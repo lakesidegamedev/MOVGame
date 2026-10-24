@@ -35,6 +35,12 @@ struct NativeElectionNightView: View {
                 Text("\(board.calledUnits) of \(data.totalUnits) called · \(data.threshold) to win · \(board.remaining) remaining")
                     .font(.caption).foregroundStyle(CampaignStyle.muted)
                 RevealMapView(map: night.map(), called: board.called)
+                HStack(spacing: 14) {
+                    legendDot("Harris", color: CampaignStyle.democrat)
+                    legendDot("Trump", color: CampaignStyle.republican)
+                    legendDot("Uncalled", color: Color(hex: "#283649"))
+                }
+                .font(.caption)
                 if let last = board.lastCall { Text(last).font(.headline) }
                 if board.finished { Button("View full results") { session.finishReveal() }.buttonStyle(.borderedProminent) }
             }.padding(20)
@@ -55,6 +61,13 @@ struct NativeElectionNightView: View {
             }
         }
         .interactiveDismissDisabled()
+    }
+
+    private func legendDot(_ label: String, color: Color) -> some View {
+        HStack(spacing: 5) {
+            Circle().fill(color).frame(width: 8, height: 8)
+            Text(label).foregroundStyle(CampaignStyle.muted)
+        }
     }
 }
 
