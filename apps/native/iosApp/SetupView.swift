@@ -372,16 +372,18 @@ struct SetupView: View {
             player = side
             mateId = ""
         } label: {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: usesCompactAX ? 6 : 8) {
                 Text(party).font(.caption2.bold()).tracking(0.7).foregroundStyle(color)
+                    .lineLimit(1).minimumScaleFactor(0.6)
                 Text(name).font(.subheadline.bold()).foregroundStyle(.white)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 0)
                 Text(player == side ? "✓ Selected" : "Play this side")
                     .font(.caption.bold()).foregroundStyle(player == side ? CampaignStyle.gold : CampaignStyle.muted)
+                    .lineLimit(1).minimumScaleFactor(0.7)
             }
             .frame(maxWidth: .infinity, minHeight: 98, alignment: .topLeading)
-            .padding(12)
+            .padding(usesCompactAX ? 10 : 12)
             .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(player == side ? CampaignStyle.gold : color.opacity(0.6), lineWidth: player == side ? 2 : 1))
