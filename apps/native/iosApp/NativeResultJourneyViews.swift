@@ -47,7 +47,6 @@ struct AccountBoardsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text("LEADERBOARDS").font(.title2.bold()).foregroundStyle(CampaignStyle.gold)
                 Picker("Board", selection: $selected) {
                     Text("Daily champions").tag("champions")
                     Text("Daily challenge").tag("daily")
@@ -60,7 +59,14 @@ struct AccountBoardsView: View {
                 if selected == "champions" {
                     if let table = account.champions {
                         Text("\(table.totalDays) days played").font(.subheadline)
-                        if table.entries.isEmpty { Text("No daily champions yet.") }
+                        if table.entries.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("No daily champions yet.").font(.headline)
+                                Text("Finish a daily challenge to join the board.").font(.caption).foregroundStyle(CampaignStyle.muted)
+                            }
+                            .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                            .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
+                        }
                         ForEach(table.entries, id: \.rank) { entry in
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("#\(entry.rank) \(entry.username)").font(.headline)
@@ -68,6 +74,12 @@ struct AccountBoardsView: View {
                             }.padding(14).frame(maxWidth: .infinity, alignment: .leading)
                                 .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
                         }
+                    } else {
+                        HStack(spacing: 10) {
+                            ProgressView().tint(CampaignStyle.gold)
+                            Text("Loading champions…").font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 } else {
                     if let rank = account.dailyRank { Text("Your daily rank: #\(rank.rank) · \(rank.score)").foregroundStyle(CampaignStyle.gold) }
@@ -76,7 +88,7 @@ struct AccountBoardsView: View {
                 }
                 Button("Refresh leaderboard") { Task { await refresh() } }
                 if let message = account.message { Text(message).font(.caption).foregroundStyle(CampaignStyle.coral) }
-            }.padding(20)
+            }.padding(20).frame(maxWidth: .infinity, alignment: .leading)
         }
         .task(id: "\(selected):\(date):\(account.user?.id ?? "guest")") { await refresh() }
         .background(CampaignStyle.background).preferredColorScheme(.dark)
