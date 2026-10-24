@@ -96,7 +96,7 @@ craft). "Weakest" names the dimension that holds the score down.
 | `replay` | 3 | hierarchy | Same compact cards; the duplicate title remains |
 | `saves` | 3 | trust | Names, weeks and second-level timestamps distinguish the rows; actions are still text links |
 | `account` | 3 | trust | Clear form, but the Lakeside sign-in opens another game's branded page |
-| `store` | 2 | states | Empty page; "Sign in to buy" with no products or price state |
+| `store` | 3 | states | Beta state is explained with an "Included now" card and a clear Browse action; no purchasable products yet |
 | `settings` | 3 | hierarchy | Readable Form; volume value sits below its slider, system green toggles |
 | `guide` | 3 | consistency | Readable cards; duplicate "How to play" title and eyebrow |
 | `editor` | 2 | hierarchy | Four same-weight blue text buttons; iPad sheet clips at the bottom |
@@ -194,9 +194,10 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
 7. **The menu is a 12-item action sheet.** Continue, analysis, replay, new,
    library, store, editor, settings, guide, Ask, leaderboards, account,
    credits all have equal weight. Source: `ContentView.swift:335-353`.
-8. **`store` is an empty page.** Signed out it shows "Sign in to buy" and
-   nothing else; signed in with no products it says bundles are not on sale.
-   Source: `MiscViews.swift:16-56`.
+8. ~~**`store` is an empty page.**~~ **Closed in iteration 8.** The beta state
+   is explained with an "Included now" card, "Browse all elections" is the
+   coral primary action, and sign-in is a secondary explanation for future
+   bundles. Evidence: `store.png` in run 40106398758.
 9. **`library` does not use iPad width.** A single 20 pt-padded column and a
    full-width CTA on a 1206 pt-wide tablet; 49 elections are reachable only
    through one menu. Evidence: `tablet/library.png`. Source:
@@ -287,6 +288,25 @@ land before the next TestFlight. This loop cannot implement A or B because
 | 5 | app chrome | Tab labels legible at AX; tab grows to 64 pt | no screen delta (P1 #4) | run 40088823403 (`small-phone/setup.png`, `small-phone/library.png`) |
 | 6 | `analysis`/`replay` | 110 pt sparklines, latest-value legend, Start/Week axis | 2 → 3 (both) | run 40091985403 (`analysis.png`, `replay.png`) |
 | 7 | `results` | Causes under the score, 56 state rows collapsed, share/achievements surfaced | 3 → 4 | run 40102440979 (`results.png`) |
+| 8 | `store` | "Included now" card, Browse primary, sign-in secondary | 2 → 3 | run 40106398758 (`store.png`) |
+
+## Final status after iteration 8
+
+- **8 iterations, 8 PRs** (#86–#93) on top of the audit (#85).
+- **Mean score 2.7 → 3.0** (31 distinct screens; `setup-2016` is a state of `setup`).
+- **P0:** none. **P1 closed:** 7 of 8. The remaining P1 is the Lakeside sign-in
+  branding, blocked on a product/backend decision (options in the decision
+  request above).
+- **Gates:** every iteration's code run is green on iOS 26, iOS 27, iPhone SE
+  large text and iPad. The Android emulator job is red throughout for reasons
+  unrelated to these iOS changes.
+- **Device-only checks still owed:** VoiceOver order on the campaign desk and
+  tab bar, real-device sign-in, save restore across app termination, and
+  purchase/restore/refund.
+- **Remaining P2/P3:** duplicate sheet titles, maps cut at the tab bar,
+  `reveal` labels, `plan` bottom clip, Undo affordance, 12-item menu, iPad
+  one-column library/sheets, editor action hierarchy, settings volume order,
+  Ask's external styling, "Play this si…" hint, pluralisation.
 
 ## Next three moves
 
