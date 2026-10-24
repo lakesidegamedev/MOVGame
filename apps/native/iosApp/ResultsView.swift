@@ -4,6 +4,7 @@ import shared
 // Phase 4 Results screen (#22): mirrors androidApp ResultsScreen.
 struct ResultsView: View {
     @ObservedObject var session: GameSession
+    @State private var showStates = false
 
     var body: some View {
         let _ = session.version
@@ -75,6 +76,34 @@ struct ResultsView: View {
                             }.padding(.vertical, 4)
                         }
                     }
+                    let causes = g.resultCauses()
+                    if !causes.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("WHAT DECIDED IT").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
+                            ForEach(causes, id: \.self) { cause in
+                                Text(cause).font(.subheadline).frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        .padding(14).frame(maxWidth: .infinity, alignment: .leading)
+                        .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
+                    }
+                    DisclosureGroup(isExpanded: $showStates) {
+                        VStack(spacing: 6) {
+                            ForEach(rows, id: \.stateId) { sr in
+                                HStack {
+                                    Text(names[sr.stateId] ?? sr.stateId).font(.caption)
+                                    Spacer()
+                                    Text("\(Int(sr.electoralVotes)) EV").font(.caption)
+                                    Text(String(format: "+%.1f", sr.margin))
+                                        .font(.caption)
+                                        .foregroundColor(sr.winner.serial == "dem" ? CampaignStyle.democrat : CampaignStyle.republican)
+                                }
+                            }
+                        }.padding(.top, 8)
+                    } label: {
+                        Text("STATE RESULTS · \(rows.count)").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
+                    }
+                    .padding(14).background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
                     DisclosureGroup("Compare with history") {
                         ForEach(g.resultHistory(), id: \.id) { region in
                             VStack(alignment: .leading, spacing: 3) {
@@ -84,26 +113,6 @@ struct ResultsView: View {
                             }.font(.caption).frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 4)
                         }
                     }.padding(.vertical, 10)
-                    Text("STATE RESULTS").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold).padding(.top, 10)
-
-                    ForEach(rows, id: \.stateId) { sr in
-                        HStack {
-                            Text(names[sr.stateId] ?? sr.stateId).font(.caption)
-                            Spacer()
-                            Text("\(Int(sr.electoralVotes)) EV").font(.caption)
-                            Text(String(format: "+%.1f", sr.margin))
-                                .font(.caption)
-                                .foregroundColor(sr.winner.serial == "dem" ? CampaignStyle.democrat : CampaignStyle.republican)
-                        }
-                    }
-
-                    let causes = g.resultCauses()
-                    if !causes.isEmpty {
-                        Text("WHAT DECIDED IT").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold).padding(.top, 10)
-                        ForEach(causes, id: \.self) { cause in
-                            Text(cause).font(.caption).frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    }
 
                     Button("Play Again") {
                         session.playScreen = .setup
