@@ -91,7 +91,7 @@ craft). "Weakest" names the dimension that holds the score down.
 | `campaign` | 3 | clarity | Good desk card, but Undo is unstyled text and the map is cut by the tab bar |
 | `plan` | 3 | hierarchy | Dense but logical; sticky CTA leaves a clipped sliver of a queued card |
 | `results` | 4 | hierarchy | Outcome, score and a collapsed 56-row state summary lead; share and achievements are no longer buried |
-| `reveal` | 3 | hierarchy | Map is 240 pt with no labels; bars have no endpoint values |
+| `reveal` | 4 | clarity | Called map now has a Harris/Trump/Uncalled legend; bars already carry values |
 | `analysis` | 3 | hierarchy | Compact trend cards lead with the latest values; the duplicate title remains |
 | `replay` | 3 | hierarchy | Same compact cards; the duplicate title remains |
 | `saves` | 3 | trust | Names, weeks and second-level timestamps distinguish the rows; actions are still text links |
@@ -182,9 +182,9 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
    under the tab bar, so the bottom row of states/regions is half-visible.
    Evidence: `campaign.png`, `world-*.png`, `world-results.png`. Source:
    `NativeCampaignViews.swift:68`, `:216`; `TileMapView.swift:31-45`.
-4. **`reveal` map is small and unlabelled.** A 240 pt canvas in a 350 pt-wide
-   area leaves dead space; states have no EV labels and the progress bars have
-   no endpoint values. Source: `NativeRevealViews.swift:31-33`, `:37`, `:83`.
+4. ~~**`reveal` map is small and unlabelled.**~~ **Closed in post-loop polish.**
+   A Harris / Trump / Uncalled legend sits under the map; the bars already
+   show each candidate's EV. Evidence: `reveal.png` in run 40138775342.
 5. **`plan` clips a queued card.** A sliver of the next card shows between the
    sticky "Add to day" bar and the tab bar. Source:
    `GameView.swift:252-263`.
@@ -291,6 +291,7 @@ land before the next TestFlight. This loop cannot implement A or B because
 | 7 | `results` | Causes under the score, 56 state rows collapsed, share/achievements surfaced | 3 → 4 | run 40102440979 (`results.png`) |
 | 8 | `store` | "Included now" card, Browse primary, sign-in secondary | 2 → 3 | run 40106398758 (`store.png`) |
 | P1 | `editor` | Save primary, Scenario action group with icons | 2 → 3 | run 40135302313 (`editor.png`, `small-phone/editor.png`, `tablet/editor.png`) |
+| P2 | `reveal` | Harris / Trump / Uncalled map legend | 3 → 4 | run 40138775342 (`reveal.png`) |
 
 ## Final status after iteration 8
 
@@ -312,10 +313,11 @@ land before the next TestFlight. This loop cannot implement A or B because
 
 ## Next three moves
 
-1. **Post-loop 2 — `reveal`:** add a called/uncalled legend to the election map.
-2. **Post-loop 3 — app menu:** replace the 12-item action sheet with grouped
-   destinations.
-3. **Post-loop 4 — `plan`:** stop the sticky CTA clipping the queued card.
+1. **Post-loop 3 — app menu:** replace the 12-item action sheet with grouped
+   destinations; needs a capture hook for the menu first.
+2. **Post-loop 4 — `plan`:** stop the sticky CTA clipping the queued card.
+3. **Post-loop 5 — consistency:** drop duplicate sheet titles where the
+   navigation title already says the same thing.
 
 `lakeside-login` is the highest-trust defect but is blocked on a product
 decision (auth host/branding lives in `shared/**` and the auth service).
