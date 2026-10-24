@@ -89,6 +89,11 @@ struct CampaignSavesView: View {
     @State private var renamed = ""
     init(session: GameSession) { self.session = session; self.account = session.account }
 
+    private func savedAt(_ millis: Int64) -> String {
+        Date(timeIntervalSince1970: Double(millis) / 1000)
+            .formatted(date: .abbreviated, time: .standard)
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
@@ -109,6 +114,7 @@ struct CampaignSavesView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(save.name).font(.headline)
                         Text("\(save.document?.label ?? "Campaign") · Week \(save.document?.turn ?? 0)").font(.caption)
+                        Text(savedAt(save.updatedAt)).font(.caption2).foregroundStyle(CampaignStyle.muted)
                         HStack {
                             Button("Load") { if session.loadNamed(id: save.id) { dismiss() } }
                             Button("Rename") { renameId = save.id; renamed = save.name }
@@ -134,6 +140,7 @@ struct CampaignSavesView: View {
                     ForEach(account.cloudSaves) { save in
                         VStack(alignment: .leading, spacing: 6) {
                             Text("\(save.name) · Week \(save.turn)").font(.headline)
+                            Text(savedAt(save.updatedAt)).font(.caption2).foregroundStyle(CampaignStyle.muted)
                             HStack {
                                 Button("Download") { Task { await session.downloadSave(id: save.id) } }
                                 Button("Delete online") { deleteCloud = save.id }

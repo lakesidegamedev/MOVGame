@@ -94,7 +94,7 @@ craft). "Weakest" names the dimension that holds the score down.
 | `reveal` | 3 | hierarchy | Map is 240 pt with no labels; bars have no endpoint values |
 | `analysis` | 2 | hierarchy | Duplicate title; 180 pt chart canvas for one data point, two charts fill the screen |
 | `replay` | 2 | hierarchy | Same chart problem, plus duplicate title |
-| `saves` | 2 | trust | Three indistinguishable "Autosave" rows (weeks 0/3/0), no timestamps; destructive actions are text links |
+| `saves` | 3 | trust | Names, weeks and second-level timestamps distinguish the rows; actions are still text links |
 | `account` | 3 | trust | Clear form, but the Lakeside sign-in opens another game's branded page |
 | `store` | 2 | states | Empty page; "Sign in to buy" with no products or price state |
 | `settings` | 3 | hierarchy | Readable Form; volume value sits below its slider, system green toggles |
@@ -142,10 +142,10 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
    card with a next step, and a loading row covers the nil table. Evidence:
    `champions.png`, `small-phone/champions.png` and `tablet/champions.png` in
    run 40078561917.
-3. **`saves` autosaves are indistinguishable.** Three rows all read
-   "Autosave · 2024 · Harris v. Trump · Week 0/3/0" with no timestamp or slot
-   name, so a player cannot tell which one is current before tapping Load.
-   Evidence: `saves.png`. Source: `NativeSaveViews.swift:108-125`.
+3. ~~**`saves` autosaves are indistinguishable.**~~ **Closed in iteration 4.**
+   Each local and cloud row now shows its `updatedAt` to the second; the
+   checkpoint and autosave names, weeks and times separate the rows. Evidence:
+   `saves.png` in run 40084847111.
 4. **Tab bar labels clip at accessibility sizes.** "Campaign" renders as
    "Campa…" on iPhone SE at AX size because the label is pinned to a 17 pt
    frame. Evidence: `small-phone/setup.png`, `small-phone/library.png`,
@@ -281,15 +281,16 @@ land before the next TestFlight. This loop cannot implement A or B because
 | 1 | `setup` | Compact AX header, explicit disabled action, whole party labels | 3 → 4 | run 40072128974 (`setup.png`, `small-phone/setup.png`, `tablet/setup.png`) |
 | 2 | `library` | Wrapping election/party rows, pinned launch action | 3 → 4 | run 40075241534 (`library.png`, `daily.png`, `small-phone/library.png`, `tablet/library.png`) |
 | 3 | `champions` | Full-width empty card, loading row, duplicate title removed | 2 → 4 | run 40078561917 (`champions.png`, `small-phone/champions.png`, `tablet/champions.png`) |
+| 4 | `saves` | Second-level timestamps on local and cloud saves | 2 → 3 | run 40084847111 (`saves.png`, `small-phone/saves.png`, `tablet/saves.png`) |
 
 ## Next three moves
 
-1. **Iteration 4 — `saves`:** distinguish the autosave rows with a slot name
-   or timestamp before Load.
-2. **Iteration 5 — app chrome:** stop the tab bar and menu labels clipping at
+1. **Iteration 5 — app chrome:** stop the tab bar and menu labels clipping at
    accessibility sizes.
-3. **Iteration 6 — `analysis` charts:** replace the huge single-point canvases
+2. **Iteration 6 — `analysis` charts:** replace the huge single-point canvases
    with a compact trend card.
+3. **Iteration 7 — `results`:** put the score and "what decided it" above the
+   long state list.
 
 `lakeside-login` is the highest-trust defect but is blocked on a product
 decision (auth host/branding lives in `shared/**` and the auth service).
