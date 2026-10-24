@@ -99,7 +99,7 @@ craft). "Weakest" names the dimension that holds the score down.
 | `store` | 3 | states | Beta state is explained with an "Included now" card and a clear Browse action; no purchasable products yet |
 | `settings` | 3 | hierarchy | Readable Form; volume value sits below its slider, system green toggles |
 | `guide` | 3 | consistency | Readable cards; duplicate "How to play" title and eyebrow |
-| `editor` | 2 | hierarchy | Four same-weight blue text buttons; iPad sheet clips at the bottom |
+| `editor` | 3 | hierarchy | One filled Save action, a separate Scenario group with icons; iPad form sheet still clips at the bottom |
 | `champions` | 4 | layout | Full-width empty card and a loading row; the narrow centred strip is gone |
 | `lakeside-login` | 1 | trust | Shows "A House Divided", "Welcome back" and PostHog cookie consent inside MOV |
 | `world-uk` | 3 | consistency | Legible standings; map cut by the tab bar |
@@ -207,9 +207,10 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
     indicator. Evidence: `tablet/editor.png`, `tablet/settings.png`,
     `tablet/saves.png`. Source: `ContentView.swift:362-385` (no
     presentation sizing), `NativeEditorView.swift:57`.
-11. **`editor` has no hierarchy.** "Save scenario", "Export JSON", "Play
-    casual campaign" and "My scenarios" are four same-weight blue buttons in
-    one section. Source: `NativeEditorView.swift:144-148`.
+11. ~~**`editor` has no hierarchy.**~~ **Closed in post-loop polish.** "Save
+    scenario" is a filled coral primary in its own section; Export, Play and My
+    scenarios are a separate icon group. Evidence: `editor.png`,
+    `small-phone/editor.png` and `tablet/editor.png` in run 40135302313.
 12. ~~**`results` prioritises the wrong list.**~~ **Closed in iteration 7.**
     Causes sit directly under the score, and the 56 state rows collapse into a
     "STATE RESULTS · 56" disclosure before the share/achievement cards.
@@ -289,6 +290,7 @@ land before the next TestFlight. This loop cannot implement A or B because
 | 6 | `analysis`/`replay` | 110 pt sparklines, latest-value legend, Start/Week axis | 2 → 3 (both) | run 40091985403 (`analysis.png`, `replay.png`) |
 | 7 | `results` | Causes under the score, 56 state rows collapsed, share/achievements surfaced | 3 → 4 | run 40102440979 (`results.png`) |
 | 8 | `store` | "Included now" card, Browse primary, sign-in secondary | 2 → 3 | run 40106398758 (`store.png`) |
+| P1 | `editor` | Save primary, Scenario action group with icons | 2 → 3 | run 40135302313 (`editor.png`, `small-phone/editor.png`, `tablet/editor.png`) |
 
 ## Final status after iteration 8
 
@@ -310,11 +312,10 @@ land before the next TestFlight. This loop cannot implement A or B because
 
 ## Next three moves
 
-1. **Iteration 8 — `store`:** make "Browse all elections" the primary action
-   while the beta catalog is free and paid products are unconfigured.
-2. **After the loop — `editor`:** give the scenario editor's four actions a
-   visible hierarchy.
-3. **After the loop — `reveal`:** label the map and the bar endpoints.
+1. **Post-loop 2 — `reveal`:** add a called/uncalled legend to the election map.
+2. **Post-loop 3 — app menu:** replace the 12-item action sheet with grouped
+   destinations.
+3. **Post-loop 4 — `plan`:** stop the sticky CTA clipping the queued card.
 
 `lakeside-login` is the highest-trust defect but is blocked on a product
 decision (auth host/branding lives in `shared/**` and the auth service).
