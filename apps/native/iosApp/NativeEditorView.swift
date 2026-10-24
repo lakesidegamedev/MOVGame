@@ -110,11 +110,16 @@ struct NativeEditorView: View {
                 Picker("Country", selection: $country) {
                     ForEach(MobileCampaign.companion.countries(), id: \.id) { Text("\($0.flag) \($0.name)").tag($0.id) }
                 }
-                Button("Create scenario") {
+                Button {
                     draft = NativeCustomScenario.companion.create(country: country, id: "custom-\(UUID().uuidString)", election: nil, now: now)
                     dirty = true; message = nil
+                } label: {
+                    Label("Create scenario", systemImage: "plus.circle.fill")
                 }
-                Button("Import scenario JSON") { importing = true }
+                .buttonStyle(.borderedProminent).tint(CampaignStyle.coral)
+                Button { importing = true } label: {
+                    Label("Import scenario JSON", systemImage: "square.and.arrow.down")
+                }
             }
             Section("My scenarios") {
                 if entries.isEmpty { Text("Create your first custom election.") }
@@ -141,11 +146,30 @@ struct NativeEditorView: View {
         let fields = NativeCustomScenario.companion.fields(json: json)
         let sections = fields.reduce(into: [String]()) { if !$0.contains($1.section) { $0.append($1.section) } }
         return Group {
-            Section("Custom campaign") {
-                Button("Save scenario") { save() }
-                Button("Export JSON") { if let saved = save() { exportFile = ScenarioFile(text: saved); exporting = true } }
-                Button("Play casual campaign") { if let saved = save() { play(saved) } }
-                Button("My scenarios") { if dirty { leaving = true } else { draft = nil } }
+            Section {
+                Button(action: { save() }) {
+                    Label("Save scenario", systemImage: "square.and.arrow.down")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent).tint(CampaignStyle.coral)
+            } header: {
+                Text("Custom campaign")
+            } footer: {
+                Text("Saved on this device. Export shares the JSON with the web editor.")
+            }
+            Section("Scenario") {
+                Button { if let saved = save() { exportFile = ScenarioFile(text: saved); exporting = true } } label: {
+                    Label("Export JSON", systemImage: "square.and.arrow.up")
+                }
+                Button { if let saved = save() { play(saved) } } label: {
+                    Label("Play casual campaign", systemImage: "play.fill")
+                }
+                Button {
+                    if dirty { leaving = true } else { draft = nil }
+                } label: {
+                    Label("My scenarios", systemImage: "folder")
+                }
                 if let entry = NativeCustomScenario.companion.entry(json: json), entry.country != "US" {
                     Menu("Change base election") {
                         ForEach(MobileCampaign.companion.elections(countryId: entry.country), id: \.nativeId) { election in
