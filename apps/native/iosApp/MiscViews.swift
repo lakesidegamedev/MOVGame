@@ -14,15 +14,29 @@ struct StoreView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Country bundles").font(.title2.bold())
-                Text("US 2024, US 2020 and the daily challenge are free. Each country is a one-time bundle, or get every country with the Complete Collection.")
+                Text("Every election is playable in the beta. Paid bundles are not on sale yet.")
                     .font(.subheadline).foregroundStyle(CampaignStyle.muted)
                 if let notice = store.notice {
                     Text(notice).font(.caption).foregroundStyle(CampaignStyle.muted)
                 }
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("INCLUDED NOW").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+                    includedRow("US 2024, US 2020 and the daily challenge")
+                    includedRow("All six countries while the beta catalog is free")
+                    includedRow("No purchase required today")
+                }
+                .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
+                Button(action: browse) {
+                    Text("Browse all elections").font(.headline).frame(maxWidth: .infinity).padding(16)
+                }
+                .buttonStyle(.plain).foregroundStyle(CampaignStyle.background)
+                .background(CampaignStyle.coral, in: RoundedRectangle(cornerRadius: 14))
                 if session.account.user?.ahdLinked != true {
-                    Text("Sign in with your Lakeside Games account to buy bundles. Purchases follow that account across web, iOS and Android.")
+                    Text("Sign in with Lakeside Games to keep any future bundles with your account across web, iOS and Android.")
                         .font(.caption).foregroundStyle(CampaignStyle.muted)
-                    Button("Sign in to buy") { showingAccount = true }.buttonStyle(.borderedProminent)
+                    Button("Sign in with Lakeside Games") { showingAccount = true }
+                        .buttonStyle(.bordered)
                 } else if store.products.isEmpty {
                     Text(store.gating ? "Loading bundles…" : "Bundles are not on sale in the app yet. Every election is playable.")
                         .font(.caption).foregroundStyle(CampaignStyle.muted)
@@ -46,19 +60,25 @@ struct StoreView: View {
                 if session.account.user?.ahdLinked == true {
                     Button("Restore purchases") { Task { await store.restore() } }
                 }
-                Button("Browse all elections") {
-                    session.dailySetup = nil
-                    session.playScreen = .library
-                    dismiss()
-                }
-                .buttonStyle(.bordered)
-                .padding(.top, 6)
             }
             .padding(20)
         }
         .background(CampaignStyle.background).preferredColorScheme(.dark)
         .sheet(isPresented: $showingAccount) { NavigationStack { AccountView(session: session) } }
         .onAppear { store.refresh() }
+    }
+
+    private func includedRow(_ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Image(systemName: "checkmark.circle.fill").foregroundStyle(CampaignStyle.gold)
+            Text(text).font(.subheadline).foregroundStyle(.white)
+        }
+    }
+
+    private func browse() {
+        session.dailySetup = nil
+        session.playScreen = .library
+        dismiss()
     }
 }
 
