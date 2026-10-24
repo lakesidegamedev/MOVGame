@@ -77,16 +77,6 @@ struct ResultsView: View {
                         .padding(14).frame(maxWidth: .infinity, alignment: .leading)
                         .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
                     }
-                    ScorePosting(session: session)
-                    if !g.resultAchievements().isEmpty {
-                        Text("ACHIEVEMENTS EARNED").font(.caption.bold()).foregroundStyle(CampaignStyle.gold)
-                        ForEach(g.resultAchievements(), id: \.id) { award in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("\(award.icon) \(award.name)").font(.subheadline.bold())
-                                Text(award.blurb).font(.caption).foregroundStyle(CampaignStyle.muted)
-                            }.padding(.vertical, 4)
-                        }
-                    }
                     DisclosureGroup(isExpanded: $showStates) {
                         VStack(spacing: 6) {
                             ForEach(rows, id: \.stateId) { sr in
@@ -104,6 +94,16 @@ struct ResultsView: View {
                         Text("STATE RESULTS · \(rows.count)").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
                     }
                     .padding(14).background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
+                    ScorePosting(session: session)
+                    if !g.resultAchievements().isEmpty {
+                        Text("ACHIEVEMENTS EARNED").font(.caption.bold()).foregroundStyle(CampaignStyle.gold)
+                        ForEach(g.resultAchievements(), id: \.id) { award in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("\(award.icon) \(award.name)").font(.subheadline.bold())
+                                Text(award.blurb).font(.caption).foregroundStyle(CampaignStyle.muted)
+                            }.padding(.vertical, 4)
+                        }
+                    }
                     DisclosureGroup("Compare with history") {
                         ForEach(g.resultHistory(), id: \.id) { region in
                             VStack(alignment: .leading, spacing: 3) {
