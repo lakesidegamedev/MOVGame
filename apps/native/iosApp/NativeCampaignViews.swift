@@ -83,6 +83,11 @@ struct NativeCampaignLibrary: View {
     private var parties: [NativeParty] {
         countryId == "US" ? [] : MobileCampaign.companion.parties(countryId: countryId, electionId: selectedElectionId)
     }
+    private var selectedElection: NativeElection? { elections.first(where: { $0.nativeId == selectedElectionId }) }
+    private var canLaunch: Bool {
+        countryId == "US" || (!partyId.isEmpty && !seed.trimmingCharacters(in: .whitespaces).isEmpty)
+    }
+    private var launchTitle: String { countryId == "US" ? "Choose your presidential ticket" : "Launch campaign" }
 
     init(session: GameSession) {
         self.session = session
@@ -104,23 +109,28 @@ struct NativeCampaignLibrary: View {
                     }
                 }
                 .pickerStyle(.menu)
-                Picker("Election", selection: $electionId) {
-                    ForEach(elections, id: \.nativeId) { election in Text(election.label).tag(election.nativeId) }
+                Menu {
+                    ForEach(elections, id: \.nativeId) { election in
+                        Button(election.label) { electionId = election.nativeId }
+                    }
+                } label: {
+                    choiceRow(selectedElection?.label ?? "Choose an election")
                 }
-                .pickerStyle(.menu)
+                .accessibilityLabel("Election")
+                .accessibilityValue(selectedElection?.label ?? "")
                 if let election = elections.first(where: { $0.nativeId == electionId }) {
                     Text(election.blurb).font(.subheadline).foregroundStyle(CampaignStyle.muted)
                 }
-                if countryId == "US" {
-                    launchButton("Choose your presidential ticket") {
-                        session.setupScenarioId = electionId
-                        session.playScreen = .setup
+                if countryId != "US" {
+                    Menu {
+                        ForEach(parties, id: \.id) { party in
+                            Button("\(party.name) · \(party.leader)") { partyId = party.id }
+                        }
+                    } label: {
+                        choiceRow(parties.first(where: { $0.id == partyId }).map { "\($0.name) · \($0.leader)" } ?? "Choose your party")
                     }
-                } else {
-                    Picker("Your party", selection: $partyId) {
-                        ForEach(parties, id: \.id) { party in Text("\(party.name) · \(party.leader)").tag(party.id) }
-                    }
-                    .pickerStyle(.menu)
+                    .accessibilityLabel("Your party")
+                    .accessibilityValue(parties.first(where: { $0.id == partyId })?.name ?? "")
                     if let party = parties.first(where: { $0.id == partyId }) {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(party.leader).font(.title2.bold())
@@ -136,14 +146,25 @@ struct NativeCampaignLibrary: View {
                     .pickerStyle(.segmented)
                     TextField("Campaign seed", text: $seed).textFieldStyle(.roundedBorder)
                         .textInputAutocapitalization(.never).autocorrectionDisabled()
-                    launchButton("Launch campaign") {
-                        session.newCampaign(countryId: countryId, electionId: electionId, partyId: partyId,
-                                            difficulty: difficulty, seed: seed)
-                    }
-                    .disabled(seed.trimmingCharacters(in: .whitespaces).isEmpty || partyId.isEmpty)
                 }
             }
             .padding(20)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Button(action: launch) {
+                Text(launchTitle)
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(16)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(canLaunch ? CampaignStyle.background : CampaignStyle.muted)
+            .background(canLaunch ? CampaignStyle.coral : CampaignStyle.card,
+                        in: RoundedRectangle(cornerRadius: 14))
+            .disabled(!canLaunch)
+            .padding(.horizontal, 20).padding(.vertical, 10)
+            .background(CampaignStyle.background)
         }
         .background(CampaignStyle.background).preferredColorScheme(.dark)
         .onAppear { session.dailySetup = nil }
@@ -154,10 +175,30 @@ struct NativeCampaignLibrary: View {
         .onChange(of: electionId) { _ in partyId = parties.first?.id ?? "" }
     }
 
-    private func launchButton(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) { Text(title).font(.headline).frame(maxWidth: .infinity).padding(16) }
-            .buttonStyle(.plain).foregroundStyle(CampaignStyle.background)
-            .background(CampaignStyle.coral, in: RoundedRectangle(cornerRadius: 14))
+    private func launch() {
+        if countryId == "US" {
+            session.setupScenarioId = selectedElectionId
+            session.playScreen = .setup
+        } else {
+            session.newCampaign(countryId: countryId, electionId: selectedElectionId, partyId: partyId,
+                                difficulty: difficulty, seed: seed)
+        }
+    }
+
+    private func choiceRow(_ title: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(title)
+                .font(.headline)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
+            Image(systemName: "chevron.up.chevron.down").font(.caption.bold())
+        }
+        .foregroundStyle(.blue)
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 10))
+        .contentShape(Rectangle())
     }
 }
 
