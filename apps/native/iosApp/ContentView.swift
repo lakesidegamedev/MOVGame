@@ -254,7 +254,7 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
     }
     private func clickSignInWhenReady(attempts: Int) {
         guard openSignInForSmokeTest, webView.url?.host == "ask.lakesidegames.net" else { return }
-        webView.evaluateJavaScript("(() => { const link = document.querySelector('a[href^=\"/auth/login\"]'); if (!link) return false; link.click(); return true; })()") { [weak self] result, _ in
+        webView.evaluateJavaScript("(() => { const link = document.querySelector('a[href^=\"/auth/lakeside/login\"]'); if (!link) return false; link.click(); return true; })()") { [weak self] result, _ in
             guard let self else { return }
             if result as? Bool == true {
                 self.openSignInForSmokeTest = false
