@@ -90,7 +90,7 @@ craft). "Weakest" names the dimension that holds the score down.
 | `daily` | 2 | trust | Raw internal seed `daily-2026-10-05` is editable on the launch screen; no daily-specific framing |
 | `campaign` | 3 | clarity | Good desk card, but Undo is unstyled text and the map is cut by the tab bar |
 | `plan` | 3 | hierarchy | Dense but logical; sticky CTA leaves a clipped sliver of a queued card |
-| `results` | 3 | hierarchy | Outcome lands, but the long state list and achievements compete below the fold |
+| `results` | 4 | hierarchy | Outcome, score and a collapsed 56-row state summary lead; share and achievements are no longer buried |
 | `reveal` | 3 | hierarchy | Map is 240 pt with no labels; bars have no endpoint values |
 | `analysis` | 3 | hierarchy | Compact trend cards lead with the latest values; the duplicate title remains |
 | `replay` | 3 | hierarchy | Same compact cards; the duplicate title remains |
@@ -209,9 +209,10 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
 11. **`editor` has no hierarchy.** "Save scenario", "Export JSON", "Play
     casual campaign" and "My scenarios" are four same-weight blue buttons in
     one section. Source: `NativeEditorView.swift:144-148`.
-12. **`results` prioritises the wrong list.** 50+ state rows sit between the
-    score and "What decided it"; achievements are cut by the tab bar in the
-    capture. Source: `ResultsView.swift:68-106`.
+12. ~~**`results` prioritises the wrong list.**~~ **Closed in iteration 7.**
+    Causes sit directly under the score, and the 56 state rows collapse into a
+    "STATE RESULTS · 56" disclosure before the share/achievement cards.
+    Evidence: `results.png` in run 40102440979.
 13. **`settings` volume label is separated from its control.** The slider and
     "Volume: 60%" sit on separate Form rows; toggles use system green instead
     of the orange accent. Source: `NativeSettingsViews.swift:44-45`.
@@ -285,15 +286,15 @@ land before the next TestFlight. This loop cannot implement A or B because
 | 4 | `saves` | Second-level timestamps on local and cloud saves | 2 → 3 | run 40084847111 (`saves.png`, `small-phone/saves.png`, `tablet/saves.png`) |
 | 5 | app chrome | Tab labels legible at AX; tab grows to 64 pt | no screen delta (P1 #4) | run 40088823403 (`small-phone/setup.png`, `small-phone/library.png`) |
 | 6 | `analysis`/`replay` | 110 pt sparklines, latest-value legend, Start/Week axis | 2 → 3 (both) | run 40091985403 (`analysis.png`, `replay.png`) |
+| 7 | `results` | Causes under the score, 56 state rows collapsed, share/achievements surfaced | 3 → 4 | run 40102440979 (`results.png`) |
 
 ## Next three moves
 
-1. **Iteration 7 — `results`:** put the score and "what decided it" above the
-   long state list and collapse the state results.
-2. **Iteration 8 — `store`:** make "Browse all elections" the primary action
+1. **Iteration 8 — `store`:** make "Browse all elections" the primary action
    while the beta catalog is free and paid products are unconfigured.
-3. **After the loop — `editor`:** give the scenario editor's four actions a
+2. **After the loop — `editor`:** give the scenario editor's four actions a
    visible hierarchy.
+3. **After the loop — `reveal`:** label the map and the bar endpoints.
 
 `lakeside-login` is the highest-trust defect but is blocked on a product
 decision (auth host/branding lives in `shared/**` and the auth service).
