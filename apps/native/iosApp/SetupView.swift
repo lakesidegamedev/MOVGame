@@ -106,6 +106,7 @@ struct HomeView: View {
 
 struct SetupView: View {
     @ObservedObject var session: GameSession
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var step = 0
     @State private var scenarioId = "2024"
     @State private var player = ""
@@ -125,24 +126,34 @@ struct SetupView: View {
     private var mates: [MateChoice] { session.mates(scenarioId: scenarioId, playerSerial: player) }
     private var selectedMate: MateChoice? { mates.first(where: { $0.id == mateId }) ?? mates.first(where: { $0.historical }) ?? mates.first }
     private var canAdvance: Bool { (step != 0 || !player.isEmpty) && (step != 3 || selectedMate != nil) }
+    private var usesAccessibilityLayout: Bool { dynamicTypeSize.isAccessibilitySize }
+    private var primaryTitle: String {
+        if step == 0 && player.isEmpty { return "Choose a side to continue" }
+        if step == 3 && selectedMate == nil { return "Choose a running mate" }
+        return step < 3 ? "Next  →" : "Launch campaign  →"
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 Button("← Campaign menu") { session.playScreen = .home }
                     .font(.subheadline.bold()).foregroundStyle(CampaignStyle.muted)
-                HStack(spacing: 10) {
-                    Image("MOVMark")
-                        .resizable()
-                        .frame(width: 36, height: 36)
-                        .accessibilityHidden(true)
-                    Text("NEW CAMPAIGN").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
-                    Spacer()
-                    Text("\(step + 1)/4").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
+                if !usesAccessibilityLayout {
+                    HStack(spacing: 10) {
+                        Image("MOVMark")
+                            .resizable()
+                            .frame(width: 36, height: 36)
+                            .accessibilityHidden(true)
+                        Text("NEW CAMPAIGN").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
+                        Spacer()
+                        Text("\(step + 1)/4").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
+                    }
                 }
                 Text("Choose your path").font(.title.bold())
-                Text(["Pick an election and side.", "Build the ticket.", "Assemble your team.", "Set the rules before you begin."][step])
-                    .foregroundStyle(CampaignStyle.muted)
+                if !usesAccessibilityLayout {
+                    Text(["Pick an election and side.", "Build the ticket.", "Assemble your team.", "Set the rules before you begin."][step])
+                        .foregroundStyle(CampaignStyle.muted)
+                }
                 HStack(spacing: 7) {
                     ForEach(0..<4, id: \.self) { index in
                         VStack(spacing: 4) {
@@ -182,19 +193,23 @@ struct SetupView: View {
 
                     VStack(alignment: .leading, spacing: 14) {
                         Text(campaign.label).font(.title2.bold())
-                        Text(campaign.tagline).font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                        if !usesAccessibilityLayout {
+                            Text(campaign.tagline).font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                        }
                         Text("CHOOSE YOUR SIDE")
                             .font(.caption.bold()).tracking(1.5).foregroundStyle(CampaignStyle.muted)
                         HStack(spacing: 10) {
                             partyCard("dem", name: campaign.demName, party: "DEMOCRAT", color: CampaignStyle.democrat)
                             partyCard("rep", name: campaign.repName, party: "REPUBLICAN", color: CampaignStyle.republican)
                         }
-                        Image("cover-country-us")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .accessibilityLabel("United States Capitol")
+                        if !usesAccessibilityLayout {
+                            Image("cover-country-us")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .accessibilityLabel("United States Capitol")
+                        }
                     }
                     .padding(16)
                     .background(CampaignStyle.background, in: RoundedRectangle(cornerRadius: 16))
@@ -299,12 +314,15 @@ struct SetupView: View {
                 Button {
                     if step < 3 { step += 1 } else { launchCampaign() }
                 } label: {
-                    Text(step < 3 ? "Next  →" : "Launch campaign  →")
-                        .font(.headline).frame(maxWidth: .infinity).padding(18)
+                    Text(primaryTitle)
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(18)
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(CampaignStyle.background)
-                .background(canAdvance ? CampaignStyle.coral : CampaignStyle.coral.opacity(0.45),
+                .foregroundStyle(canAdvance ? CampaignStyle.background : CampaignStyle.muted)
+                .background(canAdvance ? CampaignStyle.coral : CampaignStyle.card,
                             in: RoundedRectangle(cornerRadius: 14))
                 .disabled(!canAdvance)
             }
