@@ -92,8 +92,8 @@ craft). "Weakest" names the dimension that holds the score down.
 | `plan` | 3 | hierarchy | Dense but logical; sticky CTA leaves a clipped sliver of a queued card |
 | `results` | 3 | hierarchy | Outcome lands, but the long state list and achievements compete below the fold |
 | `reveal` | 3 | hierarchy | Map is 240 pt with no labels; bars have no endpoint values |
-| `analysis` | 2 | hierarchy | Duplicate title; 180 pt chart canvas for one data point, two charts fill the screen |
-| `replay` | 2 | hierarchy | Same chart problem, plus duplicate title |
+| `analysis` | 3 | hierarchy | Compact trend cards lead with the latest values; the duplicate title remains |
+| `replay` | 3 | hierarchy | Same compact cards; the duplicate title remains |
 | `saves` | 3 | trust | Names, weeks and second-level timestamps distinguish the rows; actions are still text links |
 | `account` | 3 | trust | Clear form, but the Lakeside sign-in opens another game's branded page |
 | `store` | 2 | states | Empty page; "Sign in to buy" with no products or price state |
@@ -174,9 +174,10 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
    analysis (`NativeAnalysisViews.swift:14`), replay (same), saves
    (`NativeSaveViews.swift:95`), leaderboards
    (`NativeResultJourneyViews.swift:50`) and guide (`ContentView.swift:506`).
-2. **`analysis` / `replay` charts waste the screen.** A fixed 180 pt canvas
-   with five gridlines and no axis labels renders a single dot at week 1; two
-   such cards fill a phone. Source: `NativeAnalysisViews.swift:60-80`.
+2. ~~**`analysis` / `replay` charts waste the screen.**~~ **Closed in iteration 6.**
+   The shared trend card is now a 110 pt sparkline with a latest-value legend
+   and a Start/Week axis; two cards and a third fit on one phone screen.
+   Evidence: `analysis.png` and `replay.png` in run 40091985403.
 3. **Maps are cut at rest.** The 300 pt world map and the US tile map end
    under the tab bar, so the bottom row of states/regions is half-visible.
    Evidence: `campaign.png`, `world-*.png`, `world-results.png`. Source:
@@ -283,15 +284,16 @@ land before the next TestFlight. This loop cannot implement A or B because
 | 3 | `champions` | Full-width empty card, loading row, duplicate title removed | 2 → 4 | run 40078561917 (`champions.png`, `small-phone/champions.png`, `tablet/champions.png`) |
 | 4 | `saves` | Second-level timestamps on local and cloud saves | 2 → 3 | run 40084847111 (`saves.png`, `small-phone/saves.png`, `tablet/saves.png`) |
 | 5 | app chrome | Tab labels legible at AX; tab grows to 64 pt | no screen delta (P1 #4) | run 40088823403 (`small-phone/setup.png`, `small-phone/library.png`) |
+| 6 | `analysis`/`replay` | 110 pt sparklines, latest-value legend, Start/Week axis | 2 → 3 (both) | run 40091985403 (`analysis.png`, `replay.png`) |
 
 ## Next three moves
 
-1. **Iteration 6 — `analysis`/`replay` charts:** compact trend cards with a
-   latest-value headline instead of a 180 pt single-point canvas.
-2. **Iteration 7 — `results`:** put the score and "what decided it" above the
-   long state list.
-3. **Iteration 8 — `store`:** give the signed-out store a clear next step and
-   stop it reading as an empty page.
+1. **Iteration 7 — `results`:** put the score and "what decided it" above the
+   long state list and collapse the state results.
+2. **Iteration 8 — `store`:** make "Browse all elections" the primary action
+   while the beta catalog is free and paid products are unconfigured.
+3. **After the loop — `editor`:** give the scenario editor's four actions a
+   visible hierarchy.
 
 `lakeside-login` is the highest-trust defect but is blocked on a product
 decision (auth host/branding lives in `shared/**` and the auth service).

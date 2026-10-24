@@ -56,7 +56,19 @@ private struct NativeTrendCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(chart.title).font(.headline)
-            Text("\(Int(chart.minimum)) to \(Int(chart.maximum)) · \(chart.referenceLabel)").font(.caption).foregroundStyle(CampaignStyle.muted)
+            Text("\(Int(chart.minimum))–\(Int(chart.maximum)) · \(chart.referenceLabel)")
+                .font(.caption2).foregroundStyle(CampaignStyle.muted)
+            HStack(spacing: 14) {
+                ForEach(Array(chart.series), id: \.label) { series in
+                    HStack(spacing: 5) {
+                        Circle().fill(Color(hex: series.color)).frame(width: 7, height: 7)
+                        Text(series.label).font(.caption2).foregroundStyle(CampaignStyle.muted)
+                        Text(String(format: "%.0f", series.points.last?.value ?? 0))
+                            .font(.caption.bold()).monospacedDigit()
+                            .foregroundStyle(Color(hex: series.color))
+                    }
+                }
+            }
             Canvas { context, size in
                 for index in 0...4 {
                     let y = 6 + (size.height - 12) * CGFloat(index) / 4
@@ -77,9 +89,12 @@ private struct NativeTrendCard: View {
                     }
                     context.stroke(path, with: .color(color), lineWidth: 2)
                 }
-            }.frame(height: 180).accessibilityLabel(chart.title).accessibilityValue(accessibleValues)
-            Text("Start → Week \(Int(maxTurn)) · \(chart.series.map(\.label).joined(separator: " / "))")
-                .font(.caption).foregroundStyle(CampaignStyle.muted)
+            }.frame(height: 110).accessibilityLabel(chart.title).accessibilityValue(accessibleValues)
+            HStack {
+                Text("Start").font(.caption2).foregroundStyle(CampaignStyle.muted)
+                Spacer()
+                Text("Week \(Int(maxTurn))").font(.caption2).foregroundStyle(CampaignStyle.muted)
+            }
         }.padding(14).background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
     }
 }
