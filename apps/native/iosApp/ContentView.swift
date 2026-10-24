@@ -314,6 +314,15 @@ struct ContentView: View {
         #endif
         return systemSizeCategory
     }
+    private var usesAccessibilityLayout: Bool {
+        switch captureSizeCategory {
+        case .accessibilityMedium, .accessibilityLarge, .accessibilityExtraLarge,
+             .accessibilityExtraExtraLarge, .accessibilityExtraExtraExtraLarge:
+            return true
+        default:
+            return false
+        }
+    }
     @State private var showingMenu = false
     @State private var showingAsk = false
     @StateObject private var askBrowser = AskBrowser()
@@ -486,11 +495,12 @@ struct ContentView: View {
         Button(action: action) {
             VStack(spacing: 3) {
                 Image(systemName: icon).font(.title3).frame(height: 24)
-                Text(title).font(.caption.bold()).frame(height: 17)
+                Text(title).font(.caption.bold())
+                    .lineLimit(1).minimumScaleFactor(0.75)
             }
             .foregroundStyle(selected ? CampaignStyle.gold : CampaignStyle.muted)
             .frame(maxWidth: .infinity)
-            .frame(height: 48)
+            .frame(height: usesAccessibilityLayout ? 64 : 48)
             .background(selected ? CampaignStyle.background : .clear, in: RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
