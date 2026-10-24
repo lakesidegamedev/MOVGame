@@ -85,7 +85,7 @@ craft). "Weakest" names the dimension that holds the score down.
 | Screen | Score | Weakest dimension | Why |
 | --- | --- | --- | --- |
 | `launch` | 4 | states | Strong hero and primary action; no signed-in/continue state shown in baseline |
-| `setup` | 3 | accessibility | Clear flow, but disabled Next is ~2.1:1 and the AX/SE first screen shows only a clipped card |
+| `setup` | 4 | legibility | Clear flow; disabled action is explicit and 9.2:1, and compact AX shows the election and both sides. One card hint still truncates. |
 | `library` | 3 | small phone / iPad fit | One row of controls, large dead area; AX label clips and the CTA sits under the tab bar at rest |
 | `daily` | 2 | trust | Raw internal seed `daily-2026-10-05` is editable on the launch screen; no daily-specific framing |
 | `campaign` | 3 | clarity | Good desk card, but Undo is unstyled text and the map is cut by the tab bar |
@@ -160,14 +160,15 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
    `daily-2026-10-05` in a bordered, editable-looking text field with no
    label, above "Launch campaign". Evidence: `daily.png`. Source:
    `NativeCampaignViews.swift:93`, `:137`.
-7. **`setup` disabled primary action is unreadable.** "Next" is
-   `CampaignStyle.background` on 45 % coral, measured from the source colours
-   at roughly 2.1:1, and there is no hint about why it is disabled. Evidence:
-   `setup.png`. Source: `SetupView.swift:302-309`.
-8. **`setup` collapses at AX/SE.** The first screen at AX size shows the
-   heading and a truncated "2024 · 1 of 17" stepper; the election card content
-   and both side choices are below the fold with no visible scroll cue.
-   Evidence: `small-phone/setup.png`. Source: `SetupView.swift:183-201`.
+7. ~~**`setup` disabled primary action is unreadable.**~~ **Closed in iteration 1.**
+   The action now names its blocker and uses muted text on the card surface
+   (9.2:1); coral returns when enabled. Evidence: `setup.png` in run
+   40072128974.
+8. ~~**`setup` collapses at AX/SE.**~~ **Closed in iteration 1.** On compact
+   width at accessibility sizes the page title and four-step indicator are
+   replaced by a compact "STEP 1 OF 4 · ELECTION" line; the election name and
+   both side cards are visible without scrolling. Evidence:
+   `small-phone/setup.png` in run 40072128974.
 
 ### P2
 
@@ -232,6 +233,9 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
 5. **Dates and seeds are developer-shaped** (`daily-2026-10-05`,
    `2026-10-05` in the daily header).
 6. **No image-credits capture** even though the menu exposes that sheet.
+7. **`setup` card hint truncates at compact AX.** "Play this side" renders as
+   "Play this si…" in the small-phone capture; allow two lines when the compact
+   card has room. `SetupView.swift:381`.
 
 ## Decision request — Lakeside sign-in branding
 
@@ -276,16 +280,16 @@ land before the next TestFlight. This loop cannot implement A or B because
 | Iter | Screen | Change | Score | Evidence |
 | --- | --- | --- | --- | --- |
 | 0 | all | Audit only; no code changes | 2.7 baseline | run 37372831909, artifacts `ios-simulator-launch` + `ios-layout-flows` |
+| 1 | `setup` | Compact AX header, explicit disabled action, whole party labels | 3 → 4 | run 40072128974 (`setup.png`, `small-phone/setup.png`, `tablet/setup.png`) |
 
 ## Next three moves
 
-1. **Iteration 1 — `setup`:** one primary-action component (disabled and
-   enabled variants at accessible contrast), plus a first-screen layout that
-   keeps the election card and side cards visible at AX size.
-2. **Iteration 2 — `library`:** make the election selector wrap without
-   clipping and keep the launch CTA clear of the tab bar at AX/SE size.
-3. **Iteration 3 — `champions`:** give the empty state a full-width content
+1. **Iteration 2 — `library`:** make the election selector wrap without
+   clipping and keep the launch CTA clear of the fold at AX/SE size.
+2. **Iteration 3 — `champions`:** give the empty state a full-width content
    frame and a first-class empty-state layout.
+3. **Iteration 4 — `saves`:** distinguish the autosave rows with a slot name
+   or timestamp before Load.
 
 `lakeside-login` is the highest-trust defect but is blocked on a product
 decision (auth host/branding lives in `shared/**` and the auth service).
