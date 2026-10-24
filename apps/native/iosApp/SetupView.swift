@@ -106,6 +106,8 @@ struct HomeView: View {
 
 struct SetupView: View {
     @ObservedObject var session: GameSession
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var step = 0
     @State private var scenarioId = "2024"
     @State private var player = ""
@@ -125,31 +127,47 @@ struct SetupView: View {
     private var mates: [MateChoice] { session.mates(scenarioId: scenarioId, playerSerial: player) }
     private var selectedMate: MateChoice? { mates.first(where: { $0.id == mateId }) ?? mates.first(where: { $0.historical }) ?? mates.first }
     private var canAdvance: Bool { (step != 0 || !player.isEmpty) && (step != 3 || selectedMate != nil) }
+    private var usesAccessibilityLayout: Bool { dynamicTypeSize.isAccessibilitySize }
+    private var usesCompactAX: Bool { usesAccessibilityLayout && horizontalSizeClass == .compact }
+    private var primaryTitle: String {
+        if step == 0 && player.isEmpty { return usesCompactAX ? "Choose a side" : "Choose a side to continue" }
+        if step == 3 && selectedMate == nil { return "Choose a running mate" }
+        return step < 3 ? "Next  →" : "Launch campaign  →"
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 Button("← Campaign menu") { session.playScreen = .home }
                     .font(.subheadline.bold()).foregroundStyle(CampaignStyle.muted)
-                HStack(spacing: 10) {
-                    Image("MOVMark")
-                        .resizable()
-                        .frame(width: 36, height: 36)
-                        .accessibilityHidden(true)
-                    Text("NEW CAMPAIGN").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
-                    Spacer()
-                    Text("\(step + 1)/4").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
-                }
-                Text("Choose your path").font(.title.bold())
-                Text(["Pick an election and side.", "Build the ticket.", "Assemble your team.", "Set the rules before you begin."][step])
-                    .foregroundStyle(CampaignStyle.muted)
-                HStack(spacing: 7) {
-                    ForEach(0..<4, id: \.self) { index in
-                        VStack(spacing: 4) {
-                            Capsule().fill(index == step ? CampaignStyle.gold : CampaignStyle.muted.opacity(0.3)).frame(height: 4)
-                            Text(["Election", "Ticket", "War room", "Briefing"][index])
-                                .font(.system(size: 10, weight: index == step ? .bold : .regular))
-                                .foregroundStyle(index == step ? CampaignStyle.gold : CampaignStyle.muted)
+                if usesCompactAX {
+                    Text("STEP \(step + 1) OF 4 · \(["ELECTION", "TICKET", "WAR ROOM", "BRIEFING"][step])")
+                        .font(.caption.bold()).tracking(1.2).foregroundStyle(CampaignStyle.gold)
+                } else {
+                    if !usesAccessibilityLayout {
+                        HStack(spacing: 10) {
+                            Image("MOVMark")
+                                .resizable()
+                                .frame(width: 36, height: 36)
+                                .accessibilityHidden(true)
+                            Text("NEW CAMPAIGN").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
+                            Spacer()
+                            Text("\(step + 1)/4").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
+                        }
+                    }
+                    Text("Choose your path").font(.title.bold())
+                    if !usesAccessibilityLayout {
+                        Text(["Pick an election and side.", "Build the ticket.", "Assemble your team.", "Set the rules before you begin."][step])
+                            .foregroundStyle(CampaignStyle.muted)
+                    }
+                    HStack(spacing: 7) {
+                        ForEach(0..<4, id: \.self) { index in
+                            VStack(spacing: 4) {
+                                Capsule().fill(index == step ? CampaignStyle.gold : CampaignStyle.muted.opacity(0.3)).frame(height: 4)
+                                Text(["Election", "Ticket", "War room", "Briefing"][index])
+                                    .font(.system(size: 10, weight: index == step ? .bold : .regular))
+                                    .foregroundStyle(index == step ? CampaignStyle.gold : CampaignStyle.muted)
+                            }
                         }
                     }
                 }
@@ -170,6 +188,7 @@ struct SetupView: View {
                         } label: {
                             Text("\(String(campaign.year))  ·  \(selectedCampaignNumber) of \(campaigns.count)  ⌄")
                                 .font(.headline).foregroundStyle(CampaignStyle.gold)
+                                .lineLimit(1).minimumScaleFactor(0.7)
                         }
                         Spacer()
                         Button { changeElection(by: 1) } label: {
@@ -182,19 +201,25 @@ struct SetupView: View {
 
                     VStack(alignment: .leading, spacing: 14) {
                         Text(campaign.label).font(.title2.bold())
-                        Text(campaign.tagline).font(.subheadline).foregroundStyle(CampaignStyle.muted)
-                        Text("CHOOSE YOUR SIDE")
-                            .font(.caption.bold()).tracking(1.5).foregroundStyle(CampaignStyle.muted)
+                        if !usesAccessibilityLayout {
+                            Text(campaign.tagline).font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                        }
+                        if !usesCompactAX {
+                            Text("CHOOSE YOUR SIDE")
+                                .font(.caption.bold()).tracking(1.5).foregroundStyle(CampaignStyle.muted)
+                        }
                         HStack(spacing: 10) {
                             partyCard("dem", name: campaign.demName, party: "DEMOCRAT", color: CampaignStyle.democrat)
                             partyCard("rep", name: campaign.repName, party: "REPUBLICAN", color: CampaignStyle.republican)
                         }
-                        Image("cover-country-us")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .accessibilityLabel("United States Capitol")
+                        if !usesAccessibilityLayout {
+                            Image("cover-country-us")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .accessibilityLabel("United States Capitol")
+                        }
                     }
                     .padding(16)
                     .background(CampaignStyle.background, in: RoundedRectangle(cornerRadius: 16))
@@ -299,12 +324,15 @@ struct SetupView: View {
                 Button {
                     if step < 3 { step += 1 } else { launchCampaign() }
                 } label: {
-                    Text(step < 3 ? "Next  →" : "Launch campaign  →")
-                        .font(.headline).frame(maxWidth: .infinity).padding(18)
+                    Text(primaryTitle)
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(usesCompactAX ? 12 : 18)
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(CampaignStyle.background)
-                .background(canAdvance ? CampaignStyle.coral : CampaignStyle.coral.opacity(0.45),
+                .foregroundStyle(canAdvance ? CampaignStyle.background : CampaignStyle.muted)
+                .background(canAdvance ? CampaignStyle.coral : CampaignStyle.card,
                             in: RoundedRectangle(cornerRadius: 14))
                 .disabled(!canAdvance)
             }
@@ -344,16 +372,18 @@ struct SetupView: View {
             player = side
             mateId = ""
         } label: {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: usesCompactAX ? 6 : 8) {
                 Text(party).font(.caption2.bold()).tracking(0.7).foregroundStyle(color)
+                    .lineLimit(1).minimumScaleFactor(0.6)
                 Text(name).font(.subheadline.bold()).foregroundStyle(.white)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 0)
                 Text(player == side ? "✓ Selected" : "Play this side")
                     .font(.caption.bold()).foregroundStyle(player == side ? CampaignStyle.gold : CampaignStyle.muted)
+                    .lineLimit(1).minimumScaleFactor(0.7)
             }
             .frame(maxWidth: .infinity, minHeight: 98, alignment: .topLeading)
-            .padding(12)
+            .padding(usesCompactAX ? 10 : 12)
             .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(player == side ? CampaignStyle.gold : color.opacity(0.6), lineWidth: player == side ? 2 : 1))
@@ -372,7 +402,9 @@ struct SetupView: View {
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title).font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+            if !usesCompactAX {
+                Text(title).font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+            }
             content()
         }
         .frame(maxWidth: .infinity, alignment: .leading).padding(16)
