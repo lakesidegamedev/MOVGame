@@ -86,7 +86,7 @@ craft). "Weakest" names the dimension that holds the score down.
 | --- | --- | --- | --- |
 | `launch` | 4 | states | Strong hero and primary action; no signed-in/continue state shown in baseline |
 | `setup` | 4 | legibility | Clear flow; disabled action is explicit and 9.2:1, and compact AX shows the election and both sides. One card hint still truncates. |
-| `library` | 3 | small phone / iPad fit | One row of controls, large dead area; AX label clips and the CTA sits under the tab bar at rest |
+| `library` | 4 | small phone / iPad fit | Election label wraps cleanly and the CTA stays above the tab bar at every size; iPad still has a single full-width column |
 | `daily` | 2 | trust | Raw internal seed `daily-2026-10-05` is editable on the launch screen; no daily-specific framing |
 | `campaign` | 3 | clarity | Good desk card, but Undo is unstyled text and the map is cut by the tab bar |
 | `plan` | 3 | hierarchy | Dense but logical; sticky CTA leaves a clipped sliver of a queued card |
@@ -151,11 +151,10 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
    "Campa…" on iPhone SE at AX size because the label is pinned to a 17 pt
    frame. Evidence: `small-phone/setup.png`, `small-phone/library.png`,
    `small-phone/world-de.png`. Source: `ContentView.swift:489-490`.
-5. **`library` clips the election label at AX size.** "2024 · Harris v.
-   Trump" wraps and the second line is cut mid-glyph by the menu control;
-   the primary CTA is partly behind the tab bar at rest. Evidence:
-   `small-phone/library.png`. Source: `NativeCampaignViews.swift:107-110`,
-   `:115-118`, `:157-161`.
+5. ~~**`library` clips the election label at AX size.**~~ **Closed in iteration 2.**
+   The election and party pickers are menu rows whose labels wrap; the launch
+   action is a bottom inset above the tab bar. Evidence: `small-phone/library.png`
+   in run 40075241534.
 6. **`daily` exposes the raw seed.** The launch screen for the daily shows
    `daily-2026-10-05` in a bordered, editable-looking text field with no
    label, above "Launch campaign". Evidence: `daily.png`. Source:
@@ -281,15 +280,16 @@ land before the next TestFlight. This loop cannot implement A or B because
 | --- | --- | --- | --- | --- |
 | 0 | all | Audit only; no code changes | 2.7 baseline | run 37372831909, artifacts `ios-simulator-launch` + `ios-layout-flows` |
 | 1 | `setup` | Compact AX header, explicit disabled action, whole party labels | 3 → 4 | run 40072128974 (`setup.png`, `small-phone/setup.png`, `tablet/setup.png`) |
+| 2 | `library` | Wrapping election/party rows, pinned launch action | 3 → 4 | run 40075241534 (`library.png`, `daily.png`, `small-phone/library.png`, `tablet/library.png`) |
 
 ## Next three moves
 
-1. **Iteration 2 — `library`:** make the election selector wrap without
-   clipping and keep the launch CTA clear of the fold at AX/SE size.
-2. **Iteration 3 — `champions`:** give the empty state a full-width content
+1. **Iteration 3 — `champions`:** give the empty state a full-width content
    frame and a first-class empty-state layout.
-3. **Iteration 4 — `saves`:** distinguish the autosave rows with a slot name
+2. **Iteration 4 — `saves`:** distinguish the autosave rows with a slot name
    or timestamp before Load.
+3. **Iteration 5 — app chrome:** stop the tab bar and menu labels clipping at
+   accessibility sizes.
 
 `lakeside-login` is the highest-trust defect but is blocked on a product
 decision (auth host/branding lives in `shared/**` and the auth service).
