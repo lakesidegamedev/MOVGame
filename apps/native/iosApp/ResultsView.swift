@@ -66,16 +66,6 @@ struct ResultsView: View {
                         .padding(16).frame(maxWidth: .infinity, alignment: .leading)
                         .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
                     }
-                    ScorePosting(session: session)
-                    if !g.resultAchievements().isEmpty {
-                        Text("ACHIEVEMENTS EARNED").font(.caption.bold()).foregroundStyle(CampaignStyle.gold)
-                        ForEach(g.resultAchievements(), id: \.id) { award in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("\(award.icon) \(award.name)").font(.subheadline.bold())
-                                Text(award.blurb).font(.caption).foregroundStyle(CampaignStyle.muted)
-                            }.padding(.vertical, 4)
-                        }
-                    }
                     let causes = g.resultCauses()
                     if !causes.isEmpty {
                         VStack(alignment: .leading, spacing: 6) {
@@ -86,6 +76,16 @@ struct ResultsView: View {
                         }
                         .padding(14).frame(maxWidth: .infinity, alignment: .leading)
                         .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
+                    }
+                    ScorePosting(session: session)
+                    if !g.resultAchievements().isEmpty {
+                        Text("ACHIEVEMENTS EARNED").font(.caption.bold()).foregroundStyle(CampaignStyle.gold)
+                        ForEach(g.resultAchievements(), id: \.id) { award in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("\(award.icon) \(award.name)").font(.subheadline.bold())
+                                Text(award.blurb).font(.caption).foregroundStyle(CampaignStyle.muted)
+                            }.padding(.vertical, 4)
+                        }
                     }
                     DisclosureGroup(isExpanded: $showStates) {
                         VStack(spacing: 6) {
