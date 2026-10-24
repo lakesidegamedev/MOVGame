@@ -314,6 +314,15 @@ struct ContentView: View {
         #endif
         return systemSizeCategory
     }
+    private var usesAccessibilityLayout: Bool {
+        switch captureSizeCategory {
+        case .accessibilityMedium, .accessibilityLarge, .accessibilityExtraLarge,
+             .accessibilityExtraExtraLarge, .accessibilityExtraExtraExtraLarge:
+            return true
+        default:
+            return false
+        }
+    }
     @State private var showingMenu = false
     @State private var showingAsk = false
     @StateObject private var askBrowser = AskBrowser()
@@ -491,7 +500,7 @@ struct ContentView: View {
             }
             .foregroundStyle(selected ? CampaignStyle.gold : CampaignStyle.muted)
             .frame(maxWidth: .infinity)
-            .frame(height: captureSizeCategory.isAccessibilitySize ? 64 : 48)
+            .frame(height: usesAccessibilityLayout ? 64 : 48)
             .background(selected ? CampaignStyle.background : .clear, in: RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
