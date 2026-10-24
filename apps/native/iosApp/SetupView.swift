@@ -107,6 +107,7 @@ struct HomeView: View {
 struct SetupView: View {
     @ObservedObject var session: GameSession
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var step = 0
     @State private var scenarioId = "2024"
     @State private var player = ""
@@ -127,8 +128,9 @@ struct SetupView: View {
     private var selectedMate: MateChoice? { mates.first(where: { $0.id == mateId }) ?? mates.first(where: { $0.historical }) ?? mates.first }
     private var canAdvance: Bool { (step != 0 || !player.isEmpty) && (step != 3 || selectedMate != nil) }
     private var usesAccessibilityLayout: Bool { dynamicTypeSize.isAccessibilitySize }
+    private var usesCompactAX: Bool { usesAccessibilityLayout && horizontalSizeClass == .compact }
     private var primaryTitle: String {
-        if step == 0 && player.isEmpty { return "Choose a side to continue" }
+        if step == 0 && player.isEmpty { return usesCompactAX ? "Choose a side" : "Choose a side to continue" }
         if step == 3 && selectedMate == nil { return "Choose a running mate" }
         return step < 3 ? "Next  →" : "Launch campaign  →"
     }
@@ -138,29 +140,34 @@ struct SetupView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Button("← Campaign menu") { session.playScreen = .home }
                     .font(.subheadline.bold()).foregroundStyle(CampaignStyle.muted)
-                if !usesAccessibilityLayout {
-                    HStack(spacing: 10) {
-                        Image("MOVMark")
-                            .resizable()
-                            .frame(width: 36, height: 36)
-                            .accessibilityHidden(true)
-                        Text("NEW CAMPAIGN").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
-                        Spacer()
-                        Text("\(step + 1)/4").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
+                if usesCompactAX {
+                    Text("STEP \(step + 1) OF 4 · \(["ELECTION", "TICKET", "WAR ROOM", "BRIEFING"][step])")
+                        .font(.caption.bold()).tracking(1.2).foregroundStyle(CampaignStyle.gold)
+                } else {
+                    if !usesAccessibilityLayout {
+                        HStack(spacing: 10) {
+                            Image("MOVMark")
+                                .resizable()
+                                .frame(width: 36, height: 36)
+                                .accessibilityHidden(true)
+                            Text("NEW CAMPAIGN").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
+                            Spacer()
+                            Text("\(step + 1)/4").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
+                        }
                     }
-                }
-                Text("Choose your path").font(.title.bold())
-                if !usesAccessibilityLayout {
-                    Text(["Pick an election and side.", "Build the ticket.", "Assemble your team.", "Set the rules before you begin."][step])
-                        .foregroundStyle(CampaignStyle.muted)
-                }
-                HStack(spacing: 7) {
-                    ForEach(0..<4, id: \.self) { index in
-                        VStack(spacing: 4) {
-                            Capsule().fill(index == step ? CampaignStyle.gold : CampaignStyle.muted.opacity(0.3)).frame(height: 4)
-                            Text(["Election", "Ticket", "War room", "Briefing"][index])
-                                .font(.system(size: 10, weight: index == step ? .bold : .regular))
-                                .foregroundStyle(index == step ? CampaignStyle.gold : CampaignStyle.muted)
+                    Text("Choose your path").font(.title.bold())
+                    if !usesAccessibilityLayout {
+                        Text(["Pick an election and side.", "Build the ticket.", "Assemble your team.", "Set the rules before you begin."][step])
+                            .foregroundStyle(CampaignStyle.muted)
+                    }
+                    HStack(spacing: 7) {
+                        ForEach(0..<4, id: \.self) { index in
+                            VStack(spacing: 4) {
+                                Capsule().fill(index == step ? CampaignStyle.gold : CampaignStyle.muted.opacity(0.3)).frame(height: 4)
+                                Text(["Election", "Ticket", "War room", "Briefing"][index])
+                                    .font(.system(size: 10, weight: index == step ? .bold : .regular))
+                                    .foregroundStyle(index == step ? CampaignStyle.gold : CampaignStyle.muted)
+                            }
                         }
                     }
                 }
@@ -181,6 +188,7 @@ struct SetupView: View {
                         } label: {
                             Text("\(String(campaign.year))  ·  \(selectedCampaignNumber) of \(campaigns.count)  ⌄")
                                 .font(.headline).foregroundStyle(CampaignStyle.gold)
+                                .lineLimit(1).minimumScaleFactor(0.7)
                         }
                         Spacer()
                         Button { changeElection(by: 1) } label: {
@@ -196,8 +204,10 @@ struct SetupView: View {
                         if !usesAccessibilityLayout {
                             Text(campaign.tagline).font(.subheadline).foregroundStyle(CampaignStyle.muted)
                         }
-                        Text("CHOOSE YOUR SIDE")
-                            .font(.caption.bold()).tracking(1.5).foregroundStyle(CampaignStyle.muted)
+                        if !usesCompactAX {
+                            Text("CHOOSE YOUR SIDE")
+                                .font(.caption.bold()).tracking(1.5).foregroundStyle(CampaignStyle.muted)
+                        }
                         HStack(spacing: 10) {
                             partyCard("dem", name: campaign.demName, party: "DEMOCRAT", color: CampaignStyle.democrat)
                             partyCard("rep", name: campaign.repName, party: "REPUBLICAN", color: CampaignStyle.republican)
@@ -318,7 +328,7 @@ struct SetupView: View {
                         .font(.headline)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
-                        .padding(18)
+                        .padding(usesCompactAX ? 12 : 18)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(canAdvance ? CampaignStyle.background : CampaignStyle.muted)
@@ -390,7 +400,9 @@ struct SetupView: View {
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title).font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+            if !usesCompactAX {
+                Text(title).font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+            }
             content()
         }
         .frame(maxWidth: .infinity, alignment: .leading).padding(16)
