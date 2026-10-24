@@ -146,10 +146,10 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
    Each local and cloud row now shows its `updatedAt` to the second; the
    checkpoint and autosave names, weeks and times separate the rows. Evidence:
    `saves.png` in run 40084847111.
-4. **Tab bar labels clip at accessibility sizes.** "Campaign" renders as
-   "Campa…" on iPhone SE at AX size because the label is pinned to a 17 pt
-   frame. Evidence: `small-phone/setup.png`, `small-phone/library.png`,
-   `small-phone/world-de.png`. Source: `ContentView.swift:489-490`.
+4. ~~**Tab bar labels clip at accessibility sizes.**~~ **Closed in iteration 5.**
+   The label no longer has a fixed 17 pt height, the tab grows to 64 pt at
+   accessibility sizes, and the label scales instead of truncating. Evidence:
+   `small-phone/setup.png` and `small-phone/library.png` in run 40088823403.
 5. ~~**`library` clips the election label at AX size.**~~ **Closed in iteration 2.**
    The election and party pickers are menu rows whose labels wrap; the launch
    action is a bottom inset above the tab bar. Evidence: `small-phone/library.png`
@@ -282,15 +282,16 @@ land before the next TestFlight. This loop cannot implement A or B because
 | 2 | `library` | Wrapping election/party rows, pinned launch action | 3 → 4 | run 40075241534 (`library.png`, `daily.png`, `small-phone/library.png`, `tablet/library.png`) |
 | 3 | `champions` | Full-width empty card, loading row, duplicate title removed | 2 → 4 | run 40078561917 (`champions.png`, `small-phone/champions.png`, `tablet/champions.png`) |
 | 4 | `saves` | Second-level timestamps on local and cloud saves | 2 → 3 | run 40084847111 (`saves.png`, `small-phone/saves.png`, `tablet/saves.png`) |
+| 5 | app chrome | Tab labels legible at AX; tab grows to 64 pt | no screen delta (P1 #4) | run 40088823403 (`small-phone/setup.png`, `small-phone/library.png`) |
 
 ## Next three moves
 
-1. **Iteration 5 — app chrome:** stop the tab bar and menu labels clipping at
-   accessibility sizes.
-2. **Iteration 6 — `analysis` charts:** replace the huge single-point canvases
-   with a compact trend card.
-3. **Iteration 7 — `results`:** put the score and "what decided it" above the
+1. **Iteration 6 — `analysis`/`replay` charts:** compact trend cards with a
+   latest-value headline instead of a 180 pt single-point canvas.
+2. **Iteration 7 — `results`:** put the score and "what decided it" above the
    long state list.
+3. **Iteration 8 — `store`:** give the signed-out store a clear next step and
+   stop it reading as an empty page.
 
 `lakeside-login` is the highest-trust defect but is blocked on a product
 decision (auth host/branding lives in `shared/**` and the auth service).
