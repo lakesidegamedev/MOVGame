@@ -233,6 +233,32 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
    `2026-10-05` in the daily header).
 6. **No image-credits capture** even though the menu exposes that sheet.
 
+## Decision request — Lakeside sign-in branding
+
+The sign-in sheet is functionally correct but branded for another game. The
+account API is also hosted there (`apps/native/iosApp/MiscViews.swift:248`,
+`:298`, `:447`), so this is a platform surface, not a stray URL.
+
+Options, cheapest first:
+
+- **A. Brand the broker per game.** Pass a game/brand parameter from
+  `NativeLakesideLogin.startUrl()` and have the broker render the MOV mark and
+  name. Needs a web/auth-service change; no shared-contract change.
+- **B. Use a MOV-branded auth host.** Point `startUrl`/`isCallback` at
+  `accounts.lakesidegames.net` (or a MOV subdomain) with the same one-time
+  code contract. Needs a backend endpoint plus a `shared/**` change and the
+  iOS/Android allowlists.
+- **C. UI stopgap.** Hide "Sign in with Lakeside Games" in MOV until the door
+  is branded and keep email/password. This loses the one-click flow but removes
+  the cross-brand surprise immediately.
+- **D. Explain it.** Keep the shared broker and add "You'll sign in with your
+  Lakeside Games account" above the sheet. Cheapest, but the AHD logo and
+  PostHog banner remain.
+
+Recommendation: **A**, with **C** as the stopgap if the broker change cannot
+land before the next TestFlight. This loop cannot implement A or B because
+`shared/**` is read-only.
+
 ## Coverage gaps
 
 - `native.yml` captures 32 screens, not the 34 the loop prompt describes. No
