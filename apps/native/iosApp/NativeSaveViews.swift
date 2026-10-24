@@ -91,7 +91,7 @@ struct CampaignSavesView: View {
 
     private func savedAt(_ millis: Int64) -> String {
         Date(timeIntervalSince1970: Double(millis) / 1000)
-            .formatted(date: .abbreviated, time: .shortened)
+            .formatted(date: .abbreviated, time: .standard)
     }
 
     var body: some View {
