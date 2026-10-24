@@ -100,7 +100,7 @@ craft). "Weakest" names the dimension that holds the score down.
 | `settings` | 3 | hierarchy | Readable Form; volume value sits below its slider, system green toggles |
 | `guide` | 3 | consistency | Readable cards; duplicate "How to play" title and eyebrow |
 | `editor` | 2 | hierarchy | Four same-weight blue text buttons; iPad sheet clips at the bottom |
-| `champions` | 2 | layout | Empty state collapses to a ~221 pt centred column with dead margins |
+| `champions` | 4 | layout | Full-width empty card and a loading row; the narrow centred strip is gone |
 | `lakeside-login` | 1 | trust | Shows "A House Divided", "Welcome back" and PostHog cookie consent inside MOV |
 | `world-uk` | 3 | consistency | Legible standings; map cut by the tab bar |
 | `world-ca` | 3 | consistency | same |
@@ -137,12 +137,11 @@ confirmations (`MiscViews.swift:163-168`, `NativeSaveViews.swift:166-173`).
    (`startUrl` and the AHD host allowlist). This is outside UI scope
    (`shared/**` is read-only); it needs an owner/backend decision before any
    client fix.
-2. **`champions` empty state collapses to a narrow column.** With no
-   leaderboard entries the `VStack` has no width-expanding child, and the
-   `ScrollView` centres a ~221 pt column: the title sits at the left edge,
-   content floats in the middle, and ~90 pt of dead margin is visible on each
-   side. Evidence: `champions.png` in both runs. Source:
-   `NativeResultJourneyViews.swift:48-79`.
+2. ~~**`champions` empty state collapses to a narrow column.**~~ **Closed in
+   iteration 3.** The content stack expands to full width, the empty state is a
+   card with a next step, and a loading row covers the nil table. Evidence:
+   `champions.png`, `small-phone/champions.png` and `tablet/champions.png` in
+   run 40078561917.
 3. **`saves` autosaves are indistinguishable.** Three rows all read
    "Autosave · 2024 · Harris v. Trump · Week 0/3/0" with no timestamp or slot
    name, so a player cannot tell which one is current before tapping Load.
@@ -267,9 +266,9 @@ land before the next TestFlight. This loop cannot implement A or B because
 - `native.yml` captures 32 screens, not the 34 the loop prompt describes. No
   capture for `credits`, setup steps 2-4, the event dialog, the week recap, or
   a signed-in account.
-- `ios-layouts` only runs `setup,library,saves,settings,editor,world-de`.
-  The core loop (`campaign`, `plan`, `results`, `reveal`) is **not** exercised
-  at AX size or on iPad.
+- `ios-layouts` now runs `setup,library,saves,settings,editor,world-de,champions`.
+  The core loop (`campaign`, `plan`, `results`, `reveal`) is still **not**
+  exercised at AX size or on iPad.
 - The harness never scrolls, so "below the fold" is invisible in evidence.
   Every iteration that changes layout should capture the same screen at
   default size, AX/small phone, and iPad.
@@ -281,15 +280,16 @@ land before the next TestFlight. This loop cannot implement A or B because
 | 0 | all | Audit only; no code changes | 2.7 baseline | run 37372831909, artifacts `ios-simulator-launch` + `ios-layout-flows` |
 | 1 | `setup` | Compact AX header, explicit disabled action, whole party labels | 3 → 4 | run 40072128974 (`setup.png`, `small-phone/setup.png`, `tablet/setup.png`) |
 | 2 | `library` | Wrapping election/party rows, pinned launch action | 3 → 4 | run 40075241534 (`library.png`, `daily.png`, `small-phone/library.png`, `tablet/library.png`) |
+| 3 | `champions` | Full-width empty card, loading row, duplicate title removed | 2 → 4 | run 40078561917 (`champions.png`, `small-phone/champions.png`, `tablet/champions.png`) |
 
 ## Next three moves
 
-1. **Iteration 3 — `champions`:** give the empty state a full-width content
-   frame and a first-class empty-state layout.
-2. **Iteration 4 — `saves`:** distinguish the autosave rows with a slot name
+1. **Iteration 4 — `saves`:** distinguish the autosave rows with a slot name
    or timestamp before Load.
-3. **Iteration 5 — app chrome:** stop the tab bar and menu labels clipping at
+2. **Iteration 5 — app chrome:** stop the tab bar and menu labels clipping at
    accessibility sizes.
+3. **Iteration 6 — `analysis` charts:** replace the huge single-point canvases
+   with a compact trend card.
 
 `lakeside-login` is the highest-trust defect but is blocked on a product
 decision (auth host/branding lives in `shared/**` and the auth service).
