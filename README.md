@@ -13,6 +13,8 @@ Play in the browser at
 The existing `/games/electioneer/` address and internal `electioneer` product
 identifier remain unchanged so existing links, purchases, and saves keep working.
 
+Changes by version: [CHANGELOG.md](CHANGELOG.md)
+
 ## Quick start
 
 ```bash
