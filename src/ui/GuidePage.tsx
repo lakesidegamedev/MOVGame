@@ -144,11 +144,11 @@ const BLOC_GUIDE = [
     notes: "High turnout, low persuadability. Values competence and experience.",
   },
   {
-    id: "evangelical",
-    name: "Evangelical Christians",
-    lean: "Republican",
-    cares: "Culture, abortion, religious liberty, judges",
-    notes: "Very high turnout. Low persuadability. Motivated by cultural threat framing.",
+    id: "asian_other",
+    name: "Asian American & other voters",
+    lean: "Democratic",
+    cares: "Economy, healthcare, immigration",
+    notes: "Lower turnout than most blocs. Moderately persuadable.",
   },
 ];
 
