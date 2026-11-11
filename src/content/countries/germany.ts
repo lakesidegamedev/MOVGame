@@ -1,15 +1,51 @@
-// GERMANY — two Bundestag elections, one bundle.
+// GERMANY: ten Bundestag elections, one bundle.
 //
 // 2025 (the 21st Bundestag, February 23, 2025): 630 seats under the reformed
 // (fully proportional) electoral law; 316 for a majority. Real result as the
-// calibration anchor: Union 208, AfD 152, SPD 120, Greens 85, Linke 64, SSW 1 —
+// calibration anchor: Union 208, AfD 152, SPD 120, Greens 85, Linke 64, SSW 1,
 // FDP and BSW under the 5% threshold (both live inside `oth` here).
 //
 // 2021 (the 20th Bundestag, September 26, 2021): 735 seats with overhang and
 // leveling mandates; 368 for a majority. Anchor: SPD 206, Union 197, Grüne 118,
-// FDP 92, AfD 83, Linke 39. The FDP is its own (playable) party in this cycle —
+// FDP 92, AfD 83, Linke 39. The FDP is its own (playable) party in this cycle;
 // the engine only offers parties present in an election's region data, so FDP
 // appears in 2021 and stays folded into `oth` in 2025.
+//
+// 2017 (the 19th Bundestag): 709 seats; Union 246, SPD 153, AfD 94, FDP 80,
+// Linke 69, Grüne 67.
+//
+// 2013 to 1990 were added later. Chambers and seats per party are the real
+// ones (Bundeswahlleiter), including overhang and leveling mandates:
+//   2013: 631 seats. Union 311, SPD 193, Linke 64, Grüne 63. FDP (4.8%) and
+//         the AfD (4.7%) missed the threshold: both carry their real votes and
+//         no seats, so each can be played and climb back over the line.
+//   2009: 622 seats. Union 239, SPD 146, FDP 93, Linke 76, Grüne 68.
+//   2005: 614 seats. Union 226, SPD 222, FDP 61, Linke.PDS 54, Grüne 51. The
+//         election in one Dresden district was held two weeks late; the seat
+//         totals are the final ones.
+//   2002: 603 seats. SPD 251, Union 248, Grüne 55, FDP 47, PDS 2. The PDS fell
+//         under 5% and kept only its two Berlin constituency seats.
+//   1998: 669 seats. SPD 298, Union 245, Grüne 47, FDP 43, PDS 36.
+//   1994: 672 seats. Union 294, SPD 252, Grüne 49, FDP 47, PDS 30. The PDS
+//         entered through four direct seats in East Berlin.
+//   1990: 662 seats. Union 319, SPD 239, FDP 79, PDS 17, Bündnis 90/Grüne 8.
+//         The 5% threshold applied separately in the old and new states, so
+//         the East's Bündnis 90 and the PDS won seats on their eastern vote
+//         alone while the West German Greens (4.8% there) won none.
+//
+// The `lnk` party is the PDS in 1990 to 2002 and the Left Party.PDS in 2005.
+// The `grn` party is the West German Greens and the eastern Bündnis 90 in
+// 1990 (their seats all sit in the two eastern regions) and the merged party
+// from 1994.
+//
+// Regional numbers: second-vote shares per Land from the official results,
+// combined into the seven regions weighted by electorate (with an eastern
+// turnout adjustment), so that the combination reproduces each election's
+// national result to within about 0.2 points. Seats: each election's real
+// national totals are split across regions by iterative proportional fitting
+// of the regional votes (a biproportional apportionment), rounded so that
+// rows sum to the regional pools and columns to the national totals. Regional
+// pools are in proportion to the votes of the parties that won seats.
 //
 // Seat elasticity is 1.0: proportional representation moves seats one-for-one
 // with vote share. Each election's `s` tables define its own region pools, so
@@ -41,8 +77,8 @@ export const GERMANY: CountryBundle = {
       { id: "grn", name: "Alliance 90/The Greens", shortName: "Grüne", color: "#409a3c" },
       { id: "lnk", name: "Die Linke", shortName: "Linke", color: "#be3075" },
       { id: "fdp", name: "Free Democratic Party", shortName: "FDP", color: "#ffed00" },
-      // 2025's `oth` includes the sub-threshold FDP and BSW; in 2021 the FDP
-      // stands on its own line above.
+      // 2025's `oth` includes the sub-threshold FDP and BSW; in earlier
+      // elections the FDP stands on its own line above.
       { id: "oth", name: "Others (BSW, SSW…)", shortName: "Other", color: "#9aa0a6" },
     ],
     allocation: { id: "regional_seats_curve", label: "Proportional representation (regional pools)", unit: "seat" },
@@ -188,6 +224,224 @@ export const GERMANY: CountryBundle = {
         { id: "gruene_letzte_meile", headline: "A late realo-flügel push and a slick ground game hold {party} safely over the threshold", role: "any", party: "grn", weight: 2, appeal: 0.02, momentum: 5 },
       ],
     },
+
+    "2013": {
+      id: "2013",
+      year: 2013,
+      label: "2013 · Merkel v. Steinbrück",
+      tagline: "Autumn 2013. Merkel is the most trusted politician in the country and the euro crisis has made her Europe's safest pair of hands. The FDP is polling on the threshold, a new anti-euro party has appeared from nowhere, and everyone below the Union is fighting for second place or for survival.",
+      majority: { total: 631, threshold: 316 },
+      goalText: "316 of 631 seats",
+      salience: { economy: 0.8, pensions: 0.6, energy_climate: 0.55, housing: 0.5, ukraine_security: 0.35, migration: 0.25 },
+      regions: {
+        NORTH: { v: { cdu: 0.39, spd: 0.328, grn: 0.096, lnk: 0.058, fdp: 0.045, afd: 0.039, oth: 0.044 }, s: { cdu: 48, spd: 41, grn: 12, lnk: 7 } },
+        NE:    { v: { cdu: 0.338, spd: 0.225, lnk: 0.205, grn: 0.08, afd: 0.054, fdp: 0.029, oth: 0.069 }, s: { cdu: 24, spd: 16, lnk: 14, grn: 5 } },
+        NRW:   { v: { cdu: 0.398, spd: 0.319, grn: 0.08, lnk: 0.061, fdp: 0.052, afd: 0.039, oth: 0.051 }, s: { cdu: 64, spd: 52, grn: 13, lnk: 10 } },
+        EAST:  { v: { cdu: 0.412, lnk: 0.219, spd: 0.16, afd: 0.059, grn: 0.047, fdp: 0.028, oth: 0.074 }, s: { cdu: 33, lnk: 17, spd: 13, grn: 4 } },
+        WEST:  { v: { cdu: 0.406, spd: 0.285, grn: 0.086, lnk: 0.062, fdp: 0.054, afd: 0.053, oth: 0.054 }, s: { cdu: 42, spd: 29, grn: 9, lnk: 6 } },
+        BW:    { v: { cdu: 0.457, spd: 0.206, grn: 0.11, fdp: 0.062, afd: 0.052, lnk: 0.048, oth: 0.065 }, s: { cdu: 43, spd: 19, grn: 10, lnk: 5 } },
+        BAV:   { v: { cdu: 0.493, spd: 0.2, grn: 0.084, fdp: 0.051, afd: 0.042, lnk: 0.038, oth: 0.092 }, s: { cdu: 57, spd: 23, grn: 10, lnk: 5 } },
+      },
+      // The real story beats of summer 2013, in campaign order.
+      events: [
+        { id: "elbe_flut_2013", headline: "Floods on the Elbe and the Danube put the chancellor in the disaster zone, and her calm crisis management earns {party} the week", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
+        { id: "nsa_affaere_2013", headline: "Snowden's NSA files dominate the summer, and the claim that the affair is over leaves {party}'s government on the defensive", role: "any", party: "cdu", weight: 3, appeal: -0.015, momentum: -4, turn: 1 },
+        { id: "veggie_day_2013", headline: "The Greens' plan for a weekly meat-free day in canteens becomes the campaign's favourite punchline, and {party} spends August explaining it", role: "any", party: "grn", weight: 3, appeal: -0.03, momentum: -7, turn: 2 },
+        { id: "tv_duell_2013", headline: "Merkel and Steinbrück meet in the only TV-Duell. The chancellor keeps her cool and {party} takes a narrow win on points", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 6, turn: 3 },
+        { id: "stinkefinger_2013", headline: "A magazine cover shows Steinbrück with his middle finger raised, and the clip follows {party}'s candidate for days", role: "any", party: "spd", weight: 3, appeal: -0.025, momentum: -6, turn: 4 },
+        { id: "bayern_wahl_2013", headline: "Bavaria votes a week early. The CSU wins an absolute majority and the FDP drops out of the Landtag, so the threshold panic reaches {party}", role: "any", party: "fdp", weight: 3, appeal: -0.03, momentum: -8, turn: 5 },
+        { id: "afd_euro_2013", headline: "A party founded this year campaigns against the bailouts and the euro, and {party} collects the protest vote from both flanks", role: "any", party: "afd", weight: 2, appeal: 0.025, momentum: 7 },
+        { id: "gruene_1981_2013", headline: "The Greens' 1980s debates about sex with minors resurface in the final weeks, and {party}'s Trittin has to explain a 1981 local programme", role: "any", party: "grn", weight: 2, appeal: -0.03, momentum: -7 },
+        { id: "leihstimme_2013", headline: "The FDP begs Union voters to lend it their second votes. The pitch only half works for {party}", role: "any", party: "fdp", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "mindestlohn_2013", headline: "A statutory minimum wage of 8.50 euros becomes the centrepiece of the left's pitch, and {party} gets the pay debate it wanted", role: "any", party: "spd", weight: 2, appeal: 0.02, momentum: 5 },
+      ],
+    },
+
+    "2009": {
+      id: "2009",
+      year: 2009,
+      label: "2009 · Merkel v. Steinmeier",
+      tagline: "Autumn 2009. A grand coalition that worked its way through the financial crash is ending, and nobody in it wants to say so. Merkel runs as the crisis manager, Steinmeier as the man who would like to be, and the smaller parties see the biggest opening in a generation.",
+      majority: { total: 622, threshold: 312 },
+      goalText: "312 of 622 seats",
+      salience: { economy: 0.9, pensions: 0.55, energy_climate: 0.55, ukraine_security: 0.45, housing: 0.25, migration: 0.2 },
+      regions: {
+        NORTH: { v: { cdu: 0.318, spd: 0.286, fdp: 0.138, grn: 0.12, lnk: 0.091, oth: 0.047 }, s: { cdu: 37, spd: 30, fdp: 15, grn: 13, lnk: 9 } },
+        NE:    { v: { cdu: 0.255, lnk: 0.25, spd: 0.21, grn: 0.108, fdp: 0.104, oth: 0.073 }, s: { cdu: 17, lnk: 15, spd: 13, grn: 7, fdp: 6 } },
+        NRW:   { v: { cdu: 0.331, spd: 0.285, fdp: 0.149, grn: 0.101, lnk: 0.084, oth: 0.05 }, s: { cdu: 51, spd: 39, fdp: 20, grn: 14, lnk: 11 } },
+        EAST:  { v: { cdu: 0.33, lnk: 0.278, spd: 0.16, fdp: 0.116, grn: 0.061, oth: 0.056 }, s: { cdu: 26, lnk: 20, spd: 11, fdp: 8, grn: 4 } },
+        WEST:  { v: { cdu: 0.331, spd: 0.248, fdp: 0.161, grn: 0.106, lnk: 0.101, oth: 0.052 }, s: { cdu: 32, spd: 21, fdp: 14, lnk: 9, grn: 9 } },
+        BW:    { v: { cdu: 0.345, spd: 0.193, fdp: 0.188, grn: 0.139, lnk: 0.072, oth: 0.063 }, s: { cdu: 30, spd: 15, fdp: 15, grn: 11, lnk: 6 } },
+        BAV:   { v: { cdu: 0.426, spd: 0.168, fdp: 0.147, grn: 0.108, lnk: 0.065, oth: 0.086 }, s: { cdu: 46, spd: 17, fdp: 15, grn: 10, lnk: 6 } },
+      },
+      // The real story beats of summer 2009, in campaign order.
+      events: [
+        { id: "abwrackpraemie_2009", headline: "The scrappage bonus and the Opel rescue talks make crisis management the story of the summer, and {party} stays closest to the factory gates", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
+        { id: "landtagswahlen_2009", headline: "Three state elections on August 30 show the Left above 20 percent in the East and the SPD still sinking, and {party} rides the wave", role: "any", party: "lnk", weight: 3, appeal: 0.025, momentum: 7, turn: 1 },
+        { id: "kunduz_2009", headline: "The Kunduz air strike kills civilians and reopens the Afghanistan debate, and the questions land on {party}'s government", role: "any", party: "cdu", weight: 3, appeal: -0.02, momentum: -5, turn: 2 },
+        { id: "tv_duell_2009", headline: "A polite, sleepy TV-Duell with four moderators. Steinmeier is sharper, Merkel is safer, and {party} keeps its lead", role: "any", party: "cdu", weight: 3, appeal: 0.015, momentum: 4, turn: 3 },
+        { id: "netto_brutto_2009", headline: "'More net from gross': Westerwelle's tax-cut pitch fills the halls and the polls for {party}", role: "any", party: "fdp", weight: 3, appeal: 0.03, momentum: 8, turn: 4 },
+        { id: "deutschlandplan_2009", headline: "Steinmeier's 'Germany Plan' promises four million new jobs by 2020, and a public tired of the grand coalition shrugs at {party}", role: "any", party: "spd", weight: 3, appeal: -0.02, momentum: -5, turn: 5 },
+        { id: "zensursula_2009", headline: "The web-blocking law and a new Pirate Party carry young online voters away from the big parties, and {party} picks up the protest", role: "any", party: "oth", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "atomstreit_2009", headline: "The Union and FDP want longer nuclear plant lifetimes, and the anti-nuclear camp rallies behind {party}", role: "any", party: "grn", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "opel_magna_2009", headline: "Opel's future is argued out in Berlin in the final weeks, and workers look to {party} to save the plants", role: "any", party: "spd", weight: 2, appeal: 0.015, momentum: 4 },
+      ],
+    },
+
+    "2005": {
+      id: "2005",
+      year: 2005,
+      label: "2005 · Schröder v. Merkel",
+      tagline: "Autumn 2005. The chancellor has called an election a year early after losing North Rhine-Westphalia, and he starts far behind. Five million Germans are out of work, the Union is waiting to win, and a new left party under Lafontaine and Gysi has been put together in a hurry.",
+      majority: { total: 614, threshold: 308 },
+      goalText: "308 of 614 seats",
+      salience: { economy: 0.95, pensions: 0.7, migration: 0.3, energy_climate: 0.4, ukraine_security: 0.3, housing: 0.15 },
+      regions: {
+        NORTH: { v: { spd: 0.415, cdu: 0.331, fdp: 0.091, grn: 0.089, lnk: 0.048, oth: 0.025 }, s: { spd: 44, cdu: 35, fdp: 9, grn: 9, lnk: 5 } },
+        NE:    { v: { spd: 0.342, cdu: 0.233, lnk: 0.216, grn: 0.085, fdp: 0.073, oth: 0.051 }, s: { spd: 21, cdu: 14, lnk: 13, fdp: 5, grn: 5 } },
+        NRW:   { v: { spd: 0.4, cdu: 0.344, fdp: 0.1, grn: 0.076, lnk: 0.052, oth: 0.028 }, s: { spd: 56, cdu: 47, fdp: 13, grn: 10, lnk: 7 } },
+        EAST:  { v: { spd: 0.281, cdu: 0.275, lnk: 0.247, fdp: 0.09, grn: 0.046, oth: 0.061 }, s: { spd: 21, cdu: 20, lnk: 17, fdp: 7, grn: 3 } },
+        WEST:  { v: { spd: 0.35, cdu: 0.346, fdp: 0.113, grn: 0.086, lnk: 0.067, oth: 0.038 }, s: { spd: 31, cdu: 30, fdp: 9, grn: 7, lnk: 6 } },
+        BW:    { v: { cdu: 0.392, spd: 0.301, fdp: 0.119, grn: 0.107, lnk: 0.038, oth: 0.043 }, s: { cdu: 31, spd: 24, fdp: 9, grn: 9, lnk: 3 } },
+        BAV:   { v: { cdu: 0.492, spd: 0.255, fdp: 0.095, grn: 0.079, lnk: 0.034, oth: 0.045 }, s: { cdu: 49, spd: 25, fdp: 9, grn: 8, lnk: 3 } },
+      },
+      // The real story beats of summer 2005, in campaign order.
+      events: [
+        { id: "vertrauensfrage_2005", headline: "Schröder loses a confidence vote on purpose and calls an early election after the NRW defeat, and {party} starts the race far behind", role: "any", party: "spd", weight: 3, appeal: -0.025, momentum: -6, turn: 0 },
+        { id: "linkspartei_2005", headline: "Lafontaine and Gysi join forces: the PDS renames itself the Left Party and takes in the WASG, and {party} surges in the polls", role: "any", party: "lnk", weight: 3, appeal: 0.035, momentum: 9, turn: 1 },
+        { id: "kirchhof_2005", headline: "Merkel's tax expert proposes a flat 25 percent income tax, and Schröder mocks the 'professor from Heidelberg'. The lead shrinks for {party}", role: "any", party: "cdu", weight: 3, appeal: -0.03, momentum: -8, turn: 2 },
+        { id: "merkelsteuer_2005", headline: "The Union says it will raise VAT by two points. The 'Merkel tax' gives the SPD a message at last and costs {party} votes", role: "any", party: "cdu", weight: 3, appeal: -0.025, momentum: -6, turn: 3 },
+        { id: "tv_duell_2005", headline: "In the only TV-Duell, Schröder comes out ahead on points, and {party} gets a late lift", role: "any", party: "spd", weight: 3, appeal: 0.03, momentum: 9, turn: 4 },
+        { id: "leihstimmen_2005", headline: "Union supporters hedge in the final week, and a wave of tactical second votes goes to {party} to secure a black-yellow majority", role: "any", party: "fdp", weight: 3, appeal: 0.03, momentum: 7, turn: 5 },
+        { id: "fremdarbeiter_2005", headline: "Lafontaine's 'Fremdarbeiter' remark at a rally in Chemnitz hands the other parties a stick to beat {party} with", role: "any", party: "lnk", weight: 2, appeal: -0.025, momentum: -6 },
+        { id: "hartz_iv_2005", headline: "Unemployment tops five million and Hartz IV protesters are back on the streets. The reforms that {party} passed are now its burden", role: "any", party: "spd", weight: 2, appeal: -0.03, momentum: -8 },
+        { id: "visa_affaere_2005", headline: "Fischer is questioned for hours over the visa affair, and the quarrel dents {party}'s image of competence", role: "any", party: "grn", weight: 2, appeal: -0.02, momentum: -5 },
+      ],
+    },
+
+    "2002": {
+      id: "2002",
+      year: 2002,
+      label: "2002 · Schröder v. Stoiber",
+      tagline: "Autumn 2002. Stoiber led all summer, and then the Elbe flooded. Schröder has nearly four million unemployed and a government that has run out of reform, but he also has a war in Iraq he has promised to keep Germany out of. Two televised debates, and nobody is sure of anything until the last week.",
+      majority: { total: 603, threshold: 302 },
+      goalText: "302 of 603 seats",
+      salience: { economy: 0.85, ukraine_security: 0.75, energy_climate: 0.5, pensions: 0.45, migration: 0.4, housing: 0.1 },
+      regions: {
+        NORTH: { v: { spd: 0.46, cdu: 0.335, grn: 0.093, fdp: 0.072, lnk: 0.013, oth: 0.027 }, s: { spd: 49, cdu: 35, grn: 10, fdp: 7 } },
+        NE:    { v: { spd: 0.411, cdu: 0.257, lnk: 0.145, grn: 0.086, fdp: 0.061, oth: 0.04 }, s: { spd: 28, cdu: 18, grn: 6, fdp: 4, lnk: 2 } },
+        NRW:   { v: { spd: 0.43, cdu: 0.351, fdp: 0.094, grn: 0.089, lnk: 0.012, oth: 0.024 }, s: { spd: 59, cdu: 48, fdp: 13, grn: 12 } },
+        EAST:  { v: { spd: 0.377, cdu: 0.313, lnk: 0.159, fdp: 0.07, grn: 0.042, oth: 0.039 }, s: { spd: 27, cdu: 22, fdp: 5, grn: 3 } },
+        WEST:  { v: { spd: 0.397, cdu: 0.381, grn: 0.094, fdp: 0.084, lnk: 0.012, oth: 0.032 }, s: { spd: 35, cdu: 33, grn: 8, fdp: 7 } },
+        BW:    { v: { cdu: 0.428, spd: 0.335, grn: 0.114, fdp: 0.078, lnk: 0.01, oth: 0.035 }, s: { cdu: 34, spd: 27, grn: 9, fdp: 6 } },
+        BAV:   { v: { cdu: 0.586, spd: 0.261, grn: 0.076, fdp: 0.045, lnk: 0.007, oth: 0.025 }, s: { cdu: 58, spd: 26, grn: 7, fdp: 5 } },
+      },
+      // The real story beats of summer 2002, in campaign order.
+      events: [
+        { id: "stoiber_vorsprung_2002", headline: "Stoiber's Union leads by up to ten points through the summer on jobs and a stalled economy, and {party} sets the pace", role: "any", party: "cdu", weight: 3, appeal: 0.03, momentum: 7, turn: 0 },
+        { id: "hartz_bericht_2002", headline: "The Hartz commission reports and Schröder promises to halve unemployment, and {party} has a plan to run on", role: "any", party: "spd", weight: 3, appeal: 0.02, momentum: 5, turn: 1 },
+        { id: "elbe_flut_2002", headline: "Floods along the Elbe and in Saxony turn the summer. The chancellor in rubber boots looks like a leader, and {party} gains", role: "any", party: "spd", weight: 3, appeal: 0.04, momentum: 10, turn: 2 },
+        { id: "irak_2002", headline: "Schröder rules out German troops in an Iraq war. It plays well in the East and in the SPD's base, and {party} climbs", role: "any", party: "spd", weight: 3, appeal: 0.035, momentum: 9, turn: 3 },
+        { id: "tv_duelle_2002", headline: "Germany's first-ever TV-Duelle split: Stoiber holds his own in the first, Schröder wins the second, and {party} takes back the initiative", role: "any", party: "spd", weight: 3, appeal: 0.02, momentum: 6, turn: 4 },
+        { id: "moellemann_flyer_2002", headline: "Möllemann's flyer attacking Israel's government and Michel Friedman splits the party, and {party}'s 18 percent project stalls in the last week", role: "any", party: "fdp", weight: 3, appeal: -0.035, momentum: -9, turn: 5 },
+        { id: "daeubler_gmelin_2002", headline: "The justice minister is reported to have compared Bush with Hitler, and Schröder asks her to go. The week is bruising for {party}", role: "any", party: "spd", weight: 2, appeal: -0.02, momentum: -4 },
+        { id: "gysi_ruecktritt_2002", headline: "Gysi quits as Berlin economics senator over the bonus-miles affair, and the PDS loses its best-known face. {party} feels it in the polls", role: "any", party: "lnk", weight: 2, appeal: -0.03, momentum: -8 },
+        { id: "fischer_beliebt_2002", headline: "Fischer is the most popular politician in the country, and the Greens campaign on the vice-chancellor's face. {party} gains", role: "any", party: "grn", weight: 2, appeal: 0.025, momentum: 6 },
+      ],
+    },
+
+    "1998": {
+      id: "1998",
+      year: 1998,
+      label: "1998 · Schröder v. Kohl",
+      tagline: "Autumn 1998. After sixteen years, Kohl is asking for a fifth term with unemployment near five million and an economy that will not move. The SPD has a charismatic candidate from Lower Saxony and a party chairman who does not agree with him on everything. For the first time since 1949, a sitting government could be voted out.",
+      majority: { total: 669, threshold: 335 },
+      goalText: "335 of 669 seats",
+      salience: { economy: 0.95, pensions: 0.7, energy_climate: 0.5, migration: 0.4, ukraine_security: 0.25, housing: 0.2 },
+      regions: {
+        NORTH: { v: { spd: 0.481, cdu: 0.335, grn: 0.069, fdp: 0.066, lnk: 0.013, oth: 0.035 }, s: { spd: 57, cdu: 38, grn: 8, fdp: 8 } },
+        NE:    { v: { spd: 0.393, cdu: 0.24, lnk: 0.182, grn: 0.066, fdp: 0.035, oth: 0.084 }, s: { spd: 27, cdu: 16, lnk: 15, grn: 4, fdp: 2 } },
+        NRW:   { v: { spd: 0.469, cdu: 0.338, fdp: 0.073, grn: 0.069, lnk: 0.012, oth: 0.039 }, s: { spd: 74, cdu: 50, fdp: 11, grn: 10 } },
+        EAST:  { v: { spd: 0.329, cdu: 0.302, lnk: 0.205, grn: 0.04, fdp: 0.037, oth: 0.086 }, s: { spd: 27, cdu: 23, lnk: 21, grn: 3, fdp: 3 } },
+        WEST:  { v: { spd: 0.425, cdu: 0.361, fdp: 0.073, grn: 0.072, lnk: 0.013, oth: 0.057 }, s: { spd: 42, cdu: 34, grn: 7, fdp: 6 } },
+        BW:    { v: { cdu: 0.378, spd: 0.356, grn: 0.092, fdp: 0.088, lnk: 0.01, oth: 0.076 }, s: { cdu: 33, spd: 32, grn: 8, fdp: 8 } },
+        BAV:   { v: { cdu: 0.477, spd: 0.344, grn: 0.059, fdp: 0.051, lnk: 0.007, oth: 0.062 }, s: { cdu: 51, spd: 39, grn: 7, fdp: 5 } },
+      },
+      // The real story beats of the 1998 campaign, in order.
+      events: [
+        { id: "niedersachsen_1998", headline: "Schröder wins Lower Saxony in March with 47.9 percent and becomes the SPD's chancellor candidate that night, and {party} has its man", role: "any", party: "spd", weight: 3, appeal: 0.03, momentum: 8, turn: 0 },
+        { id: "arbeitslosigkeit_1998", headline: "Unemployment tops 4.8 million, a postwar record, and Kohl's talk of recovery rings hollow for {party}", role: "any", party: "cdu", weight: 3, appeal: -0.03, momentum: -7, turn: 1 },
+        { id: "spritpreis_1998", headline: "The Greens' conference votes for five marks a litre of petrol, and {party}'s opponents have their campaign gift", role: "any", party: "grn", weight: 3, appeal: -0.035, momentum: -8, turn: 2 },
+        { id: "neue_mitte_1998", headline: "Schröder's 'new centre' courts business and the middle class, and {party} wins voters it has not had in years", role: "any", party: "spd", weight: 3, appeal: 0.025, momentum: 7, turn: 3 },
+        { id: "pds_osten_1998", headline: "Gysi's PDS climbs toward 5 percent in the polls on eastern discontent, and {party}'s talk-show turns pay off", role: "any", party: "lnk", weight: 3, appeal: 0.03, momentum: 8, turn: 4 },
+        { id: "letzte_woche_1998", headline: "In the last week the polls put the SPD ahead and the Union scrambles. Schröder tells Germans it is time for change, and {party} holds on", role: "any", party: "spd", weight: 3, appeal: 0.02, momentum: 6, turn: 5 },
+        { id: "kohl_muedigkeit_1998", headline: "Sixteen years of the same chancellor wear on {party}, and even its own supporters talk of time for a change", role: "any", party: "cdu", weight: 2, appeal: -0.025, momentum: -6 },
+        { id: "lafontaine_schroeder_1998", headline: "The Schröder and Lafontaine double act gives {party} a leader for the middle and a leader for the base", role: "any", party: "spd", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "fdp_steuerreform_1998", headline: "The FDP campaigns for lower taxes and a firm alliance with the Union, and {party} holds a steady course at about six percent", role: "any", party: "fdp", weight: 2, appeal: 0.015, momentum: 4 },
+      ],
+    },
+
+    "1994": {
+      id: "1994",
+      year: 1994,
+      label: "1994 · Kohl v. Scharping",
+      tagline: "Autumn 1994. Nineteen elections in twelve months, and Kohl has won most of them. The economy is turning, the East is recovering unevenly, and the SPD has a candidate it has not made up its mind about, flanked by Lafontaine and Schröder. The PDS needs only three direct seats to stay in the Bundestag.",
+      majority: { total: 672, threshold: 337 },
+      goalText: "337 of 672 seats",
+      salience: { economy: 0.8, migration: 0.5, pensions: 0.5, energy_climate: 0.45, ukraine_security: 0.3, housing: 0.25 },
+      regions: {
+        NORTH: { v: { spd: 0.405, cdu: 0.4, grn: 0.083, fdp: 0.075, lnk: 0.013, oth: 0.024 }, s: { cdu: 47, spd: 47, grn: 9, fdp: 9 } },
+        NE:    { v: { spd: 0.365, cdu: 0.32, lnk: 0.184, grn: 0.062, fdp: 0.039, oth: 0.031 }, s: { spd: 23, cdu: 21, lnk: 14, grn: 4, fdp: 2 } },
+        NRW:   { v: { spd: 0.431, cdu: 0.38, fdp: 0.076, grn: 0.074, lnk: 0.01, oth: 0.029 }, s: { spd: 65, cdu: 59, grn: 11, fdp: 11 } },
+        EAST:  { v: { cdu: 0.437, spd: 0.283, lnk: 0.172, grn: 0.045, fdp: 0.04, oth: 0.024 }, s: { cdu: 32, spd: 21, lnk: 16, grn: 3, fdp: 3 } },
+        WEST:  { v: { cdu: 0.415, spd: 0.391, grn: 0.078, fdp: 0.073, lnk: 0.009, oth: 0.034 }, s: { cdu: 40, spd: 37, grn: 7, fdp: 7 } },
+        BW:    { v: { cdu: 0.433, spd: 0.307, fdp: 0.099, grn: 0.096, lnk: 0.008, oth: 0.057 }, s: { cdu: 39, spd: 27, grn: 8, fdp: 8 } },
+        BAV:   { v: { cdu: 0.512, spd: 0.296, fdp: 0.064, grn: 0.063, lnk: 0.005, oth: 0.06 }, s: { cdu: 56, spd: 32, grn: 7, fdp: 7 } },
+      },
+      // The real story beats of the 1994 campaign, in order.
+      events: [
+        { id: "superwahljahr_1994", headline: "In the superelection year nineteen votes keep every party in permanent campaign mode, and {party}'s steady record helps it most", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 5, turn: 0 },
+        { id: "aufschwung_1994", headline: "The economy leaves recession and Kohl claims the credit: 'the upswing is here'. It lifts {party}", role: "any", party: "cdu", weight: 3, appeal: 0.025, momentum: 7, turn: 1 },
+        { id: "troika_1994", headline: "The SPD's troika of Scharping, Lafontaine and Schröder gives voters three faces and no clear leader, and {party} pays", role: "any", party: "spd", weight: 3, appeal: -0.025, momentum: -6, turn: 2 },
+        { id: "rote_socken_1994", headline: "The Union's 'red socks' campaign tries to tie the SPD to the PDS. The PDS gets the attention, and {party}'s eastern base loves it", role: "any", party: "lnk", weight: 3, appeal: 0.025, momentum: 7, turn: 3 },
+        { id: "kohl_osten_1994", headline: "Kohl campaigns tirelessly across the East, pitching the chancellor of unity against the SPD's three-headed team, and {party} holds its eastern lead", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 6, turn: 4 },
+        { id: "buendnis_gruene_1994", headline: "In the final week the merged Greens and Bündnis 90 stand clear of the threshold they missed in the West in 1990, and {party} breathes out", role: "any", party: "grn", weight: 3, appeal: 0.02, momentum: 5, turn: 5 },
+        { id: "treuhand_1994", headline: "The Treuhand's closures and mass unemployment in the East still shape the vote, and {party} pays for the pace of unity", role: "any", party: "cdu", weight: 2, appeal: -0.025, momentum: -6 },
+        { id: "fdp_landtage_1994", headline: "The FDP drops out of one state parliament after another, and {party} fights for the 5 percent line", role: "any", party: "fdp", weight: 2, appeal: -0.03, momentum: -7 },
+        { id: "pds_direkt_1994", headline: "Three direct seats in East Berlin would keep the PDS in the Bundestag whatever its national score, and {party} campaigns for them street by street", role: "any", party: "lnk", weight: 2, appeal: 0.02, momentum: 5 },
+      ],
+    },
+
+    "1990": {
+      id: "1990",
+      year: 1990,
+      label: "1990 · Kohl v. Lafontaine",
+      tagline: "December 2, 1990. The first free all-German election since 1932, two months after unification. Kohl has the credit for unity, and Lafontaine is the candidate who asked what it would cost. East and West have separate 5 percent thresholds, so the PDS and the East's civil rights alliance need only their own half to get in.",
+      majority: { total: 662, threshold: 332 },
+      goalText: "332 of 662 seats",
+      salience: { economy: 0.9, pensions: 0.5, housing: 0.4, energy_climate: 0.4, ukraine_security: 0.35, migration: 0.35 },
+      regions: {
+        NORTH: { v: { cdu: 0.425, spd: 0.39, fdp: 0.109, grn: 0.047, lnk: 0.004, oth: 0.025 }, s: { cdu: 50, spd: 46, fdp: 13 } },
+        NE:    { v: { cdu: 0.388, spd: 0.304, lnk: 0.112, fdp: 0.093, grn: 0.067, oth: 0.036 }, s: { cdu: 27, spd: 21, lnk: 9, fdp: 6, grn: 4 } },
+        NRW:   { v: { spd: 0.411, cdu: 0.405, fdp: 0.11, grn: 0.043, lnk: 0.003, oth: 0.028 }, s: { cdu: 63, spd: 63, fdp: 17 } },
+        EAST:  { v: { cdu: 0.454, spd: 0.209, fdp: 0.149, lnk: 0.089, grn: 0.058, oth: 0.04 }, s: { cdu: 38, spd: 17, fdp: 12, lnk: 8, grn: 4 } },
+        WEST:  { v: { cdu: 0.426, spd: 0.386, fdp: 0.102, grn: 0.047, lnk: 0.003, oth: 0.036 }, s: { cdu: 42, spd: 37, fdp: 10 } },
+        BW:    { v: { cdu: 0.465, spd: 0.291, fdp: 0.123, grn: 0.057, lnk: 0.003, oth: 0.061 }, s: { cdu: 41, spd: 26, fdp: 11 } },
+        BAV:   { v: { cdu: 0.519, spd: 0.267, fdp: 0.087, grn: 0.046, lnk: 0.002, oth: 0.079 }, s: { cdu: 58, spd: 29, fdp: 10 } },
+      },
+      // The real story beats of 1990, in order.
+      events: [
+        { id: "waehrungsunion_1990", headline: "Monetary union on July 1 swaps East German marks for Deutschmarks one to one for wages and small savings, and {party} takes the credit", role: "any", party: "cdu", weight: 3, appeal: 0.03, momentum: 8, turn: 0 },
+        { id: "bluehende_landschaften_1990", headline: "Kohl promises unity without tax rises and 'blooming landscapes' in the East within a few years, and {party} rides the optimism", role: "any", party: "cdu", weight: 3, appeal: 0.03, momentum: 7, turn: 1 },
+        { id: "lafontaine_warnung_1990", headline: "Lafontaine warns that unity will cost far more than the government admits. He is right, the voters are not listening, and {party} pays", role: "any", party: "spd", weight: 3, appeal: -0.035, momentum: -9, turn: 2 },
+        { id: "zwei_plus_vier_1990", headline: "The Two Plus Four treaty settles Germany's borders and sovereignty, and Genscher's diplomacy is {party}'s strongest card", role: "any", party: "fdp", weight: 3, appeal: 0.03, momentum: 8, turn: 3 },
+        { id: "fuenfprozent_urteil_1990", headline: "The Constitutional Court rules that the 5 percent threshold applies separately in East and West, a lifeline for {party}", role: "any", party: "lnk", weight: 3, appeal: 0.03, momentum: 8, turn: 4 },
+        { id: "ost_landtage_1990", headline: "In the East's state elections on October 14 the CDU wins four of the five new states, and {party} arrives at the federal vote with momentum", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 5, turn: 5 },
+        { id: "gruene_wetter_1990", headline: "'Everyone is talking about Germany, we are talking about the weather': the West Greens campaign on climate while the country talks unity, and {party} pays", role: "any", party: "grn", weight: 2, appeal: -0.04, momentum: -9 },
+        { id: "treuhand_1990", headline: "Eastern factories begin to close as the new currency prices out their exports, and voters in the East look for a party that speaks for them, such as {party}", role: "any", party: "lnk", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "golfkrise_1990", headline: "Iraq's invasion of Kuwait and the Gulf crisis raise fuel prices and security questions, and the debate favours {party}'s steadiness", role: "any", party: "fdp", weight: 2, appeal: 0.015, momentum: 4 },
+      ],
+    },
   },
 
   leaders: {
@@ -213,6 +467,56 @@ export const GERMANY: CountryBundle = {
       grn: { partyId: "grn", name: "Cem Özdemir & Katrin Göring-Eckardt", charisma: 56, energy: 62, competence: 58, machine: 54 },
       lnk: { partyId: "lnk", name: "Sahra Wagenknecht & Dietmar Bartsch", charisma: 60, energy: 62, competence: 58, machine: 48 },
       fdp: { partyId: "fdp", name: "Christian Lindner", charisma: 68, energy: 72, competence: 60, machine: 66 },
+    },
+    "2013": {
+      cdu: { partyId: "cdu", name: "Angela Merkel", charisma: 58, energy: 60, competence: 84, machine: 88 },
+      spd: { partyId: "spd", name: "Peer Steinbrück", charisma: 50, energy: 60, competence: 70, machine: 56 },
+      afd: { partyId: "afd", name: "Bernd Lucke", charisma: 46, energy: 62, competence: 62, machine: 34 },
+      grn: { partyId: "grn", name: "Jürgen Trittin & Katrin Göring-Eckardt", charisma: 52, energy: 62, competence: 66, machine: 56 },
+      lnk: { partyId: "lnk", name: "Gregor Gysi", charisma: 74, energy: 72, competence: 68, machine: 54 },
+      fdp: { partyId: "fdp", name: "Rainer Brüderle & Philipp Rösler", charisma: 44, energy: 50, competence: 54, machine: 52 },
+    },
+    "2009": {
+      cdu: { partyId: "cdu", name: "Angela Merkel", charisma: 56, energy: 56, competence: 80, machine: 84 },
+      spd: { partyId: "spd", name: "Frank-Walter Steinmeier", charisma: 40, energy: 56, competence: 72, machine: 62 },
+      grn: { partyId: "grn", name: "Jürgen Trittin & Renate Künast", charisma: 54, energy: 64, competence: 62, machine: 52 },
+      lnk: { partyId: "lnk", name: "Oskar Lafontaine & Gregor Gysi", charisma: 72, energy: 72, competence: 62, machine: 52 },
+      fdp: { partyId: "fdp", name: "Guido Westerwelle", charisma: 62, energy: 74, competence: 56, machine: 70 },
+    },
+    "2005": {
+      spd: { partyId: "spd", name: "Gerhard Schröder", charisma: 78, energy: 80, competence: 66, machine: 72 },
+      cdu: { partyId: "cdu", name: "Angela Merkel", charisma: 44, energy: 56, competence: 66, machine: 74 },
+      grn: { partyId: "grn", name: "Joschka Fischer", charisma: 74, energy: 66, competence: 70, machine: 60 },
+      lnk: { partyId: "lnk", name: "Oskar Lafontaine & Gregor Gysi", charisma: 72, energy: 70, competence: 58, machine: 44 },
+      fdp: { partyId: "fdp", name: "Guido Westerwelle", charisma: 60, energy: 70, competence: 52, machine: 62 },
+    },
+    "2002": {
+      spd: { partyId: "spd", name: "Gerhard Schröder", charisma: 76, energy: 76, competence: 68, machine: 74 },
+      cdu: { partyId: "cdu", name: "Edmund Stoiber", charisma: 44, energy: 70, competence: 74, machine: 80 },
+      grn: { partyId: "grn", name: "Joschka Fischer", charisma: 78, energy: 66, competence: 72, machine: 62 },
+      lnk: { partyId: "lnk", name: "Gabi Zimmer", charisma: 40, energy: 54, competence: 44, machine: 38 },
+      fdp: { partyId: "fdp", name: "Guido Westerwelle", charisma: 62, energy: 74, competence: 48, machine: 60 },
+    },
+    "1998": {
+      spd: { partyId: "spd", name: "Gerhard Schröder", charisma: 80, energy: 78, competence: 62, machine: 70 },
+      cdu: { partyId: "cdu", name: "Helmut Kohl", charisma: 40, energy: 54, competence: 70, machine: 88 },
+      grn: { partyId: "grn", name: "Joschka Fischer", charisma: 72, energy: 64, competence: 66, machine: 54 },
+      lnk: { partyId: "lnk", name: "Gregor Gysi", charisma: 78, energy: 74, competence: 62, machine: 50 },
+      fdp: { partyId: "fdp", name: "Wolfgang Gerhardt", charisma: 36, energy: 52, competence: 56, machine: 56 },
+    },
+    "1994": {
+      cdu: { partyId: "cdu", name: "Helmut Kohl", charisma: 44, energy: 56, competence: 74, machine: 90 },
+      spd: { partyId: "spd", name: "Rudolf Scharping", charisma: 42, energy: 56, competence: 58, machine: 62 },
+      grn: { partyId: "grn", name: "Joschka Fischer", charisma: 70, energy: 62, competence: 64, machine: 52 },
+      lnk: { partyId: "lnk", name: "Gregor Gysi", charisma: 78, energy: 74, competence: 64, machine: 48 },
+      fdp: { partyId: "fdp", name: "Klaus Kinkel", charisma: 40, energy: 52, competence: 60, machine: 58 },
+    },
+    "1990": {
+      cdu: { partyId: "cdu", name: "Helmut Kohl", charisma: 58, energy: 66, competence: 80, machine: 88 },
+      spd: { partyId: "spd", name: "Oskar Lafontaine", charisma: 74, energy: 70, competence: 70, machine: 60 },
+      fdp: { partyId: "fdp", name: "Hans-Dietrich Genscher", charisma: 62, energy: 62, competence: 82, machine: 64 },
+      lnk: { partyId: "lnk", name: "Gregor Gysi", charisma: 82, energy: 78, competence: 68, machine: 50 },
+      grn: { partyId: "grn", name: "Joschka Fischer", charisma: 66, energy: 60, competence: 60, machine: 46 },
     },
   },
 
@@ -278,17 +582,39 @@ export const GERMANY_MODULE = countryModule(GERMANY, {
       description: "Merkel departs, a flood reshapes the race, and six parties fight over a 735-seat Bundestag." },
     { electionId: "2017", difficulty: "hard",
       description: "The Schulz train runs out of track and the AfD storms the Bundestag. Merkel's fourth term, a re-entering FDP, and 709 seats." },
+    { electionId: "2013", difficulty: "hard", addedLater: true,
+      description: "A popular chancellor, a threshold-hugging FDP and a six-month-old AfD. Four parties are safe, two are not, and 631 seats are in play." },
+    { electionId: "2009", difficulty: "hard", addedLater: true,
+      description: "A grand coalition ends in the shadow of the financial crisis. A buoyant FDP, a surging Left and five parties fight over 622 seats." },
+    { electionId: "2005", difficulty: "easy", addedLater: true,
+      description: "Schröder calls an early election and starts far behind. A new left party, a flat-tax professor and 614 seats with no obvious majority." },
+    { electionId: "2002", difficulty: "medium", addedLater: true,
+      description: "Stoiber leads until the Elbe floods and Schröder rules out Iraq. A near tie, a PDS below the threshold and 603 seats." },
+    { electionId: "1998", difficulty: "hard", addedLater: true,
+      description: "Sixteen years of Kohl against Schröder's new centre. Unemployment near five million, and 669 seats." },
+    { electionId: "1994", difficulty: "hard", addedLater: true,
+      description: "Kohl's superelection year. A recovering economy, the PDS fighting for direct seats and the SPD's three-headed team, for 672 seats." },
+    { electionId: "1990", difficulty: "hard", addedLater: true,
+      description: "The first all-German election, two months after unification. Separate thresholds for East and West and 662 seats." },
   ],
   systemLabel: "Mixed-member proportional",
   pack: {
     id: "germany",
     name: "Germany",
-    description: "Three Bundestag elections from 2017 to 2025. Mixed-member proportional, five-plus parties, and coalition math after the count.",
+    description: "Ten Bundestag elections from 1990 to 2025. Mixed-member proportional, five-plus parties, and coalition math after the count.",
     price: 99,
   },
   daily: { pair: ["cdu", "spd"], names: { cdu: "CDU/CSU", spd: "the SPD" } },
   next: {
     chain: [
+      { id: "1990", blurb: "Continue the timeline: the first all-German election" },
+      { id: "1994", blurb: "Continue the timeline: Kohl's superelection year" },
+      { id: "1998", blurb: "Continue the timeline: the end of the Kohl era" },
+      { id: "2002", blurb: "Continue the timeline: the flood and the Iraq war" },
+      { id: "2005", blurb: "Continue the timeline: an early election" },
+      { id: "2009", blurb: "Continue the timeline: the financial crisis" },
+      { id: "2013", blurb: "Continue the timeline: the euro crisis" },
+      { id: "2017", blurb: "Continue the timeline: the AfD arrives" },
       { id: "2021", blurb: "Continue the timeline: the traffic-light era" },
       { id: "2025", blurb: "Continue the timeline: the centre holds?" },
     ],

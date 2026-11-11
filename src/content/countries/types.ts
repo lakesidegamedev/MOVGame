@@ -38,6 +38,13 @@ export interface CountryElectionEntry {
   /** Free to everyone. Paid rows join the country's pack automatically. */
   free?: boolean;
   tags?: ScenarioTag[];
+  /**
+   * Set on a row added to a country after its first release. The scenario
+   * registry lists these rows after every other row, so the shipped registry
+   * prefix (and the daily challenge's frozen classic pool) never moves. Keep
+   * such rows newest first within the module, after the shipped rows.
+   */
+  addedLater?: boolean;
 }
 
 export interface CountryPackDef {
