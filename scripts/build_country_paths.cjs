@@ -11,7 +11,7 @@
 //          https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/3_mittel.geo.json
 //   FR:    gregoiredavid/france-geojson regions.geojson (post-2016 régions)
 //          https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions.geojson
-//   NZ/IN: Natural Earth ne_10m_admin_1_states_provinces.geojson (saved as ne10_admin1.geojson)
+//   NZ/IN/IE: Natural Earth ne_10m_admin_1_states_provinces.geojson (saved as ne10_admin1.geojson)
 //          https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson
 //   BR:    the same Natural Earth ne10_admin1.geojson (states of Brazil, adm0_a3 BRA)
 //
@@ -514,6 +514,60 @@ const ES = wants("ES") && buildCountry({
   regions: esRegions(),
 });
 
+// --------------------------------------------------------------------- IE
+// Ten units built from the 26 county-level features (Natural Earth lists Cork,
+// Galway, Limerick and Waterford as a city and a county each). Dublin is cut
+// three ways to match the bundle: DNO (Fingal and the city north of the
+// Liffey), DSO (Dun Laoghaire-Rathdown and the city south of the Liffey) and
+// DWE (South Dublin plus the Castleknock and Blanchardstown corner of Fingal).
+// Northern Ireland is left blank: the Dail has no seats there.
+const ie10 = wants("IE") ? readSrc("ne10_admin1.geojson") : null;
+function ieRegions() {
+  const by = {};
+  for (const f of ie10.features) {
+    if (f.properties.adm0_a3 !== "IRL") continue;
+    const key = f.properties.name.startsWith("D\u00fan Laoghaire") ? "DLR" : f.properties.name;
+    (by[key] ||= []).push(...featurePolygons(f.geometry));
+  }
+  // Directed cut lines in lon/lat; side +1 keeps the left of a->b.
+  const liffey = [[-6.60, 53.356], [-6.10, 53.346]];     // west -> east
+  const westEdge = [[-6.29, 53.20], [-6.29, 53.60]];     // south -> north, west is left
+  const northEdge = [[-6.60, 53.43], [-6.00, 53.43]];    // west -> east, south is right
+  const dublinN = clipPolygons(by["Dublin"], [[...liffey, +1]]);
+  const dublinS = clipPolygons(by["Dublin"], [[...liffey, -1]]);
+  const fingalWest = clipPolygons(by["Fingal"], [[...westEdge, +1], [...northEdge, -1]]);
+  const fingalRest = [
+    ...clipPolygons(by["Fingal"], [[...westEdge, -1]]),
+    ...clipPolygons(by["Fingal"], [[...westEdge, +1], [...northEdge, +1]]),
+  ];
+  const merged = groupRegions(by, {
+    CMB: ["Meath", "Kildare", "Wicklow"],
+    SEA: ["Carlow", "Kilkenny", "Waterford", "Wexford"],
+    MID: ["Longford", "Westmeath", "Laoighis", "Offaly"],
+    COR: ["Cork"],
+    MUN: ["Kerry", "Limerick", "Clare", "North Tipperary", "South Tipperary"],
+    WES: ["Mayo", "Galway", "Roscommon"],
+    BOR: ["Donegal", "Cavan", "Monaghan", "Louth", "Sligo", "Leitrim"],
+  }, "IE");
+  return {
+    DNO: [...dublinN, ...fingalRest],
+    DSO: [...dublinS, ...by["DLR"]],
+    DWE: [...by["South Dublin"], ...fingalWest],
+    ...merged,
+  };
+}
+const IE = wants("IE") && buildCountry({
+  name: "Ireland", constName: "IE_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (IRL)",
+  extraNote: "Dublin cut three ways along straight lines (the Liffey, and Castleknock for the west); Northern Ireland left blank.",
+  lat0: 53.4, eps: 0.8, minIslandPx: 4,
+  clip: [-10.8, 51.3, -5.9, 55.5], // drops nothing but stray rocks
+  order: ["BOR", "WES", "MID", "CMB", "DNO", "DSO", "DWE", "SEA", "MUN", "COR"],
+  regions: ieRegions(),
+  // The three Dublin shapes are tiny: push their labels out into open space.
+  labelNudge: { DNO: [8, -16], DWE: [-26, 6], DSO: [14, 18] },
+});
+
 // ------------------------------------------------------------------- write
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const files = [
@@ -525,6 +579,7 @@ const files = [
   [BR, "br.ts"],
   [IN, "in.ts"],
   [ES, "es.ts"],
+  [IE, "ie.ts"],
 ].filter(([built]) => built);
 for (const [built, name] of files) {
   const bytes = emit(built, path.join(OUT_DIR, name));
@@ -563,4 +618,5 @@ if (NZ) assertCountry(NZ, ["NTH", "AKC", "AKS", "WBP", "CNI", "WGN", "UPS", "CAN
 if (BR) assertCountry(BR, ["AMZ", "NOR", "CPM", "PNE", "CW", "BA", "MG", "ES", "PRSC", "SP", "RJ", "RS"], 0.85, 1.25); // squarish
 if (IN) assertCountry(IN, ["UP", "BJ", "MP", "GR", "MH", "DH", "PB", "HM", "KA", "KL", "TN", "AT", "WB", "OD", "NE"], 0.8, 1.15); // squarish
 if (ES) assertCountry(ES, ["AND", "CAT", "MAD", "VAL", "GAL", "PV", "CYL", "CLE", "ARA", "NAV", "MUR", "AST", "BAL", "CAN"], 1.0, 1.9); // wide
+if (IE) assertCountry(IE, ["BOR", "WES", "MID", "CMB", "DNO", "DSO", "DWE", "SEA", "MUN", "COR"], 0.55, 0.95); // tall-ish
 console.log("All assertions passed.");
