@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useSettingsStore } from "@store/settingsStore";
 import { armAudio, sfx } from "@lib/sfx";
 
@@ -34,13 +35,9 @@ export function SettingsModal({
     <div className="overlay" onClick={onClose}>
       <div className="modal settings" onClick={(e) => e.stopPropagation()}>
         <div className="head">
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <div>
-              <div className="tag">SETTINGS</div>
-              <h2>Preferences</h2>
-            </div>
-            <button className="ghost" onClick={onClose}>Close</button>
-          </div>
+          <div className="tag">SETTINGS</div>
+          <h2>Preferences</h2>
+          <button className="modal-close" onClick={onClose} aria-label="Close" title="Close"><X size={16} /></button>
         </div>
         <div className="body">
           <div className="guide-section">
