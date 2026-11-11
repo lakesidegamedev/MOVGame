@@ -2,6 +2,7 @@
 // from the scenario baseline (prior two-party lean). Compact post-reveal
 // companion to the full geo/square map.
 import type { CandidateId, GameState, StateResult } from "@engine/types";
+import { partyInk } from "@ui/colors";
 import "./shell.css";
 
 export interface StateCallGridProps {
@@ -62,7 +63,7 @@ function CallCell({
       title={`${st.name}: ${cands[sr.winner].shortName} +${sr.margin.toFixed(1)}${flipped ? " · FLIP" : ""}`}
       data-testid={`call-${sr.stateId}`}
     >
-      <span className="ens-call-abbr" style={{ color: cands[sr.winner].color }}>
+      <span className="ens-call-abbr" style={{ color: partyInk(cands[sr.winner].color) }}>
         {st.abbr}
         {arrow && <span className="ens-call-flip" aria-label="flip">{arrow}</span>}
       </span>

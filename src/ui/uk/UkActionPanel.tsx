@@ -127,16 +127,16 @@ export function UkActionPanel() {
   const TypeIcon = ICON[type];
 
   return (
-    <div className="card">
-      <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-        <h3 style={{ margin: 0 }}>Week Plan</h3>
-        <span className="muted small">{used}/{pool} actions · max {MAX_PER_DAY}/day</span>
+    <div className="card desk-plan">
+      <div className="card-head">
+        <h3>Week Plan</h3>
+        <span className="card-sub num">{used}/{pool} actions · max {MAX_PER_DAY}/day</span>
       </div>
-      <div className="row" style={{ gap: 16, margin: "6px 0 10px" }}>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Funds</span><span className="v">£{res.funds.toFixed(1)}M</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Planned / available</span><span className="v">£{committedFunds.toFixed(1)}M / £{availableFunds.toFixed(1)}M</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Actions</span><span className="v">{res.actions}/{res.maxActions}</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Momentum</span><span className="v">{res.momentum >= 0 ? "+" : ""}{res.momentum.toFixed(0)}</span></div>
+      <div className="plan-budget">
+        <div className="metric"><span className="l">Funds</span><span className="v">£{res.funds.toFixed(1)}M</span></div>
+        <div className="metric"><span className="l">Planned / available</span><span className="v">£{committedFunds.toFixed(1)}M / £{availableFunds.toFixed(1)}M</span></div>
+        <div className="metric"><span className="l">Actions</span><span className="v">{res.actions}/{res.maxActions}</span></div>
+        <div className="metric"><span className="l">Momentum</span><span className="v">{res.momentum >= 0 ? "+" : ""}{res.momentum.toFixed(0)}</span></div>
       </div>
 
       {/* Action builder — configure one action, then drop it on a day below. */}
@@ -232,7 +232,7 @@ export function UkActionPanel() {
                     <span className="plan-chip" key={i} title={a.type}>
                       <Ico size={12} />
                       {shortDesc(a, regionAbbr)}
-                      <span className="x" onClick={() => removeAction(i)}><X size={11} /></span>
+                      <button type="button" className="x" onClick={() => removeAction(i)} aria-label="Remove action"><X size={11} /></button>
                     </span>
                   );
                 })}
@@ -243,7 +243,7 @@ export function UkActionPanel() {
       </div>
 
       <div className="row" style={{ gap: 8, marginTop: 6 }}>
-        <button className="primary" style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+        <button className="block plan-add"
           disabled={used >= pool || (regionRequired && !regionId) || mpActionCost(buildAction()) > availableFunds}
           onClick={() => { for (const d of DAYS) { if (dayItems(d).length < MAX_PER_DAY) { addToDay(d); break; } } }}>
           <TypeIcon size={14} /> Add to next open day

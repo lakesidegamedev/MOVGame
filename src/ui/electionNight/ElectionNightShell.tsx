@@ -3,6 +3,8 @@
 // finishes. Presentation only: callers keep their own score-posting / auth /
 // next-scenario wiring and pass the results in via props + children/footer.
 import type { ReactNode } from "react";
+import { Lock } from "lucide-react";
+import { partyInk } from "@ui/colors";
 import { RollingCounter } from "./RollingCounter";
 import { Swingometer, type SwingometerProps } from "./Swingometer";
 import "./shell.css";
@@ -67,7 +69,7 @@ export function ElectionNightShell({
         <div className="ens-eyebrow">{eyebrow}</div>
         <h1
           className="ens-headline"
-          style={headlineColor ? { color: headlineColor } : undefined}
+          style={headlineColor ? { color: partyInk(headlineColor) } : undefined}
           data-testid="ens-headline"
         >
           {headline}
@@ -83,7 +85,7 @@ export function ElectionNightShell({
             <RollingCounter
               value={counterValue}
               className="ens-counter"
-              style={counterColor ? { color: counterColor } : undefined}
+              style={counterColor ? { color: partyInk(counterColor) } : undefined}
             />
             <div className="ens-counter-label">{counterLabel}</div>
           </div>
@@ -107,9 +109,12 @@ export function ElectionNightShell({
 
       {children && <div className="ens-body">{children}</div>}
 
-      {nextScenario && <NextScenarioCard {...nextScenario} />}
-
-      {footer && <div className="ens-footer">{footer}</div>}
+      {(nextScenario || footer) && (
+        <div className="ens-side">
+          {nextScenario && <NextScenarioCard {...nextScenario} />}
+          {footer && <div className="ens-footer">{footer}</div>}
+        </div>
+      )}
     </div>
   );
 }
@@ -134,9 +139,9 @@ function NextScenarioCard({
           {!unlocked ? " · locked" : ""}
         </div>
         {unlocked ? (
-          <button className="secondary" onClick={onPlay}>{ctaLabel}</button>
+          <button className="primary" onClick={onPlay}>{ctaLabel}</button>
         ) : (
-          <button className="secondary" onClick={onUnlock}>{lockLabel}</button>
+          <button onClick={onUnlock}><Lock size={13} aria-hidden="true" />{lockLabel.replace(/^🔒\s*/, "")}</button>
         )}
       </div>
       {mapPreview && <div className="ens-next-preview" aria-hidden>{mapPreview}</div>}

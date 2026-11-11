@@ -62,8 +62,8 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
 
       {/* Polling trend */}
       {r.marginTrend.length >= 2 && (
-        <div style={{ marginBottom: 12 }}>
-          <div className="rl" style={{ marginBottom: 4 }}>Your national margin, start to finish</div>
+        <div className="report-section">
+          <div className="report-title">Your national margin, start to finish</div>
           <Sparkline
             values={r.marginTrend.map((p) => p.value)}
             color="var(--gold)"
@@ -84,8 +84,8 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
 
       {/* Decisive contests */}
       {r.decisiveContests.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <div className="rl" style={{ marginBottom: 4 }}>Decisive contests (closest finishes)</div>
+        <div className="report-section">
+          <div className="report-title">Decisive contests (closest finishes)</div>
           {r.decisiveContests.map((c) => (
             <div className="report-row" key={c.id}>
               <span>{c.name}</span>
@@ -99,8 +99,8 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
 
       {/* Spending / action summary */}
       {r.actionTally.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <div className="rl" style={{ marginBottom: 4 }}>What you spent the campaign doing</div>
+        <div className="report-section">
+          <div className="report-title">What you spent the campaign doing</div>
           {r.actionTally.slice(0, 8).map((a) => (
             <div className="report-row" key={a.label}>
               <span>{a.label}</span>
@@ -112,11 +112,11 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
 
       {/* Debate outcomes */}
       {debates.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <div className="rl" style={{ marginBottom: 4 }}>Debate nights</div>
+        <div className="report-section">
+          <div className="report-title">Debate nights</div>
           {debates.map((d, i) => (
-            <div className="report-row" key={i}>
-              <span>Week {d.turn}</span>
+            <div className="report-row dated" key={i}>
+              <span className="num">Week {d.turn}</span>
               <span>{d.text.replace(/^Debate:\s*/, "")}</span>
             </div>
           ))}
@@ -126,10 +126,10 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
       {/* Event impact */}
       {otherEvents.length > 0 && (
         <div>
-          <div className="rl" style={{ marginBottom: 4 }}>Events that hit the campaign</div>
+          <div className="report-title">Events that hit the campaign</div>
           {otherEvents.slice(0, 10).map((e, i) => (
-            <div className="report-row" key={i}>
-              <span>Week {e.turn}</span>
+            <div className="report-row dated" key={i}>
+              <span className="num">Week {e.turn}</span>
               <span className="muted">{e.text}</span>
             </div>
           ))}

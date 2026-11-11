@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useGameStore } from "@store/gameStore";
 import type { CandidateId, TurnPoint } from "@engine/index";
 import { money } from "./format";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, X } from "lucide-react";
 
 // ── Inline SVG line chart ──────────────────────────────────────────────
 interface Series {
@@ -152,13 +152,9 @@ export function StatsScreen({ onClose }: { onClose: () => void }) {
     <div className="overlay" onClick={onClose}>
       <div className="modal stats" onClick={(e) => e.stopPropagation()}>
         <div className="head">
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <div className="tag"><BarChart3 size={12} style={{ verticalAlign: "-2px", marginRight: 6 }} />RACE STATS</div>
-              <h2>Campaign Trends</h2>
-            </div>
-            <button className="ghost" onClick={onClose}>Close</button>
-          </div>
+          <div className="tag"><BarChart3 size={12} aria-hidden="true" />RACE STATS</div>
+          <h2>Campaign Trends</h2>
+          <button className="modal-close" onClick={onClose} aria-label="Close" title="Close"><X size={16} /></button>
         </div>
 
         <div className="body">

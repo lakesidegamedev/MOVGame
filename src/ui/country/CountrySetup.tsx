@@ -2,11 +2,10 @@ import { useState } from "react";
 import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
 import { playablePartiesIn, type CountryBundle } from "@engine/countryGame";
-import { ScenarioArt } from "@ui/ScenarioArt";
-import type { CountryCode } from "@content/scenarioRegistry";
-import { partyColor, partyName, partyShort, partyTextColor } from "./helpers";
-import { Avatar } from "@ui/Avatar";
-import { Vote, Dices, ChevronLeft, Flag } from "lucide-react";
+import { ElectionTile, PartyCard } from "@ui/ElectionTile";
+import { partyInk } from "@ui/colors";
+import { partyColor, partyName, partyShort } from "./helpers";
+import { Vote, Dices, ChevronLeft, Flag, Lock } from "lucide-react";
 import type { PartyId } from "@engine/system";
 import { BRAND } from "../../brand";
 import { DifficultyPicker, type Difficulty } from "@ui/DifficultyPicker";
@@ -50,9 +49,9 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
           <p className="muted small">Campaign clock: six planning weeks compress the historical two-week runoff.</p>
         )}
         {country.id === "FR" && FR_FIRST_ROUND[election] && (
-          <div className="su-summary" style={{ textAlign: "left", marginBottom: 12 }}>
+          <div className="su-summary">
             <strong>Runoff starting point</strong>
-            <p className="muted small" style={{ margin: "6px 0" }}>
+            <p className="muted small">
               The first round is complete. The campaign starts with finalist support and voter transfers already reflected in the regional map.
             </p>
             <div className="small">
@@ -62,9 +61,9 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
         )}
         <TideBanner scenarioId={`${country.id.toLowerCase()}-${election}`} />
         {country.id === "FR" && election === "2022" && (
-          <div className="su-summary" style={{ marginTop: 12, borderColor: "var(--gold)", textAlign: "left" }}>
+          <div className="callout warning">
             <strong>{activeParty === "ens" ? "Historical favorite" : "Long-shot challenge"}</strong>
-            <p className="muted small" style={{ margin: "6px 0 0" }}>
+            <p className="muted small">
               {activeParty === "ens"
                 ? "Macron begins the runoff with a large lead. Defend it while building a stronger finish, or try the closer 2027 race for a tighter contest."
                 : "Le Pen begins far behind. Build a national runoff argument to move support across France; regional pushes alone rarely close the gap."}
@@ -80,51 +79,38 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
 
         <div className="su-panel">
           {ids.length > 1 && (
-            <div className="field" style={{ textAlign: "left", margin: "0 0 10px" }}>
+            <div className="field">
               <label>Election</label>
-              <div className="scenario-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
-                {ids.map((id) => {
-                  return (
-                    <button key={id} type="button"
-                      className={`scenario-card has-cover${election === id ? " sel" : ""}`}
-                      style={{ alignItems: "stretch", textAlign: "left" }}
-                      onClick={() => setElection(id)}>
-                      <ScenarioArt
-                        scenarioId={`${country.id.toLowerCase()}-${id}`}
-                        country={country.id as CountryCode}
-                        year={country.elections[id].year}
-                      />
-                      <span className="scenario-year">{country.elections[id].year}</span>
-                      <span className="scenario-match">{country.elections[id].label}</span>
-                    </button>
-                  );
-                })}
+              <div className="election-grid">
+                {ids.map((id) => (
+                  <ElectionTile
+                    key={id}
+                    scenarioId={`${country.id.toLowerCase()}-${id}`}
+                    year={country.elections[id].year}
+                    title={country.elections[id].label.replace(/^\d{4}\s*(·\s*)?/, "")}
+                    selected={election === id}
+                    locked={!canPlay(`${country.id.toLowerCase()}-${id}`)}
+                    onClick={() => setElection(id)}
+                  />
+                ))}
               </div>
             </div>
           )}
 
-          <div className="field" style={{ textAlign: "left", margin: "0 0 10px" }}>
+          <div className="field">
             <label>Lead which side? Your leader's traits shape the campaign</label>
-            <div className="pick" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            <div className="pick">
               {playable.map((p) => {
                 const ld = country.leaders[election]?.[p];
-                const sel = activeParty === p;
+                const name = ld?.name ?? partyName(country, p);
                 return (
-                  <div key={p} className="candcard" onClick={() => setParty(p)}
-                    style={{ cursor: "pointer", borderColor: sel ? partyColor(country, p) : undefined, borderWidth: sel ? 2 : 1, borderStyle: "solid", boxShadow: sel ? "var(--glow-gold)" : undefined }}>
-                    <div className="row" style={{ gap: 10 }}>
-                      <Avatar name={ld?.name ?? partyName(country, p)} color={partyColor(country, p)} size={40} />
-                      <div>
-                        <div className="nm" style={{ color: partyTextColor(country, p) }}>{partyName(country, p)}</div>
-                        <div className="rm">{ld?.name ?? `${partyShort(country, p)} leader`}</div>
-                      </div>
-                    </div>
-                  </div>
+                  <PartyCard key={p} name={partyName(country, p)} sub={ld?.name ?? `${partyShort(country, p)} leader`} leader={name}
+                    color={partyColor(country, p)} selected={activeParty === p} onClick={() => setParty(p)} />
                 );
               })}
             </div>
             {leader && (
-              <div className="su-summary" style={{ marginTop: 12 }}>
+              <div className="su-summary">
                 <div className="su-summary-row"><span className="su-summary-k">Charisma</span><span className="su-summary-v">{leader.charisma}</span></div>
                 <div className="su-summary-row"><span className="su-summary-k">Energy</span><span className="su-summary-v">{leader.energy}</span></div>
                 <div className="su-summary-row"><span className="su-summary-k">Competence</span><span className="su-summary-v">{leader.competence}</span></div>
@@ -135,7 +121,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
 
           <DifficultyPicker value={difficulty} onChange={setDifficulty} />
 
-          <div className="field" style={{ textAlign: "left" }}>
+          <div className="field">
             <label>Seed: same seed replays the same events & RNG</label>
             <div className="su-seed">
               <input type="text" value={seed} onChange={(e) => setSeed(e.target.value)} />
@@ -148,7 +134,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
           <div className="su-summary">
             <div className="su-summary-row">
               <span className="su-summary-k">Leading</span>
-              <span className="su-summary-v" style={{ color: partyTextColor(country, activeParty) }}>
+              <span className="su-summary-v" style={{ color: partyInk(partyColor(country, activeParty)) }}>
                 {partyName(country, activeParty)}{leader ? ` · ${leader.name}` : ""}
               </span>
             </div>
@@ -168,7 +154,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
           >
             <Flag size={15} /> {canPlay(`${country.id.toLowerCase()}-${election}`)
               ? <>Begin {data.year} as {partyShort(country, activeParty)}</>
-              : "🔒 Unlock to play"}
+              : <><Lock size={14} aria-hidden="true" /> Unlock to play</>}
           </button>
         </div>
       </div>

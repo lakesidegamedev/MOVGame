@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { partyInk } from "@ui/colors";
 import { useGameStore } from "@store/gameStore";
 import { useUkStore } from "@store/ukStore";
 import { useCountryStore } from "@store/countryStore";
@@ -89,7 +90,7 @@ function TicketForm({
 
   return (
     <div className="field" style={{ textAlign: "left" }}>
-      <label style={{ color: ticket.color }}>
+      <label style={{ color: partyInk(ticket.color) }}>
         {side === "dem" ? "Your candidate" : "The opponent"}
       </label>
 

@@ -9,8 +9,9 @@ import { partyColor, partyName } from "./helpers";
 import { WeekRecapModal } from "@ui/WeekRecapModal";
 import { MultipartyEventModal } from "@ui/MultipartyEventModal";
 import { OnboardingCoach } from "@ui/coach/OnboardingCoach";
-import { Vote } from "lucide-react";
-import { BRAND } from "../../brand";
+import { Home, MessageCircleQuestion } from "lucide-react";
+import { DeskHeader } from "@ui/DeskHeader";
+import { partyInk } from "@ui/colors";
 import { movAskUrlFromSnapshot, movSeatAskSnapshot } from "@lib/ask";
 
 function countryEventView(countryId: string, electionId: string, eventId: string) {
@@ -79,37 +80,34 @@ export function CountryApp({ countryId, onExit, initialElection, initialSeed, in
   };
 
   return (
-    <div className="app screen">
-      <div className="topbar">
-        <div className="brand-lockup">
-          <span className="mark"><Vote size={22} /></span>
-          <div>
-            <div className="brand-name">{BRAND.nameCaps}</div>
-            <div className="brand-yr">{country.flag} {country.label.toUpperCase()} · {activeGame.label}</div>
+    <div className="app screen desk">
+      <DeskHeader
+        kicker={<>{country.flag} {country.label} · {activeGame.label}</>}
+        context={<>{weeksLeft} {weeksLeft === 1 ? "week" : "weeks"} to election day · leading{" "}
+          <strong style={{ color: partyInk(partyColor(country, activeGame.playerParty)) }}>{partyName(country, activeGame.playerParty)}</strong></>}
+        scoreboard={live ? <CountrySeatBar country={country} result={live} /> : undefined}
+        metrics={[
+          { label: `Your ${country.unitNamePlural}`, value: playerSeats, color: partyInk(partyColor(country, activeGame.playerParty)) },
+          { label: "Funds", value: `${country.currency}${res.funds.toFixed(0)}M` },
+          { label: "Actions", value: `${res.maxActions - used}/${res.maxActions}`, warn: used >= res.maxActions },
+        ]}
+        undoLabel="Undo"
+        onUndo={undo}
+        undoDisabled={!canUndo}
+        endWeekLabel={hasPending ? "Resolve event first" : "End Week"}
+        onEndWeek={handleEndTurn}
+        endWeekDisabled={hasPending}
+        ticker={activeGame.news.length > 0 ? (
+          <div className="ticker" role="status" aria-live="polite">
+            <span className="ticker-tag"><span className="ticker-dot" /> WIRE</span>
+            <span className="ticker-line">{activeGame.news[0].text}</span>
           </div>
-        </div>
-        <div className="turnchip">
-          {weeksLeft} {weeksLeft === 1 ? "week" : "weeks"} to election day · leading{" "}
-          <strong style={{ color: partyColor(country, activeGame.playerParty) }}>{partyName(country, activeGame.playerParty)}</strong>
-        </div>
-        {live && <CountrySeatBar country={country} result={live} />}
-        <div className="stat"><span className="v" style={{ color: partyColor(country, activeGame.playerParty) }}>{playerSeats}</span><span className="l">Your {country.unitNamePlural}</span></div>
-        <div className="stat"><span className="v">{country.currency}{res.funds.toFixed(0)}M</span><span className="l">Funds</span></div>
-        <div className="stat"><span className="v" style={{ color: used >= res.maxActions ? "var(--gold)" : undefined }}>{res.maxActions - used}/{res.maxActions}</span><span className="l">Actions</span></div>
-        <button className="ghost small" onClick={onExit}>Exit</button>
-        {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(activeGame, live, country.label))} target="_blank" rel="noopener noreferrer">Ask about campaign</a>}
-        <button onClick={undo} disabled={!canUndo}>↶ Undo</button>
-        <button className="primary" data-coach="endweek" onClick={handleEndTurn} disabled={hasPending}>
-          {hasPending ? "Resolve event first" : "End Week →"}
-        </button>
-      </div>
-
-      {activeGame.news.length > 0 && (
-        <div className="ticker" role="status" aria-live="polite">
-          <span className="ticker-tag"><span className="ticker-dot" /> WIRE</span>
-          <span className="ticker-line">{activeGame.news[0].text}</span>
-        </div>
-      )}
+        ) : undefined}
+        tools={<>
+          <button className="ghost small" onClick={onExit}><Home size={14} aria-hidden="true" />Exit</button>
+          {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(activeGame, live, country.label))} target="_blank" rel="noopener noreferrer"><MessageCircleQuestion size={14} aria-hidden="true" />Ask about campaign</a>}
+        </>}
+      />
 
       <div className="main">
         <div className="col">

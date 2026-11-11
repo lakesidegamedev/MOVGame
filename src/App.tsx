@@ -59,8 +59,9 @@ const ModalFallback = () => (
 );
 import { armAudio, sfx } from "@lib/sfx";
 import { useHotkeys } from "@lib/hotkeys";
-import { Vote, X, Settings } from "lucide-react";
-import { BRAND } from "./brand";
+import { X, Settings, Home, BarChart3, History, Users, BookOpen, MessageCircleQuestion, Save, Download, Upload } from "lucide-react";
+import { DeskHeader } from "@ui/DeskHeader";
+import { partyInk } from "@ui/colors";
 
 // True when the viewport is in the single-column mobile layout. Re-renders on
 // viewport changes so State Detail can switch between inline and bottom-sheet.
@@ -110,18 +111,18 @@ function SaveControls() {
   };
 
   return (
-    <div className="row" style={{ gap: 6 }}>
-      <button className="ghost small" onClick={async () => { await saveGame(`Save ${new Date().toLocaleString()}`); flash(signedIn ? "Saved and syncing" : "Saved locally"); }}>Save</button>
-      <button className="ghost small" onClick={doExport}>Export</button>
-      <button className="ghost small" onClick={() => fileRef.current?.click()}>Import</button>
+    <div className="save-controls">
+      <button className="ghost small" onClick={async () => { await saveGame(`Save ${new Date().toLocaleString()}`); flash(signedIn ? "Saved and syncing" : "Saved locally"); }}><Save size={14} aria-hidden="true" />Save</button>
+      <button className="ghost small" onClick={doExport}><Download size={14} aria-hidden="true" />Export</button>
+      <button className="ghost small" onClick={() => fileRef.current?.click()}><Upload size={14} aria-hidden="true" />Import</button>
       <input ref={fileRef} type="file" accept="application/json" style={{ display: "none" }}
         onChange={(e) => { const f = e.target.files?.[0]; if (f) doImport(f); e.target.value = ""; }} />
-      <span className="muted small" title={signedIn
+      <span className="chip save-status" title={signedIn
         ? "Your saves sync to your account across devices."
         : "Saves are kept in this browser only. Sign in to sync across devices."}>
         {signedIn ? "Synced" : "Local only"}
       </span>
-      {toast && <div className="toast">{toast}</div>}
+      {toast && <div className="toast" role="status">{toast}</div>}
     </div>
   );
 }
@@ -223,45 +224,46 @@ function GameScreen({ onHome }: { onHome: () => void }) {
     onHelp: () => setSettingsOpen((v) => !v),
   });
 
+  const remaining = res.maxActions - plannedActions;
   return (
-    <div className="app screen" key="game">
-      <div className="topbar">
-        <div className="brand-lockup">
-          <span className="mark"><Vote size={22} /></span>
-          <div>
-            <div className="brand-name">{BRAND.nameCaps}</div>
-            <div className="brand-yr">CAMPAIGN {year}</div>
+    <div className="app screen desk" key="game">
+      <DeskHeader
+        kicker={SCENARIOS_BY_ID[`us-${game.scenarioId}`]?.label ?? `Campaign ${year}`}
+        context={<>{turnLabel(game.turn, game.totalTurns)} · playing <strong style={{ color: partyInk(cand.color) }}>{cand.shortName}–{cand.runningMate.split(" ").slice(-1)[0]}</strong></>}
+        scoreboard={live ? <EvBar projection={live} /> : undefined}
+        metrics={[
+          { label: "Cash", value: money(res.cash) },
+          { label: "Actions left", value: `${remaining}/${res.maxActions}`, warn: remaining <= 0 },
+          { label: "Momentum", value: res.nationalMomentum.toFixed(0), title: "Short-term campaign energy, from -100 to +100." },
+        ]}
+        undoLabel={plannedActions > 0 ? "Undo action" : "Undo week"}
+        onUndo={handleUndo}
+        undoDisabled={!canUndoWeek && plannedActions === 0}
+        endWeekLabel={hasPendingEvent ? "Resolve event first" : "End Week"}
+        onEndWeek={handleEndTurn}
+        endWeekDisabled={hasPendingEvent}
+        ticker={<NewsTicker />}
+        banner={nextDebate ? (
+          <div className="deadline-banner" role="status">
+            <strong>Next week: {nextDebate.title}</strong>
+            <span>Debate prep and policy prep are available in this week's plan.</span>
           </div>
-        </div>
-        <div className="turnchip">{turnLabel(game.turn, game.totalTurns)} · playing <strong style={{ color: cand.color }}>{cand.shortName}–{cand.runningMate.split(" ").slice(-1)[0]}</strong></div>
-        {live && <EvBar projection={live} />}
-        <div className="stat"><span className="v">{money(res.cash)}</span><span className="l">Cash</span></div>
-        <div className="stat"><span className="v" style={{ color: plannedActions >= res.maxActions ? "var(--gold)" : undefined }}>{res.maxActions - plannedActions}/{res.maxActions}</span><span className="l">Actions left</span></div>
-        <div className="stat" aria-label={`Momentum ${res.nationalMomentum.toFixed(0)}`}><span className="v">{res.nationalMomentum.toFixed(0)}</span><span className="l">Momentum</span></div>
-        <SaveControls />
-        <button className="ghost small" onClick={onHome}>Home</button>
-        <button className="ghost small" onClick={() => setStatsOpen(true)}>Stats</button>
-        {/* Read-only replay. Hidden mid-game on the daily so it can't be used to
-            scout the shared board; always available once a game is over. */}
-        {replay && replay.mode !== "daily" && (
-          <button className="ghost small" onClick={() => setTimelineOpen(true)}>Timeline</button>
-        )}
-        <button className="ghost small" onClick={() => setCandOpen(true)}>Candidates</button>
-        <button className="ghost small" onClick={() => setGuideOpen(true)}>Guide</button>
-        {live && <a className="ghost small" href={movAskUrl(game, live)} target="_blank" rel="noopener noreferrer">Ask about campaign</a>}
-        <button className="ghost small" data-coach="settings" onClick={() => setSettingsOpen(true)} aria-label="Settings"><Settings size={16} /></button>
-        <button onClick={handleUndo} disabled={!canUndoWeek && plannedActions === 0}>
-          ↶ {plannedActions > 0 ? "Undo action" : "Undo week"}
-        </button>
-      </div>
-
-      {nextDebate && (
-        <div className="deadline-banner" role="status">
-          <strong>Next week: {nextDebate.title}</strong>
-          <span>Debate prep and policy prep are available in this week's plan.</span>
-        </div>
-      )}
-      <NewsTicker />
+        ) : undefined}
+        tools={<>
+          <button className="ghost small" onClick={onHome}><Home size={14} aria-hidden="true" />Home</button>
+          <button className="ghost small" onClick={() => setStatsOpen(true)}><BarChart3 size={14} aria-hidden="true" />Stats</button>
+          {/* Read-only replay. Hidden mid-game on the daily so it can't be used to
+              scout the shared board; always available once a game is over. */}
+          {replay && replay.mode !== "daily" && (
+            <button className="ghost small" onClick={() => setTimelineOpen(true)}><History size={14} aria-hidden="true" />Timeline</button>
+          )}
+          <button className="ghost small" onClick={() => setCandOpen(true)}><Users size={14} aria-hidden="true" />Candidates</button>
+          <button className="ghost small" onClick={() => setGuideOpen(true)}><BookOpen size={14} aria-hidden="true" />Guide</button>
+          {live && <a className="ghost small" href={movAskUrl(game, live)} target="_blank" rel="noopener noreferrer"><MessageCircleQuestion size={14} aria-hidden="true" />Ask about campaign</a>}
+          <SaveControls />
+          <button className="ghost small icon-btn" data-coach="settings" onClick={() => setSettingsOpen(true)} aria-label="Settings" title="Settings"><Settings size={15} /></button>
+        </>}
+      />
 
       <div className="main">
         <div className="col">
@@ -272,7 +274,7 @@ function GameScreen({ onHome }: { onHome: () => void }) {
           {/* On mobile, State Detail is a tap-to-open bottom sheet (below), not a
               persistent card that pushes the map and actions around. */}
           {!isMobile && <StatePanel />}
-          <ActionPanel onEndWeek={handleEndTurn} endWeekDisabled={hasPendingEvent} />
+          <ActionPanel />
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { partyFill, partyInk } from "@ui/colors";
 import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
 import { api } from "@lib/api";
@@ -194,7 +195,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
                 blurb: next.blurb,
                 unlocked,
                 ctaLabel: `Play ${nextData.year} →`,
-                lockLabel: `🔒 Unlock ${nextData.year}`,
+                lockLabel: `Unlock ${nextData.year}`,
                 onPlay: () => newGame(country.id, next.id, nextParty, String(Date.now()), difficulty),
                 onUnlock: () => openModal("activate", packId),
                 mapPreview,
@@ -215,14 +216,12 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
               popularVoteMargin={facts.popularMargin}
               onReplay={replayDaily}
             />
-            <div className="card" style={{ background: "var(--navy-600)" }}>
-              <div className="row" style={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+            <div className="card score-card">
+              <div className="score-row">
                 <div>
-                  <div className="tag muted small" style={{ color: "var(--gold)" }}>
-                    <Trophy size={12} style={{ verticalAlign: "-2px" }} /> CAMPAIGN SCORE
-                  </div>
-                  <div style={{ fontSize: 34, fontWeight: 800 }}>
-                    {score}<span className="muted" style={{ fontSize: 15, fontWeight: 600 }}> / 1000</span>
+                  <div className="eyebrow score-eyebrow"><Trophy size={12} aria-hidden="true" /> Campaign score</div>
+                  <div className="score-value num">
+                    {score}<span className="score-max"> / 1000</span>
                   </div>
                   <div className="muted small">
                     {country.unitName} margin {facts.unitMargin >= 0 ? "+" : ""}{Math.round(facts.unitMargin)} · popular{" "}
@@ -292,12 +291,12 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
           <h3>Final standings</h3>
           {order.map((p) => (
             <div className="bloc" key={p}>
-              <span className="name" style={{ color: p === game.playerParty ? partyColor(country, p) : undefined }}>
-                <span style={{ display: "inline-block", width: 10, height: 10, background: partyColor(country, p), borderRadius: 2, marginRight: 6 }} />
+              <span className="name" style={{ color: p === game.playerParty ? partyInk(partyColor(country, p)) : undefined }}>
+                <span className="swatch" style={{ "--party": partyFill(partyColor(country, p)) } as React.CSSProperties} />
                 {partyShort(country, p)}
               </span>
               <span className="meta">{r.seats[p]} {country.unitNamePlural} · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
-              <div className="suppbar"><div style={{ width: `${(r.seats[p] / majority.total) * 100 * 1.6}%`, background: partyColor(country, p) }} /></div>
+              <div className="suppbar"><div style={{ width: `${(r.seats[p] / majority.total) * 100 * 1.6}%`, background: partyFill(partyColor(country, p)) }} /></div>
             </div>
           ))}
         </div>

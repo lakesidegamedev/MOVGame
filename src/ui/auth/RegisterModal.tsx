@@ -32,7 +32,7 @@ export function RegisterModal() {
         <div className="head">
           <div className="tag">Account</div>
           <h2>Create Account</h2>
-          <button className="sheet-close" onClick={closeModal} aria-label="Close"><X size={18} /></button>
+          <button className="modal-close" onClick={closeModal} aria-label="Close"><X size={18} /></button>
         </div>
         <div className="body">
           <LakesideButton />

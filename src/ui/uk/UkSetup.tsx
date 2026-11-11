@@ -3,12 +3,13 @@ import { useUkStore } from "@store/ukStore";
 import { useAuthStore } from "@store/authStore";
 import { DifficultyPicker, type Difficulty } from "@ui/DifficultyPicker";
 import { UK_ELECTIONS, UK_ELECTION_IDS } from "@content/uk/elections";
-import { ScenarioArt } from "@ui/ScenarioArt";
+import { ElectionTile, PartyCard } from "@ui/ElectionTile";
+import { partyFill, partyInk } from "@ui/colors";
 import { UK_PLAYABLE, playablePartiesIn } from "@engine/ukGame";
 import { leaderFor } from "@content/uk/leaders";
 import { partyName, partyColor, partyShort } from "./parties";
 import { Avatar } from "@ui/Avatar";
-import { Vote, Dices, ChevronLeft, ChevronRight, Check, Flag } from "lucide-react";
+import { Vote, Dices, ChevronLeft, ChevronRight, Check, Flag, Lock } from "lucide-react";
 import type { PartyId } from "@engine/system";
 import { BRAND } from "../../brand";
 import { TideBanner, ChallengePartyBanner } from "@ui/TideBanner";
@@ -31,7 +32,7 @@ function UkBeginButton({ election, party, seed, year, onBegin }: {
       className="primary su-next"
       onClick={() => (unlocked ? onBegin() : openModal("activate", `uk-${election}`))}
     >
-      <Flag size={15} /> {unlocked ? `Begin ${year} as ${partyShort(party)}` : "🔒 Unlock to play"}
+      <Flag size={15} /> {unlocked ? `Begin ${year} as ${partyShort(party)}` : <><Lock size={14} aria-hidden="true" /> Unlock to play</>}
     </button>
   );
 }
@@ -62,6 +63,7 @@ export function UkSetup({ onBack, initialElection, initialSeed, initialParty }: 
   initialSeed?: string;    // prefill only — the player can still edit/reroll
   initialParty?: string;   // party id, e.g. "lab" / "con" (Daily Challenge routing)
 }) {
+  const canPlay = useAuthStore((s) => s.canPlay);
   const newGame = useUkStore((s) => s.newGame);
   const ids = [...UK_ELECTION_IDS].sort((a, b) => Number(b) - Number(a));
   const [step, setStep] = useState<StepId>(0);
@@ -113,32 +115,27 @@ export function UkSetup({ onBack, initialElection, initialSeed, initialParty }: 
 
         <div className="su-panel" key={step}>
           {step === 0 && (
-            <div className="field" style={{ textAlign: "left", margin: 0 }}>
+            <div className="field">
               <label>Election year: each ships its real regional results & leaders</label>
-              <div className="scenario-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
-                {ids.map((id) => {
-                  return (
-                    <button key={id} type="button"
-                      className={`scenario-card has-cover${election === id ? " sel" : ""}`}
-                      style={{ alignItems: "stretch", textAlign: "left" }}
-                      onClick={() => chooseElection(id)}>
-                      <ScenarioArt
-                        scenarioId={`uk-${id}`}
-                        country="UK"
-                        year={UK_ELECTIONS[id].year}
-                      />
-                      <span className="scenario-year">{UK_ELECTIONS[id].year}</span>
-                      <span className="scenario-match">{UK_ELECTIONS[id].label}</span>
-                    </button>
-                  );
-                })}
+              <div className="election-grid">
+                {ids.map((id) => (
+                  <ElectionTile
+                    key={id}
+                    scenarioId={`uk-${id}`}
+                    year={UK_ELECTIONS[id].year}
+                    title={UK_ELECTIONS[id].label.replace(/^\d{4}\s*(·\s*)?/, "")}
+                    selected={election === id}
+                    locked={!canPlay(`uk-${id}`)}
+                    onClick={() => chooseElection(id)}
+                  />
+                ))}
               </div>
-              <div className="su-summary" style={{ marginTop: 14 }}>
+              <div className="su-summary">
                 <div className="su-summary-row"><span className="su-summary-k">Contenders</span></div>
                 <div className="vp-roster">
                   {field.map(({ party: p, leader: nm }) => (
-                    <span key={p} className="vp-card" style={{ cursor: "default" }}>
-                      <Avatar name={nm} color={partyColor(p)} size={20} />
+                    <span key={p} className="vp-card static">
+                      <Avatar name={nm} color={partyFill(partyColor(p))} size={20} />
                       <span className="vp-name">{nm} <span className="muted">({partyShort(p)})</span></span>
                     </span>
                   ))}
@@ -148,27 +145,18 @@ export function UkSetup({ onBack, initialElection, initialSeed, initialParty }: 
           )}
 
           {step === 1 && (
-            <div className="field" style={{ textAlign: "left", margin: 0 }}>
+            <div className="field">
               <label>Lead which party? Your leader's traits shape your campaign</label>
-              <div className="pick" style={{ gridTemplateColumns: "1fr 1fr" }}>
+              <div className="pick">
                 {playable.map((p) => {
                   const ld = leaderFor(election, p, partyName(p));
-                  const sel = activeParty === p;
                   return (
-                    <div key={p} className="candcard" onClick={() => setParty(p)}
-                      style={{ cursor: "pointer", borderColor: sel ? partyColor(p) : undefined, borderWidth: sel ? 2 : 1, borderStyle: "solid", boxShadow: sel ? "var(--glow-gold)" : undefined }}>
-                      <div className="row" style={{ gap: 10 }}>
-                        <Avatar name={ld.name} color={partyColor(p)} size={40} />
-                        <div>
-                          <div className="nm" style={{ color: partyColor(p) }}>{partyName(p)}</div>
-                          <div className="rm">{ld.name}</div>
-                        </div>
-                      </div>
-                    </div>
+                    <PartyCard key={p} name={partyName(p)} sub={ld.name} leader={ld.name} color={partyColor(p)}
+                      selected={activeParty === p} onClick={() => setParty(p)} />
                   );
                 })}
               </div>
-              <div className="su-summary" style={{ marginTop: 12 }}>
+              <div className="su-summary">
                 <div className="su-summary-row"><span className="su-summary-k">Charisma</span><span className="su-summary-v">{leader.charisma}</span></div>
                 <div className="su-summary-row"><span className="su-summary-k">Energy</span><span className="su-summary-v">{leader.energy}</span></div>
                 <div className="su-summary-row"><span className="su-summary-k">Competence</span><span className="su-summary-v">{leader.competence}</span></div>
@@ -180,7 +168,7 @@ export function UkSetup({ onBack, initialElection, initialSeed, initialParty }: 
           {step === 2 && (
             <>
               <DifficultyPicker value={difficulty} onChange={setDifficulty} />
-              <div className="field" style={{ textAlign: "left" }}>
+              <div className="field">
                 <label>Seed: same seed replays the same events & RNG</label>
                 <div className="su-seed">
                   <input type="text" value={seed} onChange={(e) => setSeed(e.target.value)} />
@@ -192,7 +180,7 @@ export function UkSetup({ onBack, initialElection, initialSeed, initialParty }: 
               <div className="su-summary">
                 <div className="su-summary-row">
                   <span className="su-summary-k">Leading</span>
-                  <span className="su-summary-v" style={{ color: partyColor(activeParty) }}>{partyName(activeParty)} · {leader.name}</span>
+                  <span className="su-summary-v" style={{ color: partyInk(partyColor(activeParty)) }}>{partyName(activeParty)} · {leader.name}</span>
                 </div>
                 <div className="su-summary-row">
                   <span className="su-summary-k">Election</span>

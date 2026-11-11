@@ -1,6 +1,7 @@
 // Multiparty seat panel — majority threshold bar, coalition math, hung state.
 // Shared by UK and country results after the Election Night theater.
 import type { Government } from "@engine/types";
+import { partyFill, textOn } from "@ui/colors";
 import type { PartyId } from "@engine/system";
 import "./shell.css";
 
@@ -85,7 +86,7 @@ export function MultipartySeatPanel({
             <div
               key={s.id}
               className="ens-seat-seg"
-              style={{ width: w(s.seats), background: s.color }}
+              style={{ width: w(s.seats), background: partyFill(s.color), color: textOn(partyFill(s.color)) }}
               title={`${s.short}: ${s.seats}`}
             >
               {s.seats / total >= 0.07 ? s.short : ""}

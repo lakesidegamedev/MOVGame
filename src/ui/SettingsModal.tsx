@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useSettingsStore } from "@store/settingsStore";
 import { armAudio, sfx } from "@lib/sfx";
 
@@ -34,13 +35,9 @@ export function SettingsModal({
     <div className="overlay" onClick={onClose}>
       <div className="modal settings" onClick={(e) => e.stopPropagation()}>
         <div className="head">
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <div>
-              <div className="tag">SETTINGS</div>
-              <h2>Preferences</h2>
-            </div>
-            <button className="ghost" onClick={onClose}>Close</button>
-          </div>
+          <div className="tag">SETTINGS</div>
+          <h2>Preferences</h2>
+          <button className="modal-close" onClick={onClose} aria-label="Close" title="Close"><X size={16} /></button>
         </div>
         <div className="body">
           <div className="guide-section">
@@ -85,12 +82,12 @@ export function SettingsModal({
                 {hotkeysOn ? "On" : "Off"}
               </button>
             </div>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 10 }}>
+            <table className="data-table">
               <tbody>
                 {SHORTCUTS.map((s) => (
-                  <tr key={s.keys} style={{ borderTop: "1px solid var(--border)" }}>
-                    <td style={{ padding: "6px 8px", fontWeight: 700, whiteSpace: "nowrap" }}>{s.keys}</td>
-                    <td style={{ padding: "6px 8px", color: "var(--ink-300)" }}>{s.does}</td>
+                  <tr key={s.keys}>
+                    <td><kbd className="kbd">{s.keys}</kbd></td>
+                    <td className="muted">{s.does}</td>
                   </tr>
                 ))}
               </tbody>

@@ -32,7 +32,7 @@ export function LoginModal() {
         <div className="head">
           <div className="tag">Account</div>
           <h2>Log In</h2>
-          <button className="sheet-close" onClick={closeModal} aria-label="Close"><X size={18} /></button>
+          <button className="modal-close" onClick={closeModal} aria-label="Close"><X size={18} /></button>
         </div>
         <div className="body">
           <LakesideButton />

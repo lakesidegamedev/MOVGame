@@ -14,23 +14,21 @@ const OPTIONS: { id: Difficulty; name: string; blurb: string; Icon: typeof Flag 
 
 export function DifficultyPicker({ value, onChange }: { value: Difficulty; onChange: (d: Difficulty) => void }) {
   return (
-    <div className="field" style={{ textAlign: "left", margin: "0 0 10px" }}>
+    <div className="field">
       <label>Difficulty</label>
-      <div className="su-optgrid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+      <div className="su-optgrid su-optgrid-3" role="group" aria-label="Difficulty">
         {OPTIONS.map(({ id, name, blurb, Icon }) => {
           const sel = value === id;
           return (
             <button
               key={id}
               type="button"
-              className={`scenario-card${sel ? " sel" : ""}`}
-              style={{ textAlign: "left", alignItems: "flex-start", borderColor: sel ? "var(--gold)" : undefined, boxShadow: sel ? "var(--glow-gold)" : undefined }}
+              className={`su-opt${sel ? " sel" : ""}`}
+              aria-pressed={sel}
               onClick={() => onChange(id)}
             >
-              <span className="scenario-year" style={{ fontSize: 14, display: "inline-flex", gap: 6, alignItems: "center" }}>
-                <Icon size={14} /> {name}
-              </span>
-              <span className="muted small" style={{ fontSize: 11, lineHeight: 1.35 }}>{blurb}</span>
+              <span className="su-opt-name"><Icon size={14} className="su-opt-icon" aria-hidden="true" /> {name}</span>
+              <span className="su-opt-blurb">{blurb}</span>
             </button>
           );
         })}

@@ -14,8 +14,9 @@ import { MultipartyEventModal } from "@ui/MultipartyEventModal";
 import { OnboardingCoach } from "@ui/coach/OnboardingCoach";
 import { UK_EVENTS } from "@content/uk/events";
 import { UK_ELECTION_EVENTS } from "@content/uk/electionEvents";
-import { Vote } from "lucide-react";
-import { BRAND } from "../../brand";
+import { Home, MessageCircleQuestion } from "lucide-react";
+import { DeskHeader } from "@ui/DeskHeader";
+import { partyInk } from "@ui/colors";
 import { movAskUrlFromSnapshot, movSeatAskSnapshot } from "@lib/ask";
 
 function ukEventView(electionId: string, eventId: string) {
@@ -64,37 +65,34 @@ export function UkApp({ onExit, initialElection, initialSeed, initialParty }: { 
   };
 
   return (
-    <div className="app screen">
-      <div className="topbar">
-        <div className="brand-lockup">
-          <span className="mark"><Vote size={22} /></span>
-          <div>
-            <div className="brand-name">{BRAND.nameCaps}</div>
-            <div className="brand-yr">UK · {game.label}</div>
+    <div className="app screen desk">
+      <DeskHeader
+        kicker={<>United Kingdom · {game.label}</>}
+        context={<>{weeksLeft} {weeksLeft === 1 ? "week" : "weeks"} to polling day · leading{" "}
+          <strong style={{ color: partyInk(partyColor(game.playerParty)) }}>{partyName(game.playerParty)}</strong></>}
+        scoreboard={live ? <UkSeatBar result={live} total={maj.total} threshold={maj.threshold} /> : undefined}
+        metrics={[
+          { label: "Your seats", value: playerSeats, color: partyInk(partyColor(game.playerParty)) },
+          { label: "Funds", value: `£${res.funds.toFixed(0)}M` },
+          { label: "Actions", value: `${res.maxActions - used}/${res.maxActions}`, warn: used >= res.maxActions },
+        ]}
+        undoLabel="Undo"
+        onUndo={undo}
+        undoDisabled={!canUndo}
+        endWeekLabel={hasPending ? "Resolve event first" : "End Week"}
+        onEndWeek={handleEndTurn}
+        endWeekDisabled={hasPending}
+        ticker={game.news.length > 0 ? (
+          <div className="ticker" role="status" aria-live="polite">
+            <span className="ticker-tag"><span className="ticker-dot" /> WIRE</span>
+            <span className="ticker-line">{game.news[0].text}</span>
           </div>
-        </div>
-        <div className="turnchip">
-          {weeksLeft} {weeksLeft === 1 ? "week" : "weeks"} to polling day · leading{" "}
-          <strong style={{ color: partyColor(game.playerParty) }}>{partyName(game.playerParty)}</strong>
-        </div>
-        {live && <UkSeatBar result={live} total={maj.total} threshold={maj.threshold} />}
-        <div className="stat"><span className="v" style={{ color: partyColor(game.playerParty) }}>{playerSeats}</span><span className="l">Your seats</span></div>
-        <div className="stat"><span className="v">£{res.funds.toFixed(0)}M</span><span className="l">Funds</span></div>
-        <div className="stat"><span className="v" style={{ color: used >= res.maxActions ? "var(--gold)" : undefined }}>{res.maxActions - used}/{res.maxActions}</span><span className="l">Actions</span></div>
-        <button className="ghost small" onClick={onExit}>Exit</button>
-        {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(game, live, "UK"))} target="_blank" rel="noopener noreferrer">Ask about campaign</a>}
-        <button onClick={undo} disabled={!canUndo}>↶ Undo</button>
-        <button className="primary" data-coach="endweek" onClick={handleEndTurn} disabled={hasPending}>
-          {hasPending ? "Resolve event first" : "End Week →"}
-        </button>
-      </div>
-
-      {game.news.length > 0 && (
-        <div className="ticker" role="status" aria-live="polite">
-          <span className="ticker-tag"><span className="ticker-dot" /> WIRE</span>
-          <span className="ticker-line">{game.news[0].text}</span>
-        </div>
-      )}
+        ) : undefined}
+        tools={<>
+          <button className="ghost small" onClick={onExit}><Home size={14} aria-hidden="true" />Exit</button>
+          {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(game, live, "UK"))} target="_blank" rel="noopener noreferrer"><MessageCircleQuestion size={14} aria-hidden="true" />Ask about campaign</a>}
+        </>}
+      />
 
       <div className="main">
         <div className="col">

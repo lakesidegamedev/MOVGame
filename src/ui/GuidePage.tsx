@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useState } from "react";
 
 const TABS = [
@@ -172,18 +173,14 @@ export function GuidePage({ onClose }: { onClose: () => void }) {
     <div className="overlay" onClick={onClose}>
       <div className="modal guide" onClick={(e) => e.stopPropagation()}>
         <div className="head">
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <div>
-              <div className="tag">GUIDE</div>
-              <h2>How to Play</h2>
-            </div>
-            <button className="ghost" onClick={onClose}>Close</button>
-          </div>
+          <div className="tag">GUIDE</div>
+          <h2>How to Play</h2>
+          <button className="modal-close" onClick={onClose} aria-label="Close" title="Close"><X size={16} /></button>
         </div>
         <div className="body">
-          <div className="tabbar">
+          <div className="tabbar" role="tablist" aria-label="Guide sections">
             {TABS.map((t) => (
-              <button key={t.id} className={tab === t.id ? "active" : ""} onClick={() => setTab(t.id)}>
+              <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} className={tab === t.id ? "active" : ""} onClick={() => setTab(t.id)}>
                 {t.label}
               </button>
             ))}
