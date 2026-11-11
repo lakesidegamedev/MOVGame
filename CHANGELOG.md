@@ -13,6 +13,12 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Added
 
+- Brazil: six presidential runoffs, 2002, 2006, 2010, 2014, 2018 and 2022, as a $0.99 pack (also in
+  the Complete Collection). Lead the PT or its opponent across twelve regions, from São Paulo and
+  Minas Gerais on their own to the Northeast and the Amazon, with each campaign's real story
+  beats, from Lula's first win and the mensalão to the stabbing in Juiz de Fora and the 2022
+  photo finish. The first round is already counted, so the voters of Marina Silva, Ciro Gomes
+  and Simone Tebet are part of the opening map.
 - New Zealand: the 2017, 2020 and 2023 general elections under mixed-member proportional
   representation, as a $0.99 pack (also in the Complete Collection). Lead Labour, National, the
   Greens, ACT, NZ First or Te Pāti Māori across nine regions and the seven Māori electorates,

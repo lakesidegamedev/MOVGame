@@ -1,0 +1,496 @@
+// BRAZIL: six presidential runoffs, one bundle.
+//
+// Brazil elects its president in two rounds by national popular vote. If no
+// candidate passes half of the valid votes in the first round, the top two
+// meet in a runoff three to four weeks later. Modelled the way France is: the
+// campaign you play is the runoff, the unit is the point, and 51 of 100 points
+// win the presidency. Each region's `v` is the real runoff vote share between
+// the two finalists, so the first round and the voters of the eliminated
+// candidates are already inside the opening map. There are no coalitions to
+// form; one candidate wins outright.
+//
+// The bundle holds two party slots, as France does. `pt` is the Workers'
+// Party in every election (Lula 2002 and 2006, Rousseff 2010 and 2014, Haddad
+// 2018, Lula 2022). `dir` is whoever stood against the PT in the runoff: the
+// PSDB's Serra (2002 and 2010), Alckmin (2006) and Neves (2014), then
+// Bolsonaro for the PSL (2018) and the PL (2022). The leaders and labels carry
+// the real identities; the slot is named for what the finalists had in common.
+//
+// Regions. The 26 states and the Federal District are grouped into twelve
+// regions. São Paulo, Minas Gerais, Rio de Janeiro, Bahia, Rio Grande do Sul
+// and Espírito Santo stand alone. The rest are contiguous groups: PRSC (Paraná
+// and Santa Catarina), CPM (Ceará, Piauí and Maranhão), PNE (Pernambuco,
+// Paraíba, Rio Grande do Norte, Alagoas and Sergipe), CW (Goiás, Mato Grosso,
+// Mato Grosso do Sul and the Federal District, with the votes cast abroad,
+// which are counted with the Federal District), NOR (Pará, Amapá and
+// Tocantins) and AMZ (Amazonas, Acre, Rondônia and Roraima).
+//
+// Sources and method. Every runoff figure is the official count (Superior
+// Electoral Court), taken state by state from the Election Resources results
+// pages and cross-checked against the national tables on Wikipedia for 2014 to
+// 2022. Votes abroad are the national total minus the sum of the 27 states.
+// Regional `v` is the finalist's votes over the two finalists' votes in the
+// region. Points per region (`s`) are 100 points shared by each election's own
+// runoff valid votes (largest remainder), split between the finalists in
+// proportion to the regional vote, with the roundings chosen so the national
+// point total equals the national vote share to the nearest point. National
+// shares below are the official figures; the engine's weighted national share
+// tracks them to within a few tenths of a point, because the electorate weights
+// are fixed at the 2022 runoff.
+//
+// National runoff (valid votes) and first round, by election:
+// 2022 (30 October): Lula 50.90, Bolsonaro 49.10. First round (2 October):
+//   Lula 48.43, Bolsonaro 43.20, Tebet 4.16, Ciro Gomes 3.04, others 1.17.
+// 2018 (28 October): Bolsonaro 55.13, Haddad 44.87. First round (7 October):
+//   Bolsonaro 46.03, Haddad 29.28, Ciro Gomes 12.47, Alckmin 4.76, Amoêdo 2.50.
+// 2014 (26 October): Rousseff 51.64, Neves 48.36. First round (5 October):
+//   Rousseff 41.59, Neves 33.55, Marina Silva 21.32, others 3.54.
+// 2010 (31 October): Rousseff 56.05, Serra 43.95. First round (3 October):
+//   Rousseff 46.91, Serra 32.61, Marina Silva 19.33, others 1.15.
+// 2006 (29 October): Lula 60.83, Alckmin 39.17. First round (1 October):
+//   Lula 48.61, Alckmin 41.64, Heloísa Helena 6.85, Cristovam Buarque 2.64.
+// 2002 (27 October): Lula 61.27, Serra 38.73. First round (6 October):
+//   Lula 46.44, Serra 23.20, Garotinho 17.87, Ciro Gomes 11.97.
+//
+// What the engine cannot express: a first round. The eliminated candidates'
+// voters are folded into the starting map and the events (Marina Silva, Ciro
+// Gomes and Simone Tebet each get a beat in the election they decided), but a
+// player cannot move them through a transfer matrix the way the runoff module
+// documents for France. The guide entry says so.
+
+import type { CountryBundle } from "@engine/countryGame";
+import { countryModule } from "./types";
+import { BR_MAP } from "./paths/br";
+
+export const BRAZIL: CountryBundle = {
+  id: "BR",
+  label: "Brazil",
+  flag: "🇧🇷",
+  currency: "R$",
+  unitName: "point",
+  unitNamePlural: "points",
+  goalText: "51 of 100 electoral points",
+  defaultSeatElasticity: 1.0,
+  eventChance: 0.75,
+  map: BR_MAP,
+
+  system: {
+    id: "BR",
+    label: "Brazil",
+    parties: [
+      { id: "pt", name: "Workers' Party (PT)", shortName: "PT", color: "#d4202c" },
+      { id: "dir", name: "The Right (PSDB, PSL, PL)", shortName: "The Right", color: "#1f4fa3" },
+    ],
+    allocation: { id: "regional_seats_curve", label: "Two-round presidential runoff (points by region)", unit: "point" },
+    majority: { total: 100, threshold: 51 },
+  },
+  playable: ["pt", "dir"],
+  abstaining: [],
+  // A runoff has no coalitions: one candidate wins the presidency outright.
+  coalitions: { none: true },
+  governmentText: {
+    majority: "{party} wins the presidency with {seats} points.",
+    minority: "{party} edges the runoff with {seats} points, short of a clear mandate.",
+    hung: "Dead heat. The electoral court counts through the night, and the country waits.",
+  },
+  runoff: true,
+  goalHint: "Win {majority} of {total} presidency points. The first round is already counted: the opening map includes the voters of the eliminated candidates, and the campaign events show them moving. National broadcasts and platform preparation reach the whole electorate.",
+
+  issues: [
+    { id: "economy_jobs", name: "Jobs and inflation", blurb: "Prices at the market, wages at the end of the month and whether the factory is hiring." },
+    { id: "social", name: "Bolsa Familia and social programmes", blurb: "Cash transfers, the minimum wage and who gets to keep them." },
+    { id: "corruption", name: "Corruption", blurb: "From the mensalao to Lava Jato: who stole, who got caught and who got off." },
+    { id: "security", name: "Crime and security", blurb: "Homicides, militias, prisons and the police." },
+    { id: "values", name: "Family, faith and values", blurb: "Abortion, schools and the evangelical churches' role in politics." },
+    { id: "democracy", name: "Democracy and institutions", blurb: "Whether the courts, the press and the voting machines are trusted." },
+    { id: "environment", name: "Amazon and environment", blurb: "Deforestation, farmland and Brazil's standing abroad." },
+    { id: "state", name: "State companies and privatisation", blurb: "Petrobras, the banks and what the state should own." },
+    { id: "public_finances", name: "Public finances and the currency", blurb: "The deficit, the debt, the real and what the creditors think." },
+  ],
+
+  blocs: [
+    { id: "evangelical", name: "Evangelical voters", share: 0.27, turnoutPropensity: 0.8,
+      tilt: { dir: 0.5, pt: -0.5 } },
+    { id: "benefit", name: "Low-income households (benefits and informal work)", share: 0.24, turnoutPropensity: 0.72,
+      tilt: { pt: 0.6, dir: -0.6 } },
+    { id: "periphery", name: "Urban working class", share: 0.22, turnoutPropensity: 0.75,
+      tilt: { pt: 0.2, dir: -0.2 } },
+    { id: "graduate", name: "Graduates and public servants", share: 0.16, turnoutPropensity: 0.86,
+      tilt: { pt: 0.1, dir: -0.1 } },
+    { id: "agro", name: "Farm belt and interior towns", share: 0.14, turnoutPropensity: 0.8,
+      tilt: { dir: 0.6, pt: -0.6 } },
+    { id: "antipt", name: "Anti-PT voters", share: 0.16, turnoutPropensity: 0.88,
+      tilt: { dir: 0.9, pt: -0.9 } },
+    { id: "thirdway", name: "Third-way and undecided voters", share: 0.12, turnoutPropensity: 0.7,
+      tilt: { pt: 0, dir: 0 } },
+  ],
+
+  // `seats` is the 2022 pool; each election's `s` sets its own. `electorate`
+  // is thousands of valid runoff votes in 2022.
+  regions: [
+    { id: "AMZ", name: "Amazonas, Acre, Rondônia & Roraima", abbr: "W Amazon", seats: 3, electorate: 3553, tile: { row: 0, col: 0 },
+      profile: { evangelical: 1.5, agro: 1.4, benefit: 0.8, graduate: 0.7 } },
+    { id: "NOR", name: "Pará, Amapá & Tocantins", abbr: "Pará", seats: 5, electorate: 5820, tile: { row: 0, col: 1 },
+      profile: { benefit: 1.2, evangelical: 1.2, agro: 1.1 } },
+    { id: "CPM", name: "Ceará, Piauí & Maranhão", abbr: "Ceará-Piauí", seats: 9, electorate: 11212, tile: { row: 0, col: 2 },
+      profile: { benefit: 2.2, agro: 0.4, antipt: 0.5, graduate: 0.8 } },
+    { id: "PNE", name: "Pernambuco & the East Northeast", abbr: "Pernambuco", seats: 11, electorate: 12831, tile: { row: 0, col: 3 },
+      profile: { benefit: 2.0, agro: 0.5, antipt: 0.6 } },
+    { id: "CW", name: "Centre-West & Federal District", abbr: "Centre-West", seats: 8, electorate: 9154, tile: { row: 1, col: 1 },
+      profile: { agro: 2.0, evangelical: 1.3, antipt: 1.2, benefit: 0.6, graduate: 1.1 } },
+    { id: "BA", name: "Bahia", abbr: "Bahia", seats: 7, electorate: 8455, tile: { row: 1, col: 2 },
+      profile: { benefit: 2.0, antipt: 0.6, evangelical: 0.8 } },
+    { id: "MG", name: "Minas Gerais", abbr: "Minas", seats: 10, electorate: 12332, tile: { row: 2, col: 2 },
+      profile: { agro: 1.1, evangelical: 1.0, periphery: 1.1, thirdway: 1.2 } },
+    { id: "ES", name: "Espírito Santo", abbr: "Esp. Santo", seats: 2, electorate: 2209, tile: { row: 2, col: 3 },
+      profile: { evangelical: 1.4, agro: 0.8, antipt: 1.1 } },
+    { id: "PRSC", name: "Paraná & Santa Catarina", abbr: "Paraná-SC", seats: 9, electorate: 11065, tile: { row: 3, col: 1 },
+      profile: { agro: 1.4, antipt: 1.3, evangelical: 1.0, benefit: 0.4 } },
+    { id: "SP", name: "São Paulo", abbr: "São Paulo", seats: 22, electorate: 25736, tile: { row: 3, col: 2 },
+      profile: { graduate: 1.3, periphery: 1.2, antipt: 1.1, benefit: 0.5, agro: 0.5 } },
+    { id: "RJ", name: "Rio de Janeiro", abbr: "Rio", seats: 8, electorate: 9560, tile: { row: 3, col: 3 },
+      profile: { evangelical: 1.3, periphery: 1.3, graduate: 1.2, agro: 0.1, benefit: 0.5 } },
+    { id: "RS", name: "Rio Grande do Sul", abbr: "Rio Grande do Sul", seats: 6, electorate: 6625, tile: { row: 4, col: 1 },
+      profile: { antipt: 1.2, agro: 1.0, evangelical: 0.7, benefit: 0.3 } },
+  ],
+
+  elections: {
+    "2022": {
+      id: "2022",
+      year: 2022,
+      label: "2022 · Lula v. Bolsonaro",
+      tagline: "October 30, 2022. A former president whose convictions were annulled against an incumbent who spent the year doubting the voting machines. Lula led the first round by five points and the polls missed Bolsonaro's strength. Minas Gerais, a record Northeast turnout and the 7 percent who backed Tebet or Ciro Gomes decide it.",
+      salience: { economy_jobs: 0.9, social: 0.85, democracy: 0.75, values: 0.65, corruption: 0.55, security: 0.55, environment: 0.5 },
+      regions: {
+        SP:  { v: { pt: 0.448, dir: 0.552 }, s: { pt: 10, dir: 12 } },
+        MG:  { v: { pt: 0.502, dir: 0.498 }, s: { pt: 5, dir: 5 } },
+        RJ:  { v: { pt: 0.435, dir: 0.565 }, s: { pt: 4, dir: 4 } },
+        BA:  { v: { pt: 0.721, dir: 0.279 }, s: { pt: 5, dir: 2 } },
+        RS:  { v: { pt: 0.437, dir: 0.563 }, s: { pt: 3, dir: 3 } },
+        PRSC:{ v: { pt: 0.349, dir: 0.651 }, s: { pt: 3, dir: 6 } },
+        CPM: { v: { pt: 0.716, dir: 0.284 }, s: { pt: 6, dir: 3 } },
+        PNE: { v: { pt: 0.655, dir: 0.345 }, s: { pt: 7, dir: 4 } },
+        ES:  { v: { pt: 0.420, dir: 0.580 }, s: { pt: 1, dir: 1 } },
+        CW:  { v: { pt: 0.402, dir: 0.598 }, s: { pt: 3, dir: 5 } },
+        NOR: { v: { pt: 0.538, dir: 0.462 }, s: { pt: 3, dir: 2 } },
+        AMZ: { v: { pt: 0.410, dir: 0.590 }, s: { pt: 1, dir: 2 } },
+      },
+      events: [
+        { id: "first_round_2022", headline: "The first round: Lula 48.4, Bolsonaro 43.2, and the pollsters undercounted the incumbent by several points. {party} learns the gap is not a lead", role: "any", party: "dir", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
+        { id: "tebet_2022", headline: "Simone Tebet, third with 4 percent, backs Lula and takes to the road for him. Moderate, centre-right voters in São Paulo and Mato Grosso do Sul are the target", role: "any", party: "pt", weight: 3, appeal: 0.025, momentum: 6, turn: 1 },
+        { id: "auxilio_2022", headline: "Auxílio Brasil is raised to 600 reais months before the vote, and the state pays out in the final weeks. {party} gets a hearing in the poorest towns", role: "any", party: "dir", weight: 3, appeal: 0.025, momentum: 6, turn: 2 },
+        { id: "piranhas_2022", headline: "Bolsonaro jokes about teenage Venezuelan girls he met in a Brasília suburb, 'a mood came up'. Women voters, his weakest group, hear it, and {party} pays", role: "any", party: "dir", weight: 3, appeal: -0.035, momentum: -8, turn: 3 },
+        { id: "jefferson_2022", headline: "Roberto Jefferson, a Bolsonaro ally, fires on federal police sent to arrest him. The campaign spends its last week explaining it", role: "any", party: "dir", weight: 3, appeal: -0.03, momentum: -7, turn: 4 },
+        { id: "prf_2022", headline: "Election day: police roadblocks on Northeast highways slow buses to the polling stations. Turnout there comes in high anyway, and {party} gets the benefit", role: "any", party: "pt", weight: 3, appeal: 0.02, momentum: 5, turn: 5 },
+        { id: "minas_2022", headline: "Minas Gerais governor Romeu Zema backs Bolsonaro and both campaigns camp in Belo Horizonte. The state that picks the winner gets a visit a week", role: "any", party: "dir", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "picanha_2022", headline: "Lula's promise of beef and a beer on the weekend lands in the supermarket aisles, and {party} owns the cost of living", role: "any", party: "pt", weight: 2, appeal: 0.025, momentum: 6 },
+        { id: "evangelicos_2022", headline: "Rumours that Lula will close churches run through pastors' WhatsApp groups. Lula answers with a letter to evangelicals, and {party} has to defend its faith record", role: "any", party: "pt", weight: 2, appeal: -0.025, momentum: -6 },
+        { id: "lavajato_2022", headline: "Bolsonaro's team plays back the Lava Jato years in every ad break, and {party} spends the week on the corruption question", role: "any", party: "pt", weight: 2, appeal: -0.025, momentum: -6 },
+        { id: "ciro_2022", headline: "The 7 percent who backed Tebet or Ciro Gomes are the only voters left to win, and both campaigns flood them with ads", role: "any", weight: 2, appeal: 0.015, momentum: 4 },
+      ],
+    },
+
+    "2018": {
+      id: "2018",
+      year: 2018,
+      label: "2018 · Haddad v. Bolsonaro",
+      tagline: "October 28, 2018. Lula is in prison and barred, his stand-in has had five weeks to introduce himself, and the front-runner was stabbed in a crowd and has skipped every debate since. Fear of the PT and fear of Bolsonaro are both at record highs. Ciro Gomes holds 13 million votes and has flown to Europe.",
+      salience: { security: 0.9, corruption: 0.85, economy_jobs: 0.75, democracy: 0.7, values: 0.65, social: 0.5, environment: 0.3 },
+      regions: {
+        SP:  { v: { pt: 0.320, dir: 0.680 }, s: { pt: 7, dir: 14 } },
+        MG:  { v: { pt: 0.418, dir: 0.582 }, s: { pt: 4, dir: 6 } },
+        RJ:  { v: { pt: 0.320, dir: 0.680 }, s: { pt: 3, dir: 5 } },
+        BA:  { v: { pt: 0.727, dir: 0.273 }, s: { pt: 5, dir: 2 } },
+        RS:  { v: { pt: 0.368, dir: 0.632 }, s: { pt: 2, dir: 4 } },
+        PRSC:{ v: { pt: 0.287, dir: 0.713 }, s: { pt: 3, dir: 7 } },
+        CPM: { v: { pt: 0.729, dir: 0.271 }, s: { pt: 6, dir: 3 } },
+        PNE: { v: { pt: 0.650, dir: 0.350 }, s: { pt: 7, dir: 4 } },
+        ES:  { v: { pt: 0.369, dir: 0.631 }, s: { pt: 1, dir: 1 } },
+        CW:  { v: { pt: 0.333, dir: 0.667 }, s: { pt: 3, dir: 5 } },
+        NOR: { v: { pt: 0.539, dir: 0.461 }, s: { pt: 3, dir: 2 } },
+        AMZ: { v: { pt: 0.392, dir: 0.608 }, s: { pt: 1, dir: 2 } },
+      },
+      events: [
+        { id: "first_round_2018", headline: "The first round: Bolsonaro 46 percent, a hair short of winning outright, Haddad 29. The PT has to turn a 17-point gap into a campaign", role: "any", party: "pt", weight: 3, appeal: -0.02, momentum: -5, turn: 0 },
+        { id: "ele_nao_2018", headline: "'Ele não': women's protests fill squares in dozens of cities. The slogan trends everywhere, but Bolsonaro's numbers among women barely move", role: "any", party: "pt", weight: 3, appeal: 0.02, momentum: 5, turn: 1 },
+        { id: "ciro_2018", headline: "Ciro Gomes leaves for Europe after the first round and does not take the stage with Haddad. His 13 million voters are left to decide for themselves", role: "any", party: "pt", weight: 3, appeal: -0.03, momentum: -7, turn: 2 },
+        { id: "whatsapp_2018", headline: "A newspaper reports that businessmen are paying for mass WhatsApp messages against the PT. The electoral court opens a case, and the chains keep spreading", role: "any", party: "dir", weight: 3, appeal: -0.02, momentum: -5, turn: 3 },
+        { id: "debates_2018", headline: "Bolsonaro skips every runoff debate on medical advice. Haddad faces an empty chair and a clock running out", role: "any", party: "dir", weight: 3, appeal: 0.02, momentum: 5, turn: 4 },
+        { id: "paulista_2018", headline: "Bolsonaro addresses the Avenida Paulista rally by video from his home, promising to 'sweep the red bandits' out of Brazil. The words travel further than the crowd", role: "any", party: "dir", weight: 3, appeal: -0.025, momentum: -6, turn: 5 },
+        { id: "kit_gay_2018", headline: "The 'gay kit' claim, a false story about a school textbook, reaches every church group in the country. {party} has no answer that fits on a phone screen", role: "any", party: "pt", weight: 3, appeal: -0.03, momentum: -7 },
+        { id: "guedes_2018", headline: "Paulo Guedes, Bolsonaro's economist, promises privatisations and a flat tax. Investors cheer, and workers hear the word cuts", role: "any", party: "dir", weight: 2, appeal: -0.015, momentum: -4 },
+        { id: "soldado_2018", headline: "A video resurfaces of Eduardo Bolsonaro saying it would take 'a soldier and a corporal' to shut the Supreme Court. Democracy becomes a ballot question, and {party} gets the benefit", role: "any", party: "pt", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "lula_preso_2018", headline: "Lula's face is still on every PT poster, from his cell in Curitiba. 'Haddad is Lula' holds the base and scares everyone else", role: "any", party: "pt", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "facada_2018", headline: "The knife attack in Juiz de Fora is replayed again, and the sympathy bounce for {party} never quite goes away", role: "any", party: "dir", weight: 2, appeal: 0.02, momentum: 5 },
+      ],
+    },
+
+    "2014": {
+      id: "2014",
+      year: 2014,
+      label: "2014 · Rousseff v. Neves",
+      tagline: "October 26, 2014. Marina Silva led the polls for weeks after Eduardo Campos died in a plane crash, until the PT's advertising and Aécio Neves's late climb pushed her to third. Now the PT's fourth term is on the line: slow growth, the Petrobras investigation, and a country that votes by region.",
+      salience: { corruption: 0.85, economy_jobs: 0.8, social: 0.7, public_finances: 0.55, security: 0.5, state: 0.5 },
+      regions: {
+        SP:  { v: { pt: 0.357, dir: 0.643 }, s: { pt: 8, dir: 15 } },
+        MG:  { v: { pt: 0.524, dir: 0.476 }, s: { pt: 6, dir: 5 } },
+        RJ:  { v: { pt: 0.549, dir: 0.451 }, s: { pt: 4, dir: 4 } },
+        BA:  { v: { pt: 0.702, dir: 0.298 }, s: { pt: 5, dir: 2 } },
+        RS:  { v: { pt: 0.465, dir: 0.535 }, s: { pt: 3, dir: 3 } },
+        PRSC:{ v: { pt: 0.376, dir: 0.624 }, s: { pt: 3, dir: 6 } },
+        CPM: { v: { pt: 0.777, dir: 0.223 }, s: { pt: 7, dir: 2 } },
+        PNE: { v: { pt: 0.677, dir: 0.323 }, s: { pt: 8, dir: 3 } },
+        ES:  { v: { pt: 0.461, dir: 0.539 }, s: { pt: 1, dir: 1 } },
+        CW:  { v: { pt: 0.421, dir: 0.579 }, s: { pt: 3, dir: 4 } },
+        NOR: { v: { pt: 0.580, dir: 0.420 }, s: { pt: 2, dir: 2 } },
+        AMZ: { v: { pt: 0.542, dir: 0.458 }, s: { pt: 2, dir: 1 } },
+      },
+      events: [
+        { id: "first_round_2014", headline: "The first round: Rousseff 41.6, Neves 33.6, Marina Silva 21.3. Silva's collapse hands the runoff to a fight between the PT and the PSDB, and {party} wakes up in a new race", role: "any", party: "dir", weight: 3, appeal: 0.02, momentum: 5, turn: 0 },
+        { id: "marina_2014", headline: "Marina Silva and her party, the PSB, back Aécio Neves, despite a campaign in which his side pounded her. The 22 million who voted for her are courted by both camps", role: "any", party: "dir", weight: 3, appeal: 0.03, momentum: 8, turn: 1 },
+        { id: "bolsa_2014", headline: "PT ads warn that the opposition would cut Bolsa Familia and workers' rights. In the Northeast, it works as designed", role: "any", party: "pt", weight: 3, appeal: 0.025, momentum: 6, turn: 2 },
+        { id: "petrolao_2014", headline: "A former Petrobras director's plea deal leaks: a scheme of kickbacks on refinery contracts, tied to the ruling coalition. The scandal gets a name, the petrolão", role: "any", party: "pt", weight: 3, appeal: -0.035, momentum: -8, turn: 3 },
+        { id: "debate_2014", headline: "In the final TV debate, Aécio presses the economy and the scandal, and Rousseff presses the record of the PSDB governments. Both claim the night", role: "any", weight: 3, appeal: 0.02, momentum: 6, turn: 4 },
+        { id: "veja_2014", headline: "Two days out, a news magazine puts a witness's claim on its cover that Lula and Rousseff knew of the Petrobras scheme. Rousseff's team calls it electoral terrorism, and the story dominates the last weekend", role: "any", party: "pt", weight: 3, appeal: -0.03, momentum: -7, turn: 5 },
+        { id: "growth_2014", headline: "Growth stays flat and inflation sits at the top of the target band. The government's 'we are creating jobs' line runs into the supermarket receipts", role: "any", party: "pt", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "nordeste_2014", headline: "Social media splits the map: the Northeast posts for Rousseff, the South and São Paulo for Neves, and the insults travel both ways. Turnout rises on both sides", role: "any", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "minas_2014", headline: "Neves campaigns for his home state, where he was governor for eight years. Minas Gerais still tilts to Rousseff, and {party} has to explain the Mineiro vote", role: "any", party: "dir", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "aecio_airport_2014", headline: "A report says a Minas Gerais airport near Neves's family land was built with state money while he was governor. {party} spends a news cycle answering", role: "any", party: "dir", weight: 2, appeal: -0.02, momentum: -5 },
+      ],
+    },
+
+    "2010": {
+      id: "2010",
+      year: 2010,
+      label: "2010 · Rousseff v. Serra",
+      tagline: "October 31, 2010. Lula leaves office with approval near 80 percent and hands the ticket to a chief of staff who has never won an election. Marina Silva's 20 million votes forced a second round, and the last three weeks turn on abortion and religion more than the economy.",
+      salience: { economy_jobs: 0.65, values: 0.8, social: 0.65, corruption: 0.55, state: 0.5, security: 0.45 },
+      regions: {
+        SP:  { v: { pt: 0.459, dir: 0.541 }, s: { pt: 11, dir: 12 } },
+        MG:  { v: { pt: 0.584, dir: 0.416 }, s: { pt: 6, dir: 5 } },
+        RJ:  { v: { pt: 0.605, dir: 0.395 }, s: { pt: 5, dir: 3 } },
+        BA:  { v: { pt: 0.709, dir: 0.291 }, s: { pt: 5, dir: 2 } },
+        RS:  { v: { pt: 0.491, dir: 0.509 }, s: { pt: 3, dir: 3 } },
+        PRSC:{ v: { pt: 0.441, dir: 0.559 }, s: { pt: 4, dir: 5 } },
+        CPM: { v: { pt: 0.766, dir: 0.234 }, s: { pt: 7, dir: 2 } },
+        PNE: { v: { pt: 0.655, dir: 0.345 }, s: { pt: 7, dir: 4 } },
+        ES:  { v: { pt: 0.492, dir: 0.508 }, s: { pt: 1, dir: 1 } },
+        CW:  { v: { pt: 0.490, dir: 0.510 }, s: { pt: 3, dir: 4 } },
+        NOR: { v: { pt: 0.548, dir: 0.452 }, s: { pt: 2, dir: 2 } },
+        AMZ: { v: { pt: 0.618, dir: 0.382 }, s: { pt: 2, dir: 1 } },
+      },
+      events: [
+        { id: "first_round_2010", headline: "The first round: Rousseff 46.9, Serra 32.6, Marina Silva 19.3. Rousseff missed an outright win after a late slide over religion, and {party} has three weeks to reassemble the vote", role: "any", party: "pt", weight: 3, appeal: -0.02, momentum: -5, turn: 0 },
+        { id: "erenice_2010", headline: "Erenice Guerra, Rousseff's successor as chief of staff, had resigned over relatives' lobbying in September, and the story is back in the runoff. {party} is asked what she knew", role: "any", party: "pt", weight: 3, appeal: -0.025, momentum: -6, turn: 1 },
+        { id: "aborto_2010", headline: "Chain emails and church bulletins call Rousseff pro-abortion and anti-religion. Serra's side leans in, and abortion, not the economy, dominates the week", role: "any", party: "pt", weight: 3, appeal: -0.035, momentum: -8, turn: 2 },
+        { id: "carta_deus_2010", headline: "Rousseff issues a message to the people of God, promising not to change the abortion law and to respect every faith. It calms some pulpits, and not the loudest ones", role: "any", party: "pt", weight: 3, appeal: 0.02, momentum: 5, turn: 3 },
+        { id: "marina_2010", headline: "Marina Silva's Green Party declares itself independent. She will ask for votes for neither finalist, and her 20 million voters are left to choose", role: "any", weight: 3, appeal: 0.015, momentum: 4, turn: 4 },
+        { id: "bolinha_2010", headline: "Something hits Serra at a Rio rally, and he goes for a scan. The 'paper ball' becomes the joke of the week, and the TV cameras lose a day of his message", role: "any", party: "dir", weight: 3, appeal: -0.025, momentum: -6, turn: 5 },
+        { id: "lula_2010", headline: "Lula goes on the road for Rousseff in every state and puts his approval on the ticket. {party} has the machine", role: "any", party: "pt", weight: 3, appeal: 0.03, momentum: 8 },
+        { id: "minimo_2010", headline: "Serra promises a minimum wage of 600 reais, well above the government's figure. It is a bid for the poor, but not his record", role: "any", party: "dir", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "economia_2010", headline: "The economy grows at close to 7 percent and unemployment sits at a record low. The incumbent party takes credit, and {party} owns the mood", role: "any", party: "pt", weight: 2, appeal: 0.025, momentum: 6 },
+        { id: "sp_2010", headline: "Serra's home state of São Paulo is his firewall, and the opposition's best result comes in its suburbs. Whether it is enough is the question of the campaign", role: "any", party: "dir", weight: 2, appeal: 0.02, momentum: 5 },
+      ],
+    },
+
+    "2006": {
+      id: "2006",
+      year: 2006,
+      label: "2006 · Lula v. Alckmin",
+      tagline: "October 29, 2006. Lula survived the mensalão and the dossier scandal, missed an outright win by 1.4 points, and now meets Geraldo Alckmin in a runoff about corruption on one side and privatisation on the other. The poor North and East are with him. São Paulo is not.",
+      salience: { corruption: 0.9, state: 0.8, social: 0.75, economy_jobs: 0.6, security: 0.45 },
+      regions: {
+        SP:  { v: { pt: 0.477, dir: 0.523 }, s: { pt: 11, dir: 12 } },
+        MG:  { v: { pt: 0.652, dir: 0.348 }, s: { pt: 7, dir: 4 } },
+        RJ:  { v: { pt: 0.697, dir: 0.303 }, s: { pt: 6, dir: 2 } },
+        BA:  { v: { pt: 0.781, dir: 0.219 }, s: { pt: 6, dir: 1 } },
+        RS:  { v: { pt: 0.446, dir: 0.554 }, s: { pt: 3, dir: 4 } },
+        PRSC:{ v: { pt: 0.478, dir: 0.522 }, s: { pt: 4, dir: 5 } },
+        CPM: { v: { pt: 0.822, dir: 0.178 }, s: { pt: 7, dir: 2 } },
+        PNE: { v: { pt: 0.723, dir: 0.277 }, s: { pt: 7, dir: 3 } },
+        ES:  { v: { pt: 0.655, dir: 0.345 }, s: { pt: 1, dir: 1 } },
+        CW:  { v: { pt: 0.523, dir: 0.477 }, s: { pt: 4, dir: 3 } },
+        NOR: { v: { pt: 0.625, dir: 0.375 }, s: { pt: 3, dir: 1 } },
+        AMZ: { v: { pt: 0.705, dir: 0.295 }, s: { pt: 2, dir: 1 } },
+      },
+      events: [
+        { id: "first_round_2006", headline: "The first round: Lula 48.6, Alckmin 41.6, Heloísa Helena 6.9. A win that was sure a month ago slipped away in the last fortnight, and {party} calls it a reprieve", role: "any", party: "dir", weight: 3, appeal: 0.02, momentum: 5, turn: 0 },
+        { id: "dossie_2006", headline: "Federal police photograph almost two million reais in cash held by PT aides who were buying a dossier on PSDB candidates. The pictures are broadcast two days before the first round", role: "any", party: "pt", weight: 3, appeal: -0.035, momentum: -8, turn: 1 },
+        { id: "privatizacao_2006", headline: "PT ads say Alckmin will sell Petrobras, Banco do Brasil and the Caixa. The privatisation charge lands because he cannot shake his party's record", role: "any", party: "dir", weight: 3, appeal: -0.035, momentum: -8, turn: 2 },
+        { id: "jaqueta_2006", headline: "Alckmin pulls on a jacket covered in the logos of Petrobras, Banco do Brasil and the Caixa to swear he will sell none of them. The picture is mocked, and the denial still lands", role: "any", party: "dir", weight: 2, appeal: -0.015, momentum: -4, turn: 3 },
+        { id: "bolsa_2006", headline: "Four years of Bolsa Familia, a rising minimum wage and cheap credit reach the poorest quarter of the country. In the Northeast the runoff is already decided", role: "any", party: "pt", weight: 3, appeal: 0.03, momentum: 7, turn: 4 },
+        { id: "debate_2006", headline: "In the last debate, Alckmin presses on the mensalão and the dossier, Lula answers with the record of eight years of the PSDB. Neither lands a knockout", role: "any", weight: 3, appeal: 0.02, momentum: 6, turn: 5 },
+        { id: "mensalao_2006", headline: "The mensalão, a cash-for-votes scheme in Congress, still hangs over the party's old guard. Voters who liked Lula's policies say they do not trust the PT", role: "any", party: "pt", weight: 3, appeal: -0.025, momentum: -6 },
+        { id: "heloisa_2006", headline: "Heloísa Helena, the left-wing third-place finisher, keeps her distance from both finalists. Her 7 percent are the most volatile voters of the runoff", role: "any", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "sp_2006", headline: "Alckmin stays on message in his home state, where he was governor, and the PSDB machine runs its best operation of the campaign. São Paulo stays the opposition's stronghold", role: "any", party: "dir", weight: 2, appeal: 0.025, momentum: 6 },
+        { id: "lula_comicios_2006", headline: "Lula's rallies in the Northeast draw crowds that the first round never showed. {party} has the crowd and the momentum", role: "any", party: "pt", weight: 2, appeal: 0.025, momentum: 6 },
+      ],
+    },
+
+    "2002": {
+      id: "2002",
+      year: 2002,
+      label: "2002 · Lula v. Serra",
+      tagline: "October 27, 2002. After three failed runs, Lula is 23 points clear of José Serra, the government's candidate. But the real is sliding, the IMF has lent 30 billion dollars, and the creditors are nervous. Hold the lead without frightening them, or make Brazil afraid of the leap.",
+      salience: { economy_jobs: 0.8, public_finances: 0.75, social: 0.55, state: 0.55, security: 0.55, corruption: 0.35 },
+      regions: {
+        SP:  { v: { pt: 0.554, dir: 0.446 }, s: { pt: 13, dir: 11 } },
+        MG:  { v: { pt: 0.664, dir: 0.336 }, s: { pt: 7, dir: 4 } },
+        RJ:  { v: { pt: 0.790, dir: 0.210 }, s: { pt: 7, dir: 2 } },
+        BA:  { v: { pt: 0.657, dir: 0.343 }, s: { pt: 5, dir: 2 } },
+        RS:  { v: { pt: 0.558, dir: 0.442 }, s: { pt: 4, dir: 3 } },
+        PRSC:{ v: { pt: 0.611, dir: 0.389 }, s: { pt: 6, dir: 3 } },
+        CPM: { v: { pt: 0.656, dir: 0.344 }, s: { pt: 5, dir: 3 } },
+        PNE: { v: { pt: 0.557, dir: 0.443 }, s: { pt: 6, dir: 4 } },
+        ES:  { v: { pt: 0.594, dir: 0.406 }, s: { pt: 1, dir: 1 } },
+        CW:  { v: { pt: 0.573, dir: 0.427 }, s: { pt: 4, dir: 3 } },
+        NOR: { v: { pt: 0.545, dir: 0.455 }, s: { pt: 2, dir: 2 } },
+        AMZ: { v: { pt: 0.641, dir: 0.359 }, s: { pt: 1, dir: 1 } },
+      },
+      events: [
+        { id: "first_round_2002", headline: "The first round: Lula 46.4 percent, twice Serra's 23.2. The polls call the runoff a formality, and {party} knows a formality can be lost", role: "any", party: "pt", weight: 3, appeal: 0.015, momentum: 4, turn: 0 },
+        { id: "dolar_2002", headline: "The real hits a record low against the dollar despite the IMF's 30 billion dollar package. The government that signed it owns the crisis, and {party} pays for it", role: "any", party: "dir", weight: 3, appeal: -0.025, momentum: -6, turn: 1 },
+        { id: "apoios_2002", headline: "Anthony Garotinho and Ciro Gomes both come out for Lula. The 30 percent of voters they shared in October lines up behind him, in Rio and in the Northeast", role: "any", party: "pt", weight: 3, appeal: 0.03, momentum: 8, turn: 2 },
+        { id: "carta_2002", headline: "Bankers reread Lula's Letter to the Brazilian People: he will honour the contracts and the debt. The Duda Mendonça ads sell 'Lulinha paz e amor' to the voters who fear him", role: "any", party: "pt", weight: 3, appeal: 0.02, momentum: 5, turn: 3 },
+        { id: "experiencia_2002", headline: "Serra leans on experience: the health minister who forced down the price of AIDS drugs and brought generics to the pharmacy. The pitch lands in the south and São Paulo", role: "any", party: "dir", weight: 3, appeal: 0.025, momentum: 6, turn: 4 },
+        { id: "globo_2002", headline: "The last debate, on Globo two days out: Serra goes after Lula's preparation, and Lula stays calm and refuses the bait. The calm is the story", role: "any", party: "pt", weight: 3, appeal: 0.02, momentum: 6, turn: 5 },
+        { id: "fhc_2002", headline: "Serra keeps his distance from Fernando Henrique Cardoso, whose approval is low, and the government coalition grumbles. {party} fights without its own record", role: "any", party: "dir", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "alencar_2002", headline: "José Alencar, the textile employer on Lula's ticket, takes the case to boardrooms: a union man and a boss on one poster", role: "any", party: "pt", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "fome_zero_2002", headline: "Lula's Zero Hunger pledge, three meals a day for every Brazilian, fills his rallies in the Northeast, and {party} has the poorest towns", role: "any", party: "pt", weight: 2, appeal: 0.025, momentum: 6 },
+        { id: "violencia_2002", headline: "Gang violence in Rio and São Paulo dominates the evening news. The sitting government gets the blame, and security tops the list of voters' fears", role: "any", party: "dir", weight: 2, appeal: -0.02, momentum: -5 },
+      ],
+    },
+  },
+
+  leaders: {
+    "2022": {
+      pt:  { partyId: "pt", name: "Luiz Inácio Lula da Silva", charisma: 84, energy: 68, competence: 68, machine: 76 },
+      dir: { partyId: "dir", name: "Jair Bolsonaro", charisma: 66, energy: 68, competence: 38, machine: 70 },
+    },
+    "2018": {
+      pt:  { partyId: "pt", name: "Fernando Haddad", charisma: 44, energy: 66, competence: 72, machine: 66 },
+      dir: { partyId: "dir", name: "Jair Bolsonaro", charisma: 72, energy: 72, competence: 34, machine: 52 },
+    },
+    "2014": {
+      pt:  { partyId: "pt", name: "Dilma Rousseff", charisma: 40, energy: 62, competence: 60, machine: 82 },
+      dir: { partyId: "dir", name: "Aécio Neves", charisma: 64, energy: 66, competence: 56, machine: 62 },
+    },
+    "2010": {
+      pt:  { partyId: "pt", name: "Dilma Rousseff", charisma: 40, energy: 70, competence: 72, machine: 88 },
+      dir: { partyId: "dir", name: "José Serra", charisma: 42, energy: 66, competence: 80, machine: 58 },
+    },
+    "2006": {
+      pt:  { partyId: "pt", name: "Luiz Inácio Lula da Silva", charisma: 84, energy: 70, competence: 60, machine: 78 },
+      dir: { partyId: "dir", name: "Geraldo Alckmin", charisma: 38, energy: 56, competence: 68, machine: 64 },
+    },
+    "2002": {
+      pt:  { partyId: "pt", name: "Luiz Inácio Lula da Silva", charisma: 82, energy: 76, competence: 54, machine: 70 },
+      dir: { partyId: "dir", name: "José Serra", charisma: 40, energy: 70, competence: 82, machine: 66 },
+    },
+  },
+
+  events: [
+    { id: "datafolha_br", headline: "A fresh Datafolha poll shows {party} gaining among undecided voters", role: "any", weight: 3, appeal: 0.02, momentum: 5 },
+    { id: "whatsapp_wave_br", headline: "A viral WhatsApp chain, true or not, spreads faster than the campaign can answer, and {party} takes the hit", role: "any", weight: 3, appeal: -0.03, momentum: -7 },
+    { id: "debate_globo_br", headline: "{party}'s candidate wins the debate on Globo, and the clip is everywhere by morning", role: "any", weight: 4, appeal: 0.035, momentum: 11 },
+    { id: "governor_machine_br", headline: "A popular governor lends {party} his machine and his rallies for the final stretch", role: "any", weight: 2, appeal: 0.025, momentum: 6 },
+    { id: "pastores_br", headline: "Evangelical pastors, some with their own television stations, back {party} from the pulpit", role: "any", party: "dir", weight: 2, appeal: 0.025, momentum: 6 },
+    { id: "nordeste_turnout_br", headline: "A Northeast turnout drive fills the buses to the polling stations, and {party} benefits", role: "any", party: "pt", weight: 2, appeal: 0.025, momentum: 6 },
+    { id: "agro_comicio_br", headline: "Farm leaders fill a rally in the interior and lean on {party}'s side of the ticket", role: "any", party: "dir", weight: 2, appeal: 0.02, momentum: 5 },
+    { id: "pf_vazamento_br", headline: "A leaked police report puts a campaign ally in the headlines, and {party} loses a news cycle", role: "any", weight: 2, appeal: -0.03, momentum: -7 },
+    { id: "inflacao_br", headline: "The monthly inflation number comes in hot, and the incumbent pays for it", role: "leader", weight: 2, appeal: -0.025, momentum: -6 },
+    { id: "comicio_sp_br", headline: "A packed rally in São Paulo electrifies {party}", role: "player", weight: 2, appeal: 0.025, momentum: 9 },
+    { id: "horario_eleitoral_br", headline: "{party}'s free television hour lands, and the jingle is on every radio", role: "player", weight: 2, appeal: 0.02, momentum: 6 },
+    {
+      id: "debate_call_br",
+      headline: "The networks offer {party} a head-to-head debate slot",
+      role: "player",
+      weight: 4,
+      prompt: "A head-to-head is on the table. How do you play it?",
+      choices: [
+        { id: "accept_attack", text: "Accept and go on the attack", resultText: "You land blows and take a few. The overnight polls twitch your way.", appeal: 0.03, momentum: 10, rivalAppeal: -0.015 },
+        { id: "accept_safe", text: "Accept and play it safe", resultText: "A steady, on-message night. No gaffes, no fireworks.", appeal: 0.015, momentum: 4 },
+        { id: "decline", text: "Decline: protect the lead and avoid the ambush", resultText: "You dodge the studio lights. The press calls it a hiding.", appeal: -0.01, momentum: -4 },
+      ],
+    },
+    {
+      id: "third_place_call_br",
+      headline: "The third-place finisher holds millions of votes and has not said who to back",
+      role: "player",
+      weight: 4,
+      prompt: "The voters of the candidate who finished third will decide the runoff. What do you offer?",
+      choices: [
+        { id: "policy_deal", text: "A written policy deal, with commitments you can be held to", resultText: "The camp declares for you, grudgingly. Your base wonders what you gave away.", appeal: 0.03, momentum: 9 },
+        { id: "court_voters", text: "Skip the leader and court the voters directly with targeted ads", resultText: "Some come over. Without an endorsement, many stay home.", appeal: 0.02, momentum: 6 },
+        { id: "ignore", text: "Ignore the courting: run to your own base", resultText: "Your base turns out. The third camp drifts toward your rival or stays at home.", appeal: -0.005, momentum: 2, rivalAppeal: 0.01 },
+      ],
+    },
+    {
+      id: "centrao_call_br",
+      headline: "The centrão parties offer {party} their support, for a price",
+      role: "player",
+      weight: 3,
+      prompt: "The big, shifting block of centre parties wants ministries and budget amendments. What do you do?",
+      choices: [
+        { id: "take_deal", text: "Take the deal: their machines and airtime for ministries", resultText: "The mayors and radio stations switch to you. The press runs a week of stories about the price.", appeal: 0.03, momentum: 8 },
+        { id: "keep_clean", text: "Refuse and campaign on a clean slate", resultText: "Clean hands, thinner machine. The base cheers and the interior goes quiet.", appeal: 0.005, momentum: 3 },
+        { id: "contrast", text: "Refuse, and attack the rival for taking the same deal", resultText: "You define them more than yourself, and it lands.", appeal: 0.02, momentum: 6, rivalAppeal: -0.02 },
+      ],
+    },
+    {
+      id: "programme_fork_br",
+      headline: "{party}'s programme committee is split on the big pledge",
+      role: "player",
+      weight: 3,
+      prompt: "The draft is ready. Which way do you push?",
+      choices: [
+        { id: "bold", text: "Go bold with a defining, risky pledge", resultText: "The base roars. The spreadsheets at HQ look nervous.", appeal: 0.035, momentum: 12 },
+        { id: "cautious", text: "Play it cautious: no hostages to fortune", resultText: "No spark, no self-inflicted wounds.", appeal: 0.01, momentum: 2 },
+        { id: "contrast", text: "Make it a contrast document against the rival", resultText: "You define them more than yourself, and it lands.", appeal: 0.02, momentum: 6, rivalAppeal: -0.02 },
+      ],
+    },
+  ],
+};
+
+// Registry rows, store pack, daily pairing and "play next" chain.
+export const BRAZIL_MODULE = countryModule(BRAZIL, {
+  blurb: "The presidential runoff from Lula's first win to Bolsonaro's last: six elections, twelve regions, one national vote.",
+  cover: "images/covers/country-br.jpg",
+  art: { a: "#0b4a3a", b: "#c9a400", glow: "rgba(255,244,200,0.22)" },
+  scenarios: [
+    { electionId: "2022", difficulty: "hard",
+      description: "A former president against the incumbent who doubted the voting machines. The closest runoff in the democratic era, decided by Minas Gerais and the Northeast." },
+    { electionId: "2018", difficulty: "hard",
+      description: "Lula is in prison, his stand-in has five weeks, and the front-runner was stabbed in a crowd. Ciro Gomes has flown to Europe." },
+    { electionId: "2014", difficulty: "hard",
+      description: "Marina Silva rose and fell. The PT's fourth term meets the Petrobras scandal in a runoff that splits the country by region." },
+    { electionId: "2010", difficulty: "hard",
+      description: "Lula's chosen successor has never won an election. Marina Silva's 20 million votes force a runoff, and the fight turns on religion." },
+    { electionId: "2006", difficulty: "hard",
+      description: "The mensalão, a cash dossier and a missed first-round win. Corruption against privatisation, with São Paulo against the Northeast." },
+    { electionId: "2002", difficulty: "hard",
+      description: "After three failed runs Lula leads by 23 points, but the real is sliding and the creditors are watching." },
+  ],
+  systemLabel: "Two-round presidential runoff",
+  pack: {
+    id: "brazil",
+    name: "Brazil",
+    description: "Six presidential runoffs from 2002 to 2022: Lula, Rousseff and Bolsonaro across twelve regions, and the voters of the candidates who lost the first round.",
+    price: 99,
+  },
+  daily: { pair: ["pt", "dir"], names: { pt: "the PT", dir: "the Right" } },
+  next: {
+    chain: [
+      { id: "2002", blurb: "Continue the timeline: Lula's first win" },
+      { id: "2006", blurb: "Continue the timeline: the mensalão runoff" },
+      { id: "2010", blurb: "Continue the timeline: Rousseff and the religion fight" },
+      { id: "2014", blurb: "Continue the timeline: Marina Silva and the petrolão" },
+      { id: "2018", blurb: "Continue the timeline: the stabbing and the empty chair" },
+      { id: "2022", blurb: "Continue the timeline: Lula against Bolsonaro" },
+    ],
+  },
+  guide: {
+    title: "Brazil",
+    body: "Brazil elects its president in two rounds. You play the runoff, with the first round already counted: the voters of the candidates who lost it (Marina Silva, Ciro Gomes, Simone Tebet and others) are part of the opening map, and events show them moving. Win 51 of 100 points. Each of twelve regions holds points in proportion to the votes cast there, and a region's points go to whoever leads it. The PT is one finalist every time. The Right is the PSDB in 2002, 2006, 2010 and 2014, then Bolsonaro for the PSL (2018) and the PL (2022). The game cannot model the first round itself, so the eliminated candidates' voters cannot be moved through a transfer table. National broadcasts reach everyone, and regional pushes win a region.",
+  },
+});

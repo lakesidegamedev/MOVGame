@@ -1,5 +1,5 @@
 // Generates real-geography SVG map shape files for Canada, Germany, France,
-// Australia and New Zealand (src/content/countries/paths/*.ts), following the UK
+// Australia, New Zealand and Brazil (src/content/countries/paths/*.ts), following the UK
 // pipeline in scripts/build_uk_paths.cjs:
 //   source geo data -> (optional group union) -> equirectangular lat-corrected
 //   projection -> Douglas-Peucker simplify -> viewBox fit -> TS emit.
@@ -13,6 +13,7 @@
 //          https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions.geojson
 //   NZ:    Natural Earth ne_10m_admin_1_states_provinces.geojson (saved as ne10_admin1.geojson)
 //          https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson
+//   BR:    the same Natural Earth ne10_admin1.geojson (states of Brazil, adm0_a3 BRA)
 //
 // Merged groups (CA NORTH, DE NORTH/NE/EAST/WEST) are geometrically unioned by
 // edge cancellation: shared borders in these datasets carry identical vertex
@@ -266,7 +267,7 @@ const readSrc = (name) => JSON.parse(fs.readFileSync(path.join(SRC_DIR, name)));
 const ne50 = wants("CA") || wants("AU") ? readSrc("ne50_admin1.geojson") : null;
 const deSrc = wants("DE") ? readSrc("de_laender.geojson") : null;
 const frSrc = wants("FR") ? readSrc("fr_regions.geojson") : null;
-const ne10 = wants("NZ") ? readSrc("ne10_admin1.geojson") : null;
+const ne10 = wants("NZ") || wants("BR") ? readSrc("ne10_admin1.geojson") : null;
 
 function neCountry(a3, source = ne50) {
   const m = {};
@@ -414,10 +415,36 @@ const NZ = wants("NZ") && buildCountry({
   regions: nzRegions(),
 });
 
+// --------------------------------------------------------------------- BR
+// Twelve units built from the 27 states: São Paulo, Minas Gerais, Rio de
+// Janeiro, Bahia, Espírito Santo and Rio Grande do Sul on their own; the rest are contiguous
+// groups of states (Paraná and Santa Catarina; Ceará, Piauí and Maranhão;
+// Pernambuco and the eastern Northeast; the Centre-West with the Federal
+// District; Pará, Amapá and Tocantins; the western Amazon). The clip box
+// drops Fernando de Noronha, Trindade and the other ocean islands.
+const BR = wants("BR") && buildCountry({
+  name: "Brazil", constName: "BR_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (BRA)",
+  extraNote: "Twelve units: six states alone, six contiguous groups of states (arc-cancellation union). Ocean islands clipped.",
+  lat0: -15, eps: 1.0, minIslandPx: 5,
+  clip: [-75.0, -34.5, -33.0, 5.5], // lonMin, latMin, lonMax, latMax
+  order: ["AMZ", "NOR", "CPM", "PNE", "CW", "BA", "MG", "ES", "PRSC", "SP", "RJ", "RS"],
+  regions: groupRegions(neCountry("BRA", ne10), {
+    AMZ: ["Amazonas", "Acre", "Rondônia", "Roraima"],
+    NOR: ["Pará", "Amapá", "Tocantins"],
+    CPM: ["Ceará", "Piauí", "Maranhão"],
+    PNE: ["Pernambuco", "Paraíba", "Rio Grande do Norte", "Alagoas", "Sergipe"],
+    CW: ["Goiás", "Distrito Federal", "Mato Grosso", "Mato Grosso do Sul"],
+    BA: ["Bahia"], MG: ["Minas Gerais"], ES: ["Espírito Santo"],
+    PRSC: ["Paraná", "Santa Catarina"], SP: ["São Paulo"], RJ: ["Rio de Janeiro"],
+    RS: ["Rio Grande do Sul"],
+  }, "BR"),
+});
+
 // ------------------------------------------------------------------- write
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const files = [
-  [CA, "ca.ts"], [DE, "de.ts"], [FR, "fr.ts"], [AU, "au.ts"], [NZ, "nz.ts"],
+  [CA, "ca.ts"], [DE, "de.ts"], [FR, "fr.ts"], [AU, "au.ts"], [NZ, "nz.ts"], [BR, "br.ts"],
 ].filter(([built]) => built);
 for (const [built, name] of files) {
   const bytes = emit(built, path.join(OUT_DIR, name));
@@ -453,4 +480,5 @@ if (DE) assertCountry(DE, ["NORTH", "NE", "NRW", "EAST", "WEST", "BW", "BAV"], 0
 if (FR) assertCountry(FR, ["HDF", "NOR", "GE", "BRE", "PDL", "IDF", "BFC", "CVL", "NAQ", "ARA", "OCC", "PACA", "COM"], 0.8, 1.3); // squarish
 if (AU) assertCountry(AU, ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"], 1.0, 1.6); // wide
 if (NZ) assertCountry(NZ, ["NTH", "AKC", "AKS", "WBP", "CNI", "WGN", "UPS", "CAN", "OTS", "MAO"], 0.55, 0.95); // tall
+if (BR) assertCountry(BR, ["AMZ", "NOR", "CPM", "PNE", "CW", "BA", "MG", "ES", "PRSC", "SP", "RJ", "RS"], 0.85, 1.25); // squarish
 console.log("All assertions passed.");

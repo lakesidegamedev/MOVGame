@@ -54,6 +54,12 @@
     "au-2019": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "nz-2023": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0.05 },
     "nz-2020": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
-    "nz-2017": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
+    "nz-2017": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "br-2022": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "br-2018": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "br-2014": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "br-2010": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "br-2006": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "br-2002": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
   }
 }
