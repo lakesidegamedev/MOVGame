@@ -19,16 +19,26 @@ class NativeDaily private constructor() {
 
         fun roleName(role: String): String = names[role] ?: role.uppercase()
 
-        // Mirrors web lib/daily.ts: the first 49 registry rows are the frozen
-        // classic pool; later scenarios win a proportional share of days.
+        // Mirrors web lib/daily.ts: the classic pool is frozen by id in its
+        // original order; every other registry row wins a proportional share of days.
         const val CLASSIC_POOL_SIZE = 49
+        val CLASSIC_POOL_IDS: List<String> = listOf(
+            "us-2024", "us-2020", "us-2016", "us-2012", "us-2008", "us-2004", "us-2000", "us-1996",
+            "us-1992", "us-1988", "us-1984", "us-1980", "us-1976", "us-1972", "us-1968", "us-1964",
+            "us-1960", "uk-2024", "uk-2019", "uk-2017", "uk-2015", "uk-2010", "uk-2005", "uk-2001",
+            "uk-1997", "uk-1992", "uk-1987", "uk-1983", "uk-1979", "uk-1974feb", "uk-1974oct", "uk-1970",
+            "uk-1966", "uk-1964", "uk-1951", "ca-2025", "ca-2021", "ca-2019", "ca-2015", "de-2025",
+            "de-2021", "de-2017", "fr-2027", "fr-2022", "fr-2017", "fr-2012", "au-2025", "au-2022",
+            "au-2019",
+        )
 
         fun isAddedDay(dateUTC: String, total: Int, added: Int): Boolean =
             added > 0 && Rng.hashSeed("daily-added:$dateUTC") * total < added.toLong() * 0x100000000L
 
         private fun scenario(dateUTC: String): NativeElection {
-            val classic = nativeElections.take(CLASSIC_POOL_SIZE)
-            val added = nativeElections.drop(CLASSIC_POOL_SIZE)
+            val byId = nativeElections.associateBy { it.scenarioId }
+            val classic = CLASSIC_POOL_IDS.map { byId.getValue(it) }
+            val added = nativeElections.filter { it.scenarioId !in CLASSIC_POOL_IDS }
             if (!isAddedDay(dateUTC, nativeElections.size, added.size)) {
                 return classic[(Rng.hashSeed("daily:$dateUTC") % classic.size).toInt()]
             }
