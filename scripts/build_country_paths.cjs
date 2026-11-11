@@ -266,7 +266,7 @@ const readSrc = (name) => JSON.parse(fs.readFileSync(path.join(SRC_DIR, name)));
 const ne50 = wants("CA") || wants("AU") ? readSrc("ne50_admin1.geojson") : null;
 const deSrc = wants("DE") ? readSrc("de_laender.geojson") : null;
 const frSrc = wants("FR") ? readSrc("fr_regions.geojson") : null;
-const ne10 = wants("NZ") ? readSrc("ne10_admin1.geojson") : null;
+const ne10 = wants("NZ") || wants("ES") ? readSrc("ne10_admin1.geojson") : null;
 
 function neCountry(a3, source = ne50) {
   const m = {};
@@ -414,10 +414,50 @@ const NZ = wants("NZ") && buildCountry({
   regions: nzRegions(),
 });
 
+// --------------------------------------------------------------------- ES
+// Fourteen units: the autonomous communities, with the small ones merged
+// (Castilla-La Mancha with Extremadura, Navarre with La Rioja, Asturias with
+// Cantabria). Source features are provinces, grouped by community. Ceuta and
+// Melilla are under a pixel across at this scale and are dropped from the
+// drawing; their seats are counted with Andalusia. The Canary Islands are
+// shifted north-east into an inset in the sea off Cadiz, as on any map of Spain.
+function esRegions() {
+  const es = neCountry("ESP", ne10);
+  const shift = (polys, dLon, dLat) => polys.map((poly) => poly.map((ring) => ring.map(([lon, lat]) => [lon + dLon, lat + dLat])));
+  const merged = groupRegions(es, {
+    AND: ["Huelva", "Cádiz", "Sevilla", "Córdoba", "Jaén", "Málaga", "Granada", "Almería"],
+    CAT: ["Lérida", "Gerona", "Barcelona", "Tarragona"],
+    VAL: ["Castellón", "Valencia", "Alicante"],
+    GAL: ["La Coruña", "Lugo", "Orense", "Pontevedra"],
+    PV: ["Álava", "Bizkaia", "Gipuzkoa"],
+    CYL: ["León", "Zamora", "Salamanca", "Ávila", "Segovia", "Valladolid", "Palencia", "Burgos", "Soria"],
+    CLE: ["Cáceres", "Badajoz", "Toledo", "Ciudad Real", "Cuenca", "Albacete", "Guadalajara"],
+    ARA: ["Huesca", "Zaragoza", "Teruel"],
+    NAV: ["Navarra", "La Rioja"],
+    AST: ["Asturias", "Cantabria"],
+    CAN: ["Santa Cruz de Tenerife", "Las Palmas"],
+  }, "ES");
+  return {
+    ...merged,
+    MAD: es["Madrid"],
+    MUR: es["Murcia"],
+    BAL: es["Baleares"],
+    CAN: shift(merged.CAN, 8.2, 6.4),
+  };
+}
+const ES = wants("ES") && buildCountry({
+  name: "Spain", constName: "ES_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (ESP, provinces grouped by community)",
+  extraNote: "Ceuta and Melilla are not drawn (counted with Andalusia); CAN (Canary Islands) is shifted into an inset off the Andalusian coast.",
+  lat0: 40, eps: 0.8, minIslandPx: 3.5,
+  order: ["AND", "CAT", "MAD", "VAL", "GAL", "PV", "CYL", "CLE", "ARA", "NAV", "MUR", "AST", "BAL", "CAN"],
+  regions: esRegions(),
+});
+
 // ------------------------------------------------------------------- write
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const files = [
-  [CA, "ca.ts"], [DE, "de.ts"], [FR, "fr.ts"], [AU, "au.ts"], [NZ, "nz.ts"],
+  [CA, "ca.ts"], [DE, "de.ts"], [FR, "fr.ts"], [AU, "au.ts"], [NZ, "nz.ts"], [ES, "es.ts"],
 ].filter(([built]) => built);
 for (const [built, name] of files) {
   const bytes = emit(built, path.join(OUT_DIR, name));
@@ -453,4 +493,5 @@ if (DE) assertCountry(DE, ["NORTH", "NE", "NRW", "EAST", "WEST", "BW", "BAV"], 0
 if (FR) assertCountry(FR, ["HDF", "NOR", "GE", "BRE", "PDL", "IDF", "BFC", "CVL", "NAQ", "ARA", "OCC", "PACA", "COM"], 0.8, 1.3); // squarish
 if (AU) assertCountry(AU, ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"], 1.0, 1.6); // wide
 if (NZ) assertCountry(NZ, ["NTH", "AKC", "AKS", "WBP", "CNI", "WGN", "UPS", "CAN", "OTS", "MAO"], 0.55, 0.95); // tall
+if (ES) assertCountry(ES, ["AND", "CAT", "MAD", "VAL", "GAL", "PV", "CYL", "CLE", "ARA", "NAV", "MUR", "AST", "BAL", "CAN"], 1.0, 1.9); // wide
 console.log("All assertions passed.");
