@@ -86,7 +86,7 @@ describe("the shelf", () => {
       expect(t.querySelector("img.store-cover, .store-cover.fallback")).not.toBeNull();
       expect(buttons(/^Buy /).some((b) => tile(p.id).contains(b))).toBe(true);
     }
-    expect(tile("canada").textContent).toContain("2015 to 2025");
+    expect(tile("canada").textContent).toContain("1984 to 2025");
     expect(tile("germany").textContent).toContain("Mixed-member proportional");
   });
 
@@ -233,7 +233,7 @@ describe("purchase messages", () => {
     setPhase({ phase: { kind: "success", packId: "canada", focusScenarioId: "ca-2021", ownedBefore: [] } });
     const banner = container.querySelector(".store-banner.good")!;
     expect(banner.textContent).toContain("Canada unlocked");
-    expect(banner.textContent).toContain("All 4 elections in the pack are yours");
+    expect(banner.textContent).toContain("All 12 elections in the pack are yours");
     const first = banner.querySelector("button.primary")!;
     expect(first.textContent).toContain("Play");
     expect(first.textContent).toContain("2021");

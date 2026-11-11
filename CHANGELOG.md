@@ -100,6 +100,18 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   landslide. Mexico elects its president in one round: the candidate with the most votes wins,
   with no share to reach, so the goal bar shows the lead you need and your margin is your lead
   over the runner-up. The same one-round rule works in the apps.
+- Canada now goes back to 1984: the 2011, 2008, 2006, 2004, 2000, 1993, 1988 and 1984 elections
+  join the Canada pack. Lead the Progressive Conservatives or the merged Conservatives, the
+  Liberals, the NDP, the Bloc or, in 1993 and 2000, Reform and the Canadian Alliance, with each
+  year's real chamber (282 to 308 seats), real provincial results and real campaign beats, from
+  the 1984 patronage row and the 1988 free trade debate to the Bloc and Reform breakthrough, the
+  Harper minorities and the 2011 orange wave. Owners of the old Global pack need the Canada pack or
+  the Complete Collection for these.
+- Australia now goes back to 1996: the 2016, 2013, 2010, 2007, 2004, 2001, 1998 and 1996
+  elections join the Australia pack. Real state results and each campaign's real beats, from
+  'never, ever' a GST and the Tampa to WorkChoices, the 2010 hung parliament and the 2016
+  Mediscare, in chambers of 148 and 150 seats. Owners of the old Global pack need the Australia
+  pack or the Complete Collection for these.
 
 ### Changed
 

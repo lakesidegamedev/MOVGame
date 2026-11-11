@@ -9,6 +9,24 @@
 // Coalition 58, Greens 4 (Melbourne + Brisbane/Griffith/Ryan), crossbench 12
 // (10 independents + KAP + Centre Alliance → `ind`). The teal wave and the
 // end of nine years of Coalition government.
+//
+// Earlier elections (1996 to 2016) use the real state results from the
+// official returns as compiled on Wikipedia and the Australian Electoral
+// Commission: first-preference share per state by party and the seats won.
+// The Coalition (`lnp`) is Liberal, National, Liberal National and Country
+// Liberal combined. `ind` is independents plus the crossbench parties that won
+// seats (Katter's Australian Party, Nick Xenophon Team, the WA Nationals in
+// 2010 and Palmer United in 2013); their votes are folded in, except Palmer
+// United's, which sits in `oth`. Chambers: 148 seats in 1996 and 1998, 150
+// from 2001 to 2016. One Nation (`onp`) carries votes only.
+// 2016 (July 2): LNP 76, ALP 69, Greens 1, crossbench 4.
+// 2013 (September 7): LNP 90, ALP 55, Greens 1, crossbench 4.
+// 2010 (August 21): LNP 72, ALP 72, Greens 1, crossbench 5 (hung parliament).
+// 2007 (November 24): ALP 83, LNP 65, crossbench 2.
+// 2004 (October 9): LNP 87, ALP 60, crossbench 3.
+// 2001 (November 10): LNP 82, ALP 65, crossbench 3.
+// 1998 (October 3): LNP 80, ALP 67, crossbench 1.
+// 1996 (March 2): LNP 94, ALP 49, crossbench 5.
 
 import type { CountryBundle } from "@engine/countryGame";
 import { countryModule } from "./types";
@@ -63,6 +81,12 @@ export const AUSTRALIA: CountryBundle = {
     { id: "energy_climate", name: "Energy & climate", blurb: "Renewables versus the Coalition's seven nuclear plants." },
     { id: "trump_security", name: "Trump, tariffs & security", blurb: "Liberation Day tariffs land mid-campaign; who can steady the ship?" },
     { id: "immigration", name: "Immigration", blurb: "Record intake, migration caps, and the housing crunch blame game." },
+    { id: "economy_jobs", name: "Jobs & the economy", blurb: "Unemployment, a mining boom, a financial crisis and the slogans that promise growth." },
+    { id: "budget_debt", name: "Budget & debt", blurb: "Deficits, surpluses and the argument over who can manage the nation's finances." },
+    { id: "taxes", name: "Tax reform", blurb: "The GST, income tax cuts and company tax: who pays and who gains." },
+    { id: "border_security", name: "Borders & security", blurb: "Asylum boats, terrorism and war: whose hand is steadier." },
+    { id: "education", name: "Education", blurb: "Schools funding, laptops and the cost of a university degree." },
+    { id: "industrial_relations", name: "Workplace relations", blurb: "WorkChoices, penalty rates and how far industrial reform should go." },
   ],
 
   // Compulsory voting: turnout propensity is uniformly high; the action is all
@@ -241,6 +265,264 @@ export const AUSTRALIA: CountryBundle = {
           headline: "Every published poll still has {party}'s rival ahead: the mother of all expectations traps is set", appeal: 0.02, momentum: 5 },
       ],
     },
+
+    "2016": {
+      id: "2016",
+      year: 2016,
+      label: "2016 · Turnbull v. Shorten",
+      tagline: "May 2016. A double dissolution, a $50 billion company tax cut and a leader who promised to be a different kind of prime minister. An eight-week campaign for a one-seat majority.",
+      majority: { total: 150, threshold: 76 },
+      goalText: "76 of 150 seats",
+      salience: { economy_jobs: 0.85, medicare: 0.75, taxes: 0.6, housing: 0.5, budget_debt: 0.5, energy_climate: 0.35, border_security: 0.3 },
+      regions: {
+        NSW:  { v: { lnp: 0.42, alp: 0.37, grn: 0.09, oth: 0.07, ind: 0.04, onp: 0.01 }, s: { alp: 24, lnp: 23 } },
+        VIC:  { v: { lnp: 0.41, alp: 0.36, grn: 0.13, oth: 0.07, ind: 0.03 }, s: { alp: 18, lnp: 17, grn: 1, ind: 1 } },
+        QLD:  { v: { lnp: 0.43, alp: 0.31, grn: 0.09, oth: 0.06, onp: 0.06, ind: 0.05 }, s: { lnp: 21, alp: 8, ind: 1 } },
+        WA:   { v: { lnp: 0.50, alp: 0.32, grn: 0.12, oth: 0.05, ind: 0.01 }, s: { lnp: 11, alp: 5 } },
+        SA:   { v: { lnp: 0.35, alp: 0.32, ind: 0.22, grn: 0.06, oth: 0.05 }, s: { alp: 6, lnp: 4, ind: 1 } },
+        TAS:  { v: { alp: 0.38, lnp: 0.35, grn: 0.10, ind: 0.09, oth: 0.08 }, s: { alp: 4, ind: 1 } },
+        ACT:  { v: { alp: 0.44, lnp: 0.35, grn: 0.15, oth: 0.04, ind: 0.02 }, s: { alp: 2 } },
+        NT:   { v: { alp: 0.41, lnp: 0.33, oth: 0.11, grn: 0.09, ind: 0.06 }, s: { alp: 2 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "au16_budget", headline: "The budget's $50 billion company tax cut becomes the argument of the first week, and {party} pitches 'jobs and growth' to voters who want relief at home", role: "any", party: "lnp", weight: 1, appeal: -0.015, momentum: -4, turn: 0 },
+        { id: "au16_negative_gearing", headline: "Labor's plan to limit negative gearing and capital gains discounts sparks a property-owner backlash against {party}", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 1 },
+        { id: "au16_super_changes", headline: "The budget's superannuation changes anger the Liberal base, and {party} pays for its own measures in the older suburbs", role: "any", party: "lnp", weight: 1, appeal: -0.02, momentum: -5, turn: 2 },
+        { id: "au16_brexit", headline: "Britain votes to leave the European Union with a week to go, and {party} leans on a steady-hand argument as markets lurch", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 5, turn: 3 },
+        { id: "au16_mediscare", headline: "Text messages claim the Coalition will privatise Medicare, and {party}'s 'Mediscare' becomes the most effective week of the trail", role: "any", party: "alp", weight: 1, appeal: 0.04, momentum: 12, turn: 4 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "au16_double_dissolution", headline: "The Senate standoff over the building industry watchdog gives {party} its reason for an early election: jobs against union power", role: "any", party: "lnp", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "au16_nbn_raid", headline: "Federal police raid Labor staff over NBN leaks in mid-campaign, and {party} paints it as a political stunt", role: "any", party: "alp", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "au16_shorten_earnest", headline: "Shorten's earnest, daily-announcement campaign style wears on some voters and wins others for {party}", role: "any", party: "alp", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "au16_xenophon", headline: "Nick Xenophon's new team surges in South Australia, and {party} loses its suburban margin there", role: "any", party: "lnp", weight: 2, appeal: -0.015, momentum: -4 },
+      ],
+    },
+    "2013": {
+      id: "2013",
+      year: 2013,
+      label: "2013 · Abbott v. Rudd",
+      tagline: "August 2013. Labor has swapped its leader again and brought back the man it dumped three years ago. The Coalition has three-word slogans and a big lead. Five weeks to decide whether the party that could not govern itself can govern the country.",
+      majority: { total: 150, threshold: 76 },
+      goalText: "76 of 150 seats",
+      salience: { border_security: 0.75, economy_jobs: 0.7, energy_climate: 0.6, cost_of_living: 0.55, budget_debt: 0.55, education: 0.4 },
+      regions: {
+        NSW:  { v: { lnp: 0.47, alp: 0.35, oth: 0.08, grn: 0.08, ind: 0.02 }, s: { lnp: 30, alp: 18 } },
+        VIC:  { v: { lnp: 0.42, alp: 0.35, grn: 0.11, oth: 0.10, ind: 0.02 }, s: { alp: 19, lnp: 16, grn: 1, ind: 1 } },
+        QLD:  { v: { lnp: 0.46, alp: 0.30, oth: 0.14, grn: 0.06, ind: 0.04 }, s: { lnp: 22, alp: 6, ind: 2 } },
+        WA:   { v: { lnp: 0.50, alp: 0.29, grn: 0.10, oth: 0.10, ind: 0.01 }, s: { lnp: 12, alp: 3 } },
+        SA:   { v: { lnp: 0.44, alp: 0.36, oth: 0.10, grn: 0.08, ind: 0.02 }, s: { lnp: 6, alp: 5 } },
+        TAS:  { v: { lnp: 0.40, alp: 0.35, oth: 0.09, grn: 0.08, ind: 0.08 }, s: { lnp: 3, alp: 1, ind: 1 } },
+        ACT:  { v: { alp: 0.43, lnp: 0.35, grn: 0.13, oth: 0.09 }, s: { alp: 2 } },
+        NT:   { v: { lnp: 0.42, alp: 0.37, oth: 0.12, grn: 0.08, ind: 0.01 }, s: { lnp: 1, alp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "au13_rudd_returns", headline: "Kevin Rudd is restored as prime minister on the eve of the writ, and {party} gets a bounce in the polls", role: "any", party: "alp", weight: 1, appeal: 0.03, momentum: 9, turn: 0 },
+        { id: "au13_png", headline: "The PNG deal: no asylum seeker arriving by boat will ever settle in Australia, and {party} tries to close the gap on border control", role: "any", party: "alp", weight: 1, appeal: 0.01, momentum: 3, turn: 1 },
+        { id: "au13_suppository", headline: "Abbott's 'suppository of wisdom' slip and an awkward remark about a candidate hand {party} two days of bad headlines", role: "any", party: "lnp", weight: 1, appeal: -0.025, momentum: -7, turn: 2 },
+        { id: "au13_paid_parental", headline: "{party}'s generous paid parental leave scheme, funded by a levy on big companies, splits its own supporters", role: "any", party: "lnp", weight: 1, appeal: -0.015, momentum: -4, turn: 3 },
+        { id: "au13_costings", headline: "The Coalition releases its costings two days before the poll, and {party} says there is a hole in the budget plans", role: "any", party: "lnp", weight: 1, appeal: -0.02, momentum: -5, turn: 4 },
+        { id: "au13_feud", headline: "Six years of leadership feuding hang over {party}'s final week and no policy can outrun it", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -9, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "au13_axe_the_tax", headline: "'Axe the tax': {party}'s three-word slogan on the carbon price needs no explaining", role: "any", party: "lnp", weight: 3, appeal: 0.03, momentum: 9 },
+        { id: "au13_stop_the_boats", headline: "'Stop the boats': {party}'s three-word slogan on asylum seekers needs no explaining either", role: "any", party: "lnp", weight: 3, appeal: 0.03, momentum: 9 },
+        { id: "au13_palmer_blitz", headline: "Clive Palmer's party floods the airwaves in Queensland and splits the vote, and {party} loses ground", role: "any", party: "lnp", weight: 2, appeal: -0.015, momentum: -4 },
+        { id: "au13_kick_this_mob", headline: "A tabloid front page tells readers to kick this mob out, and {party} faces a daily campaign against its leader", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -5 },
+      ],
+    },
+    "2010": {
+      id: "2010",
+      year: 2010,
+      label: "2010 · Gillard v. Abbott",
+      tagline: "July 2010. A first-term prime minister has been replaced overnight by his deputy, the mining tax is hot and the climate bill is dead. Five weeks to decide, and nobody is sure the result will be a majority.",
+      majority: { total: 150, threshold: 76 },
+      goalText: "76 of 150 seats",
+      salience: { economy_jobs: 0.7, border_security: 0.6, energy_climate: 0.55, cost_of_living: 0.5, medicare: 0.4, budget_debt: 0.4, education: 0.3 },
+      regions: {
+        NSW:  { v: { lnp: 0.45, alp: 0.37, grn: 0.10, ind: 0.04, oth: 0.04 }, s: { alp: 26, lnp: 20, ind: 2 } },
+        VIC:  { v: { alp: 0.42, lnp: 0.40, grn: 0.13, oth: 0.04, ind: 0.01 }, s: { alp: 22, lnp: 14, grn: 1 } },
+        QLD:  { v: { lnp: 0.47, alp: 0.34, grn: 0.11, oth: 0.05, ind: 0.03 }, s: { lnp: 21, alp: 8, ind: 1 } },
+        WA:   { v: { lnp: 0.47, alp: 0.31, grn: 0.13, oth: 0.05, ind: 0.04 }, s: { lnp: 11, alp: 3, ind: 1 } },
+        SA:   { v: { alp: 0.40, lnp: 0.40, grn: 0.12, oth: 0.07, ind: 0.01 }, s: { alp: 6, lnp: 5 } },
+        TAS:  { v: { alp: 0.43, lnp: 0.34, grn: 0.17, ind: 0.05, oth: 0.01 }, s: { alp: 4, ind: 1 } },
+        ACT:  { v: { alp: 0.45, lnp: 0.35, grn: 0.19, oth: 0.01 }, s: { alp: 2 } },
+        NT:   { v: { lnp: 0.41, alp: 0.38, grn: 0.13, ind: 0.04, oth: 0.02, onp: 0.02 }, s: { lnp: 1, alp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "au10_coup", headline: "Julia Gillard replaces Kevin Rudd in an overnight coup, and {party} goes to the polls with a new leader and an old grievance", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 0 },
+        { id: "au10_mining_tax", headline: "The super profits tax on miners is settled in days, but {party} still wears the fight", role: "any", party: "alp", weight: 1, appeal: -0.015, momentum: -4, turn: 1 },
+        { id: "au10_citizens_assembly", headline: "{party}'s promise of a citizens' assembly on climate change is mocked as a retreat from a 'great moral challenge'", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 2 },
+        { id: "au10_cabinet_leaks", headline: "Cabinet leaks suggest Gillard opposed pension rises and paid parental leave, and {party} is thrown off message", role: "any", party: "alp", weight: 1, appeal: -0.035, momentum: -10, turn: 3 },
+        { id: "au10_costing_error", headline: "The Coalition's costings show an $11 billion error and its shadow treasurer is forced into a hurried correction, hurting {party}", role: "any", party: "lnp", weight: 1, appeal: -0.03, momentum: -8, turn: 4 },
+        { id: "au10_greens_record", headline: "The Greens reach a record high in the polls, and {party} looks set to win its first House seat", role: "any", party: "grn", weight: 1, appeal: 0.03, momentum: 8, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "au10_real_julia", headline: "The 'real Julia' reset sets the leader loose, and the campaign starts to lift for {party}", role: "any", party: "alp", weight: 2, appeal: 0.02, momentum: 6 },
+        { id: "au10_stop_boats", headline: "Boats and a 'stop the boats' slogan push outer-suburban voters toward {party}", role: "any", party: "lnp", weight: 2, appeal: 0.025, momentum: 7 },
+        { id: "au10_nbn_clash", headline: "The National Broadband Network is the clearest policy gap of the campaign, and {party} takes the argument to the suburbs", role: "any", party: "alp", weight: 2, appeal: 0.015, momentum: 5 },
+      ],
+    },
+    "2007": {
+      id: "2007",
+      year: 2007,
+      label: "2007 · Rudd v. Howard",
+      tagline: "October 2007. Eleven years of Howard government, a booming economy, and a new Labor leader who promises to be a conservative on money and a reformer on everything else. Six weeks to decide whether it is time.",
+      majority: { total: 150, threshold: 76 },
+      goalText: "76 of 150 seats",
+      salience: { industrial_relations: 0.85, energy_climate: 0.7, economy_jobs: 0.6, education: 0.5, cost_of_living: 0.5, border_security: 0.3, housing: 0.3 },
+      regions: {
+        NSW:  { v: { alp: 0.44, lnp: 0.41, grn: 0.08, oth: 0.04, ind: 0.03 }, s: { alp: 28, lnp: 20, ind: 1 } },
+        VIC:  { v: { alp: 0.45, lnp: 0.41, grn: 0.08, oth: 0.05, ind: 0.01 }, s: { alp: 21, lnp: 16 } },
+        QLD:  { v: { lnp: 0.44, alp: 0.43, grn: 0.06, oth: 0.04, ind: 0.03 }, s: { alp: 15, lnp: 13, ind: 1 } },
+        WA:   { v: { lnp: 0.47, alp: 0.37, grn: 0.09, oth: 0.04, ind: 0.02, onp: 0.01 }, s: { lnp: 11, alp: 4 } },
+        SA:   { v: { alp: 0.43, lnp: 0.43, grn: 0.07, oth: 0.06, ind: 0.01 }, s: { alp: 6, lnp: 5 } },
+        TAS:  { v: { alp: 0.44, lnp: 0.38, grn: 0.13, oth: 0.03, ind: 0.02 }, s: { alp: 5 } },
+        ACT:  { v: { alp: 0.51, lnp: 0.33, grn: 0.13, oth: 0.02, ind: 0.01 }, s: { alp: 2 } },
+        NT:   { v: { alp: 0.47, lnp: 0.41, grn: 0.08, ind: 0.03, oth: 0.01 }, s: { alp: 2 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "au07_kevin07", headline: "'Kevin07': {party}'s economic-conservative brand and the 'me too' on money wins a hearing from swinging voters", role: "any", party: "alp", weight: 1, appeal: 0.02, momentum: 6, turn: 0 },
+        { id: "au07_workchoices", headline: "The 'Your Rights at Work' campaign turns WorkChoices into a loss of penalty rates in every marginal seat, and {party} cannot shake it", role: "any", party: "lnp", weight: 1, appeal: -0.035, momentum: -10, turn: 1 },
+        { id: "au07_tax_cuts", headline: "Billions in tax cuts and a record surplus: {party} leans on the strongest economy in a generation", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 6, turn: 2 },
+        { id: "au07_rate_rise", headline: "The Reserve Bank lifts interest rates in the middle of the campaign, and the 'keep rates low' pledge sinks {party}", role: "any", party: "lnp", weight: 1, appeal: -0.03, momentum: -9, turn: 3 },
+        { id: "au07_worm_debate", headline: "The audience dial turns for {party}'s leader in the one leaders' debate of the campaign", role: "any", party: "alp", weight: 1, appeal: 0.03, momentum: 9, turn: 4 },
+        { id: "au07_bennelong", headline: "Maxine McKew challenges the prime minister in Bennelong, and {party}'s leader fights for his own seat", role: "any", party: "lnp", weight: 1, appeal: -0.025, momentum: -7, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "au07_kyoto", headline: "Rudd promises to ratify the Kyoto Protocol, and {party}'s pledge on climate wins younger voters", role: "any", party: "alp", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "au07_succession", headline: "The pledge of a handover to Costello is a distraction: voters ask who is in charge of {party}", role: "any", party: "lnp", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "au07_education_revolution", headline: "The 'education revolution' and laptops for senior students play to parents, and {party} gains", role: "any", party: "alp", weight: 2, appeal: 0.015, momentum: 5 },
+      ],
+    },
+    "2004": {
+      id: "2004",
+      year: 2004,
+      label: "2004 · Howard v. Latham",
+      tagline: "August 2004. A prime minister who says he is the one to trust on interest rates, a young Labor leader with big ideas. Six weeks to decide.",
+      majority: { total: 150, threshold: 76 },
+      goalText: "76 of 150 seats",
+      salience: { economy_jobs: 0.65, border_security: 0.6, education: 0.5, medicare: 0.6, taxes: 0.45, energy_climate: 0.3 },
+      regions: {
+        NSW:  { v: { lnp: 0.46, alp: 0.37, grn: 0.08, oth: 0.04, ind: 0.04, onp: 0.01 }, s: { lnp: 27, alp: 21, ind: 2 } },
+        VIC:  { v: { lnp: 0.48, alp: 0.40, grn: 0.07, oth: 0.04, ind: 0.01 }, s: { alp: 19, lnp: 18 } },
+        QLD:  { v: { lnp: 0.49, alp: 0.35, oth: 0.06, grn: 0.05, ind: 0.03, onp: 0.02 }, s: { lnp: 21, alp: 6, ind: 1 } },
+        WA:   { v: { lnp: 0.48, alp: 0.35, grn: 0.08, oth: 0.05, onp: 0.03, ind: 0.01 }, s: { lnp: 10, alp: 5 } },
+        SA:   { v: { lnp: 0.49, alp: 0.37, oth: 0.06, grn: 0.05, ind: 0.02, onp: 0.01 }, s: { lnp: 8, alp: 3 } },
+        TAS:  { v: { alp: 0.44, lnp: 0.42, grn: 0.10, oth: 0.04 }, s: { alp: 3, lnp: 2 } },
+        ACT:  { v: { alp: 0.50, lnp: 0.35, grn: 0.11, oth: 0.04 }, s: { alp: 2 } },
+        NT:   { v: { alp: 0.44, lnp: 0.44, grn: 0.06, oth: 0.04, ind: 0.02 }, s: { alp: 1, lnp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "au04_who_trust", headline: "'Who do you trust?' With interest rates at record lows, {party} tells voters it is the one that keeps the mortgage rate down", role: "any", party: "lnp", weight: 1, appeal: 0.03, momentum: 9, turn: 0 },
+        { id: "au04_jakarta", headline: "The bombing of the Australian embassy in Jakarta puts security on the agenda, and {party} gains in a week of caution", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 6, turn: 1 },
+        { id: "au04_handshake", headline: "The handshake: Latham grabs and tows Howard in a photo-op, and {party}'s leader is branded as aggressive", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 2 },
+        { id: "au04_tasmanian_forests", headline: "Labor's plan to protect Tasmania's old-growth forests costs {party} timber jobs and seats", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -8, turn: 3 },
+        { id: "au04_medicare_gold", headline: "'Medicare Gold' and a bidding war on family payments: {party}'s big spending offers are picked apart", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 4 },
+        { id: "au04_family_first", headline: "Family First preferences flow to {party} in the marginal seats", role: "any", party: "lnp", weight: 1, appeal: 0.015, momentum: 4, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "au04_iraq_withdrawal", headline: "Latham pledges to bring the troops home from Iraq by Christmas, and the war splits {party}'s own side", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -6 },
+        { id: "au04_greens_rise", headline: "The Greens poll at a record level in the cities, and {party} gains disaffected Labor voters", role: "any", party: "grn", weight: 2, appeal: 0.02, momentum: 6 },
+        { id: "au04_rates_ads", headline: "A relentless advertising campaign on interest rates reaches suburban mortgage-holders, and {party} slides", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -5 },
+      ],
+    },
+    "2001": {
+      id: "2001",
+      year: 2001,
+      label: "2001 · Howard v. Beazley",
+      tagline: "October 2001. A freighter full of asylum seekers, the September 11 attacks, and an airline collapsed into administration. A government that was behind all year goes to the polls ahead.",
+      majority: { total: 150, threshold: 76 },
+      goalText: "76 of 150 seats",
+      salience: { border_security: 0.95, economy_jobs: 0.5, taxes: 0.55, medicare: 0.45, education: 0.3, immigration: 0.45 },
+      regions: {
+        NSW:  { v: { lnp: 0.42, alp: 0.37, oth: 0.07, onp: 0.05, grn: 0.05, ind: 0.04 }, s: { lnp: 28, alp: 20, ind: 2 } },
+        VIC:  { v: { lnp: 0.42, alp: 0.42, oth: 0.07, grn: 0.06, ind: 0.02, onp: 0.01 }, s: { alp: 20, lnp: 17 } },
+        QLD:  { v: { lnp: 0.45, alp: 0.34, onp: 0.07, ind: 0.07, oth: 0.04, grn: 0.03 }, s: { lnp: 19, alp: 7, ind: 1 } },
+        WA:   { v: { lnp: 0.43, alp: 0.37, oth: 0.07, onp: 0.06, grn: 0.06, ind: 0.01 }, s: { lnp: 8, alp: 7 } },
+        SA:   { v: { lnp: 0.45, alp: 0.34, oth: 0.11, onp: 0.05, grn: 0.04, ind: 0.01 }, s: { lnp: 9, alp: 3 } },
+        TAS:  { v: { alp: 0.47, lnp: 0.37, grn: 0.08, oth: 0.05, onp: 0.03 }, s: { alp: 5 } },
+        ACT:  { v: { alp: 0.47, lnp: 0.32, oth: 0.11, grn: 0.07, onp: 0.03 }, s: { alp: 2 } },
+        NT:   { v: { alp: 0.43, lnp: 0.41, oth: 0.05, grn: 0.04, onp: 0.04, ind: 0.03 }, s: { alp: 1, lnp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "au01_tampa", headline: "The government turns back a Norwegian freighter carrying 433 rescued asylum seekers, and {party} owns the border protection argument", role: "any", party: "lnp", weight: 1, appeal: 0.035, momentum: 11, turn: 0 },
+        { id: "au01_children_overboard", headline: "Ministers claim asylum seekers threw their children overboard, and {party} turns the Navy's story into a campaign weapon", role: "any", party: "lnp", weight: 1, appeal: 0.025, momentum: 8, turn: 1 },
+        { id: "au01_security", headline: "September 11 reshapes the campaign: {party} offers steady hands and a war-on-terror consensus", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 6, turn: 2 },
+        { id: "au01_labor_me_too", headline: "Labor backs the border laws and the troop commitment to Afghanistan, and {party}'s leader struggles to define a difference", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -8, turn: 3 },
+        { id: "au01_ansett_gst", headline: "The Ansett collapse and GST paperwork give {party} a hearing among small business in the outer suburbs", role: "any", party: "alp", weight: 1, appeal: 0.02, momentum: 5, turn: 4 },
+        { id: "au01_launch", headline: "At the campaign launch, the prime minister says 'we will decide who comes to this country', and {party}'s base roars", role: "any", party: "lnp", weight: 1, appeal: 0.03, momentum: 9, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "au01_greens_tampa", headline: "The Greens oppose the Tampa policy and reach their best vote yet, and {party} picks up disaffected Labor voters", role: "any", party: "grn", weight: 2, appeal: 0.02, momentum: 6 },
+        { id: "au01_telstra_bush", headline: "Telstra's sale and bush services become a country-seat issue, and {party} loses ground in the regions", role: "any", party: "lnp", weight: 2, appeal: -0.015, momentum: -4 },
+        { id: "au01_one_nation_fades", headline: "One Nation falls from its 1998 peak, and {party} wins back some of the right's protest vote", role: "any", party: "lnp", weight: 2, appeal: 0.015, momentum: 4 },
+      ],
+    },
+    "1998": {
+      id: "1998",
+      year: 1998,
+      label: "1998 · Howard v. Beazley",
+      tagline: "August 1998. A government that wants a ten percent consumption tax, an opposition that wants to stop it, and a new right-wing party that is winning seats in Queensland. Five weeks to decide.",
+      majority: { total: 148, threshold: 75 },
+      goalText: "75 of 148 seats",
+      salience: { taxes: 0.9, economy_jobs: 0.6, medicare: 0.45, education: 0.3, border_security: 0.25, immigration: 0.3 },
+      regions: {
+        NSW:  { v: { alp: 0.40, lnp: 0.38, onp: 0.09, oth: 0.07, grn: 0.03, ind: 0.03 }, s: { lnp: 27, alp: 22, ind: 1 } },
+        VIC:  { v: { alp: 0.44, lnp: 0.40, oth: 0.09, onp: 0.04, grn: 0.02, ind: 0.01 }, s: { alp: 19, lnp: 18 } },
+        QLD:  { v: { lnp: 0.42, alp: 0.36, onp: 0.14, oth: 0.05, grn: 0.02, ind: 0.01 }, s: { lnp: 19, alp: 8 } },
+        WA:   { v: { lnp: 0.40, alp: 0.36, onp: 0.09, oth: 0.07, grn: 0.05, ind: 0.03 }, s: { lnp: 7, alp: 7 } },
+        SA:   { v: { lnp: 0.43, alp: 0.34, oth: 0.12, onp: 0.10, ind: 0.01 }, s: { lnp: 9, alp: 3 } },
+        TAS:  { v: { alp: 0.49, lnp: 0.38, grn: 0.06, oth: 0.05, onp: 0.02 }, s: { alp: 5 } },
+        ACT:  { v: { alp: 0.50, lnp: 0.31, oth: 0.09, onp: 0.05, grn: 0.04, ind: 0.01 }, s: { alp: 2 } },
+        NT:   { v: { alp: 0.42, lnp: 0.40, onp: 0.08, oth: 0.06, grn: 0.03, ind: 0.01 }, s: { alp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "au98_gst_launch", headline: "The prime minister calls the election on a 10 percent consumption tax with income tax cuts, and {party} takes the biggest gamble of its time in office", role: "any", party: "lnp", weight: 1, appeal: -0.02, momentum: -6, turn: 0 },
+        { id: "au98_waterfront", headline: "The waterfront dispute of April still colours the campaign, and {party}'s fight with the union divides voters", role: "any", party: "lnp", weight: 1, appeal: -0.015, momentum: -4, turn: 1 },
+        { id: "au98_no_gst", headline: "The 'no GST' campaign finds an audience as voters worry about the price of everyday items, and {party} gains", role: "any", party: "alp", weight: 1, appeal: 0.025, momentum: 8, turn: 2 },
+        { id: "au98_one_nation", headline: "Pauline Hanson's One Nation, fresh from winning eleven Queensland seats, splits the vote in regional seats, and {party} loses ground", role: "any", party: "lnp", weight: 1, appeal: -0.02, momentum: -6, turn: 3 },
+        { id: "au98_preferences", headline: "Both big parties put One Nation last on how-to-vote cards, and its preferences help {party} in the key seats", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 5, turn: 4 },
+        { id: "au98_marginals", headline: "The swing is large in safe seats and small in the marginals, and {party} cannot turn its popular vote into a majority", role: "any", party: "alp", weight: 1, appeal: -0.025, momentum: -7, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "au98_asian_crisis", headline: "The Asian financial crisis makes steady economic management the argument, and {party} offers experience as insurance", role: "any", party: "lnp", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "au98_native_title", headline: "The native title fight divides rural and city voters, and {party} is caught in the middle", role: "any", party: "lnp", weight: 2, appeal: -0.015, momentum: -4 },
+        { id: "au98_democrats", headline: "The Democrats poll well on opposing the GST, and {party} loses ground in the cities", role: "any", party: "grn", weight: 2, appeal: 0.01, momentum: 3 },
+      ],
+    },
+    "1996": {
+      id: "1996",
+      year: 1996,
+      label: "1996 · Howard v. Keating",
+      tagline: "January 1996. Thirteen years of Labor government, a prime minister who says he is the better economic manager, and a Liberal leader who says he will be relaxed and comfortable. Five weeks to decide whether it is time.",
+      majority: { total: 148, threshold: 75 },
+      goalText: "75 of 148 seats",
+      salience: { economy_jobs: 0.8, medicare: 0.6, taxes: 0.5, budget_debt: 0.5, education: 0.3, immigration: 0.3 },
+      regions: {
+        NSW:  { v: { lnp: 0.45, alp: 0.40, oth: 0.10, grn: 0.03, ind: 0.02 }, s: { lnp: 29, alp: 20, ind: 1 } },
+        VIC:  { v: { lnp: 0.44, alp: 0.43, oth: 0.09, grn: 0.02, ind: 0.02 }, s: { lnp: 21, alp: 16 } },
+        QLD:  { v: { lnp: 0.54, alp: 0.34, oth: 0.08, grn: 0.03, ind: 0.01 }, s: { lnp: 23, alp: 2, ind: 1 } },
+        WA:   { v: { lnp: 0.45, alp: 0.35, ind: 0.09, oth: 0.06, grn: 0.05 }, s: { lnp: 8, alp: 3, ind: 3 } },
+        SA:   { v: { lnp: 0.50, alp: 0.35, oth: 0.11, grn: 0.03, ind: 0.01 }, s: { lnp: 10, alp: 2 } },
+        TAS:  { v: { lnp: 0.46, alp: 0.44, grn: 0.06, oth: 0.04 }, s: { alp: 3, lnp: 2 } },
+        ACT:  { v: { alp: 0.48, lnp: 0.41, grn: 0.09, ind: 0.02 }, s: { alp: 3 } },
+        NT:   { v: { lnp: 0.46, alp: 0.43, grn: 0.06, ind: 0.05 }, s: { lnp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "au96_keating_calls", headline: "Keating calls the election for 2 March, and {party} starts behind in every poll after a decade in government", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -6, turn: 0 },
+        { id: "au96_never_ever", headline: "'Never, ever' a GST: Howard's promise to rule out a consumption tax takes the biggest issue of the last election off the table for {party}", role: "any", party: "lnp", weight: 1, appeal: 0.03, momentum: 9, turn: 1 },
+        { id: "au96_medicare_safe", headline: "Labor's Medicare scare is neutralised by a Coalition pledge that Medicare is safe, and {party} gains from the reassurance", role: "any", party: "lnp", weight: 1, appeal: 0.015, momentum: 4, turn: 2 },
+        { id: "au96_relaxed_comfortable", headline: "'Relaxed and comfortable': {party} offers a steady hand to voters tired of thirteen years of reform", role: "any", party: "lnp", weight: 1, appeal: 0.025, momentum: 7, turn: 3 },
+        { id: "au96_hanson", headline: "The Liberals withdraw support from Pauline Hanson over remarks on Indigenous funding, but her name stays on the ballot as {party}'s candidate", role: "any", party: "lnp", weight: 1, appeal: -0.015, momentum: -4, turn: 4 },
+        { id: "au96_its_time", headline: "'It's time' again: thirteen years in, {party} is weighed down by voters who want a change", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -9, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "au96_battlers", headline: "The Howard 'battlers' pitch wins over suburban working families, and {party} gains", role: "any", party: "lnp", weight: 3, appeal: 0.03, momentum: 9 },
+        { id: "au96_easton", headline: "The Easton affair and Carmen Lawrence's role in it dog {party}'s campaign in the West", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -6 },
+        { id: "au96_keating_manager", headline: "Keating argues he is the better manager of the recovery, and {party} makes a late argument on jobs", role: "any", party: "alp", weight: 2, appeal: 0.015, momentum: 5 },
+      ],
+    },
   },
 
   leaders: {
@@ -258,6 +540,46 @@ export const AUSTRALIA: CountryBundle = {
       alp: { partyId: "alp", name: "Bill Shorten", charisma: 44, energy: 60, competence: 62, machine: 74 },
       lnp: { partyId: "lnp", name: "Scott Morrison", charisma: 50, energy: 72, competence: 56, machine: 78 },
       grn: { partyId: "grn", name: "Richard Di Natale", charisma: 54, energy: 60, competence: 58, machine: 44 },
+    },
+    "2016": {
+      lnp: { partyId: "lnp", name: "Malcolm Turnbull", charisma: 58, energy: 62, competence: 70, machine: 66 },
+      alp: { partyId: "alp", name: "Bill Shorten", charisma: 46, energy: 70, competence: 64, machine: 76 },
+      grn: { partyId: "grn", name: "Richard Di Natale", charisma: 54, energy: 60, competence: 58, machine: 44 },
+    },
+    "2013": {
+      lnp: { partyId: "lnp", name: "Tony Abbott", charisma: 42, energy: 76, competence: 54, machine: 80 },
+      alp: { partyId: "alp", name: "Kevin Rudd", charisma: 50, energy: 72, competence: 62, machine: 56 },
+      grn: { partyId: "grn", name: "Christine Milne", charisma: 48, energy: 56, competence: 56, machine: 40 },
+    },
+    "2010": {
+      alp: { partyId: "alp", name: "Julia Gillard", charisma: 62, energy: 70, competence: 68, machine: 76 },
+      lnp: { partyId: "lnp", name: "Tony Abbott", charisma: 46, energy: 78, competence: 54, machine: 70 },
+      grn: { partyId: "grn", name: "Bob Brown", charisma: 66, energy: 66, competence: 58, machine: 48 },
+    },
+    "2007": {
+      alp: { partyId: "alp", name: "Kevin Rudd", charisma: 64, energy: 82, competence: 74, machine: 82 },
+      lnp: { partyId: "lnp", name: "John Howard", charisma: 46, energy: 70, competence: 80, machine: 82 },
+      grn: { partyId: "grn", name: "Bob Brown", charisma: 66, energy: 66, competence: 58, machine: 46 },
+    },
+    "2004": {
+      lnp: { partyId: "lnp", name: "John Howard", charisma: 46, energy: 68, competence: 82, machine: 86 },
+      alp: { partyId: "alp", name: "Mark Latham", charisma: 60, energy: 76, competence: 54, machine: 64 },
+      grn: { partyId: "grn", name: "Bob Brown", charisma: 64, energy: 64, competence: 58, machine: 44 },
+    },
+    "2001": {
+      lnp: { partyId: "lnp", name: "John Howard", charisma: 44, energy: 66, competence: 78, machine: 84 },
+      alp: { partyId: "alp", name: "Kim Beazley", charisma: 56, energy: 62, competence: 66, machine: 76 },
+      grn: { partyId: "grn", name: "Bob Brown", charisma: 62, energy: 62, competence: 56, machine: 42 },
+    },
+    "1998": {
+      lnp: { partyId: "lnp", name: "John Howard", charisma: 44, energy: 64, competence: 76, machine: 80 },
+      alp: { partyId: "alp", name: "Kim Beazley", charisma: 54, energy: 62, competence: 64, machine: 74 },
+      grn: { partyId: "grn", name: "Bob Brown", charisma: 60, energy: 60, competence: 54, machine: 40 },
+    },
+    "1996": {
+      lnp: { partyId: "lnp", name: "John Howard", charisma: 40, energy: 62, competence: 72, machine: 74 },
+      alp: { partyId: "alp", name: "Paul Keating", charisma: 66, energy: 74, competence: 80, machine: 82 },
+      grn: { partyId: "grn", name: "Bob Brown", charisma: 60, energy: 60, competence: 54, machine: 40 },
     },
   },
 
@@ -324,17 +646,42 @@ export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {
       description: "Nine years of Coalition rule, a teal wave on the harbourside, and a PM who doesn't hold a hose." },
     { electionId: "2019", difficulty: "hard",
       description: "The unlosable election. A big-target Labor agenda, a wall of yellow ads, and a daggy-dad miracle. 151 seats under preferences." },
+    { electionId: "2016", addedLater: true, difficulty: "easy",
+      description: "A double dissolution, a Mediscare text campaign and an eight-week marathon. 150 seats, and a government that survives by one." },
+    { electionId: "2013", addedLater: true, difficulty: "hard",
+      description: "Rudd returns, the carbon tax is on trial, and the boats are the issue. 150 seats and a Coalition landslide to resist or enjoy." },
+    { electionId: "2010", addedLater: true, difficulty: "easy",
+      description: "A leadership coup, leaked cabinet secrets and a Greens first. 150 seats, and the first hung parliament in seventy years." },
+    { electionId: "2007", addedLater: true, difficulty: "hard",
+      description: "Eleven years of Howard, WorkChoices on trial, and the prime minister fighting for his own seat. 150 seats and a Labor landslide." },
+    { electionId: "2004", addedLater: true, difficulty: "hard",
+      description: "'Who do you trust?' on interest rates, a handshake that went wrong,. 150 seats." },
+    { electionId: "2001", addedLater: true, difficulty: "hard",
+      description: "The Tampa, September 11 and 'we will decide who comes to this country'. 150 seats and a government that wins on security." },
+    { electionId: "1998", addedLater: true, difficulty: "medium",
+      description: "The GST election. Labor wins more votes but not enough seats, and One Nation splits the right. 148 seats." },
+    { electionId: "1996", addedLater: true, difficulty: "hard",
+      description: "Thirteen years of Labor end. 'It's time' meets 'never, ever' a GST, and the Coalition wins big. 148 seats." },
   ],
   systemLabel: "Preferential voting",
   pack: {
     id: "australia",
     name: "Australia",
-    description: "Three federal elections from 2019 to 2025. Preferential voting across 150 seats, teals, and the unlosable election.",
+    description: "Eleven federal elections from 1996 to 2025. Preferential voting from the end of Keating to the teal wave: the GST, Tampa, WorkChoices, hung parliaments and the unlosable election.",
     price: 99,
   },
   daily: { pair: ["alp", "lnp"], names: { alp: "Labor", lnp: "the Coalition" } },
   next: {
     chain: [
+      { id: "1996", blurb: "Continue the timeline: the end of thirteen years of Labor" },
+      { id: "1998", blurb: "Continue the timeline: the GST election" },
+      { id: "2001", blurb: "Continue the timeline: the Tampa election" },
+      { id: "2004", blurb: "Continue the timeline: the interest rate election" },
+      { id: "2007", blurb: "Continue the timeline: Kevin07" },
+      { id: "2010", blurb: "Continue the timeline: the hung parliament" },
+      { id: "2013", blurb: "Continue the timeline: stop the boats" },
+      { id: "2016", blurb: "Continue the timeline: the double dissolution" },
+      { id: "2019", blurb: "Continue the timeline: the unlosable election" },
       { id: "2022", blurb: "Continue the timeline: the teal wave" },
       { id: "2025", blurb: "Continue the timeline: hold the middle" },
     ],

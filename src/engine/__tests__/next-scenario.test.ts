@@ -30,7 +30,7 @@ describe("next-scenario retention chains", () => {
   it("covers the elections the old hand-written chains skipped", () => {
     expect(countryNextScenario("CA", "2015")?.id).toBe("2019");
     expect(countryNextScenario("CA", "2019")?.id).toBe("2021");
-    expect(countryNextScenario("CA", "2025")?.id).toBe("2015");
+    expect(countryNextScenario("CA", "2025")?.id).toBe("1984");
     expect(countryNextScenario("DE", "2017")?.id).toBe("2021");
     expect(countryNextScenario("DE", "2025")?.id).toBe("1990");
     expect(countryNextScenario("AU", "2019")?.id).toBe("2022");
@@ -42,7 +42,8 @@ describe("next-scenario retention chains", () => {
     expect(countryNextScenario("CA", "2019")?.blurb).toBe("Continue the timeline: the pandemic snap");
     expect(US_NEXT_SCENARIO["2000"].blurb).toBe("Continue the timeline: the wartime election");
     expect(countryNextScenario("DE", "2025")?.blurb).toBe("Back to the start of the timeline");
-    expect(countryNextScenario("CA", "2015")?.blurb).toBe("Continue the timeline");
+    expect(countryNextScenario("CA", "2015")?.blurb).toBe("Continue the timeline: the SNC-Lavalin minority");
+    expect(US_NEXT_SCENARIO["1960"].blurb).toBe("Continue the timeline");
   });
 
   it("US chain points at authored scenarios", () => {
@@ -66,6 +67,9 @@ describe("next-scenario retention chains", () => {
 
   it("country chains stay inside each pack", () => {
     expect(countryNextScenario("CA", "2021")?.id).toBe("2025");
+    expect(countryNextScenario("CA", "2025")?.id).toBe("1984");
+    expect(countryNextScenario("CA", "2015")?.id).toBe("2019");
+    expect(countryNextScenario("CA", "2011")?.id).toBe("2015");
     expect(countryNextScenario("FR", "2017")?.id).toBe("2022");
     expect(countryNextScenario("FR", "2027")?.id).toBe("1981");
     expect(countryNextScenario("FR", "2012")?.id).toBe("2017");
@@ -74,6 +78,8 @@ describe("next-scenario retention chains", () => {
     expect(countryNextScenario("DE", "2017")?.id).toBe("2021");
     expect(countryNextScenario("DE", "2025")?.id).toBe("1990");
     expect(countryNextScenario("AU", "2022")?.id).toBe("2025");
+    expect(countryNextScenario("AU", "2025")?.id).toBe("1996");
+    expect(countryNextScenario("AU", "2016")?.id).toBe("2019");
     for (const [cid, country] of Object.entries(COUNTRIES)) {
       for (const eid of Object.keys(country.elections)) {
         const next = countryNextScenario(cid, eid);

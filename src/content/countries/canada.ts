@@ -3,6 +3,28 @@
 // NDP 6, GRN 1 (Carney's tariff-war comeback over Poilievre).
 // 2021 (September 20): 338 seats, 170 for a majority — LPC 160, CPC 119, BQ 32,
 // NDP 25, GPC 2 (Trudeau's pandemic snap call buys back the same minority).
+//
+// Earlier elections (1984 to 2019) use the real provincial results from the
+// official returns as compiled on Wikipedia: seats per province and the
+// provincial popular vote by party, with the three territories merged into
+// one region (seats summed, vote weighted by votes cast). Each election has its
+// own chamber (282, 295, 301, 308, 338 or 343 seats) and majority line.
+// 2011 (May 2): 308 seats. CPC 166, NDP 103, LPC 34, BQ 4, GPC 1.
+// 2008 (October 14): 308. CPC 143, LPC 77, BQ 49, NDP 37, independents 2.
+// 2006 (January 23): 308. CPC 124, LPC 103, BQ 51, NDP 29, independent 1.
+// 2004 (June 28): 308. LPC 135, CPC 99, BQ 54, NDP 19, independent 1.
+// 2000 (November 27): 301. LPC 172, Alliance 66, BQ 38, NDP 13, PC 12.
+// 1993 (October 25): 295. LPC 177, BQ 54, Reform 52, NDP 9, PC 2, independent 1.
+// 1988 (November 21): 295. PC 169, LPC 83, NDP 43.
+// 1984 (September 4): 282. PC 211, LPC 40, NDP 30, independent 1.
+//
+// Party lines. `cpc` is the Conservative line: the Progressive Conservatives
+// until 2000 (including their collapse in 1993) and the merged Conservative
+// Party from 2004. It keeps the daily challenge pair (Liberals v. Conservatives)
+// playable in every election. `ref` is Reform, then the Canadian Alliance
+// (1993 and 2000): the main right-wing party of those years. The Bloc exists
+// from 1993. Greens carry votes in 2000 and later and are never playable.
+// The 2008 and 2006 independents (Casey, Arthur) and others are `oth`.
 
 import type { CountryBundle } from "@engine/countryGame";
 import { countryModule } from "./types";
@@ -25,16 +47,17 @@ export const CANADA: CountryBundle = {
     label: "Canada",
     parties: [
       { id: "lpc", name: "Liberal Party", shortName: "LPC", color: "#d71920" },
-      { id: "cpc", name: "Conservative Party", shortName: "CPC", color: "#1a4782" },
+      { id: "cpc", name: "Conservative Party / Progressive Conservatives", shortName: "CPC", color: "#1a4782" },
       { id: "ndp", name: "New Democratic Party", shortName: "NDP", color: "#f37021" },
       { id: "bq", name: "Bloc Québécois", shortName: "BQ", color: "#33b2cc" },
       { id: "gpc", name: "Green Party", shortName: "GPC", color: "#3d9b35" },
+      { id: "ref", name: "Reform Party / Canadian Alliance", shortName: "Reform/CA", color: "#6f8f2a" },
       { id: "oth", name: "Others / Independents", shortName: "Other", color: "#9aa0a6" },
     ],
     allocation: { id: "regional_seats_curve", label: "First-past-the-post (regional seats curve)", unit: "seat" },
     majority: { total: 343, threshold: 172 },
   },
-  playable: ["lpc", "cpc", "ndp", "bq"],
+  playable: ["lpc", "cpc", "ndp", "bq", "ref"],
   abstaining: [],
   // The two governing rivals never partner each other; the Bloc props up no one
   // formally (it extracts concessions vote-by-vote).
@@ -48,6 +71,13 @@ export const CANADA: CountryBundle = {
     { id: "energy_climate", name: "Energy & climate", blurb: "Pipelines, carbon pricing, and the resource economy." },
     { id: "immigration", name: "Immigration", blurb: "Record intake meets an infrastructure crunch." },
     { id: "reconciliation", name: "Reconciliation", blurb: "Unmarked graves, residential schools, and the Crown's unkept promises to Indigenous peoples." },
+    { id: "economy", name: "Jobs & the economy", blurb: "Recessions, unemployment and who can steer the economy through a crash." },
+    { id: "ethics", name: "Ethics & accountability", blurb: "Patronage, sponsorship, contempt of Parliament and trust in those at the top." },
+    { id: "national_unity", name: "National unity", blurb: "Quebec sovereignty, constitutional wounds and how the country stays together." },
+    { id: "deficit", name: "Deficits & debt", blurb: "Annual deficits, a growing debt and who will cut or spend." },
+    { id: "taxes", name: "Taxes & the GST", blurb: "Consumption tax, income tax cuts and the price of government." },
+    { id: "free_trade", name: "Free trade", blurb: "Open borders for goods with the United States: jobs against sovereignty." },
+    { id: "crime_security", name: "Crime & security", blurb: "Guns, law and order and the mission in Afghanistan." },
   ],
 
   blocs: [
@@ -231,6 +261,288 @@ export const CANADA: CountryBundle = {
         { id: "orange_fade", headline: "The front-runner's lead slips week by week, and {party}'s cautious campaign can't stop the slide", role: "any", party: "ndp", weight: 2, appeal: -0.025, momentum: -6 },
       ],
     },
+    "2011": {
+      id: "2011",
+      year: 2011,
+      label: "2011 · Harper v. Layton",
+      tagline: "March 2011. A government found in contempt of Parliament, a Liberal leader nobody can place, and an NDP leader on a cane who is about to remake the map. Five weeks to decide whether the Conservatives get the majority they keep asking for.",
+      majority: { total: 308, threshold: 155 },
+      goalText: "155 of 308 seats",
+      salience: { us_relations: 0.2, economy: 0.8, ethics: 0.7, healthcare: 0.6, cost_of_living: 0.45, national_unity: 0.35, deficit: 0.5 },
+      regions: {
+        // Seats and provincial vote as returned; the three territories merged.
+        BC:    { v: { cpc: 0.45, ndp: 0.33, lpc: 0.13, gpc: 0.08, oth: 0.01 }, s: { cpc: 21, ndp: 12, lpc: 2, gpc: 1 } },
+        AB:    { v: { cpc: 0.67, ndp: 0.17, lpc: 0.09, gpc: 0.05, oth: 0.02 }, s: { cpc: 27, ndp: 1 } },
+        SK:    { v: { cpc: 0.56, ndp: 0.32, lpc: 0.09, gpc: 0.03 }, s: { cpc: 13, lpc: 1 } },
+        MB:    { v: { cpc: 0.52, ndp: 0.26, lpc: 0.17, gpc: 0.04, oth: 0.01 }, s: { cpc: 11, ndp: 2, lpc: 1 } },
+        ON:    { v: { cpc: 0.44, ndp: 0.26, lpc: 0.25, gpc: 0.04, oth: 0.01 }, s: { cpc: 73, ndp: 22, lpc: 11 } },
+        QC:    { v: { ndp: 0.43, bq: 0.23, cpc: 0.17, lpc: 0.14, gpc: 0.02, oth: 0.01 }, s: { ndp: 59, lpc: 7, cpc: 5, bq: 4 } },
+        NB:    { v: { cpc: 0.43, ndp: 0.30, lpc: 0.23, gpc: 0.03, oth: 0.01 }, s: { cpc: 8, ndp: 1, lpc: 1 } },
+        NS:    { v: { cpc: 0.37, ndp: 0.30, lpc: 0.29, gpc: 0.04 }, s: { cpc: 4, lpc: 4, ndp: 3 } },
+        PE:    { v: { cpc: 0.42, lpc: 0.41, ndp: 0.15, gpc: 0.02 }, s: { lpc: 3, cpc: 1 } },
+        NL:    { v: { lpc: 0.38, ndp: 0.33, cpc: 0.28, gpc: 0.01 }, s: { lpc: 4, ndp: 2, cpc: 1 } },
+        NORTH: { v: { cpc: 0.37, ndp: 0.30, lpc: 0.25, gpc: 0.08 }, s: { cpc: 2, ndp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "ca11_contempt", headline: "The House finds the government in contempt of Parliament, a first in the Commonwealth, and the budget dies with the vote. {party} goes to the polls under that cloud", role: "any", party: "cpc", weight: 1, appeal: -0.03, momentum: -7, turn: 0 },
+        { id: "ca11_coalition_scare", headline: "'A coalition of losers': {party} warns at every stop that any vote but its own is a vote for a Liberal, NDP and Bloc deal", role: "any", party: "cpc", weight: 1, appeal: 0.025, momentum: 7, turn: 1 },
+        { id: "ca11_french_debate", headline: "Duceppe sets out to bury the NDP in the French debate, and Layton's plain answers play so well in Quebec that {party} starts to move", role: "any", party: "ndp", weight: 1, appeal: 0.035, momentum: 10, turn: 2 },
+        { id: "ca11_attendance", headline: "'You have the worst attendance record in the House': {party}'s leader lands the line of the English debate on Ignatieff", role: "any", party: "ndp", weight: 1, appeal: 0.03, momentum: 9, turn: 3 },
+        { id: "ca11_orange_wave", headline: "The orange wave: polls put {party} ahead of the Bloc in Quebec, and by the end of the week second across the country", role: "any", party: "ndp", weight: 1, appeal: 0.04, momentum: 12, turn: 4 },
+        { id: "ca11_bloc_melts", headline: "The Bloc melts in Quebec as voters pile onto the NDP, and {party} watches two decades of dominance drain away", role: "any", party: "bq", weight: 1, appeal: -0.04, momentum: -12, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "ca11_just_visiting", headline: "'Just visiting': {party}'s ads about the Liberal leader's years abroad keep running and keep working", role: "any", party: "cpc", weight: 2, appeal: 0.02, momentum: 6 },
+        { id: "ca11_layton_cane", headline: "Layton campaigns on a cane after a broken hip and cancer treatment, and the effort wins {party} a wave of sympathy", role: "any", party: "ndp", weight: 2, appeal: 0.025, momentum: 8 },
+        { id: "ca11_family_pack", headline: "{party}'s 'Family Pack' of tax credits and education grants fails to move the polls", role: "any", party: "lpc", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "ca11_controlled_rallies", headline: "Rallies are screened and the public kept out, and the stage-managed events draw complaints against {party}", role: "any", party: "cpc", weight: 2, appeal: -0.015, momentum: -4 },
+      ],
+    },
+    "2008": {
+      id: "2008",
+      year: 2008,
+      label: "2008 · Harper v. Dion",
+      tagline: "September 2008. A prime minister breaks his own fixed-date law, a Liberal leader sells a carbon tax, and the world's banks begin to fall in the last week. Five weeks to ask for a majority.",
+      majority: { total: 308, threshold: 155 },
+      goalText: "155 of 308 seats",
+      salience: { economy: 0.85, energy_climate: 0.75, cost_of_living: 0.5, healthcare: 0.45, crime_security: 0.4, ethics: 0.2 },
+      regions: {
+        BC:    { v: { cpc: 0.45, ndp: 0.26, lpc: 0.19, gpc: 0.09, oth: 0.01 }, s: { cpc: 22, ndp: 9, lpc: 5 } },
+        AB:    { v: { cpc: 0.65, ndp: 0.13, lpc: 0.11, gpc: 0.09, oth: 0.02 }, s: { cpc: 27, ndp: 1 } },
+        SK:    { v: { cpc: 0.53, ndp: 0.26, lpc: 0.15, gpc: 0.06 }, s: { cpc: 13, lpc: 1 } },
+        MB:    { v: { cpc: 0.49, ndp: 0.24, lpc: 0.19, gpc: 0.07, oth: 0.01 }, s: { cpc: 9, ndp: 4, lpc: 1 } },
+        ON:    { v: { cpc: 0.39, lpc: 0.34, ndp: 0.18, gpc: 0.08, oth: 0.01 }, s: { cpc: 51, lpc: 38, ndp: 17 } },
+        QC:    { v: { bq: 0.37, lpc: 0.24, cpc: 0.22, ndp: 0.12, gpc: 0.04, oth: 0.01 }, s: { bq: 49, lpc: 14, cpc: 10, ndp: 1, oth: 1 } },
+        NB:    { v: { cpc: 0.39, lpc: 0.33, ndp: 0.22, gpc: 0.06 }, s: { cpc: 6, lpc: 3, ndp: 1 } },
+        NS:    { v: { lpc: 0.30, ndp: 0.29, cpc: 0.26, gpc: 0.08, oth: 0.07 }, s: { lpc: 5, cpc: 3, ndp: 2, oth: 1 } },
+        PE:    { v: { lpc: 0.47, cpc: 0.36, ndp: 0.10, gpc: 0.05, oth: 0.02 }, s: { lpc: 3, cpc: 1 } },
+        NL:    { v: { lpc: 0.46, ndp: 0.34, cpc: 0.17, gpc: 0.02, oth: 0.01 }, s: { lpc: 6, ndp: 1 } },
+        NORTH: { v: { cpc: 0.36, ndp: 0.28, lpc: 0.27, gpc: 0.08, oth: 0.01 }, s: { cpc: 1, lpc: 1, ndp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "ca08_early_call", headline: "Harper breaks his own fixed-election-date law and asks for an early dissolution, and {party} is accused of calling it for advantage", role: "any", party: "cpc", weight: 1, appeal: -0.02, momentum: -5, turn: 0 },
+        { id: "ca08_may_debates", headline: "After an outcry over her exclusion, the broadcasters let Elizabeth May into the debates, and {party} gets a national platform", role: "any", party: "gpc", weight: 1, appeal: 0.03, momentum: 8, turn: 1 },
+        { id: "ca08_arts_cuts", headline: "Cuts to arts and culture grants cause an uproar in Quebec, and {party}'s hopes of a breakthrough in the province fade", role: "any", party: "cpc", weight: 1, appeal: -0.03, momentum: -9, turn: 2 },
+        { id: "ca08_debates", headline: "The leaders' debates leave {party}'s leader looking steady and the Liberal leader still struggling to be understood", role: "any", party: "cpc", weight: 1, appeal: 0.02, momentum: 5, turn: 3 },
+        { id: "ca08_murphy_interview", headline: "Asked the same question three times in a television interview, the {party} leader fumbles the answer, and the clip runs for days", role: "any", party: "lpc", weight: 1, appeal: -0.035, momentum: -10, turn: 4 },
+        { id: "ca08_good_buys", headline: "'Some good buying opportunities': as markets crash, {party}'s leader is accused of being out of touch", role: "any", party: "cpc", weight: 1, appeal: -0.025, momentum: -7, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "ca08_green_shift", headline: "The Green Shift carbon tax is hammered as a tax on everything, and {party} cannot make the pitch stick", role: "any", party: "lpc", weight: 3, appeal: -0.03, momentum: -8 },
+        { id: "ca08_duceppe_arts", headline: "Duceppe turns the arts cuts and a tougher youth justice bill into a rallying cry, and {party} gains", role: "any", party: "bq", weight: 2, appeal: 0.025, momentum: 7 },
+        { id: "ca08_liberal_cash", headline: "The Liberals run short of cash for ads and organization, and {party} is outspent in the closing weeks", role: "any", party: "lpc", weight: 2, appeal: -0.02, momentum: -5 },
+      ],
+    },
+    "2006": {
+      id: "2006",
+      year: 2006,
+      label: "2006 · Harper v. Martin",
+      tagline: "November 2005. A sponsorship scandal, a government that falls on the eve of Christmas, and a winter campaign that runs eight weeks. Can the Conservatives win without scaring anyone?",
+      majority: { total: 308, threshold: 155 },
+      goalText: "155 of 308 seats",
+      salience: { ethics: 0.9, healthcare: 0.6, cost_of_living: 0.5, crime_security: 0.55, national_unity: 0.3, taxes: 0.45 },
+      regions: {
+        BC:    { v: { cpc: 0.37, ndp: 0.29, lpc: 0.28, gpc: 0.05, oth: 0.01 }, s: { cpc: 17, ndp: 10, lpc: 9 } },
+        AB:    { v: { cpc: 0.64, lpc: 0.15, ndp: 0.12, gpc: 0.07, oth: 0.02 }, s: { cpc: 28 } },
+        SK:    { v: { cpc: 0.50, ndp: 0.24, lpc: 0.22, gpc: 0.03, oth: 0.01 }, s: { cpc: 12, lpc: 2 } },
+        MB:    { v: { cpc: 0.43, lpc: 0.26, ndp: 0.25, gpc: 0.04, oth: 0.02 }, s: { cpc: 8, lpc: 3, ndp: 3 } },
+        ON:    { v: { lpc: 0.40, cpc: 0.35, ndp: 0.19, gpc: 0.05, oth: 0.01 }, s: { lpc: 54, cpc: 40, ndp: 12 } },
+        QC:    { v: { bq: 0.42, cpc: 0.25, lpc: 0.21, ndp: 0.07, gpc: 0.04, oth: 0.01 }, s: { bq: 51, lpc: 13, cpc: 10, oth: 1 } },
+        NB:    { v: { lpc: 0.39, cpc: 0.36, ndp: 0.22, gpc: 0.02, oth: 0.01 }, s: { lpc: 6, cpc: 3, ndp: 1 } },
+        NS:    { v: { lpc: 0.36, ndp: 0.30, cpc: 0.30, gpc: 0.03, oth: 0.01 }, s: { lpc: 6, cpc: 3, ndp: 2 } },
+        PE:    { v: { lpc: 0.52, cpc: 0.33, ndp: 0.10, gpc: 0.04, oth: 0.01 }, s: { lpc: 4 } },
+        NL:    { v: { lpc: 0.42, cpc: 0.43, ndp: 0.14, gpc: 0.01 }, s: { lpc: 4, cpc: 3 } },
+        NORTH: { v: { lpc: 0.41, ndp: 0.31, cpc: 0.23, gpc: 0.03, oth: 0.02 }, s: { lpc: 2, ndp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "ca06_gomery", headline: "The Gomery report and the sponsorship scandal still hang over {party}'s launch, and the opening week is spent apologising", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -8, turn: 0 },
+        { id: "ca06_income_trusts", headline: "The RCMP opens an investigation into a leak about income trusts, and the finance minister's office becomes the story for {party}", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -8, turn: 1 },
+        { id: "ca06_child_benefit", headline: "Daily announcements land: a child benefit of $1,200 a year and a GST cut, and {party} sets the pace on affordability", role: "any", party: "cpc", weight: 1, appeal: 0.03, momentum: 8, turn: 2 },
+        { id: "ca06_open_federalism", headline: "In Quebec City, {party}'s leader promises 'open federalism', and the Bloc's grip on the province loosens", role: "any", party: "cpc", weight: 1, appeal: 0.03, momentum: 9, turn: 3 },
+        { id: "ca06_soldiers_ad", headline: "A Liberal ad warning of soldiers with guns in our cities is pulled after a backlash, and {party} pays for the stunt", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -8, turn: 4 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "ca06_handgun_pledge", headline: "After a Boxing Day shooting in Toronto, {party} promises a handgun ban, but the pitch moves few votes outside the city", role: "any", party: "lpc", weight: 2, appeal: -0.01, momentum: -3 },
+        { id: "ca06_hidden_agenda", headline: "Liberal warnings of a 'hidden agenda' on abortion and the courts dent {party} with moderate voters", role: "any", party: "cpc", weight: 2, appeal: -0.02, momentum: -6 },
+        { id: "ca06_accountability", headline: "The pledge of an accountability act, with limits on donations and a ban on floor-crossing, gives {party} an answer to the scandal", role: "any", party: "cpc", weight: 2, appeal: 0.025, momentum: 7 },
+        { id: "ca06_bloc_slips", headline: "The Conservative advance in Quebec costs {party} votes and three seats on the night", role: "any", party: "bq", weight: 2, appeal: -0.02, momentum: -5 },
+      ],
+    },
+    "2004": {
+      id: "2004",
+      year: 2004,
+      label: "2004 · Martin v. Harper",
+      tagline: "May 2004. A new prime minister, a brand new merged Conservative Party and a sponsorship scandal that will not go away. Five weeks to decide how much to forgive.",
+      majority: { total: 308, threshold: 155 },
+      goalText: "155 of 308 seats",
+      salience: { ethics: 0.85, healthcare: 0.8, economy: 0.45, taxes: 0.4, national_unity: 0.35, crime_security: 0.3 },
+      regions: {
+        BC:    { v: { cpc: 0.36, lpc: 0.29, ndp: 0.27, gpc: 0.06, oth: 0.02 }, s: { cpc: 22, lpc: 8, ndp: 5, oth: 1 } },
+        AB:    { v: { cpc: 0.61, lpc: 0.22, ndp: 0.10, gpc: 0.06, oth: 0.01 }, s: { cpc: 26, lpc: 2 } },
+        SK:    { v: { cpc: 0.42, lpc: 0.27, ndp: 0.23, oth: 0.05, gpc: 0.03 }, s: { cpc: 13, lpc: 1 } },
+        MB:    { v: { cpc: 0.40, lpc: 0.33, ndp: 0.23, gpc: 0.03, oth: 0.01 }, s: { cpc: 7, ndp: 4, lpc: 3 } },
+        ON:    { v: { lpc: 0.45, cpc: 0.32, ndp: 0.18, gpc: 0.04, oth: 0.01 }, s: { lpc: 75, cpc: 24, ndp: 7 } },
+        QC:    { v: { bq: 0.48, lpc: 0.34, cpc: 0.09, ndp: 0.05, gpc: 0.03, oth: 0.01 }, s: { bq: 54, lpc: 21 } },
+        NB:    { v: { lpc: 0.45, cpc: 0.31, ndp: 0.21, gpc: 0.03 }, s: { lpc: 7, cpc: 2, ndp: 1 } },
+        NS:    { v: { lpc: 0.40, ndp: 0.28, cpc: 0.28, gpc: 0.03, oth: 0.01 }, s: { lpc: 6, cpc: 3, ndp: 2 } },
+        PE:    { v: { lpc: 0.53, cpc: 0.31, ndp: 0.12, gpc: 0.04 }, s: { lpc: 4 } },
+        NL:    { v: { lpc: 0.48, cpc: 0.32, ndp: 0.17, gpc: 0.02, oth: 0.01 }, s: { lpc: 5, cpc: 2 } },
+        NORTH: { v: { lpc: 0.44, ndp: 0.30, cpc: 0.18, oth: 0.04, gpc: 0.04 }, s: { lpc: 3 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "ca04_sponsorship", headline: "The auditor general's report on the sponsorship program follows {party} onto the trail, and the leader insists he knew nothing", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -8, turn: 0 },
+        { id: "ca04_merged_party", headline: "A freshly merged Conservative Party runs its first campaign, and {party} has to prove that Alliance and Progressive Conservative candidates can share a platform", role: "any", party: "cpc", weight: 1, appeal: 0.015, momentum: 4, turn: 1 },
+        { id: "ca04_ontario_budget", headline: "The new health premium in Ontario's provincial budget turns voters against Liberals everywhere, and {party} takes the federal heat", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -8, turn: 2 },
+        { id: "ca04_gallant", headline: "A Conservative candidate compares abortion to the beheading of Nick Berg, and {party} spends days putting out the fire", role: "any", party: "cpc", weight: 1, appeal: -0.03, momentum: -8, turn: 3 },
+        { id: "ca04_hidden_agenda", headline: "Martin warns of a 'hidden agenda' on abortion and same-sex marriage, and {party} gains with voters worried about social conservatives", role: "any", party: "lpc", weight: 1, appeal: 0.03, momentum: 9, turn: 4 },
+        { id: "ca04_ndp_squeeze", headline: "A late Liberal plea to progressives to stop Harper bleeds support from {party} at the finish", role: "any", party: "ndp", weight: 1, appeal: -0.025, momentum: -7, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "ca04_bloc_quebec", headline: "The sponsorship scandal, much of it hatched in Quebec, sends voters in droves to {party}", role: "any", party: "bq", weight: 3, appeal: 0.04, momentum: 11 },
+        { id: "ca04_layton_minority", headline: "Layton's pitch for a minority that makes Parliament work wins {party} a late lift in Ontario and the Atlantic", role: "any", party: "ndp", weight: 2, appeal: 0.025, momentum: 7 },
+        { id: "ca04_unite_right", headline: "The merger ends vote splitting on the right, and {party} nearly doubles what the old Alliance won in Ontario", role: "any", party: "cpc", weight: 2, appeal: 0.02, momentum: 6 },
+      ],
+    },
+    "2000": {
+      id: "2000",
+      year: 2000,
+      label: "2000 · Chrétien v. Day",
+      tagline: "October 2000. A prime minister calls a snap election three and a half years in, against a right that has only just reinvented itself as the Canadian Alliance under a new leader. Five weeks to stop a third Liberal majority or hand it over.",
+      majority: { total: 301, threshold: 151 },
+      goalText: "151 of 301 seats",
+      salience: { healthcare: 0.85, taxes: 0.75, national_unity: 0.5, economy: 0.5, crime_security: 0.3, ethics: 0.25 },
+      regions: {
+        BC:    { v: { ref: 0.50, lpc: 0.28, ndp: 0.11, cpc: 0.07, oth: 0.02, gpc: 0.02 }, s: { ref: 27, lpc: 5, ndp: 2 } },
+        AB:    { v: { ref: 0.58, lpc: 0.21, cpc: 0.14, ndp: 0.05, oth: 0.01, gpc: 0.01 }, s: { ref: 23, lpc: 2, cpc: 1 } },
+        SK:    { v: { ref: 0.48, ndp: 0.26, lpc: 0.21, cpc: 0.05 }, s: { ref: 10, lpc: 2, ndp: 2 } },
+        MB:    { v: { lpc: 0.34, ref: 0.30, ndp: 0.21, cpc: 0.14, oth: 0.01 }, s: { lpc: 5, ref: 4, ndp: 4, cpc: 1 } },
+        ON:    { v: { lpc: 0.52, ref: 0.24, cpc: 0.14, ndp: 0.08, oth: 0.01, gpc: 0.01 }, s: { lpc: 100, ref: 2, ndp: 1 } },
+        QC:    { v: { lpc: 0.43, bq: 0.40, ref: 0.06, cpc: 0.06, ndp: 0.02, oth: 0.02, gpc: 0.01 }, s: { bq: 38, lpc: 36, cpc: 1 } },
+        NB:    { v: { lpc: 0.42, cpc: 0.30, ref: 0.16, ndp: 0.12 }, s: { lpc: 6, cpc: 3, ndp: 1 } },
+        NS:    { v: { lpc: 0.36, cpc: 0.29, ndp: 0.24, ref: 0.10, oth: 0.01 }, s: { lpc: 4, cpc: 4, ndp: 3 } },
+        PE:    { v: { lpc: 0.48, cpc: 0.38, ndp: 0.09, ref: 0.05 }, s: { lpc: 4 } },
+        NL:    { v: { lpc: 0.45, cpc: 0.34, ndp: 0.13, ref: 0.04, oth: 0.04 }, s: { lpc: 5, cpc: 2 } },
+        NORTH: { v: { lpc: 0.46, ndp: 0.27, ref: 0.17, cpc: 0.09, gpc: 0.01 }, s: { lpc: 3 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "ca00_snap_call", headline: "Chrétien calls a snap election with the Alliance still new under Day and the opposition short of money, and {party} takes the early lead", role: "any", party: "lpc", weight: 1, appeal: 0.03, momentum: 8, turn: 0 },
+        { id: "ca00_tax_cuts", headline: "The five-year, $100 billion tax cut plan announced just before the writ gives {party} a ready answer to the Alliance's tax pitch", role: "any", party: "lpc", weight: 1, appeal: 0.025, momentum: 7, turn: 1 },
+        { id: "ca00_single_rate", headline: "{party}'s single-rate tax plan and citizens' referendum idea win attention in the West and give Ontario voters pause", role: "any", party: "ref", weight: 1, appeal: -0.01, momentum: -3, turn: 2 },
+        { id: "ca00_two_tier", headline: "Liberal ads warn that {party} would open the door to two-tier health care, and the charge sticks in Ontario", role: "any", party: "ref", weight: 1, appeal: -0.03, momentum: -9, turn: 3 },
+        { id: "ca00_french_debate", headline: "With limited French, {party}'s leader is lost in the exchanges of the French debate, and Quebec tunes out", role: "any", party: "ref", weight: 1, appeal: -0.025, momentum: -7, turn: 4 },
+        { id: "ca00_clark_calgary", headline: "Joe Clark takes on the Alliance on its home ground in Calgary Centre, and {party}'s survival hangs on one riding", role: "any", party: "cpc", weight: 1, appeal: 0.02, momentum: 7, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "ca00_clarity_act", headline: "The Clarity Act's rules for a future referendum anger Quebec voters, and {party} gains a hearing", role: "any", party: "bq", weight: 2, appeal: 0.02, momentum: 6 },
+        { id: "ca00_health_squeeze", headline: "{party}'s pitch on health care loses ground as the Liberal government talks health spending too", role: "any", party: "ndp", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "ca00_atlantic_roots", headline: "Atlantic Canada sticks with {party} even as the party fades nationally", role: "any", party: "cpc", weight: 2, appeal: 0.02, momentum: 6 },
+      ],
+    },
+    "1993": {
+      id: "1993",
+      year: 1993,
+      label: "1993 · Chrétien v. Campbell",
+      tagline: "September 1993. Nine years of Mulroney, a hated GST, and a new Conservative prime minister three months in the job. A Quebec separatist party and a Western protest party are about to break the old system. Seven weeks to decide.",
+      majority: { total: 295, threshold: 148 },
+      goalText: "148 of 295 seats",
+      salience: { economy: 0.9, deficit: 0.8, taxes: 0.7, national_unity: 0.5, healthcare: 0.45, free_trade: 0.4 },
+      regions: {
+        BC:    { v: { ref: 0.36, lpc: 0.28, ndp: 0.15, cpc: 0.14, oth: 0.07 }, s: { ref: 24, lpc: 6, ndp: 2 } },
+        AB:    { v: { ref: 0.52, lpc: 0.25, cpc: 0.15, ndp: 0.04, oth: 0.04 }, s: { ref: 22, lpc: 4 } },
+        SK:    { v: { lpc: 0.32, ref: 0.27, ndp: 0.27, cpc: 0.11, oth: 0.03 }, s: { lpc: 5, ndp: 5, ref: 4 } },
+        MB:    { v: { lpc: 0.45, ref: 0.22, ndp: 0.17, cpc: 0.12, oth: 0.04 }, s: { lpc: 12, ref: 1, ndp: 1 } },
+        ON:    { v: { lpc: 0.53, ref: 0.20, cpc: 0.18, ndp: 0.06, oth: 0.03 }, s: { lpc: 98, ref: 1 } },
+        QC:    { v: { bq: 0.49, lpc: 0.33, cpc: 0.14, oth: 0.03, ndp: 0.01 }, s: { bq: 54, lpc: 19, cpc: 1, oth: 1 } },
+        NB:    { v: { lpc: 0.55, cpc: 0.28, ref: 0.09, ndp: 0.05, oth: 0.03 }, s: { lpc: 9, cpc: 1 } },
+        NS:    { v: { lpc: 0.53, cpc: 0.23, ref: 0.13, ndp: 0.07, oth: 0.04 }, s: { lpc: 11 } },
+        PE:    { v: { lpc: 0.60, cpc: 0.32, ndp: 0.05, oth: 0.02, ref: 0.01 }, s: { lpc: 4 } },
+        NL:    { v: { lpc: 0.67, cpc: 0.27, ndp: 0.04, oth: 0.01, ref: 0.01 }, s: { lpc: 7 } },
+        NORTH: { v: { lpc: 0.55, cpc: 0.17, ndp: 0.16, ref: 0.10, oth: 0.02 }, s: { lpc: 2, ndp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "ca93_record", headline: "A new prime minister, a nine-year record and the GST: {party} begins the campaign under the weight of the Mulroney years", role: "any", party: "cpc", weight: 1, appeal: -0.02, momentum: -5, turn: 0 },
+        { id: "ca93_red_book", headline: "The Liberal Red Book promises jobs, a smaller deficit and a renegotiated trade deal, and {party} makes a plan the centrepiece of its campaign", role: "any", party: "lpc", weight: 1, appeal: 0.03, momentum: 9, turn: 1 },
+        { id: "ca93_no_time", headline: "'This is no time to discuss serious issues': {party}'s leader dismisses a question about unemployment, and the quote follows her to election day", role: "any", party: "cpc", weight: 1, appeal: -0.035, momentum: -10, turn: 2 },
+        { id: "ca93_bouchard_debate", headline: "Lucien Bouchard dominates the French debate, and {party} turns Quebec into a one-man show", role: "any", party: "bq", weight: 1, appeal: 0.04, momentum: 12, turn: 3 },
+        { id: "ca93_face_ads", headline: "Attack ads that play on the Liberal leader's face spark a nationwide backlash, and {party} is blasted for stooping", role: "any", party: "cpc", weight: 1, appeal: -0.04, momentum: -12, turn: 4 },
+        { id: "ca93_reform_west", headline: "Manning's deficit-first message plays to the West's anger at the old parties, and {party} sweeps the Prairies and British Columbia", role: "any", party: "ref", weight: 1, appeal: 0.035, momentum: 10, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "ca93_rae_drag", headline: "Bob Rae's unpopular Ontario government drags {party} down across the country", role: "any", party: "ndp", weight: 3, appeal: -0.035, momentum: -10 },
+        { id: "ca93_gst_anger", headline: "The GST becomes the symbol of nine years of Tory government, and {party}'s pledge to scrap or replace it plays everywhere", role: "any", party: "lpc", weight: 2, appeal: 0.025, momentum: 8 },
+        { id: "ca93_fresh_start", headline: "{party}'s call for a fresh start without the old parties finds a hearing among voters who feel unrepresented", role: "any", party: "ref", weight: 2, appeal: 0.02, momentum: 6 },
+      ],
+    },
+    "1988": {
+      id: "1988",
+      year: 1988,
+      label: "1988 · Mulroney v. Turner",
+      tagline: "October 1988. One question: free trade with the United States. A Liberal Senate has forced the vote, and a trailing Liberal leader is about to win the debate and nearly the election. Seven weeks to decide what kind of country this is.",
+      majority: { total: 295, threshold: 148 },
+      goalText: "148 of 295 seats",
+      salience: { free_trade: 0.95, economy: 0.6, taxes: 0.4, healthcare: 0.4, national_unity: 0.35, deficit: 0.3 },
+      regions: {
+        BC:    { v: { ndp: 0.38, cpc: 0.35, lpc: 0.20, oth: 0.07 }, s: { ndp: 19, cpc: 12, lpc: 1 } },
+        AB:    { v: { cpc: 0.52, ndp: 0.17, oth: 0.17, lpc: 0.14 }, s: { cpc: 25, ndp: 1 } },
+        SK:    { v: { ndp: 0.45, cpc: 0.36, lpc: 0.18, oth: 0.01 }, s: { ndp: 10, cpc: 4 } },
+        MB:    { v: { cpc: 0.38, lpc: 0.36, ndp: 0.21, oth: 0.05 }, s: { cpc: 7, lpc: 5, ndp: 2 } },
+        ON:    { v: { lpc: 0.39, cpc: 0.38, ndp: 0.20, oth: 0.03 }, s: { cpc: 46, lpc: 43, ndp: 10 } },
+        QC:    { v: { cpc: 0.53, lpc: 0.30, ndp: 0.14, oth: 0.03 }, s: { cpc: 63, lpc: 12 } },
+        NB:    { v: { lpc: 0.46, cpc: 0.40, ndp: 0.09, oth: 0.05 }, s: { cpc: 5, lpc: 5 } },
+        NS:    { v: { lpc: 0.47, cpc: 0.41, ndp: 0.11, oth: 0.01 }, s: { lpc: 6, cpc: 5 } },
+        PE:    { v: { lpc: 0.51, cpc: 0.41, ndp: 0.07, oth: 0.01 }, s: { lpc: 4 } },
+        NL:    { v: { lpc: 0.46, cpc: 0.42, ndp: 0.12 }, s: { lpc: 5, cpc: 2 } },
+        NORTH: { v: { lpc: 0.34, ndp: 0.34, cpc: 0.29, oth: 0.03 }, s: { lpc: 2, ndp: 1 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "ca88_senate_block", headline: "The Liberal Senate refuses to pass the trade deal until the voters have spoken, and {party} gets the referendum on free trade it wanted", role: "any", party: "lpc", weight: 1, appeal: 0.02, momentum: 5, turn: 0 },
+        { id: "ca88_business_ads", headline: "Business groups pour millions into ads for the deal, and {party} finds an unexpected army on its side", role: "any", party: "cpc", weight: 1, appeal: 0.02, momentum: 6, turn: 1 },
+        { id: "ca88_turner_debate", headline: "Turner accuses Mulroney of selling the country out in the English debate, and {party} takes the lead in the polls", role: "any", party: "lpc", weight: 1, appeal: 0.04, momentum: 14, turn: 2 },
+        { id: "ca88_mulroney_counter", headline: "The prime minister's reassurances on social programs and a surge in Quebec bring {party}'s lead back within days", role: "any", party: "cpc", weight: 1, appeal: 0.03, momentum: 9, turn: 3 },
+        { id: "ca88_broadbent_best", headline: "Broadbent's best campaign ever: {party} polls its highest in years and carries the West Coast", role: "any", party: "ndp", weight: 1, appeal: 0.03, momentum: 9, turn: 4 },
+        { id: "ca88_quebec_deal", headline: "The Quebec premier and Quebec business back the deal, and {party} is carried by the province", role: "any", party: "cpc", weight: 1, appeal: 0.025, momentum: 8, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "ca88_meech_split", headline: "The Liberals are split over the Meech Lake accord, and {party} cannot stop its own members arguing in public", role: "any", party: "lpc", weight: 2, appeal: -0.02, momentum: -6 },
+        { id: "ca88_social_programs", headline: "The warning that free trade will cost jobs and social programs hits home in Ontario, and {party} gains", role: "any", party: "lpc", weight: 2, appeal: 0.02, momentum: 6 },
+        { id: "ca88_labour", headline: "Unions run their own campaign against the deal, and {party} gains ground in the factory towns", role: "any", party: "ndp", weight: 2, appeal: 0.02, momentum: 6 },
+      ],
+    },
+    "1984": {
+      id: "1984",
+      year: 1984,
+      label: "1984 · Mulroney v. Turner",
+      tagline: "July 1984. Trudeau is gone, a new Liberal leader has just come back after eight years away, and the Conservatives need Quebec. Eight weeks of summer campaign to decide whether the country wants a change.",
+      majority: { total: 282, threshold: 142 },
+      goalText: "142 of 282 seats",
+      salience: { economy: 0.9, deficit: 0.6, national_unity: 0.5, taxes: 0.4, healthcare: 0.3, ethics: 0.5 },
+      regions: {
+        BC:    { v: { cpc: 0.47, ndp: 0.35, lpc: 0.16, oth: 0.02 }, s: { cpc: 19, ndp: 8, lpc: 1 } },
+        AB:    { v: { cpc: 0.69, ndp: 0.14, lpc: 0.13, oth: 0.04 }, s: { cpc: 21 } },
+        SK:    { v: { cpc: 0.42, ndp: 0.38, lpc: 0.18, oth: 0.02 }, s: { cpc: 9, ndp: 5 } },
+        MB:    { v: { cpc: 0.43, ndp: 0.27, lpc: 0.22, oth: 0.08 }, s: { cpc: 9, ndp: 4, lpc: 1 } },
+        ON:    { v: { cpc: 0.47, lpc: 0.30, ndp: 0.21, oth: 0.02 }, s: { cpc: 67, lpc: 14, ndp: 13, oth: 1 } },
+        QC:    { v: { cpc: 0.50, lpc: 0.35, ndp: 0.09, oth: 0.06 }, s: { cpc: 58, lpc: 17 } },
+        NB:    { v: { cpc: 0.54, lpc: 0.32, ndp: 0.14 }, s: { cpc: 9, lpc: 1 } },
+        NS:    { v: { cpc: 0.50, lpc: 0.34, ndp: 0.15, oth: 0.01 }, s: { cpc: 9, lpc: 2 } },
+        PE:    { v: { cpc: 0.51, lpc: 0.41, ndp: 0.07, oth: 0.01 }, s: { cpc: 3, lpc: 1 } },
+        NL:    { v: { cpc: 0.58, lpc: 0.36, ndp: 0.06 }, s: { cpc: 4, lpc: 3 } },
+        NORTH: { v: { cpc: 0.45, lpc: 0.26, ndp: 0.25, oth: 0.04 }, s: { cpc: 3 } },
+      },
+      events: [
+        // Scheduled beats, in order.
+        { id: "ca84_patronage", headline: "The new leader agrees to Trudeau's list of patronage appointments, and the 'new broom' image takes its first hit as {party} is dragged into the old ways", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -9, turn: 0 },
+        { id: "ca84_you_had_an_option", headline: "'You had an option, sir': {party}'s leader turns the English debate on patronage into the defining exchange of the campaign", role: "any", party: "cpc", weight: 1, appeal: 0.04, momentum: 12, turn: 1 },
+        { id: "ca84_bum_pat", headline: "The cameras catch the Liberal leader patting the party president on the bottom, and {party} spends a week apologising for a leader who seems out of date", role: "any", party: "lpc", weight: 1, appeal: -0.025, momentum: -7, turn: 2 },
+        { id: "ca84_sept_iles", headline: "In Sept-Iles, {party}'s leader promises to bring Quebec into the constitution 'with honour and enthusiasm', and the province swings behind him", role: "any", party: "cpc", weight: 1, appeal: 0.04, momentum: 12, turn: 3 },
+        { id: "ca84_unemployment", headline: "With unemployment above 11 percent, {party} promises jobs and a sharp break with the Trudeau years", role: "any", party: "cpc", weight: 1, appeal: 0.025, momentum: 7, turn: 4 },
+        { id: "ca84_ndp_squeezed", headline: "The NDP fights to hold its ground as the Liberals and Conservatives battle over the centre, and {party} is squeezed", role: "any", party: "ndp", weight: 1, appeal: -0.025, momentum: -7, turn: 5 },
+        // Unscheduled flavor: joins the weekly draw, fires at most once.
+        { id: "ca84_turner_absence", headline: "A leader who left Parliament in 1976 struggles to explain his place in a government he did not lead, and {party} slips", role: "any", party: "lpc", weight: 2, appeal: -0.02, momentum: -6 },
+        { id: "ca84_quebec_blue", headline: "The Liberal hold on Quebec crumbles, and {party} gains ground in a province it has not won since 1958", role: "any", party: "cpc", weight: 3, appeal: 0.03, momentum: 9 },
+        { id: "ca84_broadbent_debate", headline: "Broadbent holds his own in both debates, and {party} keeps its base in the West and the Ontario factory towns", role: "any", party: "ndp", weight: 2, appeal: 0.015, momentum: 5 },
+      ],
+    },
   },
 
   leaders: {
@@ -261,6 +573,58 @@ export const CANADA: CountryBundle = {
       ndp: { partyId: "ndp", name: "Thomas Mulcair", charisma: 58, energy: 62, competence: 70, machine: 60 },
       bq:  { partyId: "bq", name: "Gilles Duceppe", charisma: 56, energy: 58, competence: 64, machine: 46 },
       gpc: { partyId: "gpc", name: "Elizabeth May", charisma: 56, energy: 58, competence: 62, machine: 24 },
+    },
+    "2011": {
+      cpc: { partyId: "cpc", name: "Stephen Harper", charisma: 46, energy: 62, competence: 76, machine: 84 },
+      ndp: { partyId: "ndp", name: "Jack Layton", charisma: 72, energy: 74, competence: 62, machine: 60 },
+      lpc: { partyId: "lpc", name: "Michael Ignatieff", charisma: 50, energy: 56, competence: 66, machine: 54 },
+      bq:  { partyId: "bq", name: "Gilles Duceppe", charisma: 62, energy: 58, competence: 66, machine: 46 },
+      gpc: { partyId: "gpc", name: "Elizabeth May", charisma: 56, energy: 58, competence: 62, machine: 26 },
+    },
+    "2008": {
+      cpc: { partyId: "cpc", name: "Stephen Harper", charisma: 44, energy: 60, competence: 76, machine: 84 },
+      lpc: { partyId: "lpc", name: "Stéphane Dion", charisma: 30, energy: 50, competence: 58, machine: 52 },
+      ndp: { partyId: "ndp", name: "Jack Layton", charisma: 68, energy: 70, competence: 60, machine: 56 },
+      bq:  { partyId: "bq", name: "Gilles Duceppe", charisma: 62, energy: 60, competence: 66, machine: 48 },
+      gpc: { partyId: "gpc", name: "Elizabeth May", charisma: 56, energy: 58, competence: 62, machine: 26 },
+    },
+    "2006": {
+      cpc: { partyId: "cpc", name: "Stephen Harper", charisma: 42, energy: 62, competence: 72, machine: 74 },
+      lpc: { partyId: "lpc", name: "Paul Martin", charisma: 48, energy: 54, competence: 62, machine: 68 },
+      ndp: { partyId: "ndp", name: "Jack Layton", charisma: 66, energy: 68, competence: 58, machine: 52 },
+      bq:  { partyId: "bq", name: "Gilles Duceppe", charisma: 62, energy: 60, competence: 66, machine: 50 },
+      gpc: { partyId: "gpc", name: "Jim Harris", charisma: 48, energy: 54, competence: 56, machine: 22 },
+    },
+    "2004": {
+      lpc: { partyId: "lpc", name: "Paul Martin", charisma: 50, energy: 56, competence: 66, machine: 70 },
+      cpc: { partyId: "cpc", name: "Stephen Harper", charisma: 42, energy: 60, competence: 70, machine: 56 },
+      ndp: { partyId: "ndp", name: "Jack Layton", charisma: 66, energy: 66, competence: 56, machine: 50 },
+      bq:  { partyId: "bq", name: "Gilles Duceppe", charisma: 64, energy: 62, competence: 66, machine: 52 },
+      gpc: { partyId: "gpc", name: "Jim Harris", charisma: 48, energy: 54, competence: 56, machine: 22 },
+    },
+    "2000": {
+      lpc: { partyId: "lpc", name: "Jean Chrétien", charisma: 60, energy: 66, competence: 76, machine: 86 },
+      ref: { partyId: "ref", name: "Stockwell Day", charisma: 50, energy: 72, competence: 44, machine: 60 },
+      bq:  { partyId: "bq", name: "Gilles Duceppe", charisma: 58, energy: 60, competence: 64, machine: 46 },
+      ndp: { partyId: "ndp", name: "Alexa McDonough", charisma: 52, energy: 58, competence: 60, machine: 46 },
+      cpc: { partyId: "cpc", name: "Joe Clark", charisma: 40, energy: 56, competence: 72, machine: 40 },
+    },
+    "1993": {
+      lpc: { partyId: "lpc", name: "Jean Chrétien", charisma: 58, energy: 64, competence: 76, machine: 80 },
+      bq:  { partyId: "bq", name: "Lucien Bouchard", charisma: 84, energy: 74, competence: 70, machine: 54 },
+      ref: { partyId: "ref", name: "Preston Manning", charisma: 48, energy: 66, competence: 64, machine: 60 },
+      ndp: { partyId: "ndp", name: "Audrey McLaughlin", charisma: 50, energy: 56, competence: 54, machine: 40 },
+      cpc: { partyId: "cpc", name: "Kim Campbell", charisma: 62, energy: 62, competence: 56, machine: 40 },
+    },
+    "1988": {
+      cpc: { partyId: "cpc", name: "Brian Mulroney", charisma: 70, energy: 76, competence: 70, machine: 86 },
+      lpc: { partyId: "lpc", name: "John Turner", charisma: 52, energy: 66, competence: 56, machine: 52 },
+      ndp: { partyId: "ndp", name: "Ed Broadbent", charisma: 70, energy: 66, competence: 72, machine: 60 },
+    },
+    "1984": {
+      cpc: { partyId: "cpc", name: "Brian Mulroney", charisma: 72, energy: 78, competence: 62, machine: 82 },
+      lpc: { partyId: "lpc", name: "John Turner", charisma: 40, energy: 58, competence: 60, machine: 58 },
+      ndp: { partyId: "ndp", name: "Ed Broadbent", charisma: 64, energy: 62, competence: 68, machine: 56 },
     },
   },
 
@@ -328,17 +692,43 @@ export const CANADA_MODULE = countryModule(CANADA, {
       description: "SNC-Lavalin, the blackface photos, and a Liberal government that loses the popular vote but keeps the keys. A minority, 338 seats." },
     { electionId: "2015", difficulty: "hard",
       description: "A decade of Harper, a 78-day marathon, and a third-place party that wakes up in a majority. Sunny ways over a tired throne." },
+    { electionId: "2011", addedLater: true, difficulty: "hard",
+      description: "A contempt-of-Parliament defeat, a Quebec orange wave out of nowhere, and the Bloc falling apart. 308 seats, a majority within reach." },
+    { electionId: "2008", addedLater: true, difficulty: "hard",
+      description: "An early call, a Green Shift carbon tax and a global market crash in the last week. 308 seats, and a second minority waiting to be broken." },
+    { electionId: "2006", addedLater: true, difficulty: "hard",
+      description: "Gomery, a Christmas campaign and a daily drip of Conservative promises. 308 seats and the end of twelve years of Liberal government." },
+    { electionId: "2004", addedLater: true, difficulty: "easy",
+      description: "A freshly merged Conservative Party, a Liberal government in trouble over sponsorship, and a Bloc on the rise. 308 seats, and the Liberals fall to a minority." },
+    { electionId: "2000", addedLater: true, difficulty: "hard",
+      description: "A snap call, a flat tax pitch and a split right: the Canadian Alliance against the Progressive Conservatives. 301 seats, and the Liberals already ahead." },
+    { electionId: "1993", addedLater: true, difficulty: "hard",
+      description: "The collapse of the old Conservative coalition. The Bloc and Reform break through, the NDP all but disappears, and 295 seats go to a Liberal majority." },
+    { electionId: "1988", addedLater: true, difficulty: "hard",
+      description: "The free trade election. A Liberal Senate forces the vote, Turner wins the debate, and Quebec decides it. 295 seats." },
+    { electionId: "1984", addedLater: true, difficulty: "hard",
+      description: "Trudeau retires, a patronage row sinks Turner, and the Conservatives win the biggest landslide in Canadian history. 282 seats." },
   ],
-  systemLabel: "First past the post, 343 ridings",
+  systemLabel: "First past the post, 282 to 343 ridings",
   pack: {
     id: "canada",
     name: "Canada",
-    description: "Four federal elections from 2015 to 2025: Sunny ways, two minorities, and the tariff-war comeback across 343 ridings.",
+    description: "Twelve federal elections from 1984 to 2025: the Mulroney landslide, the free trade vote, the Bloc and Reform breakthrough, the Harper years, Sunny ways and the tariff-war comeback.",
     price: 99,
   },
   daily: { pair: ["lpc", "cpc"], names: { lpc: "the Liberals", cpc: "the Conservatives" } },
   next: {
     chain: [
+      { id: "1984", blurb: "Continue the timeline: the Mulroney landslide" },
+      { id: "1988", blurb: "Continue the timeline: the free trade election" },
+      { id: "1993", blurb: "Continue the timeline: the collapse of the old order" },
+      { id: "2000", blurb: "Continue the timeline: the split right" },
+      { id: "2004", blurb: "Continue the timeline: the merged Conservatives" },
+      { id: "2006", blurb: "Continue the timeline: the Harper breakthrough" },
+      { id: "2008", blurb: "Continue the timeline: the carbon tax and the crash" },
+      { id: "2011", blurb: "Continue the timeline: the orange wave" },
+      { id: "2015", blurb: "Continue the timeline: Sunny ways" },
+      { id: "2019", blurb: "Continue the timeline: the SNC-Lavalin minority" },
       { id: "2021", blurb: "Continue the timeline: the pandemic snap" },
       { id: "2025", blurb: "Continue the timeline: the tariff-war rematch" },
     ],
