@@ -87,12 +87,17 @@ describe("import of a paid-base custom", () => {
 });
 
 describe("release bundles", () => {
-  it("sells six $0.99 country bundles and a $3.99 Complete Collection", async () => {
+  it("sells a $0.99 bundle per country and a $3.99 Complete Collection", async () => {
     const { STORE_PACKS, ALL_PAID } = await import("@content/packs");
+    const { COUNTRY_MODULES } = await import("@content/countries");
     const prices = Object.fromEntries(STORE_PACKS.map((p) => [p.id, p.price]));
     expect(prices).toEqual({
-      "us-historical": 99, "uk-elections": 99, canada: 99, germany: 99, france: 99, australia: 99, complete: 399,
+      ...Object.fromEntries(COUNTRY_MODULES.map((m) => [m.pack.id, 99])),
+      complete: 399,
     });
+    for (const id of ["us-historical", "uk-elections", "canada", "germany", "france", "australia", "new-zealand"]) {
+      expect(prices[id], id).toBe(99);
+    }
     const countryTotal = STORE_PACKS.filter((p) => p.id !== "complete").reduce((n, p) => n + p.price, 0);
     expect(countryTotal).toBeGreaterThan(prices.complete);
     // Every paid scenario sits in exactly one country bundle.
@@ -105,7 +110,13 @@ describe("release bundles", () => {
     const { PACKS_BY_ID, STORE_PACKS, packCovered } = await import("@content/packs");
     expect(STORE_PACKS.some((p) => p.id === "global")).toBe(false);
     expect(PACKS_BY_ID.global.scenarios).toContain("de-2025");
-    for (const id of ["canada", "germany", "france", "australia"]) expect(packCovered(id, ["global"])).toBe(true);
+    // Global is frozen: it covers a country pack only while that pack holds
+    // nothing added after Global was retired.
+    for (const id of ["canada", "germany", "france", "australia"]) {
+      const frozen = PACKS_BY_ID[id].scenarios.every((s) => PACKS_BY_ID.global.scenarios.includes(s));
+      expect(packCovered(id, ["global"]), id).toBe(frozen);
+    }
+    expect(packCovered("new-zealand", ["global"])).toBe(false);
     expect(packCovered("us-historical", ["global"])).toBe(false);
     expect(packCovered("france", ["complete"])).toBe(true);
   });

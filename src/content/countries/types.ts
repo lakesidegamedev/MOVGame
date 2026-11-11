@@ -62,7 +62,11 @@ export interface CountryModule {
   engine: EnginePath;
   /** One line for the landing page country card. */
   blurb: string;
-  /** Landing cover photo under public/, or null for the generated fallback. */
+  /**
+   * Landing cover photo under public/ with an entry in
+   * public/images/covers/ATTRIBUTION.json. The UI copes with null (a text-led
+   * card), but the completeness test requires a photo before shipping.
+   */
   cover: string | null;
   /** Colours for the generated scenario art (ScenarioArt). */
   art: { a: string; b: string; glow: string };

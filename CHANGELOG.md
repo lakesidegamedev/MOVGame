@@ -11,6 +11,14 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ## [Unreleased]
 
+### Added
+
+- New Zealand: the 2017, 2020 and 2023 general elections under mixed-member proportional
+  representation, as a $0.99 pack (also in the Complete Collection). Lead Labour, National, the
+  Greens, ACT, NZ First or Te Pāti Māori across nine regions and the seven Māori electorates,
+  with each campaign's real story beats, from Jacindamania and the COVID election to Winston
+  Peters back as kingmaker.
+
 ### Changed
 
 - Countries are now self-contained add-ons inside the game. Each country carries its own
@@ -20,6 +28,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - The Complete Collection automatically includes every paid election of every country, including
   countries added later. The retired Global pack keeps exactly the fourteen Canada, Germany,
   France and Australia elections it always had.
+- The daily challenge now includes newly added countries on a fair share of days. Every day that
+  was already assigned to one of the original elections keeps it, and past leaderboards keep
+  showing the election that was played that day.
 
 ## 2026-10
 

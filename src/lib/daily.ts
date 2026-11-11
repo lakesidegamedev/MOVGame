@@ -56,15 +56,49 @@ export function isDailyDate(s: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(s);
 }
 
+// Until New Zealand, the daily drew from the 49 registry rows of the US, UK,
+// Canada, Germany, France and Australia. Those days never move: on a
+// "classic" day the scenario is the date hash modulo this frozen pool,
+// exactly as before.
+// Scenarios registered after it take a fair share of days instead: a second
+// hash marks a date as an "added" day with probability added / total, and
+// the added scenario with the highest per-date score wins it. Registering
+// more countries only ever converts some classic days into added days and
+// reassigns some added days to the newcomers; every other day keeps its
+// scenario, so older app versions stay in step on most days.
+export const CLASSIC_DAILY_POOL_SIZE = 49;
+
+/** Whether `dateUTC` is drawn from the scenarios added after the classic pool. */
+export function isAddedDailyDay(dateUTC: string, total: number, added: number): boolean {
+  if (added <= 0) return false;
+  // h / 2^32 < added / total, in exact integer arithmetic (h * total < 2^53).
+  return fnv1a(`daily-added:${dateUTC}`) * total < added * 0x100000000;
+}
+
+function dailyScenario(dateUTC: string): ScenarioMeta {
+  const pool: ScenarioMeta[] = SCENARIO_REGISTRY;
+  const classic = pool.slice(0, CLASSIC_DAILY_POOL_SIZE);
+  const added = pool.slice(CLASSIC_DAILY_POOL_SIZE);
+  if (!isAddedDailyDay(dateUTC, pool.length, added.length)) {
+    return classic[fnv1a(`daily:${dateUTC}`) % classic.length];
+  }
+  let best = added[0];
+  let bestScore = -1;
+  for (const meta of added) {
+    const score = fnv1a(`daily:${dateUTC}:${meta.scenarioId}`);
+    if (score > bestScore) { best = meta; bestScore = score; }
+  }
+  return best;
+}
+
 /**
- * The day's assignment: scenario hashed from the date over the whole
- * registry, role hashed independently (salted with the scenario id so the
- * side rotation doesn't mirror the scenario rotation). Same date in, same
- * assignment out — everywhere.
+ * The day's assignment: scenario from the date (see above), role hashed
+ * independently (salted with the scenario id so the side rotation doesn't
+ * mirror the scenario rotation). Same date in, same assignment out,
+ * everywhere.
  */
 export function dailyAssignment(dateUTC: string): DailyAssignment {
-  const pool: ScenarioMeta[] = SCENARIO_REGISTRY;
-  const meta = pool[fnv1a(`daily:${dateUTC}`) % pool.length];
+  const meta = dailyScenario(dateUTC);
   const pair = DAILY_ROLE_PAIRS[meta.country];
   const role = pair[fnv1a(`role:${dateUTC}:${meta.scenarioId}`) % 2];
   return { date: dateUTC, scenarioId: meta.scenarioId, seed: `daily-${dateUTC}`, role };

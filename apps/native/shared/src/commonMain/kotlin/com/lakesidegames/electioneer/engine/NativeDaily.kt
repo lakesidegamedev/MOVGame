@@ -19,10 +19,32 @@ class NativeDaily private constructor() {
 
         fun roleName(role: String): String = names[role] ?: role.uppercase()
 
+        // Mirrors web lib/daily.ts: the first 49 registry rows are the frozen
+        // classic pool; later scenarios win a proportional share of days.
+        const val CLASSIC_POOL_SIZE = 49
+
+        fun isAddedDay(dateUTC: String, total: Int, added: Int): Boolean =
+            added > 0 && Rng.hashSeed("daily-added:$dateUTC") * total < added.toLong() * 0x100000000L
+
+        private fun scenario(dateUTC: String): NativeElection {
+            val classic = nativeElections.take(CLASSIC_POOL_SIZE)
+            val added = nativeElections.drop(CLASSIC_POOL_SIZE)
+            if (!isAddedDay(dateUTC, nativeElections.size, added.size)) {
+                return classic[(Rng.hashSeed("daily:$dateUTC") % classic.size).toInt()]
+            }
+            var best = added.first()
+            var bestScore = -1L
+            for (meta in added) {
+                val score = Rng.hashSeed("daily:$dateUTC:${meta.scenarioId}")
+                if (score > bestScore) { best = meta; bestScore = score }
+            }
+            return best
+        }
+
         fun assignment(dateUTC: String): NativeDailyAssignment {
             require(Regex("\\d{4}-\\d{2}-\\d{2}").matches(dateUTC))
             // Use the exported registry's order, exactly as web and server do.
-            val meta = nativeElections[(Rng.hashSeed("daily:$dateUTC") % nativeElections.size).toInt()]
+            val meta = scenario(dateUTC)
             val role = pairs.getValue(meta.country)[(Rng.hashSeed("role:$dateUTC:${meta.scenarioId}") % 2).toInt()]
             return NativeDailyAssignment(dateUTC, meta.scenarioId, "daily-$dateUTC", role,
                 meta.country, meta.nativeId, meta.label, meta.flag, names.getValue(role))

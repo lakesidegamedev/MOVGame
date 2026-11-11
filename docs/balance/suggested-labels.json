@@ -51,6 +51,9 @@
     "fr-2012": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "au-2025": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "au-2022": { "suggested": "medium", "authored": "medium", "underdogWinRate": null },
-    "au-2019": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
+    "au-2019": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "nz-2023": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0.05 },
+    "nz-2020": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "nz-2017": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
   }
 }

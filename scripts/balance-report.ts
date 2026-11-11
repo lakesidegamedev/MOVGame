@@ -4,13 +4,19 @@
 //
 //   npx tsx scripts/balance-report.ts            # full matrix, 20 seeds/cell
 //   GAUNTLET_SEEDS=10 npx tsx scripts/balance-report.ts
+//   GAUNTLET_COUNTRIES=NZ npx tsx scripts/balance-report.ts   # one country
+//
+// A country-filtered run writes report-<date>-<codes>.md and merges its rows
+// into suggested-labels.json, leaving every other scenario's label alone.
+// WRITE_REGISTRY=1 patches the difficulty on each mismatched row in its
+// country module (src/content/countries/*.ts).
 //
 // The report is the design record behind the registry's difficulty labels:
 // it flags threshold breaches and lists label mismatches (measured focused-
 // bot underdog win rate vs the authored easy/medium/hard label).
 // ─────────────────────────────────────────────────────────────────────────
 
-import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -23,9 +29,15 @@ import {
   GAUNTLET_THRESHOLDS,
   type GauntletRow,
 } from "@engine/balance/harness";
-import { SCENARIO_REGISTRY } from "@content/scenarioRegistry";
+import { SCENARIO_REGISTRY as FULL_REGISTRY } from "@content/scenarioRegistry";
 
 const SEEDS = Number(process.env.GAUNTLET_SEEDS ?? 20);
+// Optional country filter, e.g. GAUNTLET_COUNTRIES=NZ or NZ,CA.
+const ONLY_COUNTRIES = (process.env.GAUNTLET_COUNTRIES ?? "").split(",").map((c) => c.trim().toUpperCase()).filter(Boolean);
+const SCENARIO_REGISTRY = ONLY_COUNTRIES.length
+  ? FULL_REGISTRY.filter((m) => ONLY_COUNTRIES.includes(m.country))
+  : FULL_REGISTRY;
+if (SCENARIO_REGISTRY.length === 0) throw new Error(`No scenarios for GAUNTLET_COUNTRIES=${ONLY_COUNTRIES.join(",")}`);
 // WRITE_REGISTRY=1 rewrites difficulty fields in scenarioRegistry.ts from the
 // measured suggested labels (keeps the picker honest after a gauntlet run).
 const WRITE_REGISTRY = process.env.WRITE_REGISTRY === "1";
@@ -34,10 +46,11 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const pct = (x: number) => `${(x * 100).toFixed(0)}%`;
 const num = (x: number) => (Math.abs(x) >= 100 ? x.toFixed(0) : x.toFixed(1));
 
-console.log(`Balance gauntlet: full matrix, ${SEEDS} seeds/cell…`);
+console.log(`Balance gauntlet: ${ONLY_COUNTRIES.length ? ONLY_COUNTRIES.join(", ") : "full matrix"}, ${SEEDS} seeds/cell…`);
 const t0 = Date.now();
 let lastTick = 0;
 const rows = runGauntlet({
+  scenarios: SCENARIO_REGISTRY.map((m) => m.scenarioId),
   seedsPerCell: SEEDS,
   onProgress: (done, total) => {
     const tick = Math.floor((done / total) * 20);
@@ -195,41 +208,58 @@ lines.push("");
 
 const outDir = join(root, "docs", "balance");
 mkdirSync(outDir, { recursive: true });
-const outPath = join(outDir, `report-${date}.md`);
+const outPath = join(outDir, ONLY_COUNTRIES.length ? `report-${date}-${ONLY_COUNTRIES.join("-").toLowerCase()}.md` : `report-${date}.md`);
 writeFileSync(outPath, lines.join("\n"));
 
 // Machine-readable labels — the registry-sync test and WRITE_REGISTRY consume this.
-const labelsJson = Object.fromEntries(
-  labels.map((l) => [l.scenarioId, { suggested: l.suggested, authored: l.authored, underdogWinRate: l.winRate }]),
-);
 const labelsPath = join(outDir, "suggested-labels.json");
-writeFileSync(labelsPath, JSON.stringify({ date, seeds: SEEDS, labels: labelsJson }, null, 2) + "\n");
+// A filtered run merges into the existing labels instead of replacing them.
+type LabelsFile = { date: string; seeds: number; note?: string; labels: Record<string, Record<string, unknown>> };
+const previous = ONLY_COUNTRIES.length && existsSync(labelsPath)
+  ? (JSON.parse(readFileSync(labelsPath, "utf8")) as LabelsFile)
+  : null;
+const labelsJson: LabelsFile["labels"] = {
+  ...(previous?.labels ?? {}),
+  ...Object.fromEntries(
+    labels.map((l) => [l.scenarioId, { suggested: l.suggested, authored: l.authored, underdogWinRate: l.winRate }]),
+  ),
+};
+// One scenario per line keeps the file diffable.
+const inline = (o: Record<string, unknown>) => `{ ${Object.entries(o).map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`).join(", ")} }`;
+const header: Record<string, unknown> = { date: previous?.date ?? date, seeds: previous?.seeds ?? SEEDS };
+if (previous?.note) header.note = previous.note;
+writeFileSync(labelsPath, [
+  "{",
+  ...Object.entries(header).map(([k, v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)},`),
+  '  "labels": {',
+  Object.entries(labelsJson).map(([id, row]) => `    ${JSON.stringify(id)}: ${inline(row)}`).join(",\n"),
+  "  }",
+  "}",
+].join("\n") + "\n");
 
 if (WRITE_REGISTRY && mismatches.length > 0) {
-  const registryPath = join(root, "src", "content", "scenarioRegistry.ts");
-  let src = readFileSync(registryPath, "utf8");
-  for (const l of mismatches) {
-    // Replace the difficulty string on the row that mentions this scenarioId.
-    // US/UK helpers pass difficulty as the last arg; country rows use difficulty: "…".
-    const esc = l.scenarioId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const helperRe = new RegExp(`((?:us|uk)\\(${l.scenarioId.replace(/^(us|uk)-/, "")}[\\s\\S]*?)"${l.authored}"\\)`);
-    // Prefer the explicit difficulty: "…" form (country rows + any future style).
-    const fieldRe = new RegExp(`(scenarioId:\\s*"${esc}"[\\s\\S]*?difficulty:\\s*)"${l.authored}"`);
-    if (fieldRe.test(src)) {
-      src = src.replace(fieldRe, `$1"${l.suggested}"`);
-    } else {
-      // Fall back: last quoted difficulty on the us()/uk() call for this year.
-      const year = l.scenarioId.replace(/^(us|uk)-/, "");
-      const callRe = new RegExp(
-        `((?:us|uk)\\(${year},\\s*"[^"]*",\\s*"[^"]*",(?:\\s*true,|\\s*false,)?\\s*)"${l.authored}"\\)`,
-      );
-      if (callRe.test(src)) src = src.replace(callRe, `$1"${l.suggested}"`);
-      else console.warn(`  could not patch registry row for ${l.scenarioId}`);
-    }
-    void helperRe;
+  // Each registry row lives in its country module as
+  // `{ electionId: "<id>", ..., difficulty: "<label>", ... }`.
+  const dir = join(root, "src", "content", "countries");
+  const files = readdirSync(dir).filter((f) => f.endsWith(".ts") && f !== "index.ts" && f !== "types.ts");
+  const byCode = new Map<string, string>();
+  for (const f of files) {
+    const text = readFileSync(join(dir, f), "utf8");
+    const code = /\bcode: "([A-Z]{2})"/.exec(text)?.[1] ?? /^\s+id: "([A-Z]{2})",$/m.exec(text)?.[1];
+    if (code) byCode.set(code, join(dir, f));
   }
-  writeFileSync(registryPath, src);
-  console.log(`\nWRITE_REGISTRY=1: patched ${mismatches.length} difficulty label(s) in scenarioRegistry.ts`);
+  let patched = 0;
+  for (const l of mismatches) {
+    const meta = FULL_REGISTRY.find((m) => m.scenarioId === l.scenarioId)!;
+    const file = byCode.get(meta.country);
+    const src = file ? readFileSync(file, "utf8") : "";
+    const esc = meta.nativeId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const rowRe = new RegExp(`(electionId: "${esc}"[^}]*?difficulty: )"${l.authored}"`);
+    if (!file || !rowRe.test(src)) { console.warn(`  could not patch registry row for ${l.scenarioId}`); continue; }
+    writeFileSync(file, src.replace(rowRe, `$1"${l.suggested}"`));
+    patched++;
+  }
+  console.log(`\nWRITE_REGISTRY=1: patched ${patched} difficulty label(s) in the country modules`);
 }
 
 // ── stdout summary ─────────────────────────────────────────────────────────
