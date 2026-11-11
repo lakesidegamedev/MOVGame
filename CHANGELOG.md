@@ -115,6 +115,12 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Changed
 
+- Spain: the Catalan and Basque parties are now playable as regional parties in every election
+  they stood in: ERC, CiU and its successors Democràcia i Llibertat and Junts, the PNV, and
+  Amaiur and EH Bildu, each with its real lead candidate. They stand only in Catalonia or in the
+  Basque Country and Navarre, so they cannot win a majority; the setup says so and the results
+  screen measures you against the party's real seat count. Two new story beats cover the Catalan
+  lists of 2015 and the PNV's record before April 2019.
 - Every country now has a free election, playable without an account: the newest election of
   each country (France's 2022 runoff rather than the speculative 2027 one), plus the US 2024 and
   2020 races as before. The free election stays free when newer elections arrive. Country packs
@@ -154,6 +160,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- On Easy, a party that stands in only part of a country (the Bloc Québécois, India's regional
+  parties, Spain's Catalan and Basque parties) no longer appears on the ballot in regions where it
+  never stood. The Easy head start now applies only where your party is actually running.
 - Parties with very dark colors, such as the CDU/CSU in Germany, are now readable on maps,
   seat bars, standings and setup cards.
 - Small text and party-colored names now meet contrast guidelines on the dark panels.

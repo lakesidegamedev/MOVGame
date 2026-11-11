@@ -284,6 +284,12 @@ a bundle are rejected by the native exporter.
     then across regions (biproportional, as for proportional systems) so the national points
     order matches the real vote even in a near tie.
 - **`goalHint`**: the native campaign coach's goal line, with `{majority}` and `{total}`.
+- **`regional`**: playable parties that stand in only part of the country (Spain's ERC, Junts,
+  PNV and Bildu). They are left out of the generic random events, which are written for national
+  parties, so give each one at least one story beat pinned to it with `party`. The web setup
+  tells the player where the party stands, that it cannot win a majority and that success is
+  beating its real seat count, and the results screen scores it against that count. Every
+  `regional` party must be in `playable`, and its regions can never add up to a majority.
 - **Ids are free-form.** Party, bloc and region ids are plain lowercase strings. A new country
   can bring bloc ids no other country uses (New Zealand has `maori` and `pasifika`), parties that
   stand in only some of its elections, and parties with votes but no seats. Neither engine keeps

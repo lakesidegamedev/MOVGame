@@ -56,9 +56,16 @@
 // What the engine cannot express. The engine forms governments from the
 // largest party plus at most one partner. Spanish investitures are often built
 // from five or six parties and abstentions, which the engine cannot count, so
-// the regional parties are modelled as seats that decide the arithmetic but
-// are not playable, and the government text describes the investiture
-// threshold. The win condition is the most seats, as everywhere.
+// the government text describes the investiture threshold. The win condition
+// is the most seats, as everywhere.
+//
+// Regional parties. ERC, the CiU line, the PNV and Bildu are playable as
+// regional parties (`regional`): they stand only in Catalonia, or in the
+// Basque Country and Navarre, so they cannot reach 176 and their game is the
+// seat count and the balance of power. The setup says so. They are kept out
+// of the generic random events, which are written for national parties, and
+// their own story beats are pinned to them. The Galician BNG and Canarian
+// Coalition win one or two seats and stay in the results only.
 
 import type { CountryBundle } from "@engine/countryGame";
 import { countryModule } from "./types";
@@ -87,7 +94,7 @@ export const SPAIN: CountryBundle = {
       { id: "cs", name: "Citizens", shortName: "Cs", color: "#ee6a0f" },
       { id: "vox", name: "Vox", shortName: "Vox", color: "#5fb62a" },
       { id: "upyd", name: "Union, Progress and Democracy", shortName: "UPyD", color: "#d6208a" },
-      { id: "ciu", name: "Convergence and Union, Democracy and Freedom, Junts", shortName: "CiU/Junts", color: "#1a3a8f" },
+      { id: "ciu", name: "CiU, Democracy and Freedom, Junts", shortName: "CiU/Junts", color: "#1a3a8f" },
       { id: "erc", name: "Republican Left of Catalonia", shortName: "ERC", color: "#f6a21a" },
       { id: "pnv", name: "Basque Nationalist Party", shortName: "PNV", color: "#007a3d" },
       { id: "bil", name: "Amaiur and EH Bildu", shortName: "Bildu", color: "#2aa198" },
@@ -98,7 +105,8 @@ export const SPAIN: CountryBundle = {
     allocation: { id: "regional_seats_curve", label: "Proportional by province (D'Hondt), grouped into regions", unit: "seat" },
     majority: { total: 350, threshold: 176 },
   },
-  playable: ["pp", "psoe", "pod", "iu", "cs", "vox", "upyd"],
+  playable: ["pp", "psoe", "pod", "iu", "cs", "vox", "upyd", "erc", "ciu", "pnv", "bil"],
+  regional: ["erc", "ciu", "pnv", "bil"],
   abstaining: [],
   // PP and PSOE have never governed together. Podemos and IU will not back
   // the PP and nobody on the left will deal with Vox. The Catalan and Basque
@@ -264,6 +272,7 @@ export const SPAIN: CountryBundle = {
         { id: "right_three_ways", headline: "Casado warns that a vote for Citizens or Vox is a vote that helps Sánchez, and {party} makes a last push for the tactical vote of the right", role: "any", party: "pp", weight: 3, appeal: 0.02, momentum: 5, turn: 4 },
         { id: "andalusia_warning", headline: "PSOE warns that the PP, Citizens and Vox will govern Spain as they now govern Andalusia, and {party} sees its own supporters come home", role: "any", party: "psoe", weight: 3, appeal: 0.025, momentum: 7, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "pnv_delivers", headline: "The PNV, whose votes passed Rajoy's last budget and then helped remove him in the June 2018 censure motion, campaigns as the party that gets results for the Basque Country, and {party} gains", role: "any", party: "pnv", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "colon_rally", headline: "The PP, Citizens and Vox join the same Plaza de Colón rally on the Catalan question, and {party} shares a stage with its rivals and its allies", role: "any", party: "pp", weight: 2, appeal: -0.01, momentum: -3 },
         { id: "minimum_wage", headline: "The minimum wage rises to 900 euros a month, and {party} says it is the proof of what a left government can do", role: "any", party: "pod", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "vox_fills_halls", headline: "Vox fills halls and bullrings with crowds that the pollsters did not expect, and {party} is the story of the week", role: "any", party: "vox", weight: 2, appeal: 0.025, momentum: 7 },
@@ -308,6 +317,7 @@ export const SPAIN: CountryBundle = {
         // Unscheduled flavour: joins the weekly draw, fires at most once.
         { id: "gurtel_trial", headline: "The Gürtel and Bárcenas papers are back in the papers and on the television, and {party} has to answer for money again", role: "any", party: "pp", weight: 2, appeal: -0.03, momentum: -7 },
         { id: "garzon_unity", headline: "Alberto Garzón's IU runs on its own list after talks with Podemos collapse, and {party} claims it is the real left", role: "any", party: "iu", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "catalan_lists", headline: "Fresh from the Junts pel Sí win in the September Catalan election, ERC under Gabriel Rufián and Democràcia i Llibertat take the independence case to Madrid on separate lists, and {party} says Catalonia will be heard in the Congress", role: "any", party: "erc", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "catalonia_plebiscite", headline: "The Catalan pro-independence parties claim a mandate after the September regional election, and {party} promises to hold the line", role: "any", party: "pp", weight: 2, appeal: 0.015, momentum: 4 },
         { id: "new_politics", headline: "Both newcomers say the old parties had their chance and fell short, and {party} presents itself as a clean start", role: "any", party: "cs", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "pension_scare", headline: "A pension scare on the television news puts the PP's reforms back under scrutiny, and {party} has to reassure its older voters", role: "any", party: "pp", weight: 2, appeal: -0.02, momentum: -5 },
@@ -364,6 +374,10 @@ export const SPAIN: CountryBundle = {
       psoe: { partyId: "psoe", name: "Pedro Sánchez", charisma: 70, energy: 82, competence: 70, machine: 86 },
       vox: { partyId: "vox", name: "Santiago Abascal", charisma: 64, energy: 74, competence: 50, machine: 66 },
       pod: { partyId: "pod", name: "Yolanda Díaz", charisma: 74, energy: 72, competence: 64, machine: 46 },
+      erc: { partyId: "erc", name: "Gabriel Rufián", charisma: 72, energy: 76, competence: 60, machine: 64 },
+      ciu: { partyId: "ciu", name: "Míriam Nogueras", charisma: 56, energy: 70, competence: 58, machine: 62 },
+      pnv: { partyId: "pnv", name: "Aitor Esteban", charisma: 66, energy: 62, competence: 78, machine: 78 },
+      bil: { partyId: "bil", name: "Mertxe Aizpurua", charisma: 56, energy: 64, competence: 62, machine: 72 },
     },
     "2019": {
       psoe: { partyId: "psoe", name: "Pedro Sánchez", charisma: 66, energy: 80, competence: 62, machine: 76 },
@@ -371,6 +385,12 @@ export const SPAIN: CountryBundle = {
       cs: { partyId: "cs", name: "Albert Rivera", charisma: 68, energy: 82, competence: 54, machine: 62 },
       pod: { partyId: "pod", name: "Pablo Iglesias", charisma: 66, energy: 72, competence: 60, machine: 62 },
       vox: { partyId: "vox", name: "Santiago Abascal", charisma: 60, energy: 76, competence: 48, machine: 50 },
+      // Junqueras and Sànchez headed their lists from pretrial detention in
+      // Soto del Real; Gabriel Rufián and Laura Borràs fronted the debates.
+      erc: { partyId: "erc", name: "Oriol Junqueras", charisma: 72, energy: 34, competence: 66, machine: 72 },
+      ciu: { partyId: "ciu", name: "Jordi Sànchez", charisma: 58, energy: 30, competence: 58, machine: 60 },
+      pnv: { partyId: "pnv", name: "Aitor Esteban", charisma: 64, energy: 64, competence: 76, machine: 80 },
+      bil: { partyId: "bil", name: "Mertxe Aizpurua", charisma: 52, energy: 62, competence: 58, machine: 62 },
     },
     "2015": {
       pp: { partyId: "pp", name: "Mariano Rajoy", charisma: 40, energy: 50, competence: 68, machine: 84 },
@@ -379,12 +399,20 @@ export const SPAIN: CountryBundle = {
       cs: { partyId: "cs", name: "Albert Rivera", charisma: 72, energy: 78, competence: 56, machine: 52 },
       iu: { partyId: "iu", name: "Alberto Garzón", charisma: 60, energy: 68, competence: 54, machine: 38 },
       upyd: { partyId: "upyd", name: "Andrés Herzog", charisma: 44, energy: 60, competence: 50, machine: 28 },
+      erc: { partyId: "erc", name: "Gabriel Rufián", charisma: 70, energy: 82, competence: 54, machine: 58 },
+      ciu: { partyId: "ciu", name: "Francesc Homs", charisma: 50, energy: 64, competence: 60, machine: 58 },
+      pnv: { partyId: "pnv", name: "Aitor Esteban", charisma: 62, energy: 64, competence: 74, machine: 78 },
+      bil: { partyId: "bil", name: "Marian Beitialarrangoitia", charisma: 46, energy: 60, competence: 52, machine: 56 },
     },
     "2011": {
       pp: { partyId: "pp", name: "Mariano Rajoy", charisma: 40, energy: 52, competence: 66, machine: 84 },
       psoe: { partyId: "psoe", name: "Alfredo Pérez Rubalcaba", charisma: 56, energy: 66, competence: 80, machine: 64 },
       iu: { partyId: "iu", name: "Cayo Lara", charisma: 50, energy: 62, competence: 50, machine: 52 },
       upyd: { partyId: "upyd", name: "Rosa Díez", charisma: 58, energy: 74, competence: 56, machine: 38 },
+      erc: { partyId: "erc", name: "Alfred Bosch", charisma: 56, energy: 62, competence: 58, machine: 40 },
+      ciu: { partyId: "ciu", name: "Josep Antoni Duran i Lleida", charisma: 58, energy: 60, competence: 72, machine: 74 },
+      pnv: { partyId: "pnv", name: "Josu Erkoreka", charisma: 50, energy: 58, competence: 70, machine: 78 },
+      bil: { partyId: "bil", name: "Iñaki Antigüedad", charisma: 48, energy: 62, competence: 56, machine: 64 },
     },
   },
 
@@ -416,10 +444,10 @@ export const SPAIN: CountryBundle = {
       headline: "Every interview asks {party} the same question: what would you do about Catalonia?",
       role: "player",
       weight: 3,
-      prompt: "A rally in Barcelona and another in Seville. One answer has to do for both. What do you say?",
+      prompt: "Whatever you say will be played back in Barcelona and in Madrid the same evening. What is the answer?",
       choices: [
-        { id: "firm_unity", text: "Defend the unity of Spain without compromise", resultText: "Madrid and the provinces cheer. Barcelona does not.", appeal: 0.02, momentum: 5 },
-        { id: "dialogue", text: "Offer dialogue and a new financing deal for the regions", resultText: "Catalan moderates listen. The right calls it a surrender.", appeal: 0.01, momentum: 3, rivalAppeal: 0.005 },
+        { id: "firm_unity", text: "Hold your line on Catalonia and do not move", resultText: "Your own voters cheer. The other side of the argument hears a door closing.", appeal: 0.02, momentum: 5 },
+        { id: "dialogue", text: "Offer talks and a new financing deal for the regions", resultText: "Moderates on both sides listen. The hard liners call it a surrender.", appeal: 0.01, momentum: 3, rivalAppeal: 0.005 },
         { id: "dodge", text: "Talk about jobs and change the subject", resultText: "Nobody is angry, and nobody is satisfied either.", appeal: -0.01, momentum: -3 },
       ],
     },
@@ -432,7 +460,7 @@ export const SPAIN: CountryBundle = {
       choices: [
         { id: "name_partners", text: "Name your partners and campaign as a bloc", resultText: "Clarity reassures your side. The other side calls it a stitch-up.", appeal: 0.02, momentum: 5 },
         { id: "keep_open", text: "Keep every option open", resultText: "Nobody is ruled out, and nobody is quite reassured.", appeal: -0.01, momentum: -3 },
-        { id: "rule_out", text: "Rule out the kingmakers and dare voters to choose", resultText: "A bold line. It sharpens the contrast with your rival.", appeal: 0.015, momentum: 4, rivalAppeal: -0.02 },
+        { id: "rule_out", text: "Rule out the other camp and dare voters to choose", resultText: "A bold line. It sharpens the contrast with your rival.", appeal: 0.015, momentum: 4, rivalAppeal: -0.02 },
       ],
     },
     {
@@ -457,7 +485,7 @@ export const SPAIN_MODULE = countryModule(SPAIN, {
   art: { a: "#5a0f1c", b: "#c8860a", glow: "rgba(255,226,140,0.22)" },
   freeElections: ["2023"],
   scenarios: [
-    { electionId: "2023", difficulty: "easy",
+    { electionId: "2023", difficulty: "hard",
       description: "Sánchez calls a July vote after losing the May local elections. Feijóo needs Vox to reach 176, and Junts and the Basque parties hold the keys to any investiture." },
     { electionId: "2019", difficulty: "hard",
       description: "The Catalan parties sink Sánchez's budget and he calls an April vote. The right splits three ways between the PP, Citizens and a rising Vox." },
@@ -484,6 +512,6 @@ export const SPAIN_MODULE = countryModule(SPAIN, {
   },
   guide: {
     title: "Spain",
-    body: "350 seats are won province by province with closed party lists, grouped here into 14 regions. Small provinces mean a party needs a strong local base: the regional parties win seats on a few percent of the national vote, while small national parties win few. A government needs 176 votes in the first investiture ballot, or more yes than no in the second. The game scores the largest party and at most one partner, so real Spanish deals built from several parties and abstentions are reduced to that arithmetic. PP and PSOE never govern together, nobody but the PP deals with Vox, and the Catalan, Basque, Galician and Canarian parties cannot be played but shape every close result.",
+    body: "350 seats are won province by province with closed party lists, grouped here into 14 regions. Small provinces mean a party needs a strong local base: the regional parties win seats on a few percent of the national vote, while small national parties win few. A government needs 176 votes in the first investiture ballot, or more yes than no in the second. The game scores the largest party and at most one partner, so real Spanish deals built from several parties and abstentions are reduced to that arithmetic. PP and PSOE never govern together, nobody but the PP deals with Vox, and the Catalan and Basque parties can be played as regional parties: they stand in one or two regions, cannot win a majority, and win by beating their real seat count and becoming the votes a government needs. The Galician and Canarian parties shape close results from the sidelines.",
   },
 });

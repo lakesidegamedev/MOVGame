@@ -138,6 +138,11 @@ export interface CountryBundle {
   goalText: string;        // "172 of 343 seats"
   system: PoliticalSystem;
   playable: PartyId[];
+  // Playable parties that stand in only part of the country (Spain's Catalan
+  // and Basque parties). They are never the target of a generic random event,
+  // whose headlines are written for national parties, and the setup explains
+  // that they cannot win a majority. Absent ⇒ none.
+  regional?: PartyId[];
   abstaining: PartyId[];
   defaultSeatElasticity: number;
   issues: CountryIssueDef[];
@@ -413,6 +418,37 @@ function activeParties(country: CountryBundle, election: CountryElectionData): P
   return [...set].sort((a, b) => order.indexOf(a) - order.indexOf(b));
 }
 
+export interface RegionalReach {
+  /** Region ids where the party stands (has votes or seats) in this election. */
+  regions: string[];
+  /** Seats in those regions, the most the party could ever win. */
+  seats: number;
+  /** The party's real seat result in this election. */
+  historical: number;
+}
+
+/**
+ * Where a regional party stands in one election and what that caps it at, or
+ * null when the party is not listed in `regional` or does not stand.
+ */
+export function regionalReach(country: CountryBundle, electionId: string, party: PartyId): RegionalReach | null {
+  if (!country.regional?.includes(party)) return null;
+  const election = country.elections[electionId];
+  if (!election) return null;
+  const regions: string[] = [];
+  let seats = 0;
+  let historical = 0;
+  for (const meta of country.regions) {
+    const r = election.regions[meta.id];
+    if (!r) continue;
+    historical += r.s[party] ?? 0;
+    if ((r.v[party] ?? 0) <= 0 && (r.s[party] ?? 0) <= 0) continue;
+    regions.push(meta.id);
+    seats += Object.values(r.s).reduce((a, b) => a + b, 0);
+  }
+  return regions.length ? { regions, seats, historical } : null;
+}
+
 export function playablePartiesIn(country: CountryBundle, electionId: string): PartyId[] {
   const election = country.elections[electionId];
   if (!election) return [...country.playable];
@@ -456,9 +492,12 @@ export const COUNTRY_HANDICAP: Record<Difficulty, CountryHandicap> = {
 
 // One-time favorable-climate tilt: add `env` logits to the player's appeal in
 // every bloc, then refresh live support. No-op when env = 0 (normal/hard base).
+// Only where the player stands: a regional party does not appear on ballots
+// in regions it never contested.
 function applyCountryEnvironment(regions: StateContest[], player: PartyId, env: number) {
   if (!env) return;
   for (const region of regions) {
+    if (region.baselineShare?.[player] === undefined) continue;
     for (const bloc of region.blocs) {
       if (!bloc.appeal) continue;
       bloc.appeal[player] = (bloc.appeal[player] ?? 0) + env;
@@ -759,7 +798,8 @@ function applyCountryEventEffects(g: CountryGameState, country: CountryBundle, e
 
 function resolveCountryEventTarget(g: CountryGameState, country: CountryBundle, ev: CountryEventDef, rng: Rng): PartyId | undefined {
   const proj = computeSeatsResult(g.regions, majorityFor(g, country), g.abstaining);
-  const majors = g.parties.filter((p) => country.playable.includes(p));
+  const regional = country.regional ?? [];
+  const majors = g.parties.filter((p) => country.playable.includes(p) && !regional.includes(p));
   return ev.party && g.parties.includes(ev.party)
     ? ev.party
     : pickEventTarget(ev.role, g.playerParty, proj.largestParty, majors, (xs) => rng.pick(xs));

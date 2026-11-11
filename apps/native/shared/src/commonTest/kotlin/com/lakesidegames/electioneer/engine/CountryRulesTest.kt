@@ -105,4 +105,14 @@ class CountryRulesTest {
         }
         assertNull(getCountry("US"))
     }
+
+    @Test fun regionalPartiesArePlayableAndDecodeFromTheBundle() {
+        val es = getCountry("ES")!!
+        assertEquals(listOf("erc", "ciu", "pnv", "bil"), es.regional)
+        assertTrue(es.playable.containsAll(es.regional))
+        // A regional party leads its own campaign like any other side.
+        val erc = MobileCampaign.start("ES", "2023", "erc", "normal", "regional")
+        assertTrue(erc.goalText().isNotBlank())
+        for (country in COUNTRIES.values) assertTrue(country.playable.containsAll(country.regional), country.id)
+    }
 }

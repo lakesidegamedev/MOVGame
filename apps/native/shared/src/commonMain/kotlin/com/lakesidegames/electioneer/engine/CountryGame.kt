@@ -172,6 +172,8 @@ val COUNTRY_HANDICAP: Map<String, CountryHandicap> = mapOf(
 private fun applyCountryEnvironment(regions: List<StateContest>, player: PartyId, env: Double) {
     if (env == 0.0) return
     for (region in regions) {
+        // Only where the player stands (web applyCountryEnvironment).
+        if (region.baselineShare?.get(player) == null) continue
         for (bloc in region.blocs) {
             val appeal = bloc.appeal ?: continue
             appeal[player] = (appeal[player] ?: 0.0) + env
@@ -493,7 +495,7 @@ private fun resolveCountryEventTarget(
     rng: Rng,
 ): PartyId? {
     val proj = computeSeatsResult(g.regions, majorityFor(g, country), g.abstaining)
-    val majors = g.parties.filter { country.playable.contains(it) }
+    val majors = g.parties.filter { country.playable.contains(it) && !country.regional.contains(it) }
     return if (ev.party != null && g.parties.contains(ev.party)) {
         ev.party
     } else {

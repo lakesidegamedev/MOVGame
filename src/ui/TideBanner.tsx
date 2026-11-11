@@ -27,3 +27,30 @@ export function ChallengePartyBanner({ partyLabel }: { partyLabel: string }) {
     </div>
   );
 }
+
+/**
+ * Shown when the player picks a regional party (CountryBundle.regional): where
+ * it stands, why it cannot win a majority, and what counts as success.
+ */
+export function RegionalPartyBanner({ partyLabel, regionNames, seats, total, unitPlural, historical }: {
+  partyLabel: string;
+  regionNames: string[];
+  seats: number;
+  total: number;
+  unitPlural: string;
+  historical: number;
+}) {
+  const where = regionNames.length <= 1
+    ? regionNames.join("")
+    : `${regionNames.slice(0, -1).join(", ")} and ${regionNames[regionNames.length - 1]}`;
+  return (
+    <div className="callout warning">
+      <div className="callout-title">Regional party</div>
+      <div className="callout-body">
+        {partyLabel} stands only in {where}: {seats} of {total} {unitPlural}, so it cannot win a majority or the most {unitPlural}.
+        Success is beating its real result of {historical} {historical === 1 ? unitPlural.replace(/s$/, "") : unitPlural} and
+        ending with the votes a government needs. The results screen scores you against that real result.
+      </div>
+    </div>
+  );
+}
