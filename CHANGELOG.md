@@ -148,6 +148,22 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   hold the rest of each country's elections; the Store shows the free one on the pack page as
   "Free", and the base game section lists every free election by country. Nobody loses anything:
   owners of a pack or the retired Global pack keep every election they had.
+- Android: a full interface pass. The app now uses the same colors, type sizes, spacing and
+  party color rules as the web game, so dark party colors stay readable and every screen has
+  one clear main action. The campaign desk for the U.S., the UK and every other country shows a
+  seat bar with the majority line, a standings table, a tappable map with a matching region
+  list, and End week pinned to the bottom of the screen. Long party lists, such as India's ten
+  playable sides, are picked from a full list instead of a dropdown.
+- Android: the campaign library groups all twelve countries and their elections by country,
+  with search and filters for free and owned elections, difficulty and era. Each election opens
+  a briefing with the party picker, difficulty and seed.
+- Android: the Store lists every pack, with the Complete Collection first. It shows what you
+  own and why (bought, included in the Complete Collection, or part of an older Global pack),
+  the Google Play price when a pack is on sale, and "Coming soon" when it is not. There is no
+  Buy button for a pack you cannot buy yet.
+- Android: results, election night, saved campaigns, leaderboards, settings and the account
+  screen use the new layout, with numbers in aligned columns and larger touch targets.
+
 - Countries are now self-contained add-ons inside the game. Each country carries its own
   elections, store pack, daily challenge sides and "play next" links, and the web game, the
   iPhone app and the Android app all list countries and packs from that one source. Nothing

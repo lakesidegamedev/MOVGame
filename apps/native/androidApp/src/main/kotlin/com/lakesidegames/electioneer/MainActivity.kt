@@ -15,13 +15,18 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.unit.dp
+import com.lakesidegames.electioneer.ui.Mov
+import com.lakesidegames.electioneer.ui.MovTheme
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.PlayArrow
@@ -103,50 +108,49 @@ fun MarginOfVictoryApp(session: GameSession, activity: Activity) {
         else if (screen in listOf(Screen.ANALYSIS, Screen.REPLAY)) session.resumeGame()
         else session.go(Screen.HOME)
     }
-    MaterialTheme(colorScheme = darkColorScheme(
-        primary = Color(0xFFF5B942), onPrimary = Color(0xFF17202B),
-        background = Color(0xFF0A0F14), surface = Color(0xFF111B26),
-        surfaceVariant = Color(0xFF16222E), onSurface = Color(0xFFEAF0F6),
-        onSurfaceVariant = Color(0xFFA8B5C2), primaryContainer = Color(0xFF35402D),
-    )) {
-        Surface {
+    MovTheme {
+        Surface(color = Mov.Surface0) {
             if (askUrl != null) AskDialog(askUrl!!, onRefresh = session::askUrl,
                 onClose = { askUrl = null }, smoke = capture?.takeIf { it in listOf("ask-offline", "ask-blank", "ask-retry") })
             Scaffold(
+                containerColor = Mov.Surface0,
                 topBar = {
                     if (screen in listOf(Screen.HOME, Screen.GAME, Screen.WORLD_GAME, Screen.RESULTS)) {
-                        TextButton(onClick = { askUrl = session.askUrl() }, modifier = Modifier.statusBarsPadding()) {
-                            Text(if (session.hasSave()) "Ask about this campaign" else "Ask about Margin of Victory")
+                        Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(if (screen == Screen.HOME) "" else "Margin of Victory", Modifier.padding(start = 12.dp).weight(1f), color = Mov.Text3,
+                                style = MaterialTheme.typography.labelLarge)
+                            TextButton(onClick = { askUrl = session.askUrl() }, colors = ButtonDefaults.textButtonColors(contentColor = Mov.Info)) {
+                                Text(if (session.hasSave()) "Ask about this campaign" else "Ask about Margin of Victory", style = MaterialTheme.typography.labelLarge)
+                            }
                         }
                     }
                 },
                 bottomBar = {
-                    NavigationBar {
+                    val itemColors = NavigationBarItemDefaults.colors(selectedIconColor = Mov.Text1, selectedTextColor = Mov.Text1,
+                        indicatorColor = Mov.AccentSoft, unselectedIconColor = Mov.Text3, unselectedTextColor = Mov.Text3)
+                    NavigationBar(containerColor = Mov.Surface1, tonalElevation = 0.dp) {
                         NavigationBarItem(
                             selected = screen == Screen.HOME || screen == Screen.SETUP || screen == Screen.LOADING ||
                                 screen == Screen.GAME ||
                                 screen == Screen.RESULTS || screen == Screen.LIBRARY || screen == Screen.WORLD_GAME || screen == Screen.ANALYSIS || screen == Screen.REPLAY || screen == Screen.REVEAL,
                             onClick = { session.playTab() },
-                            icon = {
-                                Icon(Icons.Filled.PlayArrow, contentDescription = "Play")
-                            },
+                            icon = { Icon(Icons.Filled.PlayArrow, contentDescription = null) },
                             label = { Text("Play") },
+                            colors = itemColors,
                         )
                         NavigationBarItem(
                             selected = screen == Screen.STORE,
                             onClick = { session.go(Screen.STORE) },
-                            icon = {
-                                Icon(Icons.Filled.ShoppingCart, contentDescription = "Store")
-                            },
+                            icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = null) },
                             label = { Text("Store") },
+                            colors = itemColors,
                         )
                         NavigationBarItem(
                             selected = screen in listOf(Screen.ACCOUNT, Screen.SAVES, Screen.BOARDS, Screen.SETTINGS, Screen.GUIDE, Screen.EDITOR),
                             onClick = { session.go(Screen.ACCOUNT) },
-                            icon = {
-                                Icon(Icons.Filled.AccountCircle, contentDescription = "Account")
-                            },
+                            icon = { Icon(Icons.Filled.AccountCircle, contentDescription = null) },
                             label = { Text("Account") },
+                            colors = itemColors,
                         )
                     }
                 },
@@ -156,9 +160,9 @@ fun MarginOfVictoryApp(session: GameSession, activity: Activity) {
                     when (screen) {
                         Screen.HOME -> HomeScreen(session)
                         Screen.SETUP -> SetupScreen(session)
-                        Screen.LOADING -> Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                            CircularProgressIndicator()
-                            Text("Preparing the campaign trail…")
+                        Screen.LOADING -> Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)) {
+                            CircularProgressIndicator(color = Mov.Accent)
+                            Text("Preparing the campaign", color = Mov.Text2)
                         }
                         Screen.GAME -> GameScreen(session)
                         Screen.RESULTS -> ResultsScreen(session)

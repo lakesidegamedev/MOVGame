@@ -86,7 +86,7 @@ def tap_label(label, direction='down', suffix=False, prefix=False):
             continue
         nodes = ET.fromstring((output / f'tap-{attempt}.xml').read_text()).iter('node')
         for node in nodes:
-            text = node.get('text', '').strip()
+            text = (node.get('text', '') or node.get('content-desc', '')).strip()
             matches = text.endswith(label) if suffix else text.startswith(label) if prefix else text == label
             if not matches or node.get('enabled') != 'true':
                 continue
@@ -169,10 +169,16 @@ COUNTRIES = ('US', 'UK', 'CA', 'DE', 'FR', 'AU', 'NZ', 'BR', 'IN', 'ES', 'IE', '
 
 def route_flows():
     routes = [('home', 'Margin of'), ('library', 'Choose your election'), ('setup', 'Choose your path'),
-              ('store', 'History is yours to play'), ('account', 'YOUR ACCOUNT'), ('settings', 'Sound effects'), ('guide', 'HOW TO PLAY'),
+              ('store', 'Election packs'), ('boards', 'Daily champions'), ('account', 'YOUR ACCOUNT'), ('settings', 'Sound effects'), ('guide', 'HOW TO PLAY'),
               ('editor', 'SCENARIO EDITOR'), ('saves', 'SAVED CAMPAIGNS'), ('analysis', 'CAMPAIGN ANALYSIS'), ('replay', 'CAMPAIGN REPLAY AND REPORT')]
     for flow, marker in routes:
         shot(flow, marker, 'ask')
+    # A side picker per engine, including India's ten playable sides.
+    for country in ('US', 'UK', 'IN', 'JP'):
+        shot(f'library-{country}', 'Choose your presidential ticket' if country == 'US' else 'Choose your side', 'ask')
+    # Election night for each engine, held on screen for the capture.
+    for country in ('US', 'UK', 'IN', 'BR'):
+        shot(f'reveal-{country}', 'Election night')
     for country in COUNTRIES:
         kinds = ('game', 'custom', 'results') if country in ('US', 'UK', 'CA', 'DE', 'FR', 'AU') else ('game', 'results')
         for kind in kinds:
@@ -205,9 +211,10 @@ def layout_flows():
         adb('shell', 'wm', 'size', size)
         adb('shell', 'wm', 'density', density)
         time.sleep(2)
-        for flow, marker in [('settings', 'Sound effects'), ('editor', 'SCENARIO EDITOR'), ('saves', 'SAVED CAMPAIGNS'), ('game-DE', 'WEEK')]:
-            launch(flow)
-            capture(f'{layout}-{flow}', marker, 'ask')
+        for flow, marker in [('settings', 'Sound effects'), ('editor', 'SCENARIO EDITOR'), ('saves', 'SAVED CAMPAIGNS'), ('game-DE', 'WEEK'),
+                             ('game-US', 'CAMPAIGN DESK'), ('game-IN', 'WEEK'), ('library', 'Choose your election'), ('library-IN', 'Choose your side'),
+                             ('store', 'Election packs'), ('results-US', 'CAMPAIGN SCORE')]:
+            shot(flow, marker, 'ask', name=f'{layout}-{flow}')
     adb('shell', 'settings', 'put', 'system', 'font_scale', '1.0')
     adb('shell', 'wm', 'size', 'reset')
     adb('shell', 'wm', 'density', 'reset')
@@ -222,7 +229,7 @@ def queue_flows():
     capture('queue-added', '1 planned', 'ask')
     tap_label('Add to day 1')
     capture('queue-added-twice', '2 planned', 'ask')
-    tap_label('Fundraise  ×', suffix=True)
+    tap_label('Remove Fundraise', prefix=True)
     capture('queue-removed', '1 planned', 'ask')
     tap_label('Clear all', direction='up')
     capture('queue-cleared', '0 planned', 'ask')

@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import java.io.ByteArrayOutputStream
@@ -68,58 +69,64 @@ fun CampaignSavesScreen(session: GameSession) {
         }
     }
     LaunchedEffect(user?.id) { if (user != null) account.loadCloudSaves() }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("SAVED CAMPAIGNS", style = MaterialTheme.typography.headlineSmall)
-        Text("Local saves work offline. When signed in, U.S. autosaves and named saves sync with the web. Conflicting cloud saves need your choice.", style = MaterialTheme.typography.bodySmall)
-        OutlinedTextField(name, { name = it }, label = { Text("Save name") }, modifier = Modifier.fillMaxWidth())
-        Button(onClick = { if (session.saveNamed(name)) name = "" }, enabled = name.isNotBlank() && session.currentSnapshot() != null) { Text("Save current campaign") }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { importFile.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }) { Text("Import file") }
-            OutlinedButton(onClick = {
-                exporting = session.exportCampaign()
-                if (exporting != null) exportFile.launch("mov-campaign.json")
-            }, enabled = session.currentSnapshot() != null) { Text("Export current") }
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+        ScreenHeader("Your campaigns", "Saved campaigns",
+            "Local saves work offline. When you are signed in, U.S. autosaves and named saves sync with the web.")
+        listOfNotNull(fileNotice, notice, remoteNotice).distinct().forEach { Notice(it) }
+        MovCard {
+            CardHead("Current campaign") { Text(session.savedCampaignLabel() ?: "None", color = Mov.Text3, style = MaterialTheme.typography.labelMedium) }
+            OutlinedTextField(name, { name = it }, label = { Text("Save name") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
+                colors = movFieldColors(), shape = MovRadius.md)
+            PrimaryButton("Save current campaign", { if (session.saveNamed(name)) name = "" }, Modifier.fillMaxWidth(),
+                enabled = name.isNotBlank() && session.currentSnapshot() != null)
+            Row(horizontalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
+                SecondaryButton("Import file", { importFile.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }, Modifier.weight(1f))
+                SecondaryButton("Export current", {
+                    exporting = session.exportCampaign()
+                    if (exporting != null) exportFile.launch("mov-campaign.json")
+                }, Modifier.weight(1f), enabled = session.currentSnapshot() != null)
+            }
         }
-        listOfNotNull(fileNotice, notice, remoteNotice).distinct().forEach { Text(it, style = MaterialTheme.typography.bodySmall) }
+        Eyebrow("On this device · ${saves.size}")
+        if (saves.isEmpty()) Text("No saved campaigns yet.", color = Mov.Text3, style = MaterialTheme.typography.bodyMedium)
         saves.forEach { save ->
             val document = save.document
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(save.name, style = MaterialTheme.typography.titleSmall)
-                    Text("${document?.label ?: "Campaign"} · Week ${document?.turn ?: 0}", style = MaterialTheme.typography.bodySmall)
-                    Row {
-                        TextButton(onClick = { session.loadNamed(save.id) }) { Text("Load") }
-                        TextButton(onClick = { renaming = save.id; rename = save.name }) { Text("Rename") }
-                        TextButton(onClick = { deletingLocal = save.id }) { Text("Delete") }
+            MovCard(tight = true) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(save.name, style = MaterialTheme.typography.titleSmall, color = Mov.Text1)
+                        Text("${document?.label ?: "Campaign"} · Week ${document?.turn ?: 0}", style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
                     }
-                    if (user != null && document?.engine == "us") Row {
-                        TextButton(onClick = { session.uploadSave(save.id) }, enabled = !busy) { Text("Upload") }
-                        TextButton(onClick = { session.uploadSaveAsNew(save.id) }, enabled = !busy) { Text("Upload as new") }
-                    }
+                    if (save.cloudOwner != null) Tag("Cloud", TagKind.Info)
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
+                    SecondaryButton("Load", { session.loadNamed(save.id) })
+                    GhostButton("Rename", { renaming = save.id; rename = save.name }, color = Mov.Text2)
+                    GhostButton("Delete", { deletingLocal = save.id }, color = Mov.Negative)
+                }
+                if (user != null && document?.engine == "us") Row(horizontalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
+                    GhostButton("Upload", { session.uploadSave(save.id) }, enabled = !busy)
+                    GhostButton("Upload as new", { session.uploadSaveAsNew(save.id) }, enabled = !busy)
                 }
             }
         }
-        if (user != null) {
-            syncNotice?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-            TextButton(onClick = session::retryCloudSync, enabled = !busy) { Text("Retry cloud sync") }
-        }
-        Text("CLOUD SAVES", style = MaterialTheme.typography.titleMedium)
-        if (user == null) TextButton(onClick = { session.go(Screen.ACCOUNT) }) { Text("Sign in to sync saves") }
-        else {
-            TextButton(onClick = account::loadCloudSaves, enabled = !busy) { Text("Refresh cloud saves") }
-            cloud.forEach { save ->
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text("${save.name} · Week ${save.turn}")
-                        Row {
-                            TextButton(onClick = { session.downloadSave(save.id) }, enabled = !busy) { Text("Download") }
-                            TextButton(onClick = { deletingCloud = save.id }, enabled = !busy) { Text("Delete online") }
-                        }
+        MovCard {
+            CardHead("Cloud saves") { if (user != null) GhostButton("Refresh", account::loadCloudSaves, enabled = !busy) }
+            if (user == null) SecondaryButton("Sign in to sync saves", { session.go(Screen.ACCOUNT) }, Modifier.fillMaxWidth())
+            else {
+                syncNotice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Mov.Text2) }
+                if (cloud.isEmpty()) Text("No cloud saves.", color = Mov.Text3, style = MaterialTheme.typography.bodyMedium)
+                cloud.forEach { save ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("${save.name} · Week ${save.turn}", Modifier.weight(1f), color = Mov.Text1, style = MaterialTheme.typography.bodyMedium)
+                        GhostButton("Download", { session.downloadSave(save.id) }, enabled = !busy)
+                        GhostButton("Delete", { deletingCloud = save.id }, enabled = !busy, color = Mov.Negative)
                     }
                 }
+                GhostButton("Retry cloud sync", session::retryCloudSync, enabled = !busy, color = Mov.Text2)
             }
         }
-        OutlinedButton(onClick = { session.go(Screen.ACCOUNT) }) { Text("Back to account") }
+        GhostButton("Back to account", { session.go(Screen.ACCOUNT) }, color = Mov.Text2)
     }
     if (renaming != null) AlertDialog(onDismissRequest = { renaming = null }, title = { Text("Rename campaign") },
         text = { OutlinedTextField(rename, { rename = it }) }, confirmButton = { TextButton(onClick = {

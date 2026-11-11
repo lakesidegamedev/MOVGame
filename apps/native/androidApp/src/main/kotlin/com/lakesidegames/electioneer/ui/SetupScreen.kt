@@ -12,6 +12,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -20,32 +23,34 @@ import com.lakesidegames.electioneer.engine.EventMode
 
 @Composable
 fun HomeScreen(session: GameSession) {
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        Spacer(Modifier.height(28.dp))
-        Text("THE ROAD TO 270", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
-        Text("Margin of\nVictory", style = MaterialTheme.typography.displayMedium, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Black)
-        Text("Every state has a story. Every decision moves the map.", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(10.dp))
+    val countries = remember { com.lakesidegames.electioneer.engine.NativeCatalog.countries() }
+    val electionCount = remember { countries.sumOf { com.lakesidegames.electioneer.engine.MobileCampaign.elections(it.id).size } }
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s4)) {
+        Spacer(Modifier.height(MovSpace.s4))
+        Eyebrow("Election campaign strategy", color = Mov.AccentText)
+        Text("Margin of Victory", style = MaterialTheme.typography.displayMedium, color = Mov.Text1)
+        Text("Run the campaign in ${countries.size} countries and $electionCount elections. Every week of choices moves the map.",
+            style = MaterialTheme.typography.bodyLarge, color = Mov.Text2)
+        Text(countries.joinToString(" ") { it.flag }, style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { contentDescription = countries.joinToString(", ") { it.name } })
         if (session.hasSave()) {
-            Card(Modifier.fillMaxWidth().clickable { session.resumeGame() }) {
-                Column(Modifier.padding(20.dp)) {
-                    Text("CONTINUE CAMPAIGN", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
-                    Text(session.savedCampaignLabel() ?: "Your campaign", style = MaterialTheme.typography.headlineSmall)
-                    Text("Return to the campaign trail →", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+            MovCard(accent = true, color = Mov.Surface2, onClick = { session.resumeGame() }, onClickLabel = "Continue campaign") {
+                Eyebrow("Continue campaign", color = Mov.AccentText)
+                Text(session.savedCampaignLabel() ?: "Your campaign", style = MaterialTheme.typography.headlineSmall, color = Mov.Text1)
+                PrimaryButton("Continue campaign", { session.resumeGame() }, Modifier.fillMaxWidth())
             }
-        }
-        Button(onClick = { session.go(Screen.LIBRARY) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-            Text("Start a new campaign")
-        }
+            SecondaryButton("Start a new campaign", { session.go(Screen.LIBRARY) }, Modifier.fillMaxWidth())
+        } else PrimaryButton("Start a new campaign", { session.go(Screen.LIBRARY) }, Modifier.fillMaxWidth(), large = true)
         val daily = session.dailyAssignment()
-        Card(Modifier.fillMaxWidth().clickable { session.openDaily() }) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("DAILY CHALLENGE · ${daily.date}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
-            Text("${daily.flag} ${daily.label}", style = MaterialTheme.typography.titleMedium)
-            Text("Play as ${daily.roleName} · same seed and events for everyone", style = MaterialTheme.typography.bodySmall)
-            Text(session.dailyBest()?.let { "Played · Best $it · ${session.dailyStreak()}-day streak" } ?: "Play today's challenge", color = MaterialTheme.colorScheme.primary)
-        } }
-        Text("Six countries. Historical campaigns and today's political battles.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        MovCard(onClick = { session.openDaily() }, onClickLabel = "Play the daily challenge") {
+            CardHead("Daily challenge") { Text(daily.date, color = Mov.Text3, style = MaterialTheme.typography.labelMedium.num) }
+            Text("${daily.flag} ${daily.label}", style = MaterialTheme.typography.titleMedium, color = Mov.Text1)
+            Text("Play as ${daily.roleName}. Same seed and events for everyone.", style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
+            val best = session.dailyBest()
+            if (best != null) Row(horizontalArrangement = Arrangement.spacedBy(MovSpace.s1_5)) {
+                Tag("Best $best", TagKind.Positive); Tag("${session.dailyStreak()}-day streak", TagKind.Warning)
+            } else Text("Play today's challenge", color = Mov.AccentText, style = MaterialTheme.typography.labelLarge)
+        }
     }
 }
 
@@ -68,105 +73,101 @@ fun SetupScreen(session: GameSession) {
     val mates = remember(scenarioId, player) { session.mates(scenarioId, player) }
     val selectedMate = mates.firstOrNull { it.id == mateId } ?: mates.firstOrNull { it.historical } ?: mates.first()
 
+    Column(Modifier.fillMaxSize()) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.weight(1f),
+        contentPadding = PaddingValues(MovSpace.gutter),
+        verticalArrangement = Arrangement.spacedBy(MovSpace.s3),
     ) {
         item {
-            TextButton(onClick = { session.go(Screen.HOME) }) { Text("← Campaign menu") }
-            Text("NEW CAMPAIGN", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
-            Text("Choose your path", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-            Text("Build the ticket. Assemble the team. Rewrite the map.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            GhostButton("All elections", { session.go(Screen.LIBRARY) }, color = Mov.Text2)
+            ScreenHeader("New U.S. campaign", "Choose your path", "Pick the election, the ticket and the team.")
         }
         item {
-            SetupSection("01  THE ELECTION") {
-                Text("SWIPE THROUGH 17 ELECTIONS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            SetupSection("1 · The election") {
+                Text("${campaigns.size} elections. Swipe for more.", style = MaterialTheme.typography.labelMedium, color = Mov.Text3)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(campaigns) { c ->
                         val selected = scenarioId == c.id
-                        OutlinedCard(onClick = { scenarioId = c.id; mateId = "" }, modifier = Modifier.width(248.dp), colors = CardDefaults.outlinedCardColors(containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(c.year.toString(), style = MaterialTheme.typography.displaySmall, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Black, color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
-                                Text(c.label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                                Text("${c.demName}  v.  ${c.repName}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        MovCard(Modifier.width(220.dp), tight = true, accent = selected, color = if (selected) Mov.Surface2 else Mov.Surface1,
+                            onClick = { scenarioId = c.id; mateId = "" }) {
+                            Text(c.year.toString(), style = MaterialTheme.typography.displaySmall.num, color = if (selected) Mov.AccentText else Mov.Text1)
+                            Text(electionTitle(c.label), style = MaterialTheme.typography.titleSmall, color = Mov.Text1, maxLines = 2)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(c.demName, color = Mov.DemText, style = MaterialTheme.typography.bodySmall)
+                                Text(" v. ", color = Mov.Text4, style = MaterialTheme.typography.bodySmall)
+                                Text(c.repName, color = Mov.GopText, style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
                 }
-                Text(campaign.tagline, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(campaign.tagline, color = Mov.Text2, style = MaterialTheme.typography.bodyMedium)
             }
         }
         item {
-            SetupSection("02  YOUR TICKET") {
+            SetupSection("2 · Your ticket") {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = player == CandidateId.DEM, onClick = { player = CandidateId.DEM; mateId = "" }, label = { Text(campaign.demName) })
-                    FilterChip(selected = player == CandidateId.REP, onClick = { player = CandidateId.REP; mateId = "" }, label = { Text(campaign.repName) })
+                    MovChip(campaign.demName, player == CandidateId.DEM, { player = CandidateId.DEM; mateId = "" }, leading = Mov.Dem)
+                    MovChip(campaign.repName, player == CandidateId.REP, { player = CandidateId.REP; mateId = "" }, leading = Mov.Gop)
                 }
-                Text("Running mate", style = MaterialTheme.typography.labelMedium)
+                Eyebrow("Running mate")
                 mates.forEach { mate ->
                     val selected = selectedMate.id == mate.id
-                    OutlinedCard(onClick = { mateId = mate.id }, modifier = Modifier.fillMaxWidth(), colors = CardDefaults.outlinedCardColors(containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
-                        Column(Modifier.padding(12.dp)) {
-                            Text(mate.name + if (mate.historical) " • Historical" else "", fontWeight = FontWeight.Bold)
-                            Text(mate.blurb, style = MaterialTheme.typography.bodySmall)
+                    MovCard(tight = true, accent = selected, color = if (selected) Mov.Surface2 else Mov.Surface1, onClick = { mateId = mate.id }) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(mate.name, Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, color = Mov.Text1)
+                            if (mate.historical) Tag("Historical", TagKind.Outline)
                         }
+                        Text(mate.blurb, style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
                     }
                 }
             }
         }
         item {
-            SetupSection("03  WAR ROOM  ·  ${staffIds.size}/3") {
-                Text("Hire up to three advisers", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            SetupSection("3 · War room · ${staffIds.size} of 3 hired") {
+                Text("Hire up to three advisers", color = Mov.Text3, style = MaterialTheme.typography.bodyMedium)
                 session.staffChoices().forEach { staff ->
                     val selected = staff.id in staffIds
-                    OutlinedCard(onClick = { staffIds = if (selected) staffIds - staff.id else if (staffIds.size < 3) staffIds + staff.id else staffIds }, modifier = Modifier.fillMaxWidth(), colors = CardDefaults.outlinedCardColors(containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
-                        Column(Modifier.padding(12.dp)) {
-                            Text("${if (selected) "✓  " else ""}${staff.name} · ${staff.role}", fontWeight = FontWeight.Bold)
-                            Text(staff.blurb, style = MaterialTheme.typography.bodySmall)
+                    MovCard(tight = true, accent = selected, color = if (selected) Mov.Surface2 else Mov.Surface1,
+                        onClick = { staffIds = if (selected) staffIds - staff.id else if (staffIds.size < 3) staffIds + staff.id else staffIds }) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("${staff.name} · ${staff.role}", Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, color = Mov.Text1)
+                            if (selected) Tag("Hired", TagKind.Accent)
                         }
+                        Text(staff.blurb, style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
                     }
                 }
             }
         }
         item {
-            SetupSection("04  CAMPAIGN BRIEFING") {
-                Text("Difficulty", style = MaterialTheme.typography.labelMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    DIFFICULTIES.forEach { d -> FilterChip(selected = difficulty == d, onClick = { difficulty = d }, label = { Text(d.replaceFirstChar(Char::titlecase)) }) }
-                }
-                Text("Events", style = MaterialTheme.typography.labelMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    EventMode.entries.forEach { m -> FilterChip(selected = mode == m, onClick = { mode = m }, label = { Text(m.serial.replaceFirstChar(Char::titlecase)) }) }
-                }
-                Text("Campaign length", style = MaterialTheme.typography.labelMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf(5, 9, 14).forEach { n -> FilterChip(selected = turns == n, onClick = { turns = n }, label = { Text("$n weeks") }) }
-                }
-                Text("What if: make one state a tossup", style = MaterialTheme.typography.labelMedium)
-                listOf("", "TX", "FL", "OH", "PA", "MI", "WI", "GA", "AZ", "NC", "NY").chunked(4).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        row.forEach { state -> FilterChip(selected = whatIfState == state, onClick = { whatIfState = state }, label = { Text(state.ifEmpty { "Off" }) }) }
-                    }
-                }
+            SetupSection("4 · Campaign rules") {
+                Eyebrow("Difficulty")
+                Segmented(DIFFICULTIES.map { it to it.replaceFirstChar(Char::titlecase) }, difficulty, { difficulty = it }, label = "Difficulty")
+                Eyebrow("Events")
+                Segmented(EventMode.entries.map { it.serial to it.serial.replaceFirstChar(Char::titlecase) }, mode.serial, { id -> mode = EventMode.entries.first { it.serial == id } }, label = "Events")
+                Eyebrow("Campaign length")
+                Segmented(listOf(5, 9, 14).map { "$it" to "$it weeks" }, "$turns", { turns = it.toInt() }, label = "Campaign length")
+                Eyebrow("What if: make one state a tossup")
+                ChipRow { listOf("", "TX", "FL", "OH", "PA", "MI", "WI", "GA", "AZ", "NC", "NY").forEach { state ->
+                    MovChip(state.ifEmpty { "Off" }, whatIfState == state, { whatIfState = state })
+                } }
                 NativeToggle("Mirror match · underdog boost", mirrorMatch, { mirrorMatch = it })
                 NativeToggle("Pandemic era issues", pandemic, { pandemic = it })
-                OutlinedTextField(value = seed, onValueChange = { seed = it.take(32) }, label = { Text("Campaign seed") }, supportingText = { Text("Use the same seed to replay the same campaign") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = seed, onValueChange = { seed = it.take(32) }, label = { Text("Campaign seed") }, supportingText = { Text("Use the same seed to replay the same campaign") },
+                    modifier = Modifier.fillMaxWidth(), colors = movFieldColors(), shape = MovRadius.md, singleLine = true)
             }
         }
-        item {
-            Button(onClick = { session.newGame(scenarioId, player, selectedMate.id, staffIds.toList(), difficulty, mode, turns, seed, whatIfState, mirrorMatch, pandemic) }, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("Launch campaign →") }
-            Spacer(Modifier.height(12.dp))
-        }
+    }
+    ActionBar {
+        PrimaryButton("Launch ${campaign.year} campaign", { session.newGame(scenarioId, player, selectedMate.id, staffIds.toList(), difficulty, mode, turns, seed, whatIfState, mirrorMatch, pandemic) }, Modifier.weight(1f))
+    }
     }
 }
 
 @Composable
 private fun SetupSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp), content = {
-            Text(title, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-            content()
-        })
+    MovCard {
+        Eyebrow(title, color = Mov.AccentText)
+        content()
     }
 }

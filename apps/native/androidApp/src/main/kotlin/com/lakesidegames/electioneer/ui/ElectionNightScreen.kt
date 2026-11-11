@@ -1,18 +1,19 @@
 package com.lakesidegames.electioneer.ui
 
 import android.provider.Settings
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
@@ -29,45 +30,44 @@ fun ElectionNightScreen(session: GameSession) {
     val board = reveal.board(index)
     LaunchedEffect(reveal, index, speed, instant) {
         if (index < reveal.count()) { delay(reveal.delay(index, speed).toLong()); index++ }
-        else if (instant) { delay(1500); session.finishReveal() }
+        else if (instant && !session.captureHoldReveal) { delay(1500); session.finishReveal() }
     }
-    fun color(hex: String) = runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(Color.Gray)
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("LIVE · ELECTION NIGHT", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-        Text(data.title, style = MaterialTheme.typography.headlineSmall)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = { speed = 1; instant = false }) { Text("1×") }
-            TextButton(onClick = { speed = 2; instant = false }) { Text("2×") }
-            TextButton(onClick = { instant = true; index = reveal.count() }) { Text("Instant") }
-            TextButton(onClick = session::finishReveal) { Text("Skip") }
-        }
-        Text(board.status, color = MaterialTheme.colorScheme.primary)
-        board.projection?.let { Text(it, style = MaterialTheme.typography.titleLarge) }
-        board.rows.forEach { row ->
-            Text("${row.name}: ${row.units} ${data.unitLabel}", style = MaterialTheme.typography.titleMedium)
-            LinearProgressIndicator(progress = { row.units.toFloat() / data.totalUnits }, modifier = Modifier.fillMaxWidth(), color = color(row.color))
-        }
-        Text("${board.calledUnits} of ${data.totalUnits} called · ${data.goalLabel()} · ${board.remaining} remaining")
-        val map = reveal.map()
-        val called = board.called.associateBy { it.id }
-        Canvas(Modifier.fillMaxWidth().height(240.dp).semantics { contentDescription = "Election map. " + board.called.joinToString { "${it.name}: ${it.winnerShort} leads" } }) {
-            val factor = minOf(size.width / map.width, size.height / map.height).toFloat()
-            val left = (size.width - map.width.toFloat() * factor) / 2
-            val top = (size.height - map.height.toFloat() * factor) / 2
-            for (shape in map.shapes) {
-                val path = Path()
-                for (polygon in shape.polygons) {
-                    polygon.points.forEachIndexed { i, point ->
-                        val x = left + point.x.toFloat() * factor; val y = top + point.y.toFloat() * factor
-                        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-                    }
-                    path.close()
+    val leader = board.rows.maxByOrNull { it.units }
+    Column(Modifier.fillMaxSize()) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Eyebrow(if (board.finished) "Election night · final" else "Live · Election night", color = Mov.Negative)
+                    Text(data.title, style = MaterialTheme.typography.headlineSmall, color = Mov.Text1)
                 }
-                drawPath(path, called[shape.id]?.let { color(it.winnerColor) } ?: Color(0xFF283649))
-                drawPath(path, Color(0xFF0A0F14), style = androidx.compose.ui.graphics.drawscope.Stroke(1f))
+            }
+            Segmented(listOf("1" to "1×", "2" to "2×", "instant" to "Instant"), if (instant) "instant" else "$speed", { id ->
+                if (id == "instant") { instant = true; index = reveal.count() } else { speed = id.toInt(); instant = false }
+            }, label = "Reveal speed")
+            MovCard {
+                Text(board.status, color = Mov.Warning, style = MaterialTheme.typography.labelLarge, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+                board.projection?.let { Text(it, style = MaterialTheme.typography.titleLarge, color = Mov.Text1) }
+                SeatBar(board.rows.map { partyFill(it.color) to it.units }, data.totalUnits, data.threshold,
+                    description = board.rows.joinToString("; ") { "${it.name} ${it.units} ${data.unitLabel}" } + ". ${data.threshold} to win.")
+                board.rows.forEach { row ->
+                    PartyRow(row.color, row.name, listOf("${row.units}"), highlight = row.id == data.playerPartyId, tag = if (row.id == data.playerPartyId) "You" else null)
+                }
+                KeyValue("Called", "${board.calledUnits} of ${data.totalUnits}")
+                KeyValue("To win", "${data.threshold}")
+                KeyValue("Remaining", "${board.remaining}")
+            }
+            MovCard(tight = true) {
+                CardHead("Results map") { leader?.let { Text("${it.name} leads", color = partyInk(it.color), style = MaterialTheme.typography.labelLarge) } }
+                val called = board.called.associateBy { it.id }
+                NativeCountryMap(reveal.map(), called.mapValues { partyFill(it.value.winnerColor) }, null, null,
+                    "Election map. " + board.called.joinToString { "${it.name}: ${it.winnerShort} leads" }, maxHeight = 280.dp)
+                board.lastCall?.let { Text(it, style = MaterialTheme.typography.titleSmall, color = Mov.Text1, fontWeight = FontWeight.SemiBold) }
             }
         }
-        board.lastCall?.let { Text(it, style = MaterialTheme.typography.titleMedium) }
-        if (board.finished) Button(onClick = session::finishReveal, modifier = Modifier.fillMaxWidth()) { Text("View full results") }
+        ActionBar {
+            if (board.finished) PrimaryButton("View full results", session::finishReveal, Modifier.weight(1f))
+            else SecondaryButton("Skip to results", session::finishReveal, Modifier.weight(1f))
+        }
     }
 }
+

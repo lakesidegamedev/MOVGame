@@ -12,6 +12,8 @@ data class NativeElection(
     val free: Boolean = true, val packId: String? = null,
     // The daily's two sides when they differ from the country's pair (web ScenarioMeta.dailyPair).
     val dailyPair: List<String>? = null,
+    /** Registry difficulty ("easy", "medium", "hard"), for library filters. */
+    val difficulty: String = "medium",
 )
 
 data class NativeCountry(val id: String, val name: String, val flag: String)

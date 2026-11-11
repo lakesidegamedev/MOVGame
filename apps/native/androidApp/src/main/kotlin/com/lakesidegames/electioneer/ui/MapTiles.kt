@@ -18,6 +18,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import com.lakesidegames.electioneer.engine.CandidateId
 import com.lakesidegames.electioneer.engine.Projection
 
@@ -50,16 +56,16 @@ private val byPos: Map<Pair<Int, Int>, String> =
 fun tileColor(lean: String?, demShare: Double?): Color = when (lean) {
     CandidateId.DEM.serial -> {
         val t = (((demShare ?: 0.6) - 0.5) * 2).toFloat().coerceIn(0.15f, 1f)
-        Color(0xFF1D4ED8).copy(alpha = 0.35f + 0.65f * t)
+        lerp(Color(0xFF1E3A6E), Mov.Dem, t)
     }
     CandidateId.REP.serial -> {
-        val t = (((demShare ?: 0.4)).let { 1 - it } - 0.5).let { it * 2 }
-            .toFloat().coerceIn(0.15f, 1f)
-        Color(0xFFB91C1C).copy(alpha = 0.35f + 0.65f * t)
+        val t = ((1 - (demShare ?: 0.4)) - 0.5).let { it * 2 }.toFloat().coerceIn(0.15f, 1f)
+        lerp(Color(0xFF6E2626), Mov.Gop, t)
     }
-    else -> Color(0xFF6B7280).copy(alpha = 0.55f)
+    else -> Mov.Tossup
 }
 
+/** 12 x 8 tile cartogram of the states. Every tile is a named, tappable control. */
 @Composable
 fun TileMap(
     projection: Projection?,
@@ -67,6 +73,7 @@ fun TileMap(
     selectedAbbr: String?,
     onSelect: (stateId: String, abbr: String) -> Unit,
     modifier: Modifier = Modifier,
+    describe: (stateId: String) -> String = { it },
 ) {
     val byStateId = projection?.contests?.associateBy { it.stateId } ?: emptyMap()
     Column(modifier = modifier.fillMaxWidth()) {
@@ -74,39 +81,30 @@ fun TileMap(
             Row(modifier = Modifier.fillMaxWidth()) {
                 for (c in 0 until COLS) {
                     val abbr = byPos[c to r]
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f)
-                            .padding(1.dp),
-                    ) {
-                        // States with no electoral votes this year are not on the map.
-                        if (abbr != null && abbr in abbrToStateId) {
+                    Box(modifier = Modifier.weight(1f).aspectRatio(1f).padding(1.dp)) {
+                        if (abbr != null) {
                             val stateId = abbrToStateId[abbr]
                             val contest = stateId?.let { byStateId[it] }
                             val isSel = abbr == selectedAbbr
+                            val fill = tileColor(contest?.lean, contest?.demShare)
                             Box(
                                 modifier = Modifier
                                     .matchParentSize()
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(tileColor(contest?.lean, contest?.demShare))
-                                    .clickable(enabled = stateId != null) {
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(fill)
+                                    .then(if (isSel) Modifier.border(2.dp, Mov.Warning, RoundedCornerShape(3.dp)) else Modifier)
+                                    .clickable(enabled = stateId != null, onClickLabel = "Select state") {
                                         if (stateId != null) onSelect(stateId, abbr)
                                     }
-                                    .padding(1.dp),
+                                    .semantics { if (stateId != null) contentDescription = describe(stateId); selected = isSel },
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
                                     text = abbr,
-                                    fontSize = 9.sp,
-                                    color = if (isSel) Color.Yellow else Color.White,
-                                    style = if (isSel) {
-                                        MaterialTheme.typography.labelSmall.copy(
-                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                        )
-                                    } else {
-                                        MaterialTheme.typography.labelSmall
-                                    },
+                                    fontSize = 10.sp,
+                                    color = textOn(fill),
+                                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.sp,
+                                        fontWeight = if (isSel) FontWeight.ExtraBold else FontWeight.SemiBold),
                                 )
                             }
                         }

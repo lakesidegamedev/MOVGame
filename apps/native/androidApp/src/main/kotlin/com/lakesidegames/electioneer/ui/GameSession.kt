@@ -137,6 +137,10 @@ class GameSession : ViewModel() {
     lateinit var account: CampaignAccount
         private set
     var dailySetup: NativeDailyAssignment? = null
+    /** Scenario id the library opens straight into, then clears. */
+    var libraryPick: String? = null
+    /** Debug captures keep election night on screen instead of moving on. */
+    var captureHoldReveal = false
 
     fun dailyAssignment(): NativeDailyAssignment = NativeDaily.assignment(nativeUtcDay())
     fun openDaily(restart: Boolean = false) {

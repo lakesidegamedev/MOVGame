@@ -11,8 +11,16 @@ internal fun captureDebugFlow(session: GameSession, flow: String) {
     if (!BuildConfig.DEBUG) return
     val routes = mapOf("home" to Screen.HOME, "account" to Screen.ACCOUNT, "library" to Screen.LIBRARY,
         "setup" to Screen.SETUP, "store" to Screen.STORE,
-        "settings" to Screen.SETTINGS, "guide" to Screen.GUIDE, "editor" to Screen.EDITOR)
+        "settings" to Screen.SETTINGS, "guide" to Screen.GUIDE, "editor" to Screen.EDITOR, "boards" to Screen.BOARDS)
     if (flow in routes) { session.go(routes.getValue(flow)); return }
+    if (flow.startsWith("library-")) {
+        // Open the library on one country's newest election, to show its side picker.
+        val country = flow.substringAfter('-')
+        session.libraryPick = MobileCampaign.elections(country).maxBy { it.year }.scenarioId
+        session.go(Screen.LIBRARY)
+        android.util.Log.i("MOVCapture", "FLOW_READY $flow")
+        return
+    }
     if (flow.startsWith("ask")) {
         val country = flow.substringAfter('-', "US").takeIf { it in NativeCatalog.countryIds() } ?: "US"
         captureDebugFlow(session, "game-$country")
@@ -34,7 +42,7 @@ internal fun captureDebugFlow(session: GameSession, flow: String) {
                 "normal", "native-ui-$country").saveSnapshot()
         }
     var replay = NativeReplay.start(snapshot, "casual")
-    if (flow.startsWith("results-") || flow == "replay") {
+    if (flow.startsWith("results-") || flow.startsWith("reveal-") || flow == "replay") {
         val us = MobileGame.restore(snapshot)
         val world = if (us == null) MobileCampaign.restore(snapshot)!! else null
         var count = 0
@@ -61,5 +69,6 @@ internal fun captureDebugFlow(session: GameSession, flow: String) {
         "replay" -> session.go(Screen.REPLAY)
         "saves" -> { check(session.saveNamed("Smoke campaign")); session.go(Screen.SAVES) }
     }
+    if (flow.startsWith("reveal-")) { session.captureHoldReveal = true; session.resumeGame() }
     android.util.Log.i("MOVCapture", "FLOW_READY $flow")
 }
