@@ -107,20 +107,21 @@ async function run(name, opts) {
   }
 
   if (want("landing")) {
-  // Library: the catalog, then one country.
-  await page.locator("#campaign-catalog").scrollIntoViewIfNeeded();
-  const catalog = page.locator(".catalog-search");
-  await catalog.scrollIntoViewIfNeeded();
-  await page.evaluate(() => window.scrollBy(0, -80));
+  // Library: the catalog, then one country, then a search.
+  const search = page.locator('input[aria-label="Search election scenarios"]');
+  const toLibrary = async () => {
+    await search.scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollBy(0, -150));
+  };
+  await toLibrary();
   await shot("02-library");
   const usCard = page.locator("button", { hasText: "United States" }).first();
   if (await usCard.count()) {
     await usCard.click();
-    await catalog.scrollIntoViewIfNeeded();
-    await page.evaluate(() => window.scrollBy(0, -80));
+    await toLibrary();
     await shot("02-library-us");
   }
-  await page.locator(".catalog-search input").fill("1992");
+  await search.fill("1992");
   await wait(200);
   await shot("02-library-search");
 

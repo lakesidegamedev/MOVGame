@@ -84,13 +84,10 @@ describe("App renders without crashing", () => {
     typeInto(input!, "Thatcher");
     expect(m.html()).toContain("3 matching elections");
     expect(m.html()).toContain("Thatcher's third");
-    expect(m.container.querySelectorAll("[data-scenario-art]")).toHaveLength(0);
-    const visualView = [...m.container.querySelectorAll<HTMLButtonElement>('.catalog-filter-group button')]
-      .find((button) => button.textContent === "Visual");
-    act(() => { visualView!.click(); });
-    const campaignArt = [...m.container.querySelectorAll<HTMLElement>("[data-scenario-art]")];
-    expect(campaignArt).toHaveLength(3);
-    expect(new Set(campaignArt.map((art) => art.dataset.scenarioArt)).size).toBe(3);
+    // Results stay grouped by country: three UK elections, one group.
+    const groups = [...m.container.querySelectorAll<HTMLElement>(".library-group")];
+    expect(groups).toHaveLength(1);
+    expect(groups[0].querySelectorAll(".library-card")).toHaveLength(3);
 
     typeInto(input!, "no such campaign");
     expect(m.html()).toContain('for "no such campaign"');
@@ -107,7 +104,7 @@ describe("App renders without crashing", () => {
     expect(hardFilter!.getAttribute("aria-pressed")).toBe("true");
 
     if (PAYWALL_ENABLED) {
-      const playable = filterButtons.find((button) => button.textContent === "Playable");
+      const playable = filterButtons.find((button) => button.textContent === "Owned");
       act(() => { playable!.click(); });
       expect(playable!.getAttribute("aria-pressed")).toBe("true");
       expect(m.html()).toContain("Pick a playable campaign");
