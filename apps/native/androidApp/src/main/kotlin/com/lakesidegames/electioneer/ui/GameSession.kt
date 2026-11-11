@@ -101,7 +101,7 @@ class GameSession : ViewModel() {
         settings.play("turnAdvance")
         val afterUnits = campaign.standings().first { it.partyId == campaign.playerParty() }.units
         if (afterUnits != beforeUnits) settings.play(if (afterUnits > beforeUnits) "pollUp" else "pollDown")
-        if (campaign.isOver()) { settings.play(if (afterUnits >= campaign.majority()) "win" else "lose"); presentReveal() }
+        if (campaign.isOver()) { settings.play(if (campaign.reachedGoal(afterUnits)) "win" else "lose"); presentReveal() }
         else if (campaign.hasPendingEvent()) settings.play("eventPopup")
         return true
     }

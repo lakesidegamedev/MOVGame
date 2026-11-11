@@ -1,4 +1,5 @@
-// Multiparty seat panel — majority threshold bar, coalition math, hung state.
+// Multiparty seat panel — majority threshold bar, coalition math, hung state,
+// or a plurality bar (most units wins) for single-round presidencies.
 // Shared by UK and country results after the Election Night theater.
 import type { Government } from "@engine/types";
 import { partyFill, textOn } from "@ui/colors";
@@ -21,6 +22,8 @@ export interface MultipartySeatPanelProps {
   nameOf: (id: PartyId) => string;
   unitPlural?: string; // "seats" | "MPs" | …
   mathLabel?: string;
+  /** Single-round plurality: most units wins, no majority line. */
+  plurality?: boolean;
 }
 
 function coalitionParts(g: Government): PartyId[] | null {
@@ -45,6 +48,7 @@ export function MultipartySeatPanel({
   nameOf,
   unitPlural = "seats",
   mathLabel = "COALITION MATH",
+  plurality = false,
 }: MultipartySeatPanelProps) {
   const hung = government.kind === "hung" || government.kind === "minority" ||
     government.kind === "coalition" || government.kind === "confidence_supply";
@@ -58,7 +62,12 @@ export function MultipartySeatPanel({
     const sum = parts.reduce((s, p) => s + seatOf(p), 0);
     mathLine = `${bits.join(" + ")} = ${sum}`;
   } else if (majority && parts) {
-    mathLine = `${nameOf(parts[0])} ${seatOf(parts[0])}, majority of ${threshold}`;
+    if (plurality) {
+      const rival = Math.max(0, ...segments.filter((s) => s.id !== parts[0]).map((s) => s.seats));
+      mathLine = `${nameOf(parts[0])} ${seatOf(parts[0])}, ${seatOf(parts[0]) - rival} ahead of the runner-up`;
+    } else {
+      mathLine = `${nameOf(parts[0])} ${seatOf(parts[0])}, majority of ${threshold}`;
+    }
   }
 
   const w = (n: number) => `${total > 0 ? (n / total) * 100 : 0}%`;
@@ -80,7 +89,7 @@ export function MultipartySeatPanel({
         </div>
       )}
 
-      <div className="ens-seat-bar" title={`${threshold} for a majority of ${total}`}>
+      <div className="ens-seat-bar" title={plurality ? `Most ${unitPlural} wins, out of ${total}` : `${threshold} for a majority of ${total}`}>
         <div className="ens-seat-track">
           {segments.map((s) => (
             <div
@@ -92,15 +101,17 @@ export function MultipartySeatPanel({
               {s.seats / total >= 0.07 ? s.short : ""}
             </div>
           ))}
-          <div
-            className="ens-seat-thresh"
-            style={{ left: w(threshold) }}
-            title={`Majority: ${threshold}`}
-          />
+          {!plurality && (
+            <div
+              className="ens-seat-thresh"
+              style={{ left: w(threshold) }}
+              title={`Majority: ${threshold}`}
+            />
+          )}
         </div>
         <div className="ens-seat-meta">
           <span>{segments[0] ? `${segments[0].short} ${segments[0].seats}` : "·"}</span>
-          <span className="muted">{threshold} to win · {total} {unitPlural}</span>
+          <span className="muted">{plurality ? `Most ${unitPlural} wins` : `${threshold} to win`} · {total} {unitPlural}</span>
         </div>
       </div>
 

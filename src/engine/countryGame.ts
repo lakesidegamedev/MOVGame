@@ -9,7 +9,7 @@
 // The UK path itself is intentionally untouched.
 // ─────────────────────────────────────────────────────────────────────────
 
-import type { PartyId, PoliticalSystem } from "./system";
+import type { MajorityRule, PartyId, PoliticalSystem } from "./system";
 import type { CauseEntry, Government, SeatResult, StateBloc, StateContest } from "./types";
 import { createRng, hashSeed, type Rng } from "./rng";
 import { computeSeatsResult, blocPartyShares, tallyRegion, softmax } from "./multiparty";
@@ -159,6 +159,10 @@ export interface CountryBundle {
   // Presidential two-round runoff (France): the campaign is the second round,
   // units are points, and the shell shows runoff framing.
   runoff?: boolean;
+  // Single-round plurality (Mexico's presidency): the party with the most units
+  // wins outright. No threshold, no coalition step. Ties on units go to the
+  // higher national vote share, then to the earlier party in result order.
+  plurality?: boolean;
   // Longer goal line for the native campaign coach. Placeholders: {majority},
   // {total}. Absent ⇒ the native default for seat-based elections.
   goalHint?: string;
@@ -394,8 +398,9 @@ export interface CountryGameState {
   result?: CountryResult;
 }
 
-export function majorityFor(g: CountryGameState, country: CountryBundle): { total: number; threshold: number } {
-  return g.majority ?? country.elections[g.electionId]?.majority ?? country.system.majority;
+export function majorityFor(g: CountryGameState, country: CountryBundle): MajorityRule {
+  const m = g.majority ?? country.elections[g.electionId]?.majority ?? country.system.majority;
+  return country.plurality ? { ...m, plurality: true } : m;
 }
 
 function activeParties(country: CountryBundle, election: CountryElectionData): PartyId[] {

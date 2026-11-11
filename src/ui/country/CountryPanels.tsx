@@ -19,16 +19,24 @@ function regionWinner(region: StateContest): { winner: string; seats: Record<str
   return { winner, seats, lead };
 }
 
-// ── Seat bar (majority marker at the country's threshold) ──────────────────
+// ── Seat bar (majority marker at the country's threshold, or the lead needed) ─
 export function CountrySeatBar({ country, result }: { country: CountryBundle; result: CountryResult }) {
   const game = useCountryStore((s) => s.game);
   const order = sortBySeats(country, result.seats);
-  const { total, threshold } = game ? majorityFor(game, country) : country.system.majority;
+  const { total, threshold: majorityLine } = game ? majorityFor(game, country) : country.system.majority;
   const w = (n: number) => `${(n / total) * 100}%`;
   const largest = order[0];
+  // Plurality: no fixed line. The marker is the lead needed: one more than the
+  // strongest rival of the player (or of the leader before a game exists).
+  const self = game?.playerParty ?? largest;
+  const rivalBest = Math.max(0, ...order.filter((p) => p !== self).map((p) => result.seats[p] ?? 0));
+  const threshold = country.plurality ? Math.min(total, rivalBest + 1) : majorityLine;
+  const title = country.plurality
+    ? `Most ${country.unitNamePlural} wins. ${threshold} puts you ahead of every rival.`
+    : `${country.unitNamePlural} won: ${threshold} for the win`;
 
   return (
-    <div className="evbar" title={`${country.unitNamePlural} won: ${threshold} for the win`}>
+    <div className="evbar" title={title}>
       <div className="endlabel" style={{ color: largest ? partyInk(partyColor(country, largest)) : undefined }}>
         {largest ? result.seats[largest] : 0}
       </div>
@@ -43,7 +51,7 @@ export function CountrySeatBar({ country, result }: { country: CountryBundle; re
         })}
         <div className="threshold" style={{ left: `${(threshold / total) * 100}%` }} />
       </div>
-      <div className="endlabel goal">{threshold}<small>to win</small></div>
+      <div className="endlabel goal">{threshold}<small>{country.plurality ? "to lead" : "to win"}</small></div>
     </div>
   );
 }
@@ -179,7 +187,7 @@ export function CountryStandings() {
   return (
     <div className="card scroll">
       <h3>National Standings</h3>
-      <div className="kv"><span className="k">Projected outcome</span><span style={{ color: partyInk(partyColor(country, live.largestParty)) }}>{country.runoff && live.government.kind === "majority" ? "Wins presidency" : GOV_LABEL[live.government.kind]}</span></div>
+      <div className="kv"><span className="k">Projected outcome</span><span style={{ color: partyInk(partyColor(country, live.largestParty)) }}>{(country.runoff || country.plurality) && live.government.kind === "majority" ? "Wins presidency" : GOV_LABEL[live.government.kind]}</span></div>
       <div className="kv"><span className="k">Leading</span><span style={{ color: partyInk(partyColor(country, live.largestParty)) }}>{partyName(country, live.largestParty)}</span></div>
       <div className="kv"><span className="k">Your momentum</span><span>{game.resources[game.playerParty].momentum.toFixed(0)}</span></div>
       {country.runoff && voteShift !== null && (

@@ -91,6 +91,7 @@ function factsFromSubmission(sub: ScoreSubmission, meta: ScenarioMeta): ScoreFac
       threshold,
       chamber,
       sub.difficulty,
+      meta.engine === "country" && COUNTRIES[meta.country]?.plurality === true,
     );
   }
 

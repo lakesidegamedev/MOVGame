@@ -32,7 +32,7 @@ struct NativeElectionNightView: View {
                         ProgressView(value: Double(row.units), total: Double(data.totalUnits)).tint(Color(hex: row.color))
                     }
                 }
-                Text("\(board.calledUnits) of \(data.totalUnits) called · \(data.threshold) to win · \(board.remaining) remaining")
+                Text("\(board.calledUnits) of \(data.totalUnits) called · \(data.goalLabel()) · \(board.remaining) remaining")
                     .font(.caption).foregroundStyle(CampaignStyle.muted)
                 RevealMapView(map: night.map(), called: board.called)
                 HStack(spacing: 14) {

@@ -179,8 +179,32 @@ describe.each(multiparty.map((m) => [m.code, m.bundle!] as const))("%s content",
       ...Object.keys(rules?.onlyWith ?? {}), ...Object.values(rules?.onlyWith ?? {}).flat()];
     for (const p of ruled) expect(parties.has(p), `coalition rule party ${p}`).toBe(true);
     for (const e of country.events) if (e.party) expect(parties.has(e.party), `event ${e.id} party`).toBe(true);
-    expect(country.system.majority.threshold).toBe(Math.floor(country.system.majority.total / 2) + 1);
+    if (!country.plurality) {
+      expect(country.system.majority.threshold).toBe(Math.floor(country.system.majority.total / 2) + 1);
+    }
   });
+
+  if (country.plurality) {
+    it("plurality rules are consistent: one winner, no majority line, no coalitions", () => {
+      // Most units wins outright. Nothing may reintroduce a threshold or a
+      // coalition step, and no player copy may promise a majority.
+      expect(country.runoff, "plurality and runoff are exclusive").toBeFalsy();
+      expect(country.coalitions?.none, "coalitions.none").toBe(true);
+      expect(country.abstaining, "no abstaining parties").toEqual([]);
+      for (const m of [country.system.majority, ...Object.values(country.elections).map((e) => e.majority).filter(Boolean)]) {
+        expect(m!.effectiveThreshold, "no effective threshold").toBeUndefined();
+        expect(m!.threshold, "threshold is a unit count").toBeGreaterThan(0);
+        expect(m!.threshold, "threshold is a unit count").toBeLessThanOrEqual(m!.total);
+      }
+      expect(country.governmentText?.majority, "a winner template").toBeDefined();
+      const copy = [country.goalText, country.goalHint ?? "", country.governmentText?.majority ?? "",
+        ...Object.values(country.elections).map((e) => e.goalText ?? "")];
+      for (const text of copy) {
+        expect(/majority/i.test(text), `"${text}" mentions a majority`).toBe(false);
+        expect(text.includes("{majority}"), `"${text}" uses {majority}`).toBe(false);
+      }
+    });
+  }
 
   it("text templates use only placeholders the engines fill", () => {
     // Both engines fill these keys per government kind and leave anything else
@@ -225,7 +249,7 @@ describe.each(multiparty.map((m) => [m.code, m.bundle!] as const))("%s content",
       it("regional seats sum to the chamber and vote shares sum to about 1", () => {
         expect(election.id).toBe(eid);
         const majority = election.majority ?? country.system.majority;
-        expect(majority.threshold, "threshold").toBe(Math.floor(majority.total / 2) + 1);
+        if (!country.plurality) expect(majority.threshold, "threshold").toBe(Math.floor(majority.total / 2) + 1);
         let total = 0;
         for (const [rid, res] of Object.entries(election.regions)) {
           expect(regionIds.has(rid), `region meta ${rid}`).toBe(true);
@@ -276,6 +300,20 @@ describe.each(multiparty.map((m) => [m.code, m.bundle!] as const))("%s content",
           expect(Math.abs((result.seats[p] ?? 0) - s), `${p}: got ${result.seats[p]}, real ${s}`).toBeLessThanOrEqual(2);
         }
         expect(Object.values(result.seats).reduce((a, b) => a + b, 0)).toBe(majorityFor(g, country).total);
+        if (country.plurality) {
+          // The real winner (most units in the tables) wins outright under
+          // neutral play.
+          const winner = Object.keys(expected).sort((a, b) => expected[b] - expected[a])[0];
+          expect(expected[winner], "the real winner is unique").toBeGreaterThan(
+            Math.max(...Object.keys(expected).filter((p) => p !== winner).map((p) => expected[p])));
+          expect(result.government, "neutral winner").toEqual({ kind: "majority", party: winner, seats: result.seats[winner] });
+          expect(result.largestParty).toBe(winner);
+          // Points and the displayed national vote must agree on who finished
+          // first, or a player would see the loser ahead on votes.
+          const votes = result.voteShare;
+          const voteLeader = Object.keys(votes).sort((a, b) => votes[b] - votes[a])[0];
+          expect(voteLeader, "the winner also leads the national vote").toBe(winner);
+        }
       });
 
       it("every playable party runs to completion on every difficulty", () => {

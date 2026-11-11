@@ -196,7 +196,7 @@ fun WorldCampaignScreen(session: GameSession) {
             Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp)) {
                 Text(if (game.isOver()) game.outcome() else "Projected standings", style = MaterialTheme.typography.titleMedium)
                 StandingRows(rows, unit)
-                Text("${game.majority()} of ${game.totalUnits()} $unit to win outright", style = MaterialTheme.typography.bodySmall)
+                Text(game.goalLine(), style = MaterialTheme.typography.bodySmall)
             } }
         }
         if (game.hasPendingEvent()) {
@@ -280,7 +280,7 @@ fun WorldCampaignScreen(session: GameSession) {
             if (game.isCustom()) item { Text("CUSTOM CAMPAIGN · CASUAL ONLY", color = MaterialTheme.colorScheme.primary) }
             item { game.resultSummary()?.let { summary -> Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("CAMPAIGN SCORE ${summary.score} / 1000", style = MaterialTheme.typography.titleMedium)
-                Text("${summary.difficulty.replaceFirstChar { it.uppercase() }} difficulty · $unit above majority: ${summary.unitMargin}")
+                Text("${summary.difficulty.replaceFirstChar { it.uppercase() }} difficulty · ${game.marginLabel()}: ${summary.unitMargin}")
                 Text("Vote margin vs. leading rival: ${"%+.1f".format(summary.popularMargin)} points")
             } } } }
             item { TextButton(onClick = { showHistory = !showHistory }) { Text(if (showHistory) "Hide historical comparison" else "Compare with history") } }

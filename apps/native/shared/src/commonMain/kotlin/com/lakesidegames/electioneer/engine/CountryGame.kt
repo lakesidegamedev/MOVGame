@@ -116,7 +116,7 @@ fun majorityFor(
     val m = g.majority
         ?: country.elections[g.electionId]?.majority?.let { MajorityRule(total = it.total, threshold = it.threshold) }
         ?: country.system.majority
-    return m
+    return if (country.plurality) m.copy(plurality = true) else m
 }
 
 private fun activeParties(

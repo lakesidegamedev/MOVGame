@@ -44,17 +44,19 @@ for (const country of ALL_COUNTRY_CODES) {
     data = countryReveal(bundle, game);
   }
   const { map, ...normalized } = data;
-  const schedule = buildSchedule(data.units, data.threshold);
+  const schedule = buildSchedule(data.units, data.threshold, data.pluralityWinner);
   const allocation: Record<string, number> = {};
   for (const unit of data.units) for (const [party, seats] of Object.entries(unit.allocation ?? { [unit.winnerId]: unit.units })) allocation[party] = (allocation[party] ?? 0) + seats;
-  if ((Object.entries(allocation).find(([, seats]) => seats >= data.threshold)?.[0] ?? null) !== schedule.projectedId) throw Error(`False projection: ${country}`);
+  // Plurality countries project the engine's winner; everyone else the first party over the line.
+  const expected = data.pluralityWinner ?? Object.entries(allocation).find(([, seats]) => seats >= data.threshold)?.[0] ?? null;
+  if (expected !== schedule.projectedId) throw Error(`False projection: ${country}`);
   const envelope = JSON.parse(snapshot);
   const game = envelope.state ?? envelope.uk ?? envelope.country;
   const player = game.playerCandidate ?? game.playerParty;
   const election = game.scenarioId ?? game.electionId;
   const meta = SCENARIO_REGISTRY.find(m => m.country === country && m.nativeId === election)!;
   const result = game.result;
-  const facts = country === "US" ? usScoreFacts(result, player, "normal") : multipartyScoreFacts(result, player, data.threshold, data.totalUnits, game.difficulty ?? "normal");
+  const facts = country === "US" ? usScoreFacts(result, player, "normal") : multipartyScoreFacts(result, player, data.threshold, data.totalUnits, game.difficulty ?? "normal", data.pluralityWinner !== undefined);
   const score = computeScoreFromFacts(facts);
   const units = (result.electoralVotes ?? result.seats)[player] ?? 0;
   const unitLine = `${units} ${country === "US" ? "EVs" : data.unitLabel}`;

@@ -178,11 +178,15 @@ export function computeSeatsResult(
   const voteShare: Record<PartyId, number> = {};
   for (const p of Object.keys(nationalVotes)) voteShare[p] = nationalTotal > 0 ? nationalVotes[p] / nationalTotal : 0;
 
-  // Largest party by seats.
+  // Largest party by seats. Under plurality a tie on units goes to the higher
+  // national vote share; an exact tie on both keeps the earlier party.
   let largestParty = "";
   let mostSeats = -1;
   for (const p of Object.keys(seats)) {
     if (seats[p] > mostSeats) { mostSeats = seats[p]; largestParty = p; }
+    else if (majority.plurality && seats[p] === mostSeats && (voteShare[p] ?? 0) > (voteShare[largestParty] ?? 0)) {
+      largestParty = p;
+    }
   }
 
   const government = formGovernment(seats, majority, abstainingParties, largestParty, compatible);
@@ -201,6 +205,12 @@ export function formGovernment(
   largestParty: PartyId,
   compatible: (lead: PartyId, partner: PartyId) => boolean = () => true,
 ): Government {
+  // Plurality: the largest party wins outright, whatever its share.
+  if (majority.plurality) {
+    const top = seats[largestParty] ?? 0;
+    return top > 0 ? { kind: "majority", party: largestParty, seats: top } : { kind: "hung", largest: largestParty };
+  }
+
   const abstainSeats = abstainingParties.reduce((s, p) => s + (seats[p] ?? 0), 0);
   // Effective Commons size after abstentions; majority is half of that + 1.
   const effectiveTotal = majority.total - abstainSeats;

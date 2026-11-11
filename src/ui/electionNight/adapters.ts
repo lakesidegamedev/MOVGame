@@ -167,5 +167,7 @@ export function countryReveal(country: CountryBundle, game: CountryGameState): R
     map: country.map, // all shipped bundles carry one; undefined ⇒ chip-only
     noMajorityLabel: "NO OVERALL MAJORITY: HUNG PARLIAMENT",
     storageKey: `reveal-${game.seed}-${country.id.toLowerCase()}-${game.electionId}`,
+    // Only plurality countries carry this key, so every other reveal is unchanged.
+    ...(majority.plurality ? { pluralityWinner: r.largestParty } : {}),
   };
 }

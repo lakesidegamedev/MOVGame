@@ -54,7 +54,7 @@ final class GameSession: ObservableObject {
         settings.play("turnAdvance")
         let afterUnits = campaign.standings().first { $0.partyId == campaign.playerParty() }?.units ?? 0
         if afterUnits != beforeUnits { settings.play(afterUnits > beforeUnits ? "pollUp" : "pollDown") }
-        if campaign.isOver() { settings.play(afterUnits >= campaign.majority() ? "win" : "lose"); presentReveal() }
+        if campaign.isOver() { settings.play(campaign.reachedGoal(units: afterUnits) ? "win" : "lose"); presentReveal() }
         else if campaign.hasPendingEvent() { settings.play("eventPopup") }
         return true
     }

@@ -55,6 +55,12 @@ export interface MajorityRule {
   // Effective threshold once abstentions + the Speaker are netted out (UK ≈ 320,
   // because Sinn Féin do not take their seats). Absent ⇒ same as `threshold`.
   effectiveThreshold?: number;
+  // Single-round plurality (Mexico's presidency): the party with the most units
+  // wins outright, with no threshold and no coalition step. Ties on units go to
+  // the higher national vote share, then to the earlier party in result order.
+  // Set from the country bundle's `plurality` flag by majorityFor; absent for
+  // every majority system.
+  plurality?: boolean;
 }
 
 export interface PoliticalSystem {

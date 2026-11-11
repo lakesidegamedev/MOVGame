@@ -55,6 +55,15 @@ fun usScoreFacts(
     )
 }
 
+// Player's units against the goal: units minus the threshold, or for plurality
+// countries units minus the strongest rival's units. Port of scoring.ts.
+fun multipartyUnitMargin(seats: Map<String, Int>, player: String, majorityThreshold: Int, plurality: Boolean = false): Int {
+    val mine = seats[player] ?: 0
+    if (!plurality) return mine - majorityThreshold
+    val rival = (listOf(0) + seats.keys.filter { it != player }.map { seats[it] ?: 0 }).max()
+    return mine - rival
+}
+
 fun multipartyScoreFacts(
     seats: Map<String, Int>,
     voteShare: Map<String, Double>,
@@ -62,12 +71,13 @@ fun multipartyScoreFacts(
     majorityThreshold: Int,
     chamberSize: Int,
     difficulty: String,
+    plurality: Boolean = false,
 ): ScoreFacts {
     val rivalShare = (listOf(0.0) + voteShare.keys
         .filter { it != player }
         .map { voteShare[it] ?: 0.0 }).max()
     return ScoreFacts(
-        unitMargin = ((seats[player] ?: 0) - majorityThreshold).toDouble(),
+        unitMargin = multipartyUnitMargin(seats, player, majorityThreshold, plurality).toDouble(),
         chamberSize = chamberSize,
         popularMargin = ((voteShare[player] ?: 0.0) - rivalShare) * 100,
         difficulty = difficulty,

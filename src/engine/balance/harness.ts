@@ -38,7 +38,7 @@ import {
   type CountryAction,
   type CountryBundle,
 } from "../countryGame";
-import { computeScoreFromFacts, usScoreFacts, multipartyScoreFacts } from "../scoring";
+import { computeScoreFromFacts, usScoreFacts, multipartyScoreFacts, multipartyUnitMargin } from "../scoring";
 import {
   mpFocusedActions,
   mpScattershotActions,
@@ -322,7 +322,7 @@ function mpOutcome(
   voteShare: Record<PartyId, number>,
   largestParty: PartyId,
   side: PartyId,
-  majority: { total: number; threshold: number },
+  majority: { total: number; threshold: number; plurality?: boolean },
   baselineWinner: string,
   difficulty: UsDifficulty,
 ): RunOutcome {
@@ -334,11 +334,13 @@ function mpOutcome(
       .map((p) => seats[p] ?? 0),
   );
   return {
+    // Plurality countries: finishing first is the win, and the margin is the
+    // lead over the strongest rival (there is no threshold).
     won: largestParty === side,
-    unitMargin: mine - majority.threshold,
+    unitMargin: multipartyUnitMargin(seats, side, majority.threshold, majority.plurality === true),
     blowout: Math.abs(mine - rival) > majority.total * 0.25,
     score: computeScoreFromFacts(
-      multipartyScoreFacts({ seats, voteShare }, side, majority.threshold, majority.total, difficulty),
+      multipartyScoreFacts({ seats, voteShare }, side, majority.threshold, majority.total, difficulty, majority.plurality === true),
     ),
     matchedHistory: largestParty === baselineWinner,
   };

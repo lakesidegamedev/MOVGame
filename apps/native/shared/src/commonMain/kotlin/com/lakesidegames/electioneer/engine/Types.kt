@@ -555,6 +555,9 @@ data class MajorityRule(
     val threshold: Int,
     // Effective threshold net of abstentions/Speaker (UK ~= 320).
     val effectiveThreshold: Int? = null,
+    // Single-round plurality: the largest party wins outright (no threshold,
+    // no coalition step). Set from the bundle by majorityFor; null elsewhere.
+    val plurality: Boolean? = null,
 )
 
 @Serializable

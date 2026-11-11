@@ -47,7 +47,7 @@ fun ElectionNightScreen(session: GameSession) {
             Text("${row.name}: ${row.units} ${data.unitLabel}", style = MaterialTheme.typography.titleMedium)
             LinearProgressIndicator(progress = { row.units.toFloat() / data.totalUnits }, modifier = Modifier.fillMaxWidth(), color = color(row.color))
         }
-        Text("${board.calledUnits} of ${data.totalUnits} called · ${data.threshold} to win · ${board.remaining} remaining")
+        Text("${board.calledUnits} of ${data.totalUnits} called · ${data.goalLabel()} · ${board.remaining} remaining")
         val map = reveal.map()
         val called = board.called.associateBy { it.id }
         Canvas(Modifier.fillMaxWidth().height(240.dp).semantics { contentDescription = "Election map. " + board.called.joinToString { "${it.name}: ${it.winnerShort} leads" } }) {

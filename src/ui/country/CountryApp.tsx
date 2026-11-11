@@ -134,7 +134,9 @@ export function CountryApp({ countryId, onExit, initialElection, initialSeed, in
 
       <OnboardingCoach
         doneKey={`coach-done-${country.id.toLowerCase()}-v1`}
-        winLine={`Win ${maj.threshold} ${country.unitNamePlural} in {N} weeks. No pressure.`}
+        winLine={country.plurality
+          ? `Finish ahead of every rival in {N} weeks. Most ${country.unitNamePlural} wins.`
+          : `Win ${maj.threshold} ${country.unitNamePlural} in {N} weeks. No pressure.`}
         mapHint="Click a region on the map to continue."
         mapBody="Your battleground. Colours show the current lean; click a competitive region."
         planBody="Queue your week: broadcasts, rallies, ground game. Actions cost slots. Spend all of them; unspent slots win nothing."
