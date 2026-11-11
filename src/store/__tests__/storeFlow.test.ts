@@ -292,6 +292,13 @@ describe("coming back from checkout", () => {
     expect(phase()).toMatchObject({ kind: "needs-login", reason: "return" });
   });
 
+  it("asks for a log in, not a patient wait, when the session expired while the player was away", async () => {
+    useStoreFlow.getState().handleReturn("success", "canada");
+    setUser(null);
+    await vi.advanceTimersByTimeAsync(RETURN_WATCH.deadlineMs + 10_000);
+    expect(phase()).toMatchObject({ kind: "needs-login", reason: "return", packId: "canada" });
+  });
+
   it("ignores a stale intent for a different pack", () => {
     sessionStorage.setItem("mov.store.intent", JSON.stringify({ packId: "germany", scenarioId: "de-2021", ownedBefore: [], at: Date.now() }));
     useStoreFlow.getState().handleReturn("success", "canada");

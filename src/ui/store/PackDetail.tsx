@@ -50,7 +50,7 @@ export function PackDetail({ packId }: { packId: string }) {
           <h3 className="store-h3">Elections in this pack</h3>
           <ol className="store-elections">
             {facts.elections.map((m) => {
-              const open = ctx.canPlay(m.scenarioId);
+              const open = owned || ctx.canPlay(m.scenarioId);
               const tags = scenarioTags(m);
               const isFocus = m.scenarioId === ctx.focusScenarioId;
               return (
@@ -111,7 +111,7 @@ export function PackDetail({ packId }: { packId: string }) {
                         ? `Adds the ${plural(sum.addsPacks.length, "pack")} you don't have (${plural(sum.addsElections, "election")}) and every pack added later.`
                         : `Every country, plus every pack added later.${sum.saveCents > 0 && sum.addsPacks.length > 1 ? ` Cheaper than buying all ${sum.addsPacks.length} packs separately (${formatPrice(sum.separateCents)}).` : ""}`}
                   </p>
-                  <OfferAction packId={COMPLETE_ID} label="Buy everything" primary={false} />
+                  <OfferAction packId={COMPLETE_ID} label="Buy everything" accessibleName="Buy the Complete Collection" primary={false} />
                 </div>
               )}
               {hint && (offer.kind === "buy" || completeOffer.kind === "buy") && <p className="store-hint">{hint}</p>}

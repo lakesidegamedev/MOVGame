@@ -14,7 +14,7 @@ import { PurchaseBanner } from "./PurchaseBanner";
 import { CompleteOffer } from "./CompleteOffer";
 import { PackTile } from "./PackTile";
 import { PackDetail } from "./PackDetail";
-import { DifficultyChip, electionName, electionYearLabel, plural } from "./StoreParts";
+import { DifficultyChip, OwnedTick, electionName, electionYearLabel, plural } from "./StoreParts";
 import "./store.css";
 
 type Filter = "all" | "open" | "owned";
@@ -101,7 +101,10 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
   }, [authModal]);
 
   const ownedPackIds = unlocked.packIds;
-  const busy = phase.kind === "redirecting" || phase.kind === "checkout-open" || phase.kind === "confirming";
+  // While a purchase is in flight every Buy waits, including after a checkout return whose payment
+  // has not shown up yet: that payment went through, so a second Buy would charge twice.
+  const busy = phase.kind === "redirecting" || phase.kind === "checkout-open" || phase.kind === "confirming"
+    || (phase.kind === "slow" && !phase.fromCheckout);
 
   const ctx: StoreCtx = useMemo(() => ({
     catalog, ownedPackIds, purchases, user, busy, canPlay,
@@ -194,7 +197,7 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
               <section className="store-free" aria-labelledby="store-free-title">
                 <div className="store-free-head">
                   <h2 id="store-free-title">The base game</h2>
-                  <span className="store-owned"><span className="store-tick" aria-hidden="true">✓</span> Free for everyone</span>
+                  <span className="store-owned"><OwnedTick /> Free for everyone</span>
                 </div>
                 <ul className="store-free-list">
                   {freeElections().map((m) => (

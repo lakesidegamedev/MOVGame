@@ -8,12 +8,13 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "../../App";
 import { useGameStore } from "@store/gameStore";
+import { useStoreNav } from "@store/storeNav";
 import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
-import { BRAND } from "../../brand";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const reset = () => {
+  useStoreNav.setState({ open: false, focus: {}, resume: null });
   window.history.replaceState({ movView: { kind: "landing" } }, "");
   useGameStore.setState({ game: null, history: [], lastEventResult: null });
 };
@@ -65,10 +66,10 @@ describe("App renders without crashing", () => {
     expect(m.html()).toContain(PAYWALL_ENABLED ? "Play free" : "Start here");
     expect(m.html()).toContain("Harris v. Trump");
     expect(m.html()).toContain(PAYWALL_ENABLED ? "Country bundles" : "Scenario packs");
-    const storeLinks = [...m.container.querySelectorAll<HTMLAnchorElement>('a[href]')]
-      .filter((link) => link.textContent?.includes("Store"));
-    expect(storeLinks.length).toBeGreaterThan(0);
-    expect(storeLinks.every((link) => link.href === BRAND.storeUrl)).toBe(true);
+    // The Store is a screen inside the game, reachable from the top bar.
+    const storeButtons = [...m.container.querySelectorAll<HTMLButtonElement>("button")]
+      .filter((button) => button.textContent?.trim() === "Store");
+    expect(storeButtons.length).toBeGreaterThan(0);
     // Entering a free U.S. scenario shows the setup wizard on that year.
     clickButton(m.container, "Biden v. Trump");
     const html = m.html();
@@ -123,10 +124,13 @@ describe("App renders without crashing", () => {
     // Behavior past the card depends on the master paywall switch.
     clickButton(m.container, "United States");
     clickButton(m.container, "Clinton v. Trump");
-    await m.flush(); // AuthModals is lazy-loaded
+    await m.flush(); // AuthModals and the Store are lazy-loaded
+    await m.flush();
     const html = m.html();
     if (PAYWALL_ENABLED) {
-      expect(html).toContain("Unlock this election"); // signed-out click opens the unlock prompt
+      // A locked election opens the Store on its pack, with the pack and the Complete Collection side by side.
+      expect(html).toContain("Elections in this pack");
+      expect(html).toContain("The election you tried to open");
       expect(html).toContain("Buy United States");
       expect(html).toContain("Buy everything");
       expect(m.html()).not.toContain("The War Room"); // no setup wizard

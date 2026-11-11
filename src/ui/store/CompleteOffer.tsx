@@ -18,6 +18,7 @@ export function CompleteOffer({ compact = false }: { compact?: boolean }) {
   const sum = summarizeComplete(ctx.ownedPackIds, ctx.catalog);
   if (!sum) return null;
   const owned = offer.kind === "owned";
+  const soldElsewhere = DISTRIBUTION.checkout === null;
   const covers = completeCovers();
   const completePrice = priceCents(COMPLETE_ID, ctx.catalog);
   const buyable = offer.kind === "buy" || offer.kind === "unavailable";
@@ -33,12 +34,14 @@ export function CompleteOffer({ compact = false }: { compact?: boolean }) {
       </div>
       <div className="store-hero-body">
         <div className="store-hero-copy">
-          <p className="store-eyebrow">{owned ? "Yours" : "Everything in one purchase"}</p>
+          <p className="store-eyebrow">{owned ? "Yours" : soldElsewhere ? "Every country" : "Everything in one purchase"}</p>
           <h2 id="store-complete-title">{PACKS_BY_ID[COMPLETE_ID].name}</h2>
           <p className="store-hero-lede">
             {owned
               ? offer.kind === "owned" ? describeReason(offer.reason) + "." : ""
-              : "Every country and every election, and every one we add in later updates."}
+              : soldElsewhere
+                ? "Every country and every election in the game."
+                : "Every country and every election, and every one we add in later updates."}
           </p>
           <ul className="store-stats" aria-label="What the Complete Collection contains">
             <li><b>{sum.elections}</b><span>elections</span></li>

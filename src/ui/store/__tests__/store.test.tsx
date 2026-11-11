@@ -279,6 +279,15 @@ describe("purchase messages", () => {
     expect(container.querySelector("[aria-live='polite']")).not.toBeNull();
   });
 
+  it("keeps Buy locked while a returned payment has not shown up yet, so it cannot be charged twice", () => {
+    mount();
+    setPhase({ phase: { kind: "slow", packId: "canada", unverified: false, fromCheckout: false } });
+    expect(buttons(/^Buy /).every((b) => b.disabled)).toBe(true);
+    // A desktop wait that ran out may mean nothing was paid: buying stays possible.
+    setPhase({ phase: { kind: "slow", packId: "canada", unverified: false, fromCheckout: true } });
+    expect(buttons(/^Buy /).some((b) => !b.disabled)).toBe(true);
+  });
+
   it("walks a desktop player through checkout in their browser", () => {
     Object.assign(hoisted.policy, { channel: "desktop-direct", checkout: "system-browser" });
     useAuthStore.setState({ user: player });
@@ -310,7 +319,11 @@ describe("keyboard and screen readers", () => {
   it("gives every Buy button a name with the pack and the price", () => {
     mount();
     expect(buttons(/^Buy Canada for \$0\.99$/)).toHaveLength(1);
-    expect(buttons(/^Buy the Complete Collection Complete Collection for \$3\.99$|^Buy the Complete Collection/)).toHaveLength(1);
+    expect(buttons(/^Buy the Complete Collection for \$3\.99$/)).toHaveLength(1);
+    click(buttons(/^Buy Canada for/)[0].closest("article")!.querySelector("button.pack-tile-main")!);
+    // On the pack page: the pack's own button and "Buy everything" each name what they buy.
+    expect(buttons(/^Buy Canada for \$0\.99$/)).toHaveLength(1);
+    expect(buttons(/^Buy the Complete Collection for \$3\.99$/)).toHaveLength(1); // the "Buy everything" option
   });
 
   it("stands down while a log in dialog is open above it", () => {

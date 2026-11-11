@@ -24,10 +24,12 @@ export function useBuyHint(): string | null {
 }
 
 /** Price block and the one action that fits the pack's state. Owned packs show no price and no Buy. */
-export function OfferAction({ packId, label, primary = true, compact = false, showPrice = true }: {
+export function OfferAction({ packId, label, accessibleName, primary = true, compact = false, showPrice = true }: {
   packId: string;
   /** Button text; defaults to "Buy". */
   label?: string;
+  /** What a screen reader hears before the price, when the visible text alone is not enough ("Buy everything"). */
+  accessibleName?: string;
   primary?: boolean;
   compact?: boolean;
   showPrice?: boolean;
@@ -60,7 +62,7 @@ export function OfferAction({ packId, label, primary = true, compact = false, sh
         className={`${primary ? "primary" : "ghost"}${compact ? " small" : ""}`}
         disabled={disabled}
         aria-describedby={offer.kind === "unavailable" ? noteId : undefined}
-        aria-label={`${label ?? "Buy"} ${name} for ${price}`}
+        aria-label={`${accessibleName ?? (label && label.includes(name) ? label : `${label ?? "Buy"} ${name}`)} for ${price}`}
         onClick={() => ctx.buy(packId)}
       >
         {label ?? "Buy"}

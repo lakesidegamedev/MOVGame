@@ -160,7 +160,11 @@ export const useStoreFlow = create<StoreFlow>((set, get) => {
     void watchForOwnership({ ...realDeps(id), check: () => checkOwnership(packId) }, opts).then((res) => {
       if (id !== runId) return;
       if (res.outcome === "owned") succeed(packId);
-      else if (res.outcome === "timeout") set({ phase: { kind: "slow", packId, unverified: res.unverified, fromCheckout, url }, checking: false });
+      else if (res.outcome === "timeout") {
+        // A session that expired while the player was away is a login problem, not a slow webhook.
+        if (!useAuthStore.getState().user) set({ phase: { kind: "needs-login", packId, reason: "return" }, checking: false });
+        else set({ phase: { kind: "slow", packId, unverified: res.unverified, fromCheckout, url }, checking: false });
+      }
     });
   };
 
