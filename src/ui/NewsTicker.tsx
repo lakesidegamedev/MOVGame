@@ -28,7 +28,7 @@ function buildHeadlines(game: GameState, live: Projection | null): string[] {
     const readyish = debateReadiness(game, game.playerCandidate) >= 56;
     const when = toDebate === 1 ? "NEXT WEEK" : "IN 2 WEEKS";
     out.push(
-      `⚑ DEBATE ${when}: ${readyish ? "your prep is solid; your choice and opponent still matter." : "prep now (Debate Prep + Policy Prep) to lift your score."}`,
+      `DEBATE ${when}: ${readyish ? "your prep is solid; your choice and opponent still matter." : "prep now (Debate Prep + Policy Prep) to lift your score."}`,
     );
   }
 

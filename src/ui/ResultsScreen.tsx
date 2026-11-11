@@ -456,7 +456,7 @@ function ScoreAndAchievements() {
       </div>
 
       <div className="card">
-        <h3>🏆 Achievements: {earned.length} earned</h3>
+        <h3 className="card-title-icon"><Trophy size={12} aria-hidden="true" /> Achievements: {earned.length} earned</h3>
         {earned.length === 0 ? (
           <p className="muted small">None this run. Landslides, comebacks, and debate sweeps all leave trophies.</p>
         ) : (

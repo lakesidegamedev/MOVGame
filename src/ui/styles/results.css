@@ -35,3 +35,4 @@
   .lb-table { font-size: var(--fs-xs); }
   .lb-table th, .lb-table td { padding: var(--space-1-5) var(--space-1); }
 }
+.card-title-icon { display: flex; align-items: center; gap: var(--space-1-5); }
