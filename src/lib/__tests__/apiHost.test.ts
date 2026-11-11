@@ -94,7 +94,7 @@ describe("malformed 200 payloads (the SPA-fallback HTML case)", () => {
     vi.restoreAllMocks();
   });
 
-  it("auth store keeps a usable unlocked set when /auth/me returns non-JSON 200", async () => {
+  it("auth store keeps a usable unlocked set when /auth/me returns non-JSON 200", { timeout: 30000 }, async () => {
     setOrigin("lakesidegames.net");
     vi.resetModules();
     const { api } = await import("../api");

@@ -24,6 +24,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   Greens, ACT, NZ First or Te Pāti Māori across nine regions and the seven Māori electorates,
   with each campaign's real story beats, from Jacindamania and the COVID election to Winston
   Peters back as kingmaker.
+- India: the 2009, 2014, 2019 and 2024 Lok Sabha elections under first past the post, as a $0.99
+  pack (also in the Complete Collection). Lead the BJP-led NDA, the Congress-led UPA (the INDIA
+  bloc in 2024), Trinamool, the Left, the Samajwadi Party, the BSP, the BJD, the YSRCP, the AIADMK
+  or the AAP across fifteen regions that keep every state's real seat total. Each campaign has
+  its real beats, from the nuclear deal and the farm loan waiver to Pulwama and Balakot, NYAY and
+  the 2024 result that left the BJP needing its allies, and the results are built from
+  constituency counts.
 - A Store screen. It opens from the landing page, the account menu, the setup and results
   screens, and every locked election. It leads with the Complete Collection and says exactly
   what it contains and, if you already own some packs, which ones it would add. Every country

@@ -11,7 +11,7 @@
 //          https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/3_mittel.geo.json
 //   FR:    gregoiredavid/france-geojson regions.geojson (post-2016 régions)
 //          https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions.geojson
-//   NZ:    Natural Earth ne_10m_admin_1_states_provinces.geojson (saved as ne10_admin1.geojson)
+//   NZ/IN: Natural Earth ne_10m_admin_1_states_provinces.geojson (saved as ne10_admin1.geojson)
 //          https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson
 //   BR:    the same Natural Earth ne10_admin1.geojson (states of Brazil, adm0_a3 BRA)
 //
@@ -267,7 +267,8 @@ const readSrc = (name) => JSON.parse(fs.readFileSync(path.join(SRC_DIR, name)));
 const ne50 = wants("CA") || wants("AU") ? readSrc("ne50_admin1.geojson") : null;
 const deSrc = wants("DE") ? readSrc("de_laender.geojson") : null;
 const frSrc = wants("FR") ? readSrc("fr_regions.geojson") : null;
-const ne10 = wants("NZ") || wants("BR") ? readSrc("ne10_admin1.geojson") : null;
+// Natural Earth 10m admin-1, shared by every country built from it.
+const ne10 = readSrc("ne10_admin1.geojson");
 
 function neCountry(a3, source = ne50) {
   const m = {};
@@ -441,10 +442,44 @@ const BR = wants("BR") && buildCountry({
   }, "BR"),
 });
 
+// --------------------------------------------------------------------- IN
+// Fifteen groups of states and union territories. The Andaman and Nicobar and
+// Lakshadweep island groups vote with West Bengal and Kerala but are not drawn.
+const inRegionPolys = () => {
+  const ind = neCountry("IND", ne10);
+  const merged = groupRegions(ind, {
+    BJ: ["Bihar", "Jharkhand"],
+    MP: ["Madhya Pradesh", "Chhattisgarh"],
+    GR: ["Gujarat", "Rajasthan", "Dadra and Nagar Haveli and Daman and Diu"],
+    MH: ["Maharashtra", "Goa"],
+    DH: ["Delhi", "Haryana", "Chandigarh"],
+    HM: ["Himachal Pradesh", "Uttarakhand", "Jammu and Kashmir", "Ladakh"],
+    TN: ["Tamil Nadu", "Puducherry"],
+    AT: ["Andhra Pradesh", "Telangana"],
+    NE: ["Assam", "Arunachal Pradesh", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Sikkim", "Tripura"],
+  }, "IN");
+  return {
+    UP: ind["Uttar Pradesh"],
+    ...merged,
+    PB: ind["Punjab"], KA: ind["Karnataka"], KL: ind["Kerala"],
+    WB: ind["West Bengal"], OD: ind["Odisha"],
+  };
+};
+const IN = wants("IN") && buildCountry({
+  name: "India", constName: "IN_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (IND)",
+  extraNote: "Island territories (Andaman and Nicobar, Lakshadweep) vote with West Bengal and Kerala and are not drawn.",
+  lat0: 22, eps: 0.9, minIslandPx: 4,
+  order: ["UP", "BJ", "MP", "GR", "MH", "DH", "PB", "HM", "KA", "KL", "TN", "AT", "WB", "OD", "NE"],
+  regions: inRegionPolys(),
+});
+
 // ------------------------------------------------------------------- write
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const files = [
-  [CA, "ca.ts"], [DE, "de.ts"], [FR, "fr.ts"], [AU, "au.ts"], [NZ, "nz.ts"], [BR, "br.ts"],
+  [CA, "ca.ts"], [DE, "de.ts"], [FR, "fr.ts"], [AU, "au.ts"], [NZ, "nz.ts"],
+  [BR, "br.ts"],
+  [IN, "in.ts"],
 ].filter(([built]) => built);
 for (const [built, name] of files) {
   const bytes = emit(built, path.join(OUT_DIR, name));
@@ -481,4 +516,5 @@ if (FR) assertCountry(FR, ["HDF", "NOR", "GE", "BRE", "PDL", "IDF", "BFC", "CVL"
 if (AU) assertCountry(AU, ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"], 1.0, 1.6); // wide
 if (NZ) assertCountry(NZ, ["NTH", "AKC", "AKS", "WBP", "CNI", "WGN", "UPS", "CAN", "OTS", "MAO"], 0.55, 0.95); // tall
 if (BR) assertCountry(BR, ["AMZ", "NOR", "CPM", "PNE", "CW", "BA", "MG", "ES", "PRSC", "SP", "RJ", "RS"], 0.85, 1.25); // squarish
+if (IN) assertCountry(IN, ["UP", "BJ", "MP", "GR", "MH", "DH", "PB", "HM", "KA", "KL", "TN", "AT", "WB", "OD", "NE"], 0.8, 1.15); // squarish
 console.log("All assertions passed.");

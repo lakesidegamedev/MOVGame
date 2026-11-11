@@ -1,24 +1,24 @@
 {
-  "webHead": "1815f95ab0ee3e741122ca612d7ee851bfb8f033",
-  "exportedAt": "2026-11-11T20:40:54.260Z",
+  "webHead": "b9dece0956001c07f6ed22b53f755db197550cd4",
+  "exportedAt": "2026-11-11T21:03:33.488Z",
   "bundles": {
     "editor-defaults": {
-      "bytes": 78869
+      "bytes": 90335
     },
     "sound-cues": {
       "bytes": 779
     },
     "scenario-registry": {
-      "bytes": 17277
+      "bytes": 18678
     },
     "next-campaigns": {
-      "bytes": 6649
+      "bytes": 7196
     },
     "maps": {
-      "bytes": 252667
+      "bytes": 277541
     },
     "catalog": {
-      "bytes": 5057
+      "bytes": 6127
     },
     "us-blocs": {
       "bytes": 2889
@@ -55,6 +55,9 @@
     },
     "countries/br": {
       "bytes": 34638
+    },
+    "countries/in": {
+      "bytes": 37347
     }
   }
 }
