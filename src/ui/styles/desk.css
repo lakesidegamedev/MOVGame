@@ -109,7 +109,12 @@
 .evbar .seg.dem { background: var(--dem); }
 .evbar .seg.tossup { background: var(--tossup); color: var(--text-3); }
 .evbar .seg.gop { background: var(--gop); }
-.evbar .threshold { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--text-1); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5); }
+.evbar .threshold {
+  position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px;
+  /* Notches at the top and bottom edge leave the label band in the middle clear. */
+  background: linear-gradient(to bottom, var(--text-1) 0 30%, transparent 30% 70%, var(--text-1) 70% 100%);
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+}
 .evbar .endlabel {
   font-weight: var(--fw-heavy); font-size: var(--fs-lg); min-width: 34px; text-align: center; font-variant-numeric: tabular-nums;
 }

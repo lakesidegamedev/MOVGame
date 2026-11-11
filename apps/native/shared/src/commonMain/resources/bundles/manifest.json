@@ -1,6 +1,6 @@
 {
-  "webHead": "1a2b04a2631412526299fc6e570f120064b34b24",
-  "exportedAt": "2026-11-11T21:29:28.742Z",
+  "webHead": "9b56e805b5f6f9b7b8fd8eb537f44c94fd046662",
+  "exportedAt": "2026-11-11T21:49:57.637Z",
   "bundles": {
     "editor-defaults": {
       "bytes": 122559
@@ -12,7 +12,7 @@
       "bytes": 23511
     },
     "next-campaigns": {
-      "bytes": 10566
+      "bytes": 10186
     },
     "maps": {
       "bytes": 332209

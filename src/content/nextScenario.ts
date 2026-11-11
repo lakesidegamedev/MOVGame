@@ -2,7 +2,8 @@
 // scenario registry (every playable election of a country, oldest first,
 // wrapping at the end), so an election added to a country joins its chain
 // automatically. Each module's `next` data only supplies the blurbs; an
-// election without an authored blurb gets one built from its label.
+// election without an authored blurb gets a plain one (the card's title
+// already names the election).
 
 import { COUNTRY_MODULES_BY_CODE } from "./countries/index";
 import type { NextLink } from "./countries/types";
@@ -36,7 +37,8 @@ function blurbFor(code: string, from: string, to: ScenarioMeta, wrapped: boolean
   if (chained && !wrapped) return chained.blurb;
   const anyMapped = Object.values(next?.map ?? {}).find((e) => e.id === to.nativeId);
   if (anyMapped && !wrapped) return anyMapped.blurb;
-  return wrapped ? `Back to the start: ${to.label}` : `Continue the timeline: ${to.label}`;
+  // The card already shows the election's label as its title.
+  return wrapped ? "Back to the start of the timeline" : "Continue the timeline";
 }
 
 /**

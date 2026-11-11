@@ -98,8 +98,8 @@ export interface CountryModule {
    * derived (every election of the country, oldest first, wrapping), so this
    * never needs a new entry for a new election. A `chain` entry gives the
    * blurb shown when continuing to that election; a `map` entry gives the
-   * blurb for one specific step. Elections without one get "Continue the
-   * timeline: <label>".
+   * blurb for one specific step. Elections without one get a plain
+   * "Continue the timeline".
    */
   next: { chain?: NextLink[]; map?: Record<string, NextLink> };
   /** A "how this system works" entry for the native guide, if the generic ones do not cover it. */

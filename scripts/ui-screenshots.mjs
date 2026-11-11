@@ -2,7 +2,9 @@
 //
 // Usage (with `npm run dev` already running):
 //   node scripts/ui-screenshots.mjs <base-url> <output-dir> [phone,tablet,desktop] [screen-filter] [sections]
-// sections: all, or a comma list of landing,setup,us,uk,de,leaderboard
+// sections: all, or a comma list of landing,setup,us,uk,de,countries,leaderboard
+// "countries" captures library, setup, desk (geo and tile map), results and
+// Store pack page for every registered country; SHOT_COUNTRIES=JP,IN limits it.
 //
 // Game state is driven through the dev server's own store modules, so the
 // shots show real engine output (seeded) rather than mock data.
@@ -102,6 +104,11 @@ async function run(name, opts) {
   await page.goto(base);
   await page.waitForSelector(".landing");
   await wait(800);
+  // Mark every registered country's onboarding coach as seen.
+  await page.evaluate(async () => {
+    const { COUNTRY_MODULES } = await import("/src/content/countries/index.ts");
+    for (const m of COUNTRY_MODULES) localStorage.setItem(`coach-done-${m.code.toLowerCase()}-v1`, "1");
+  });
   if (want("landing")) {
     await shot("01-landing", { full: true });
     await shot("01-landing-top");
@@ -334,6 +341,112 @@ async function run(name, opts) {
   await shot("14-results-de");
   await shot("14-results-de-full", { full: true });
 
+  }
+
+  if (want("countries")) {
+  // Every country: library, setup (newest and oldest election), campaign desk
+  // on both map views, results, and its Store pack page. Shots are named
+  // c-<code>-<screen> so one country can be picked with the screen filter.
+  const countries = await page.evaluate(async () => {
+    const { COUNTRY_MODULES } = await import("/src/content/countries/index.ts");
+    const { SCENARIO_REGISTRY } = await import("/src/content/scenarioRegistry.ts");
+    return COUNTRY_MODULES.map((m) => {
+      const rows = SCENARIO_REGISTRY.filter((s) => s.country === m.code).sort((a, b) => b.year - a.year);
+      return {
+        code: m.code, name: m.name, engine: m.engine, pack: m.pack.id,
+        newest: rows[0].nativeId, oldest: rows[rows.length - 1].nativeId,
+        party: m.engine === "country" ? m.bundle.playable[0] : m.engine === "uk" ? "lab" : "dem",
+      };
+    });
+  });
+  await unlockAll();
+  const onlyCountries = (process.env.SHOT_COUNTRIES ?? "").split(",").filter(Boolean);
+  const storeHook = { us: "gameStore", uk: "ukStore", country: "countryStore" };
+  const viewFor = (c, extra = {}) => c.engine === "us" ? { kind: "us", ...extra } : c.engine === "uk" ? { kind: "uk", ...extra } : { kind: "country", countryId: c.code, ...extra };
+  const pressToggle = (labels) => page.evaluate((labels) => {
+    const b = [...document.querySelectorAll('[role="group"][aria-label="Map view"] button')].find((el) => labels.includes(el.textContent?.trim()));
+    b?.click();
+    return !!b;
+  }, labels);
+  for (const c of countries) {
+    if (onlyCountries.length && !onlyCountries.includes(c.code)) continue;
+    const id = (s) => `c-${c.code.toLowerCase()}-${s}`;
+    await step(id("library"), async () => {
+      await nav({ kind: "landing" });
+      await page.goto(base);
+      await page.waitForSelector(".landing");
+      await unlockAll();
+      const chip = page.locator(".library-countries button", { hasText: c.name }).first();
+      await chip.scrollIntoViewIfNeeded();
+      await chip.click();
+      await page.evaluate(() => document.getElementById("election-library")?.scrollIntoView());
+      await shot(id("library"));
+    });
+    await step(id("setup"), async () => {
+      await page.evaluate(async () => {
+        for (const [file, name] of [["gameStore", "useGameStore"], ["ukStore", "useUkStore"], ["countryStore", "useCountryStore"]]) {
+          const mod = await import(`/src/store/${file}.ts`);
+          mod[name].getState().unload?.();
+        }
+      });
+      const key = c.engine === "us" ? "scenarioId" : "electionId";
+      await nav(viewFor(c, { [key]: c.newest, setup: true }));
+      await shot(id("setup-newest"), { full: true });
+      if (c.oldest !== c.newest) {
+        await nav({ kind: "landing" });
+        await nav(viewFor(c, { [key]: c.oldest, setup: true }));
+        await shot(id("setup-oldest"), { full: true });
+      }
+    });
+    await step(id("desk"), async () => {
+      await page.evaluate(async (c) => {
+        if (c.engine === "us") {
+          const { useGameStore } = await import("/src/store/gameStore.ts");
+          useGameStore.getState().newGame({ scenario: c.newest, playerCandidate: c.party, seed: "ui-shots" });
+        } else if (c.engine === "uk") {
+          const { useUkStore } = await import("/src/store/ukStore.ts");
+          useUkStore.getState().newGame(c.newest, c.party, "ui-shots");
+        } else {
+          const { useCountryStore } = await import("/src/store/countryStore.ts");
+          useCountryStore.getState().newGame(c.code, c.newest, c.party, "ui-shots");
+        }
+      }, c);
+      await nav({ kind: "landing" });
+      await nav(viewFor(c));
+      await advance(storeHook[c.engine], "g.turn >= 3");
+      await clearOverlays();
+      await pressToggle(["Geo", "Geographic"]);
+      await shot(id("desk-geo"));
+      await shot(id("desk-geo-full"), { full: true });
+      await pressToggle(["Square", "EV tiles"]);
+      await shot(id("desk-tile"));
+    });
+    await step(id("results"), async () => {
+      await advance(storeHook[c.engine], "false", 40);
+      await clearOverlays();
+      await nav({ kind: "landing" });
+      await nav(viewFor(c));
+      await wait(2000);
+      const skipBtn = page.locator("button", { hasText: /skip|results|continue/i }).first();
+      if (await skipBtn.count()) await skipBtn.click().catch(() => {});
+      await wait(1500);
+      await shot(id("results"));
+      await shot(id("results-full"), { full: true });
+    });
+    await step(id("store"), async () => {
+      await nav({ kind: "landing" });
+      await page.evaluate(async (packId) => {
+        const { useStoreNav } = await import("/src/store/storeNav.ts");
+        useStoreNav.getState().openStore({ packId });
+      }, c.pack);
+      await wait(800);
+      await shot(id("store"));
+      await page.evaluate(async () => {
+        const { useStoreNav } = await import("/src/store/storeNav.ts");
+        useStoreNav.getState().closeStore();
+      });
+    });
+  }
   }
 
   if (want("leaderboard")) {

@@ -72,6 +72,8 @@
   position: sticky; top: 64px; z-index: 5;
 }
 .library-countries { display: flex; gap: var(--space-1); overflow-x: auto; scrollbar-width: thin; padding-bottom: 2px; }
+/* Wide screens show every country; phones keep the swipeable rail. */
+@media (min-width: 641px) { .library-countries { flex-wrap: wrap; overflow-x: visible; } }
 .country-chip {
   flex: 0 0 auto; min-height: var(--control-sm); padding: 0 var(--space-2-5); gap: var(--space-1-5);
   border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-2); font-size: var(--fs-sm); font-weight: var(--fw-semibold);

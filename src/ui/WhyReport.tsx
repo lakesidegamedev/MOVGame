@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { getCountry } from "@content/countries";
 import { deriveReport, type ReplayLog } from "@lib/replay";
 import { Sparkline } from "./Sparkline";
 import { money } from "./format";
@@ -27,7 +28,12 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
 
   const debates = r.events.filter((e) => e.text.startsWith("Debate:"));
   const otherEvents = r.events.filter((e) => !e.text.startsWith("Debate:"));
-  const currency = log?.engine === "uk" ? "£" : log?.engine === "country" && /^(fr|de|france|germany)/i.test(log.scenarioId) ? "€" : "$";
+  // Country replay logs carry "<CODE>-<election>" as their scenario id.
+  const currency = log?.engine === "uk"
+    ? "£"
+    : log?.engine === "country"
+      ? getCountry(log.scenarioId.split("-")[0]!.toUpperCase())?.currency ?? "$"
+      : "$";
 
   return (
     <div className="card">

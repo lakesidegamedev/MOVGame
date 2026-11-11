@@ -140,11 +140,11 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
 
   const mapPreview = country.map ? (
     <svg viewBox={country.map.viewBox} preserveAspectRatio="xMidYMid meet">
-      {Object.entries(country.map.shapes).slice(0, 14).map(([id, shape]) => (
+      {Object.entries(country.map.shapes).map(([id, shape]) => (
         <path
           key={id}
           d={shape.d}
-          fill={partyColor(country, game.playerParty)}
+          fill={partyFill(partyColor(country, game.playerParty))}
           stroke="#0b1120"
           strokeWidth={0.8}
         />
@@ -292,7 +292,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
                 <span className="swatch" style={{ "--party": partyFill(partyColor(country, p)) } as React.CSSProperties} />
                 {partyShort(country, p)}
               </span>
-              <span className="meta">{r.seats[p]} {country.unitNamePlural} · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
+              <span className="meta">{r.seats[p]} {r.seats[p] === 1 ? country.unitName : country.unitNamePlural} · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
               <div className="suppbar"><div style={{ width: `${(r.seats[p] / majority.total) * 100 * 1.6}%`, background: partyFill(partyColor(country, p)) }} /></div>
             </div>
           ))}

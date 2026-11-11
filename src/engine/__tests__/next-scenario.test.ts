@@ -38,11 +38,11 @@ describe("next-scenario retention chains", () => {
     expect(US_NEXT_SCENARIO["2024"].id).toBe("1960");
   });
 
-  it("keeps authored blurbs and builds the rest from labels", () => {
+  it("keeps authored blurbs and never repeats the card title", () => {
     expect(countryNextScenario("CA", "2019")?.blurb).toBe("Continue the timeline: the pandemic snap");
     expect(US_NEXT_SCENARIO["2000"].blurb).toBe("Continue the timeline: the wartime election");
-    expect(countryNextScenario("DE", "2025")?.blurb).toMatch(/^Back to the start: 2017/);
-    expect(countryNextScenario("CA", "2015")?.blurb).toMatch(/^Continue the timeline: 2019/);
+    expect(countryNextScenario("DE", "2025")?.blurb).toBe("Back to the start of the timeline");
+    expect(countryNextScenario("CA", "2015")?.blurb).toBe("Continue the timeline");
   });
 
   it("US chain points at authored scenarios", () => {

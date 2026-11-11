@@ -121,6 +121,18 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   the FAQ quotes the current store prices.
 - The France-only "six planning weeks" note no longer shows on Brazil's setup screen.
 - The election library shows a one-line summary for every country, not only the first six.
+- Region names on the geographic maps no longer pile on top of each other in crowded areas such
+  as Tokyo, Delhi, the Basque Country, Auckland or London. Labels keep a readable size on phones
+  and stay inside the map; a region with no room for its label keeps its color and shows its
+  name on hover.
+- Seat bars only print a party's name when it fits its slice, so small parties no longer show
+  cut-off names, and the majority marker no longer cuts through party names.
+- Every country appears in the library's country filter on wide screens instead of running off
+  the edge.
+- The results card's next-election map is visible for parties with dark colors, and the
+  campaign summary shows each country's own currency.
+- On phones the setup screen's back and start buttons no longer wrap awkwardly with long party
+  names.
 
 ## 2026-10
 
