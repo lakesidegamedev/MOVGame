@@ -105,12 +105,7 @@ def tap_label(label, direction='down', suffix=False, prefix=False):
     raise RuntimeError(f'Could not reach control: {label}')
 
 
-try:
-    adb('install', '-r', sys.argv[1])
-    adb('shell', 'pm', 'clear', PACKAGE)
-    adb('shell', 'settings', 'put', 'global', 'window_animation_scale', '0')
-    adb('shell', 'settings', 'put', 'global', 'transition_animation_scale', '0')
-    adb('shell', 'settings', 'put', 'global', 'animator_duration_scale', '0')
+def ask_flows():
     # Ask is an embedded page with the same bounded campaign handoff as iOS.
     adb('logcat', '-c')
     launch('home')
@@ -121,7 +116,9 @@ try:
     wait_ask('MOV_ASK_DOCUMENT_READY', 'ask-live')
     wait_ask('MOV_ASK_SNAPSHOT_READY', 'ask-snapshot')
     capture('ask-live', 'Margin of Victory', 'ask')
-    tap_label('Sign in', prefix=True)
+    # Ask lists several identity providers. Margin of Victory accounts are
+    # Lakeside accounts, so the embedded check follows that provider.
+    tap_label('Sign in with Lakeside', prefix=True)
     wait_ask('MOV_ASK_SIGNIN_REACHED_EMBEDDED_AUTH', 'ask-signin-form')
     capture('ask-signin', 'Password', 'ask')
     text = ' '.join(node.get('text', '') + ' ' + node.get('content-desc', '')
@@ -151,18 +148,39 @@ try:
             if retried.count('MOV_ASK_FIXTURE_RESPONSE_200') != 1:
                 raise RuntimeError('Try again did not load the successful third HTTP response')
             capture('ask-retried', 'Ask recovered', 'ask')
+
+
+failures = []
+
+
+def shot(flow, marker, mode='game', name=None):
+    # One screen per launch. A failure is recorded and the run moves on.
+    name = name or flow
+    try:
+        launch(flow)
+        capture(name, marker, mode)
+    except Exception as error:  # noqa: BLE001
+        print(f'FAIL {name}: {error}', flush=True)
+        failures.append(f'{name}: {error}')
+
+
+COUNTRIES = ('US', 'UK', 'CA', 'DE', 'FR', 'AU', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP')
+
+
+def route_flows():
     routes = [('home', 'Margin of'), ('library', 'Choose your election'), ('setup', 'Choose your path'),
               ('store', 'History is yours to play'), ('account', 'YOUR ACCOUNT'), ('settings', 'Sound effects'), ('guide', 'HOW TO PLAY'),
               ('editor', 'SCENARIO EDITOR'), ('saves', 'SAVED CAMPAIGNS'), ('analysis', 'CAMPAIGN ANALYSIS'), ('replay', 'CAMPAIGN REPLAY AND REPORT')]
     for flow, marker in routes:
-        launch(flow)
-        capture(flow, marker, 'ask')
-    for country in ('US', 'UK', 'CA', 'DE', 'FR', 'AU'):
-        for kind in ('game', 'custom', 'results'):
-            name = f'{kind}-{country}'
-            launch(name)
+        shot(flow, marker, 'ask')
+    for country in COUNTRIES:
+        kinds = ('game', 'custom', 'results') if country in ('US', 'UK', 'CA', 'DE', 'FR', 'AU') else ('game', 'results')
+        for kind in kinds:
             marker = 'CAMPAIGN DESK' if country == 'US' and kind != 'results' else 'ELECTION RESULT' if kind == 'results' and country != 'US' else 'CAMPAIGN SCORE' if kind == 'results' else 'WEEK'
-            capture(name, marker)
+            shot(f'{kind}-{country}', marker)
+
+
+def accessibility_flows():
     # Check the actual accessibility tree, including each switch's name.
     launch('settings')
     capture('settings-accessibility', 'Sound effects', 'ask')
@@ -178,6 +196,9 @@ try:
         adb('shell', 'input', 'swipe', str(width // 2), str(height * 3 // 4), str(width // 2), str(height // 3), '300')
     if remaining:
         raise RuntimeError(f'Settings switches have no accessible names: {sorted(remaining)}')
+
+
+def layout_flows():
     # Use explicit dp widths for narrow phones and tablet navigation.
     adb('shell', 'settings', 'put', 'system', 'font_scale', '1.3')
     for layout, size, density in [('small-phone', '640x1136', '320'), ('tablet', '1920x1200', '240')]:
@@ -190,6 +211,9 @@ try:
     adb('shell', 'settings', 'put', 'system', 'font_scale', '1.0')
     adb('shell', 'wm', 'size', 'reset')
     adb('shell', 'wm', 'density', 'reset')
+
+
+def queue_flows():
     # A successful queue edit must repaint without another navigation or selection.
     launch('game-US')
     capture('queue-before', 'CAMPAIGN DESK')
@@ -202,6 +226,9 @@ try:
     capture('queue-removed', '1 planned', 'ask')
     tap_label('Clear all', direction='up')
     capture('queue-cleared', '0 planned', 'ask')
+
+
+def keyboard_flows():
     # Verify a blank week's keyboard command asks before consuming the week.
     launch('game-US')
     capture('keyboard-before', 'WEEK 1/9')
@@ -216,11 +243,39 @@ try:
     capture('keyboard-empty-week', 'Unspent slots win nothing', 'ask')
     adb('shell', 'input', 'keyevent', '4')
     capture('keyboard-cancelled', 'WEEK 1/9')
+
+
+def restart_flows():
     # Restart restores a real custom country campaign from persisted storage.
     launch('custom-DE')
     capture('custom-before-restart', 'WEEK 1 OF')
     launch('resume')
     capture('custom-after-restart', 'WEEK 1 OF')
+
+
+def section(run):
+    # Keep capturing after a failed section so one broken flow does not hide
+    # every later screen. The job still fails at the end.
+    try:
+        run()
+    except Exception as error:  # noqa: BLE001
+        print(f'FAIL {run.__name__}: {error}', flush=True)
+        failures.append(f'{run.__name__}: {error}')
+        adb('shell', 'settings', 'put', 'system', 'font_scale', '1.0')
+        adb('shell', 'wm', 'size', 'reset')
+        adb('shell', 'wm', 'density', 'reset')
+
+
+try:
+    adb('install', '-r', sys.argv[1])
+    adb('shell', 'pm', 'clear', PACKAGE)
+    adb('shell', 'settings', 'put', 'global', 'window_animation_scale', '0')
+    adb('shell', 'settings', 'put', 'global', 'transition_animation_scale', '0')
+    adb('shell', 'settings', 'put', 'global', 'animator_duration_scale', '0')
+    for run in (ask_flows, route_flows, accessibility_flows, layout_flows, queue_flows, keyboard_flows, restart_flows):
+        section(run)
+    if failures:
+        raise RuntimeError('Failed flows: ' + '; '.join(failures))
 finally:
     (output / 'logcat.txt').write_text(adb('logcat', '-d', '-t', '1200'))
     adb('shell', 'am', 'force-stop', PACKAGE)
