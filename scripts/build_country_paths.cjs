@@ -167,7 +167,16 @@ function simplifyRing(ring, eps) {
 
 // ------------------------------------------------------------ build country
 // cfg: { name, constName, sourceNote, lat0, eps, minIslandPx, clip?, order,
-//        regions: id -> array of polygons (lon/lat), labelNudge?: id -> [dx,dy] }
+//        regions: id -> array of polygons (lon/lat), labelNudge?: id -> [dx,dy],
+//        labelAt?: id -> [x,y], padRight?: number }
+// `padRight` adds open sea to the right of the fitted country, in output units
+// (the country keeps its 560-unit fit). A tall map drawn in a wide frame loses
+// no scale, and small coastal regions get room for their labels.
+// Label anchors default to the centroid of a region's largest ring, moved by
+// `labelNudge`. `labelAt` replaces the anchor outright, in output (viewBox)
+// units: use it for small or crowded regions whose label reads better in open
+// sea next to the shape. Check the result on the geo map at phone and desktop
+// widths (scripts/ui-screenshots.mjs, countries section).
 function buildCountry(cfg) {
   const k = Math.cos((cfg.lat0 * Math.PI) / 180);
   const project = ([lon, lat]) => [lon * k, lat];
@@ -193,8 +202,9 @@ function buildCountry(cfg) {
       if (y < minY) minY = y; if (y > maxY) maxY = y;
     }
 
-  const PAD = 8, W = 560;
-  const sx = (W - PAD * 2) / (maxX - minX);
+  const PAD = 8, FIT = 560;
+  const W = FIT + (cfg.padRight || 0);
+  const sx = (FIT - PAD * 2) / (maxX - minX);
   const H = Math.round((maxY - minY) * sx + PAD * 2);
   const tx = (x) => PAD + (x - minX) * sx;
   const ty = (y) => PAD + (maxY - y) * sx; // flip vertical
@@ -233,11 +243,14 @@ function buildCountry(cfg) {
     }
     if (!d) throw new Error(`${cfg.name}: region ${id} produced an empty path`);
     const nudge = (cfg.labelNudge && cfg.labelNudge[id]) || [0, 0];
+    const at = cfg.labelAt && cfg.labelAt[id];
     shapes[id] = {
       d,
-      label: bestCentroid
-        ? [round(bestCentroid[0] + nudge[0]), round(bestCentroid[1] + nudge[1])]
-        : [W / 2, H / 2],
+      label: at
+        ? [at[0], at[1]]
+        : bestCentroid
+          ? [round(bestCentroid[0] + nudge[0]), round(bestCentroid[1] + nudge[1])]
+          : [W / 2, H / 2],
     };
   }
   return { viewBox: `0 0 ${W} ${H}`, W, H, shapes, cfg };
@@ -318,6 +331,12 @@ const CA = wants("CA") && buildCountry({
   // NORTH's largest ring is the merged mainland; nudge the label toward the
   // NWT/Nunavut mainland's visual middle if the centroid drifts.
   labelNudge: { NORTH: [0, 20] },
+  // The Maritimes are three small shapes: Prince Edward Island is labelled in
+  // the Gulf of St. Lawrence and Nova Scotia in the Atlantic, leaving New
+  // Brunswick's label on land.
+  // The narrow Prairie provinces alternate high and low so each keeps its
+  // second line next to a neighbour's.
+  labelAt: { NB: [462, 462], PE: [505, 434], NS: [514, 496], BC: [102, 382], AB: [171, 332], SK: [224, 382], MB: [276, 336] },
 });
 
 // --------------------------------------------------------------------- DE
@@ -415,6 +434,9 @@ const NZ = wants("NZ") && buildCountry({
   clip: [166.0, -47.5, 179.0, -34.0], // mainland + Stewart Island; drops Chathams and the subantarctic islands
   order: ["NTH", "AKC", "AKS", "WBP", "CNI", "WGN", "UPS", "CAN", "OTS", "MAO"],
   regions: nzRegions(),
+  // The two Auckland cuts are too small for two labels: central and west
+  // Auckland is labelled in the Tasman Sea, south and east in the Hauraki Gulf.
+  labelAt: { AKC: [318, 172], AKS: [484, 138] },
 });
 
 // --------------------------------------------------------------------- BR
@@ -441,6 +463,9 @@ const BR = wants("BR") && buildCountry({
     PRSC: ["Paraná", "Santa Catarina"], SP: ["São Paulo"], RJ: ["Rio de Janeiro"],
     RS: ["Rio Grande do Sul"],
   }, "BR"),
+  // Espírito Santo and Rio de Janeiro are thin coastal states: label both in
+  // the Atlantic, clear of Minas Gerais.
+  labelAt: { ES: [510, 378], RJ: [480, 424] },
 });
 
 // --------------------------------------------------------------------- IN
@@ -473,6 +498,9 @@ const IN = wants("IN") && buildCountry({
   lat0: 22, eps: 0.9, minIslandPx: 4,
   order: ["UP", "BJ", "MP", "GR", "MH", "DH", "PB", "HM", "KA", "KL", "TN", "AT", "WB", "OD", "NE"],
   regions: inRegionPolys(),
+  // Kerala is a thin coastal strip next to Tamil Nadu: its label sits in the
+  // Arabian Sea. Bengal's label sits in the Bay of Bengal, clear of Bihar.
+  labelAt: { KL: [120, 524], TN: [224, 492], WB: [405, 300] },
 });
 
 // --------------------------------------------------------------------- ES
@@ -513,6 +541,8 @@ const ES = wants("ES") && buildCountry({
   lat0: 40, eps: 0.8, minIslandPx: 3.5,
   order: ["AND", "CAT", "MAD", "VAL", "GAL", "PV", "CYL", "CLE", "ARA", "NAV", "MUR", "AST", "BAL", "CAN"],
   regions: esRegions(),
+  // Aragon's centroid sits level with the Catalonia label: move it south.
+  labelAt: { ARA: [356, 152] },
 });
 
 // --------------------------------------------------------------------- IE
@@ -565,8 +595,12 @@ const IE = wants("IE") && buildCountry({
   clip: [-10.8, 51.3, -5.9, 55.5], // drops nothing but stray rocks
   order: ["BOR", "WES", "MID", "CMB", "DNO", "DSO", "DWE", "SEA", "MUN", "COR"],
   regions: ieRegions(),
-  // The three Dublin shapes are tiny: push their labels out into open space.
-  labelNudge: { DNO: [8, -16], DWE: [-26, 6], DSO: [14, 18] },
+  // The three Dublin shapes are tiny: their labels stack in the Irish Sea,
+  // which the extra frame on the right provides at no cost in scale (the map
+  // is height-bound on every screen). The commuter belt label moves south to
+  // Wicklow so it clears the Midlands.
+  padRight: 150,
+  labelAt: { DNO: [622, 376], DWE: [622, 420], DSO: [622, 464], CMB: [488, 505] },
 });
 
 // --------------------------------------------------------------------- JP
@@ -610,7 +644,10 @@ const JP = wants("JP") && buildCountry({
   name: "Japan", constName: "JP_MAP",
   sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (JPN)",
   extraNote: "Regions are the 11 proportional blocks. Okinawa (Kyushu block) is an inset shifted north; Tokyo carries a 2.4x magnified lens copy in the Pacific so it can be tapped; Amami, Tokara, Izu and Ogasawara are dropped.",
-  labelNudge: { KYU: [10, -14], SKT: [15, 12], NKT: [-2, -4] },
+  labelNudge: { KYU: [10, -14], NKT: [-2, -4] },
+  // Central Honshu is too narrow for five labels: Hokuriku and Chugoku sit in
+  // the Sea of Japan, Tokai, Southern Kanto and Shikoku in the Pacific.
+  labelAt: { HSN: [335, 238], CHG: [238, 296], TKI: [345, 366], SKT: [414, 340], SHK: [262, 384] },
   lat0: 36, eps: 0.8, minIslandPx: 4,
   clip: [122.5, 27.8, 145.9, 45.9],
   order: ["HKD", "TOH", "NKT", "SKT", "HSN", "TKI", "KNK", "CHG", "SHK", "KYU", "TKY"],
@@ -664,6 +701,9 @@ const IT = wants("IT") && buildCountry({
   clip: [6.0, 36.2, 19.6, 47.3],
   order: ["PIE", "LOM", "VEN", "NEA", "TOS", "EMR", "UMA", "LAZ", "ABM", "CAM", "PUG", "BAC", "SIC", "SAR", "EST"],
   regions: itRegions(),
+  // Veneto and Abruzzo-Molise are labelled in the Adriatic, Apulia on its
+  // northern coast, so the central and southern labels do not collide.
+  labelAt: { VEN: [282, 118], ABM: [380, 280], PUG: [468, 345] },
 });
 
 // --------------------------------------------------------------------- MX
@@ -703,8 +743,10 @@ const MX = wants("MX") && buildCountry({
   clip: [-117.6, 14.3, -86.5, 32.8], // drops Guadalupe and other far Pacific islands
   order: ["NW", "NOR", "NE", "WES", "BAJ", "MEX", "CDMX", "CEN", "VER", "SUR", "PEN"],
   regions: mxRegions(),
-  // The central units are small and crowded: push their labels apart.
-  labelNudge: { MEX: [-12, 10], CEN: [2, -10], VER: [-2, 14], BAJ: [-4, -6] },
+  // The central units are small and crowded: push their labels apart, and
+  // put the West, Veracruz and Pacific South labels on or past their coasts.
+  labelNudge: { MEX: [-12, 10] },
+  labelAt: { WES: [222, 262], BAJ: [285, 222], CEN: [352, 248], VER: [430, 286], SUR: [340, 332], PEN: [496, 240] },
 });
 
 // ------------------------------------------------------------------- write

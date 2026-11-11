@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from "react";
 // Region labels for the geographic maps (UK and the multiparty countries).
 //
 // Labels are sized in screen pixels, not map units, so they stay readable on a
-// phone and on tall maps like the UK. They are placed greedily, biggest region
-// first: a label that would collide with one already placed drops its second
-// line, and if its name still collides it is left off. The region keeps its
-// color, its hover title and its tile on the Square view. The selected region
-// is always labelled.
+// phone and on tall maps like the UK. They are placed greedily in two passes,
+// biggest region first: every name that does not collide with one already
+// placed is drawn, then each placed name gets its second line where that
+// still fits. A region whose name cannot fit keeps its color, its hover title
+// and its tile on the Square view. The selected region is always labelled in
+// full.
 
 export interface MapLabelInput {
   id: string;
@@ -91,26 +92,37 @@ export function placeMapLabels(
     Number(b.id === selectedId) - Number(a.id === selectedId) || b.weight - a.weight || a.id.localeCompare(b.id));
   const placed: Box[] = [];
   const out: Record<string, PlacedLabel> = {};
-  const free = (b: Box) => !placed.some((p) => hit(p, b));
+  const free = (b: Box, except?: Box) => !placed.some((p) => p !== except && hit(p, b));
   // Keep a label of half-width `half` fully inside the map.
   const clampX = (x: number, half: number) => Math.min(Math.max(x, half), Math.max(half, mapWidth - half));
+  // Pass 1: names. Every name that fits is placed before any second line, so
+  // a big region's detail never hides a smaller region's name.
+  const nameBoxes: Record<string, Box> = {};
   for (const it of order) {
-    const halfName = (textBox(0, 0, it.name, sizes.name).x1);
-    const halfDetail = it.detail ? textBox(0, 0, it.detail, sizes.detail).x1 : 0;
-    const xFull = clampX(it.x, Math.max(halfName, halfDetail));
-    const xName = clampX(it.x, halfName);
-    const name = textBox(xFull, it.y, it.name, sizes.name);
-    const detail = it.detail ? textBox(xFull, it.y + sizes.offset, it.detail, sizes.detail) : null;
-    const nameOnly = textBox(xName, it.y, it.name, sizes.name);
-    if (it.id === selectedId || (free(name) && (!detail || free(detail)))) {
-      out[it.id] = { mode: "full", x: xFull };
-      placed.push(name);
-      if (detail) placed.push(detail);
-    } else if (free(nameOnly)) {
+    const xName = clampX(it.x, textBox(0, 0, it.name, sizes.name).x1);
+    const box = textBox(xName, it.y, it.name, sizes.name);
+    if (it.id === selectedId || free(box)) {
       out[it.id] = { mode: "name", x: xName };
-      placed.push(nameOnly);
+      placed.push(box);
+      nameBoxes[it.id] = box;
     } else {
       out[it.id] = { mode: "none", x: it.x };
+    }
+  }
+  // Pass 2: second lines, in the same order, where they still fit. A wide
+  // second line may shift the pair inward from the map edge.
+  for (const it of order) {
+    const nameBox = nameBoxes[it.id];
+    if (!nameBox || !it.detail) continue;
+    const halfName = textBox(0, 0, it.name, sizes.name).x1;
+    const halfDetail = textBox(0, 0, it.detail, sizes.detail).x1;
+    const xFull = clampX(it.x, Math.max(halfName, halfDetail));
+    const name = textBox(xFull, it.y, it.name, sizes.name);
+    const detail = textBox(xFull, it.y + sizes.offset, it.detail, sizes.detail);
+    if (it.id === selectedId || (free(name, nameBox) && free(detail, nameBox))) {
+      out[it.id] = { mode: "full", x: xFull };
+      placed[placed.indexOf(nameBox)] = name;
+      placed.push(detail);
     }
   }
   return out;

@@ -183,6 +183,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   beats that were misdated, misattributed or could not be sourced were corrected or replaced (for
   example the German Greens' 1990 leaders, the 1993 Campbell line in Canada, and the 1944 US
   campaign's Pearl Harbor wording), and unverifiable quotes were removed.
+- Geographic maps now show every region's name at phone and desktop sizes. Small or crowded
+  regions are labelled in the sea next to them (Prince Edward Island and Nova Scotia, Auckland,
+  Kerala and Bengal, the three Dublin regions, central Japan, Veneto and Apulia, Espírito Santo
+  and Rio, the centre of Mexico), and a region's name is always placed before any neighbour's
+  seat count, so a seat count never hides a name. Japan's blocks use short labels ("Hok",
+  "N Kan", "Kinki"), as do Ireland's commuter belt and Dublin regions, Abruzzo-Molise and
+  Mexico's Yucatán; the full name is still on hover and in the region panel.
 - On Easy, a party that stands in only part of a country (the Bloc Québécois, India's regional
   parties, Spain's Catalan and Basque parties) no longer appears on the ballot in regions where it
   never stood. The Easy head start now applies only where your party is actually running.

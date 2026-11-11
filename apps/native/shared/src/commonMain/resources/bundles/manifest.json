@@ -1,6 +1,6 @@
 {
-  "webHead": "e1e606ed9c3357c834bd8b533b7b3427b8c43bb4",
-  "exportedAt": "2026-11-11T23:46:55.411Z",
+  "webHead": "1b9b417bb972d7c2ccd11b0c90ac191838eeb60d",
+  "exportedAt": "2026-11-12T00:23:58.574Z",
   "bundles": {
     "editor-defaults": {
       "bytes": 196719
@@ -15,7 +15,7 @@
       "bytes": 16468
     },
     "maps": {
-      "bytes": 363348
+      "bytes": 363237
     },
     "catalog": {
       "bytes": 11878
@@ -63,16 +63,16 @@
       "bytes": 38987
     },
     "countries/ie": {
-      "bytes": 34577
+      "bytes": 34561
     },
     "countries/jp": {
-      "bytes": 53429
+      "bytes": 53398
     },
     "countries/it": {
-      "bytes": 34556
+      "bytes": 34552
     },
     "countries/mx": {
-      "bytes": 28321
+      "bytes": 28314
     }
   }
 }

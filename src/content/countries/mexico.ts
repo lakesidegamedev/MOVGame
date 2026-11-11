@@ -152,7 +152,7 @@ export const MEXICO: CountryBundle = {
       profile: { urban_working: 1.6, young: 1.2, north_middle: 1.0, catholic: 0.5, rural_south: 0.1 } },
     { id: "CEN", name: "Puebla, Hidalgo, Tlaxcala & Morelos", abbr: "Centre", seats: 11, electorate: 4915, tile: { row: 2, col: 3 },
       profile: { urban_working: 1.1, rural_south: 1.1, pri_loyal: 1.1, catholic: 1.0 } },
-    { id: "PEN", name: "Tabasco, Campeche, Yucatán & Quintana Roo", abbr: "Gulf & Yucatán", seats: 6, electorate: 2853, tile: { row: 2, col: 4 },
+    { id: "PEN", name: "Tabasco, Campeche, Yucatán & Quintana Roo", abbr: "Yucatán", seats: 6, electorate: 2853, tile: { row: 2, col: 4 },
       profile: { welfare: 1.3, rural_south: 1.1, pri_loyal: 1.0, north_middle: 0.8 } },
   ],
 

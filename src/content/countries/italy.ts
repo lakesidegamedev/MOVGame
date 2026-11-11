@@ -210,7 +210,7 @@ export const ITALY: CountryBundle = {
       profile: { south: 1.3, pensioner: 1.1, young: 0.9, civic: 0.6 } },
     { id: "UMA", name: "Umbria & Marche", abbr: "Umbria-Marche", seats: 16, electorate: 1198, tile: { row: 2, col: 1 },
       profile: { civic: 1.7, pensioner: 1.2, catholic: 1.1, south: 0.5 } },
-    { id: "ABM", name: "Abruzzo & Molise", abbr: "Abruzzo-Molise", seats: 11, electorate: 755, tile: { row: 2, col: 2 },
+    { id: "ABM", name: "Abruzzo & Molise", abbr: "Abr-Molise", seats: 11, electorate: 755, tile: { row: 2, col: 2 },
       profile: { south: 1.3, pensioner: 1.15, catholic: 1.15 } },
     { id: "EST", name: "Italians abroad", abbr: "Abroad", seats: 8, electorate: 1086, tile: { row: 3, col: 0 },
       profile: { abroad: 14, graduate: 0.8, worker: 0.5, south: 0.3, pensioner: 0.6, civic: 0.1 } },
