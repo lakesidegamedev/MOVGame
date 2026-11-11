@@ -453,6 +453,7 @@ export const INDIA_MODULE = countryModule(INDIA, {
   blurb: "First past the post across 543 seats: two alliances, a dozen regional powers and the largest electorate on earth.",
   cover: "images/covers/country-in.jpg",
   art: { a: "#7a2e0b", b: "#0f5b46", glow: "rgba(255,200,120,0.22)" },
+  freeElections: ["2024"],
   scenarios: [
     { electionId: "2024", difficulty: "hard",
       description: "Ab ki baar 400 paar meets an opposition bloc that finally agrees on something. Seven phases, a Hindi belt that pushed back, and the BJP needing its allies." },

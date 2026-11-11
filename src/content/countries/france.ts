@@ -646,6 +646,7 @@ export const FRANCE_MODULE = countryModule(FRANCE, {
   blurb: "The two-round runoff for the Élysée.",
   cover: "images/covers/country-fr.jpg",
   art: { a: "#142a59", b: "#a82b42", glow: "rgba(245,245,245,0.18)" },
+  freeElections: ["2022"],
   scenarios: [
     { electionId: "2027", label: "2027 · The Republic's runoff", difficulty: "hard",
       description: "Macron is term-limited. The centre defends the Élysée against the RN in a two-round fight for France." },

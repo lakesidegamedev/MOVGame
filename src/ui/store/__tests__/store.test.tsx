@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { PACKS_BY_ID } from "@content/packs";
-import { catalogFromResponse, countryPacks, summarizeComplete, unreachableCatalog, type CatalogState } from "@lib/storeModel";
+import { catalogFromResponse, countryPacks, packFacts, summarizeComplete, unreachableCatalog, type CatalogState } from "@lib/storeModel";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -81,7 +81,8 @@ describe("the shelf", () => {
     for (const p of countryPacks()) {
       const t = tile(p.id);
       expect(t.textContent).toContain(p.name);
-      expect(t.textContent).toContain(`${p.scenarios.length} election`);
+      expect(t.textContent).toContain(`${packFacts(p).elections.length} elections, `);
+      expect(t.textContent).toMatch(/elections, [12] free/);
       expect(t.textContent).toContain("$0.99");
       expect(t.querySelector("img.store-cover, .store-cover.fallback")).not.toBeNull();
       expect(buttons(/^Buy /).some((b) => tile(p.id).contains(b))).toBe(true);
@@ -97,6 +98,9 @@ describe("the shelf", () => {
     expect(free.textContent).toContain("Harris v. Trump");
     expect(free.textContent).toContain("Biden v. Trump");
     expect(free.textContent).toContain("Daily Challenge");
+    // One group per country, each with its free election.
+    expect(free.querySelectorAll(".store-free-country:not(.store-free-daily)")).toHaveLength(countryPacks().length);
+    expect(free.textContent).toContain("France");
     click(buttons(/Play 2024/)[0]);
     expect(onPlay).toHaveBeenCalledWith("us-2024");
   });
@@ -186,7 +190,12 @@ describe("a pack page", () => {
     mount();
     expect(container.querySelector("h2")!.textContent).toBe("Canada");
     const rows = [...container.querySelectorAll(".store-election")];
-    expect(rows).toHaveLength(PACKS_BY_ID.canada.scenarios.length);
+    // The paid elections plus the country's free one, marked Free with Play.
+    expect(rows).toHaveLength(PACKS_BY_ID.canada.scenarios.length + 1);
+    const free = rows.filter((r) => r.querySelector(".tag-free"));
+    expect(free).toHaveLength(1);
+    expect(free[0].textContent).toContain("2025");
+    expect(free[0].querySelector("button")?.textContent).toContain("Play");
     const focus = container.querySelector(".store-election.is-focus")!;
     expect(focus.textContent).toContain("Trudeau v. Scheer");
     expect(focus.textContent).toContain("The election you tried to open");
@@ -197,7 +206,7 @@ describe("a pack page", () => {
     expect(box.textContent).toContain("Complete Collection");
     expect(box.textContent).toContain("$3.99");
     expect(box.querySelectorAll("button")).toHaveLength(2);
-    expect(rows.every((r) => r.textContent!.includes("Locked"))).toBe(true);
+    expect(rows.filter((r) => !r.querySelector(".tag-free")).every((r) => r.textContent!.includes("Locked"))).toBe(true);
   });
 
   it("lets the owner jump straight into an election", () => {

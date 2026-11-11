@@ -543,6 +543,7 @@ export const JAPAN_MODULE = countryModule(JAPAN, {
   blurb: "Parallel voting: districts plus regional lists, from the 2009 change of government to the 2024 slush fund election.",
   cover: "images/covers/country-jp.jpg",
   art: { a: "#14213d", b: "#b3202a", glow: "rgba(255,240,235,0.22)" },
+  freeElections: ["2024"],
   scenarios: [
     { electionId: "2024", difficulty: "easy",
       description: "Ishiba calls a quick election to save a government hurt by the slush fund scandal. The opposition is split several ways, and the coalition's majority is in play." },

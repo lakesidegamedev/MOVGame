@@ -424,6 +424,7 @@ export const IRELAND_MODULE = countryModule(IRELAND, {
   blurb: "Single transferable vote: Fianna Fáil, Fine Gael, Sinn Féin and an army of independents.",
   cover: "images/covers/country-ie.jpg",
   art: { a: "#0b3d2e", b: "#c8782a", glow: "rgba(236,240,245,0.2)" },
+  freeElections: ["2024"],
   scenarios: [
     { electionId: "2024", difficulty: "hard",
       description: "A new Taoiseach, a giveaway budget and a housing crisis that will not go away. The old rivals need partners, and Sinn Féin needs the transfers." },

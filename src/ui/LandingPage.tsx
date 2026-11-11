@@ -4,12 +4,13 @@ import { packCovered, STORE_PACKS } from "@content/packs";
 import { countryCover } from "@content/covers";
 import { COUNTRY_MODULES } from "@content/countries";
 import {
-  COUNTRY_COUNT, ELECTION_COUNT, FREE_ELECTION_COUNT, VOTING_SYSTEM_COUNT,
-  countWord, countryInSentence, electionCountFor, firstYearFor, joinList,
+  COUNTRY_COUNT, ELECTION_COUNT, FREE_COUNTRY_COUNT, FREE_ELECTION_COUNT, VOTING_SYSTEM_COUNT,
+  countryInSentence, electionCountFor, firstYearFor, joinList,
 } from "@content/facts";
 import { useAuthStore } from "@store/authStore";
 import { useStoreNav } from "@store/storeNav";
 import { usePackPrices } from "@lib/usePackPrices";
+import { packFacts } from "@lib/storeModel";
 import { DISTRIBUTION } from "@lib/distribution";
 import { UserMenu } from "@ui/auth/UserMenu";
 import { DailyCard } from "@ui/DailyCard";
@@ -31,6 +32,8 @@ function otherCountriesList(): string {
 const COUNTRY_FLAGS = COUNTRY_MODULES.map((m) => m.flag);
 const VOTING_SYSTEMS_LINE = `${COUNTRY_COUNT} countries, ${VOTING_SYSTEM_COUNT} voting systems`;
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+// "13 full elections across 12 countries": every country has a free election.
+const FREE_LINE = `${FREE_ELECTION_COUNT} full elections across ${FREE_COUNTRY_COUNT} countries`;
 
 export type LandingDestination =
   | { kind: "us"; scenarioId: string }   // native id, e.g. "2024"
@@ -117,11 +120,11 @@ function faqItems(prices: Record<string, number>): { q: string; a: string }[] {
   return [
   {
     q: "What's actually free?",
-    a: `${countWord(FREE_ELECTION_COUNT, true)} full scenarios plus a new daily challenge every day, no account and no payment required. Nothing is time limited or ad supported.`,
+    a: `${FREE_LINE}, so you can try every country before you buy it, plus a new daily challenge every day. No account and no payment required. Nothing is time limited or ad supported.`,
   },
   {
     q: "What do I get if I pay?",
-    a: `Each country is a ${money(prices["us-historical"] ?? 99)} bundle: the rest of the US elections back to ${firstYearFor("US")}, ${otherCountriesList()}. The Complete Collection unlocks every country for ${money(prices.complete ?? 399)}. Both are one time purchases, not subscriptions.`,
+    a: `Each country is a ${money(prices["us-historical"] ?? 99)} bundle with the rest of its elections: the US back to ${firstYearFor("US")}, ${otherCountriesList()}. The Complete Collection unlocks every country for ${money(prices.complete ?? 399)}. Both are one time purchases, not subscriptions.`,
   },
   {
     q: BUY_QUESTION,
@@ -252,7 +255,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
               Run a real campaign turn by turn: allocate a budget, target battlegrounds, survive debates,
               and watch the map move. {ELECTION_COUNT} elections across {COUNTRY_COUNT} countries.
               {PAYWALL_ENABLED
-                ? ` ${countWord(FREE_ELECTION_COUNT, true)} full scenarios and the daily challenge are free forever. Every other country is ${money(packPrices["us-historical"] ?? 99)}, or ${money(packPrices.complete ?? 399)} for everything.`
+                ? ` ${FREE_LINE}, and the daily challenge are free forever. The rest of each country is ${money(packPrices["us-historical"] ?? 99)}, or ${money(packPrices.complete ?? 399)} for everything.`
                 : " All of them are free to play right now."}
             </p>
             <div className="landing-hero-actions">
@@ -337,7 +340,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
               <h3>Free</h3>
               <p className="pricing-price">$0</p>
               <ul className="pricing-list">
-                <li><Check size={13} /> {PAYWALL_ENABLED ? `${FREE_ELECTION_COUNT} full scenarios` : `All ${ELECTION_COUNT} scenarios`}, no account needed</li>
+                <li><Check size={13} /> {PAYWALL_ENABLED ? FREE_LINE : `All ${ELECTION_COUNT} scenarios`}, no account needed</li>
                 <li><Check size={13} /> A new daily challenge every day</li>
                 <li><Check size={13} /> Leaderboards with a free account</li>
               </ul>
@@ -379,7 +382,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
                   <span className="scenario-year" style={{ fontSize: 14 }}>
                     {p.name} {owned && <Check size={13} style={{ verticalAlign: "-2px", color: "var(--green)" }} />}
                   </span>
-                  <span className="scenario-match">{p.scenarios.length} scenarios</span>
+                  <span className="scenario-match">{packFacts(p).countLabel}</span>
                   <span className="muted small" style={{ fontSize: 11 }}>{p.description}</span>
                   <span className="pack-foot">
                     <span className="pack-price">

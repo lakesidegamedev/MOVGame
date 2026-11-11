@@ -115,6 +115,12 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Changed
 
+- Every country now has a free election, playable without an account: the newest election of
+  each country (France's 2022 runoff rather than the speculative 2027 one), plus the US 2024 and
+  2020 races as before. The free election stays free when newer elections arrive. Country packs
+  hold the rest of each country's elections; the Store shows the free one on the pack page as
+  "Free", and the base game section lists every free election by country. Nobody loses anything:
+  owners of a pack or the retired Global pack keep every election they had.
 - Countries are now self-contained add-ons inside the game. Each country carries its own
   elections, store pack, daily challenge sides and "play next" links, and the web game, the
   iPhone app and the Android app all list countries and packs from that one source. Nothing

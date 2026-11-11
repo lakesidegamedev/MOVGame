@@ -3,7 +3,7 @@ import { packFacts, describeReason } from "@lib/storeModel";
 import type { ScenarioPack } from "@content/packs";
 import { useStoreCtx } from "./StoreContext";
 import { OfferAction, useOffer } from "./OfferAction";
-import { Cover, plural } from "./StoreParts";
+import { Cover } from "./StoreParts";
 
 export function PackTile({ pack }: { pack: ScenarioPack }) {
   const ctx = useStoreCtx();
@@ -13,7 +13,7 @@ export function PackTile({ pack }: { pack: ScenarioPack }) {
   const soon = offer.kind === "coming-soon";
   return (
     <article className={`pack-tile${owned ? " owned" : ""}${soon ? " soon" : ""}`} aria-labelledby={`tile-${pack.id}`}>
-      <button type="button" className="pack-tile-main" onClick={() => ctx.openPack(pack.id)} aria-label={`Open ${pack.name}: ${plural(facts.elections.length, "election")}`}>
+      <button type="button" className="pack-tile-main" onClick={() => ctx.openPack(pack.id)} aria-label={`Open ${pack.name}: ${facts.countLabel}`}>
         <span className="pack-tile-cover">
           <Cover facts={facts} />
           <span className="pack-tile-shade" aria-hidden="true" />
@@ -23,7 +23,7 @@ export function PackTile({ pack }: { pack: ScenarioPack }) {
           <span className="pack-tile-name" id={`tile-${pack.id}`}>{pack.name}</span>
         </span>
         <span className="pack-tile-facts">
-          <span className="pack-tile-count"><b>{plural(facts.elections.length, "election")}</b>{facts.yearRange && <> · {facts.yearRange}</>}</span>
+          <span className="pack-tile-count"><b>{facts.countLabel}</b>{facts.yearRange && <> · {facts.yearRange}</>}</span>
           {facts.system && <span className="pack-tile-system">{facts.system}</span>}
         </span>
         <span className="pack-tile-desc">{pack.description}</span>

@@ -11,7 +11,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { COUNTRY_MODULES } from "./countries/index";
-import type { EnginePath, ScenarioDifficulty, ScenarioTag } from "./countries/types";
+import { freeElectionIds, rowYear, type EnginePath, type ScenarioDifficulty, type ScenarioTag } from "./countries/types";
 
 /** Country code ("US", "UK", "CA", …). Any registered module's code. */
 export type CountryCode = string;
@@ -77,18 +77,22 @@ export function tideBlurb(meta: ScenarioMeta): string | null {
 // the registry never shifts.
 const REGISTRY_ROWS = COUNTRY_MODULES.flatMap((m) => m.scenarios.map((row) => ({ m, row })));
 
+// Every country has a free taster: the module's `freeElections`, or its newest
+// election when it names none (countries/types.ts). Free rows have no pack.
+const FREE_IDS = new Map(COUNTRY_MODULES.map((m) => [m.code, new Set(freeElectionIds(m))]));
+
 export const SCENARIO_REGISTRY: ScenarioMeta[] = [
   ...REGISTRY_ROWS.filter(({ row }) => !row.addedLater),
   ...REGISTRY_ROWS.filter(({ row }) => row.addedLater),
 ].map(({ m, row }): ScenarioMeta => {
   const election = m.bundle?.elections[row.electionId];
-  const free = row.free === true;
+  const free = FREE_IDS.get(m.code)!.has(row.electionId);
   const meta: ScenarioMeta = {
     scenarioId: row.scenarioId ?? `${m.code.toLowerCase()}-${row.electionId}`,
     country: m.code,
     engine: m.engine,
     nativeId: row.electionId,
-    year: row.year ?? election?.year ?? 0,
+    year: rowYear(m, row),
     free,
     packId: free ? undefined : m.pack.id,
     difficulty: row.difficulty,
@@ -111,8 +115,9 @@ export const FREE_SCENARIO_IDS = SCENARIO_REGISTRY.filter((s) => s.free).map((s)
 // the packs/activation machinery stays intact so flipping this back on
 // restores the paid tiers without further changes.
 //
-// ON at release: US 2024, US 2020 and the daily challenge are free; every
-// other scenario needs its country bundle or the Complete Collection.
+// ON: one election per country (two for the US) and the daily challenge are
+// free; every other scenario needs its country bundle or the Complete
+// Collection.
 export const PAYWALL_ENABLED = true;
 
 export function isFreeScenario(scenarioId: string): boolean {

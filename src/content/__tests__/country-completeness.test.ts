@@ -145,6 +145,18 @@ describe("registry rows", () => {
     }
   });
 
+  it("every country has a free election, pinned to real rows, and something left to sell", () => {
+    for (const m of COUNTRY_MODULES) {
+      const rows = m.scenarios.map((r) => r.electionId);
+      const free = SCENARIO_REGISTRY.filter((s) => s.country === m.code && s.free);
+      expect(free.length, `${m.code} free elections`).toBeGreaterThanOrEqual(1);
+      expect(free.length, `${m.code} keeps paid elections`).toBeLessThan(rows.length);
+      for (const id of m.freeElections ?? []) expect(rows, `${m.code} freeElections ${id}`).toContain(id);
+      if (m.freeElections) expect(new Set(m.freeElections).size, `${m.code} duplicate free ids`).toBe(m.freeElections.length);
+      for (const s of free) expect(s.packId, s.scenarioId).toBeUndefined();
+    }
+  });
+
   it("every country pack is on sale and holds exactly that country's paid rows", () => {
     for (const m of COUNTRY_MODULES) {
       const pack = STORE_PACKS.find((p) => p.id === m.pack.id);

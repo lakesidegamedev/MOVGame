@@ -2,7 +2,7 @@ import { CheckCircle2, ExternalLink, Info, LoaderCircle, Play, RefreshCw, Triang
 import { PACKS_BY_ID } from "@content/packs";
 import { useAuthStore } from "@store/authStore";
 import { useStoreFlow, type FlowPhase } from "@store/storeFlow";
-import { electionsToOffer, summarizeComplete, COMPLETE_ID, LOADING_CATALOG } from "@lib/storeModel";
+import { electionsToOffer, packFacts, summarizeComplete, COMPLETE_ID, LOADING_CATALOG } from "@lib/storeModel";
 import { useStoreCtx } from "./StoreContext";
 
 function packName(packId: string | null): string {
@@ -23,7 +23,9 @@ function unlockedLine(packId: string | null): string {
       ? `All ${sum.elections} elections in ${sum.countries} countries are yours, and every country we add later.`
       : "Every country and election is yours.";
   }
-  return `All ${pack.scenarios.length} election${pack.scenarios.length === 1 ? "" : "s"} in the pack are yours.`;
+  // The country's free election counts: after buying, every one of them is open.
+  const n = packFacts(pack).elections.length;
+  return `All ${n} election${n === 1 ? "" : "s"} in the pack are yours.`;
 }
 
 /**

@@ -7,7 +7,7 @@ import { consumeResume, useStoreFlow } from "@store/storeFlow";
 import { useCatalog } from "@lib/useCatalog";
 import { DISTRIBUTION } from "@lib/distribution";
 import { BRAND } from "../../brand";
-import { countryPacks, freeElections, offerFor } from "@lib/storeModel";
+import { countryPacks, freeElections, freeElectionsByCountry, offerFor } from "@lib/storeModel";
 import { StoreContext, type StoreCtx } from "./StoreContext";
 import { useDialogFocus } from "./useDialogFocus";
 import { PurchaseBanner } from "./PurchaseBanner";
@@ -199,15 +199,26 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
                   <h2 id="store-free-title">The base game</h2>
                   <span className="store-owned"><OwnedTick /> Free for everyone</span>
                 </div>
+                <p className="store-free-sub">
+                  {plural(freeElections().length, "election")} in {plural(freeElectionsByCountry().length, "country", "countries")}, no account needed, plus the Daily Challenge.
+                </p>
                 <ul className="store-free-list">
-                  {freeElections().map((m) => (
-                    <li key={m.scenarioId}>
-                      <span className="store-free-name">{m.flag} <b>{electionYearLabel(m)}</b> {electionName(m)}</span>
-                      <DifficultyChip difficulty={m.difficulty} />
-                      <button type="button" className="ghost small" onClick={() => onPlay(m.scenarioId)} aria-label={`Play ${m.label}`}>Play</button>
+                  {freeElectionsByCountry().map((g) => (
+                    <li key={g.country} className="store-free-country">
+                      <span className="store-free-country-name"><span aria-hidden="true">{g.flag}</span> {g.name}</span>
+                      {g.elections.map((m) => (
+                        <span key={m.scenarioId} className="store-free-row">
+                          <span className="store-free-name"><b>{electionYearLabel(m)}</b> {electionName(m)}</span>
+                          <DifficultyChip difficulty={m.difficulty} />
+                          <button type="button" className="ghost small" onClick={() => onPlay(m.scenarioId)} aria-label={`Play ${m.label}`}>Play</button>
+                        </span>
+                      ))}
                     </li>
                   ))}
-                  <li><span className="store-free-name"><b>Daily Challenge</b> A new seeded race every day</span></li>
+                  <li className="store-free-country store-free-daily">
+                    <span className="store-free-country-name">Daily Challenge</span>
+                    <span className="store-free-row"><span className="store-free-name">A new seeded race every day, the same for everyone.</span></span>
+                  </li>
                 </ul>
               </section>
 

@@ -455,6 +455,7 @@ export const SPAIN_MODULE = countryModule(SPAIN, {
   blurb: "Proportional by province: five national parties, Catalan and Basque kingmakers and an investiture vote to win.",
   cover: "images/covers/country-es.jpg",
   art: { a: "#5a0f1c", b: "#c8860a", glow: "rgba(255,226,140,0.22)" },
+  freeElections: ["2023"],
   scenarios: [
     { electionId: "2023", difficulty: "easy",
       description: "Sánchez calls a July vote after losing the May local elections. Feijóo needs Vox to reach 176, and Junts and the Basque parties hold the keys to any investiture." },
