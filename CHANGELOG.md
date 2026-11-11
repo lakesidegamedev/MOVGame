@@ -92,6 +92,11 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   Chirac's third try in 1995 and Sarkozy against Royal in 2007. The first round is already
   counted, and each campaign has its real story beats. Owners of the old Global pack need the
   France pack or the Complete Collection for these.
+- United States: 1948, 1952 and 1956 join the United States pack. Play Truman's whistle-stop
+  upset against Dewey with the Democrats split three ways, and Stevenson against Eisenhower
+  twice, from Korea and the Checkers speech to Suez and Hungary. Each uses that year's
+  Electoral College of 48 states and 531 votes, 266 to win, with real state results and
+  running mates.
 
 ### Changed
 

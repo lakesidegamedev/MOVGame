@@ -95,6 +95,22 @@ class ElectoralCollegeTest {
     }
 
     @Test
+    fun electionsBefore1960ReproduceTheirRealMaps() {
+        // Mirror of src/engine/__tests__/us-historical.test.ts.
+        val history = listOf(Triple("1956", 74, 457), Triple("1952", 89, 442), Triple("1948", 304, 227))
+        for ((id, dem, rep) in history) {
+            val game = createGame(NewGameOptions(seed = "calibration", scenario = id))
+            assertEquals(ElectoralRule(531, 266), game.electoralRule(), id)
+            for (absent in listOf("AK", "HI", "DC")) assertFalse(game.states.any { it.id == absent }, "$id $absent")
+            val r = computeResult(game)
+            assertEquals(mapOf("dem" to dem, "rep" to rep), r.electoralVotes, id)
+        }
+        val r48 = computeResult(createGame(NewGameOptions(seed = "dixiecrat", scenario = "1948")))
+        for (id in listOf("AL", "LA", "MS", "SC")) assertEquals(CandidateId.REP, r48.stateResults.first { it.stateId == id }.winner, "1948 $id")
+        for (id in listOf("TN", "OH", "CA", "IL")) assertEquals(CandidateId.DEM, r48.stateResults.first { it.stateId == id }.winner, "1948 $id")
+    }
+
+    @Test
     fun aThirdCandidatesStatesFoldIntoOneTicket() {
         // 1968 handling: Wallace's Deep South folds into the Republican column.
         val r = computeResult(createGame(NewGameOptions(seed = "wallace", scenario = "1968")))

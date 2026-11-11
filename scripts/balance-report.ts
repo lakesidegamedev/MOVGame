@@ -34,10 +34,14 @@ import { SCENARIO_REGISTRY as FULL_REGISTRY } from "@content/scenarioRegistry";
 const SEEDS = Number(process.env.GAUNTLET_SEEDS ?? 20);
 // Optional country filter, e.g. GAUNTLET_COUNTRIES=NZ or NZ,CA.
 const ONLY_COUNTRIES = (process.env.GAUNTLET_COUNTRIES ?? "").split(",").map((c) => c.trim().toUpperCase()).filter(Boolean);
-const SCENARIO_REGISTRY = ONLY_COUNTRIES.length
-  ? FULL_REGISTRY.filter((m) => ONLY_COUNTRIES.includes(m.country))
-  : FULL_REGISTRY;
-if (SCENARIO_REGISTRY.length === 0) throw new Error(`No scenarios for GAUNTLET_COUNTRIES=${ONLY_COUNTRIES.join(",")}`);
+// Optional scenario filter, e.g. GAUNTLET_SCENARIOS=us-1956,us-1952: measures
+// only new elections and merges their labels like a country-filtered run.
+const ONLY_SCENARIOS = (process.env.GAUNTLET_SCENARIOS ?? "").split(",").map((c) => c.trim().toLowerCase()).filter(Boolean);
+const FILTERED = ONLY_COUNTRIES.length > 0 || ONLY_SCENARIOS.length > 0;
+const SCENARIO_REGISTRY = FULL_REGISTRY
+  .filter((m) => !ONLY_COUNTRIES.length || ONLY_COUNTRIES.includes(m.country))
+  .filter((m) => !ONLY_SCENARIOS.length || ONLY_SCENARIOS.includes(m.scenarioId));
+if (SCENARIO_REGISTRY.length === 0) throw new Error(`No scenarios for GAUNTLET_COUNTRIES=${ONLY_COUNTRIES.join(",")} GAUNTLET_SCENARIOS=${ONLY_SCENARIOS.join(",")}`);
 // WRITE_REGISTRY=1 rewrites difficulty fields in scenarioRegistry.ts from the
 // measured suggested labels (keeps the picker honest after a gauntlet run).
 const WRITE_REGISTRY = process.env.WRITE_REGISTRY === "1";
@@ -46,7 +50,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const pct = (x: number) => `${(x * 100).toFixed(0)}%`;
 const num = (x: number) => (Math.abs(x) >= 100 ? x.toFixed(0) : x.toFixed(1));
 
-console.log(`Balance gauntlet: ${ONLY_COUNTRIES.length ? ONLY_COUNTRIES.join(", ") : "full matrix"}, ${SEEDS} seeds/cell…`);
+console.log(`Balance gauntlet: ${FILTERED ? [...ONLY_COUNTRIES, ...ONLY_SCENARIOS].join(", ") : "full matrix"}, ${SEEDS} seeds/cell…`);
 const t0 = Date.now();
 let lastTick = 0;
 const rows = runGauntlet({
@@ -208,14 +212,14 @@ lines.push("");
 
 const outDir = join(root, "docs", "balance");
 mkdirSync(outDir, { recursive: true });
-const outPath = join(outDir, ONLY_COUNTRIES.length ? `report-${date}-${ONLY_COUNTRIES.join("-").toLowerCase()}.md` : `report-${date}.md`);
+const outPath = join(outDir, FILTERED ? `report-${date}-${[...ONLY_COUNTRIES, ...ONLY_SCENARIOS].join("-").toLowerCase()}.md` : `report-${date}.md`);
 writeFileSync(outPath, lines.join("\n"));
 
 // Machine-readable labels — the registry-sync test and WRITE_REGISTRY consume this.
 const labelsPath = join(outDir, "suggested-labels.json");
 // A filtered run merges into the existing labels instead of replacing them.
 type LabelsFile = { date: string; seeds: number; note?: string; labels: Record<string, Record<string, unknown>> };
-const previous = ONLY_COUNTRIES.length && existsSync(labelsPath)
+const previous = FILTERED && existsSync(labelsPath)
   ? (JSON.parse(readFileSync(labelsPath, "utf8")) as LabelsFile)
   : null;
 const labelsJson: LabelsFile["labels"] = {

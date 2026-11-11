@@ -1072,6 +1072,199 @@ const SAL_1968: Partial<Record<IssueId, number>> = { law_and_order: 0.85, econom
 const SAL_1964: Partial<Record<IssueId, number>> = { economy: 0.70, race_policing: 0.65, law_and_order: 0.55, taxes: 0.50, healthcare: 0.50, trade: 0.30, abortion: 0.20, immigration: 0.20, climate: 0.10, covid_response: 0 };
 const SAL_1960: Partial<Record<IssueId, number>> = { economy: 0.75, law_and_order: 0.50, taxes: 0.50, healthcare: 0.45, race_policing: 0.45, trade: 0.35, abortion: 0.20, immigration: 0.20, climate: 0.10, covid_response: 0 };
 
+const VPS_1956_DEM: RunningMate[] = [
+  { id: "kefauver56", name: "Estes Kefauver", ticket: "dem", historical: true,
+    blurb: "The coonskin-cap crusader: a Tennessee senator who won the open convention vote and works the small towns.",
+    traitBonuses: { energy: 6, charisma: 4 }, favorability: { noncollege_white: 0.06, seniors: 0.03 } },
+  { id: "jfk56", name: "John F. Kennedy", ticket: "dem",
+    blurb: "The young senator from Massachusetts: nearly won the open floor vote, and brings Catholic voters in the Northern cities.",
+    traitBonuses: { charisma: 7, energy: 4 }, favorability: { noncollege_white: 0.05, youth: 0.04 } },
+  { id: "gore56", name: "Albert Gore Sr.", ticket: "dem",
+    blurb: "Tennessee's other senator: a New Deal Southerner who refused to sign the Southern Manifesto.",
+    traitBonuses: { policyKnowledge: 5, debatePrep: 4 }, favorability: { noncollege_white: 0.05, seniors: 0.03 } },
+  { id: "humphrey56", name: "Hubert Humphrey", ticket: "dem",
+    blurb: "Minnesota's liberal: labor, farm and civil rights credentials for the upper Midwest.",
+    traitBonuses: { energy: 5, debatingSkill: 5 }, favorability: { noncollege_white: 0.04, black: 0.05 } },
+];
+
+const VPS_1956_REP: RunningMate[] = [
+  { id: "nixon56", name: "Richard Nixon", ticket: "rep", historical: true,
+    blurb: "The sitting Vice President: a tireless partisan campaigner who does the attacking so the President does not have to.",
+    traitBonuses: { energy: 6, debatingSkill: 4 }, favorability: { noncollege_white: 0.05, seniors: 0.03 } },
+  { id: "herter56", name: "Christian Herter", ticket: "rep",
+    blurb: "The dump-Nixon alternative: a Massachusetts governor and diplomat favored by the party's moderates.",
+    traitBonuses: { policyKnowledge: 6, intelligence: 4 }, favorability: { college_white: 0.05, suburban_women: 0.04 } },
+  { id: "knowland56", name: "William Knowland", ticket: "rep",
+    blurb: "The Senate Republican leader from California: an Old Guard conservative with a hard line on China.",
+    traitBonuses: { debatePrep: 4, policyKnowledge: 4 }, favorability: { noncollege_white: 0.05, seniors: 0.03 } },
+  { id: "halleck56", name: "Charles Halleck", ticket: "rep",
+    blurb: "The Indiana House leader: a farm-belt organizer for the restless Midwest.",
+    traitBonuses: { energy: 4, debatePrep: 4 }, favorability: { noncollege_white: 0.06 } },
+];
+
+const VPS_1952_DEM: RunningMate[] = [
+  { id: "sparkman52", name: "John Sparkman", ticket: "dem", historical: true,
+    blurb: "Alabama's New Deal senator: a Southern moderate chosen to hold the South after the 1948 walkout.",
+    traitBonuses: { policyKnowledge: 4, debatePrep: 4 }, favorability: { noncollege_white: 0.06, seniors: 0.03 } },
+  { id: "kefauver52", name: "Estes Kefauver", ticket: "dem",
+    blurb: "The crime-hearings star: won the primaries and the television audience, and has the party bosses against him.",
+    traitBonuses: { charisma: 6, energy: 5 }, favorability: { noncollege_white: 0.05, suburban_women: 0.03 } },
+  { id: "russell52", name: "Richard Russell", ticket: "dem",
+    blurb: "Georgia's Senate leader: the segregationist South's own candidate, and a hard sell in the North.",
+    traitBonuses: { policyKnowledge: 7, debatePrep: 4 }, favorability: { noncollege_white: 0.07, black: -0.06 } },
+  { id: "monroney52", name: "Mike Monroney", ticket: "dem",
+    blurb: "Oklahoma's reform senator: a border-state voice for clean government.",
+    traitBonuses: { debatePrep: 4, energy: 4 }, favorability: { noncollege_white: 0.04, college_white: 0.03 } },
+];
+
+const VPS_1952_REP: RunningMate[] = [
+  { id: "nixon52", name: "Richard Nixon", ticket: "rep", historical: true,
+    blurb: "The young California senator: the Hiss case made his name, and he gives the general an attack dog and the West.",
+    traitBonuses: { energy: 6, debatingSkill: 5 }, favorability: { noncollege_white: 0.05, youth: 0.03 } },
+  { id: "warren52", name: "Earl Warren", ticket: "rep",
+    blurb: "California's popular governor: a progressive Republican who wins Democratic votes at home.",
+    traitBonuses: { charisma: 5, policyKnowledge: 5 }, favorability: { suburban_women: 0.05, college_white: 0.04 } },
+  { id: "stassen52", name: "Harold Stassen", ticket: "rep",
+    blurb: "Minnesota's former boy governor: an internationalist who moved his delegates to Eisenhower.",
+    traitBonuses: { energy: 5, debatePrep: 4 }, favorability: { college_white: 0.04, noncollege_white: 0.03 } },
+  { id: "judd52", name: "Walter Judd", ticket: "rep",
+    blurb: "The missionary doctor from Minnesota: a keynote orator and an anti-communist voice on Asia.",
+    traitBonuses: { debatingSkill: 5, policyKnowledge: 4 }, favorability: { seniors: 0.04, noncollege_white: 0.03 } },
+];
+
+const VPS_1948_DEM: RunningMate[] = [
+  { id: "barkley48", name: "Alben Barkley", ticket: "dem", historical: true,
+    blurb: "The Veep-to-be: a Kentucky Senate leader whose keynote speech brought the convention to its feet.",
+    traitBonuses: { charisma: 5, debatingSkill: 4 }, favorability: { noncollege_white: 0.05, seniors: 0.04 } },
+  { id: "douglas48", name: "William O. Douglas", ticket: "dem",
+    blurb: "The New Deal justice: Truman's first choice, a liberal who could hold the Wallace-curious left.",
+    traitBonuses: { intelligence: 6, policyKnowledge: 5 }, favorability: { college_white: 0.05, youth: 0.04 } },
+  { id: "rayburn48", name: "Sam Rayburn", ticket: "dem",
+    blurb: "Mr. Sam: the Texas House leader, a reassurance to Southern Democrats tempted by Thurmond.",
+    traitBonuses: { policyKnowledge: 6, debatePrep: 3 }, favorability: { noncollege_white: 0.06, seniors: 0.03 } },
+  { id: "humphrey48", name: "Hubert Humphrey", ticket: "dem",
+    blurb: "The Minneapolis mayor whose civil rights speech split the convention: all in on the North.",
+    traitBonuses: { energy: 6, debatingSkill: 5 }, favorability: { black: 0.07, noncollege_white: -0.02, youth: 0.03 } },
+];
+
+const VPS_1948_REP: RunningMate[] = [
+  { id: "warren48", name: "Earl Warren", ticket: "rep", historical: true,
+    blurb: "California's governor: a popular moderate who balances a New York ticket with the West.",
+    traitBonuses: { charisma: 5, policyKnowledge: 5 }, favorability: { suburban_women: 0.05, college_white: 0.03 } },
+  { id: "halleck48", name: "Charles Halleck", ticket: "rep",
+    blurb: "The House majority leader: Indiana's party man, and a link to the Congress Truman is running against.",
+    traitBonuses: { debatePrep: 4, energy: 4 }, favorability: { noncollege_white: 0.05 } },
+  { id: "stassen48", name: "Harold Stassen", ticket: "rep",
+    blurb: "Dewey's primary rival: the young Midwestern internationalist he beat in Oregon.",
+    traitBonuses: { energy: 6, debatingSkill: 4 }, favorability: { college_white: 0.04, youth: 0.04 } },
+  { id: "vandenberg48", name: "Arthur Vandenberg", ticket: "rep",
+    blurb: "The Senate's foreign-policy elder: the face of the bipartisan Cold War consensus.",
+    traitBonuses: { policyKnowledge: 7, debatePrep: 4 }, favorability: { seniors: 0.05, college_white: 0.03 } },
+];
+
+// 1940-census apportionment (used 1944 and 1948): 48 states, 531 votes. Maine
+// (5) and Nebraska (6) voted statewide; their at-large units hold the rest.
+const EV_1940C: Record<string, number> = {
+  AL: 11, AZ: 4, AR: 9, CA: 25, CO: 6, CT: 8, DE: 3, FL: 8, GA: 12, ID: 4, IL: 28,
+  IN: 13, IA: 10, KS: 8, KY: 11, LA: 10, MD: 8, MA: 16, MI: 19, MN: 11, MS: 9, MO: 15,
+  MT: 4, NV: 3, NH: 4, NJ: 16, NM: 4, NY: 47, NC: 14, ND: 4, OH: 25, OK: 10, OR: 6,
+  PA: 35, RI: 4, SC: 8, SD: 4, TN: 12, TX: 23, UT: 4, VT: 3, VA: 11, WA: 8, WV: 8,
+  WI: 12, WY: 3, "ME-AL": 3, "NE-AL": 3,
+};
+
+// 1912 to 1956: 48 states and 531 votes. Alaska and Hawaii were territories
+// and DC had no electors.
+const EC_48_STATES: ElectoralCollege = { total: 531, absent: ["AK", "HI", "DC"] };
+
+const EISENHOWER_1956: ScenarioTicket = {
+  name: "Dwight D. Eisenhower", shortName: "Eisenhower", party: "Republican", color: GOP_RED,
+  traits: { charisma: 80, energy: 52, debatePrep: 60, intelligence: 76, policyKnowledge: 78, debatingSkill: 56, fundraisingProwess: 82 },
+  issuePositions: { economy: 0.15, covid_response: 0, healthcare: 0.1, immigration: 0.05, race_policing: 0.05, climate: 0.1, taxes: 0.25, law_and_order: 0.4, abortion: 0.15, trade: 0.0 },
+  baseFavorability: { noncollege_white: 0.14, seniors: 0.12, suburban_women: 0.12, college_white: 0.08 },
+  runningMates: VPS_1956_REP,
+};
+
+const STEVENSON_1956: ScenarioTicket = {
+  name: "Adlai Stevenson", shortName: "Stevenson", party: "Democratic", color: DEM_BLUE,
+  traits: { charisma: 60, energy: 70, debatePrep: 72, intelligence: 90, policyKnowledge: 82, debatingSkill: 74, fundraisingProwess: 50 },
+  issuePositions: { economy: -0.3, covid_response: 0, healthcare: -0.35, immigration: -0.15, race_policing: -0.1, climate: -0.1, taxes: -0.25, law_and_order: -0.15, abortion: -0.05, trade: -0.1 },
+  baseFavorability: { college_white: 0.12, black: 0.20, noncollege_white: 0.04 },
+  runningMates: VPS_1956_DEM,
+};
+
+const EISENHOWER_1952: ScenarioTicket = {
+  name: "Dwight D. Eisenhower", shortName: "Eisenhower", party: "Republican", color: GOP_RED,
+  traits: { charisma: 82, energy: 66, debatePrep: 58, intelligence: 76, policyKnowledge: 74, debatingSkill: 56, fundraisingProwess: 80 },
+  issuePositions: { economy: 0.2, covid_response: 0, healthcare: 0.15, immigration: 0.1, race_policing: 0.1, climate: 0.1, taxes: 0.3, law_and_order: 0.5, abortion: 0.15, trade: 0.0 },
+  baseFavorability: { noncollege_white: 0.12, seniors: 0.10, suburban_women: 0.12, college_white: 0.08 },
+  runningMates: VPS_1952_REP,
+};
+
+const STEVENSON_1952: ScenarioTicket = {
+  name: "Adlai Stevenson", shortName: "Stevenson", party: "Democratic", color: DEM_BLUE,
+  traits: { charisma: 64, energy: 66, debatePrep: 72, intelligence: 90, policyKnowledge: 82, debatingSkill: 76, fundraisingProwess: 52 },
+  issuePositions: { economy: -0.3, covid_response: 0, healthcare: -0.35, immigration: -0.15, race_policing: -0.15, climate: -0.1, taxes: -0.25, law_and_order: -0.1, abortion: -0.05, trade: -0.1 },
+  baseFavorability: { college_white: 0.12, black: 0.22, noncollege_white: 0.06 },
+  runningMates: VPS_1952_DEM,
+};
+
+const TRUMAN_1948: ScenarioTicket = {
+  name: "Harry S. Truman", shortName: "Truman", party: "Democratic", color: DEM_BLUE,
+  traits: { charisma: 58, energy: 88, debatePrep: 60, intelligence: 70, policyKnowledge: 80, debatingSkill: 66, fundraisingProwess: 40 },
+  issuePositions: { economy: -0.45, covid_response: 0, healthcare: -0.5, immigration: -0.15, race_policing: -0.35, climate: -0.1, taxes: -0.35, law_and_order: -0.1, abortion: -0.05, trade: -0.25 },
+  baseFavorability: { black: 0.28, noncollege_white: 0.12, seniors: 0.04 },
+  runningMates: VPS_1948_DEM,
+};
+
+const DEWEY_1948: ScenarioTicket = {
+  name: "Thomas E. Dewey", shortName: "Dewey", party: "Republican", color: GOP_RED,
+  traits: { charisma: 50, energy: 60, debatePrep: 76, intelligence: 82, policyKnowledge: 80, debatingSkill: 70, fundraisingProwess: 80 },
+  issuePositions: { economy: 0.25, covid_response: 0, healthcare: 0.25, immigration: 0.1, race_policing: 0.0, climate: 0.15, taxes: 0.4, law_and_order: 0.35, abortion: 0.15, trade: 0.1 },
+  baseFavorability: { college_white: 0.10, suburban_women: 0.08, seniors: 0.06 },
+  runningMates: VPS_1948_REP,
+};
+
+// Period salience: the Cold War and Korea read through law_and_order; civil
+// rights through race_policing. Climate and COVID are absent.
+const SAL_1956: Partial<Record<IssueId, number>> = { economy: 0.65, law_and_order: 0.65, race_policing: 0.45, taxes: 0.40, healthcare: 0.30, trade: 0.30, immigration: 0.15, abortion: 0.10, climate: 0.05, covid_response: 0 };
+const SAL_1952: Partial<Record<IssueId, number>> = { law_and_order: 0.80, economy: 0.60, taxes: 0.50, race_policing: 0.35, healthcare: 0.30, trade: 0.30, immigration: 0.20, abortion: 0.10, climate: 0.05, covid_response: 0 };
+const SAL_1948: Partial<Record<IssueId, number>> = { economy: 0.80, race_policing: 0.55, law_and_order: 0.50, taxes: 0.50, healthcare: 0.40, trade: 0.35, immigration: 0.20, abortion: 0.05, climate: 0.05, covid_response: 0 };
+
+// Two-party Democratic share, 1948 to 1956 (real state results). Third parties
+// are absorbed by the two-party normalization, except 1948 in the four states
+// Thurmond carried: there his vote is counted against Truman, as Wallace's is
+// in 1968, so they open in the Republican column. Truman was not on the Alabama
+// ballot; its share is floored at 0.10 so the state stays playable.
+const PRIORS_1956: Record<string, number> = {
+  AL: 0.589, AR: 0.534, AZ: 0.389, CA: 0.444, CO: 0.396, CT: 0.363, DE: 0.447, FL: 0.427, GA: 0.666,
+  IA: 0.408, ID: 0.388, IL: 0.404, IN: 0.399, KS: 0.343, KY: 0.454, LA: 0.426, MA: 0.405, MD: 0.400,
+  MI: 0.442, MN: 0.462, MO: 0.501, MS: 0.704, MT: 0.429, NC: 0.507, ND: 0.382, NH: 0.339, NJ: 0.346,
+  NM: 0.420, NV: 0.420, NY: 0.388, OH: 0.389, OK: 0.449, OR: 0.448, PA: 0.434, RI: 0.417, SC: 0.643,
+  SD: 0.416, TN: 0.497, TX: 0.443, UT: 0.354, VA: 0.409, VT: 0.278, WA: 0.457, WI: 0.381, WV: 0.459,
+  WY: 0.399,
+  "ME-1": 0.291, "ME-2": 0.291, "ME-AL": 0.291, "NE-1": 0.345, "NE-2": 0.345, "NE-3": 0.345, "NE-AL": 0.345,
+};
+
+const PRIORS_1952: Record<string, number> = {
+  AL: 0.648, AR: 0.561, AZ: 0.416, CA: 0.427, CO: 0.393, CT: 0.441, DE: 0.481, FL: 0.450, GA: 0.697,
+  IA: 0.358, ID: 0.345, IL: 0.450, IN: 0.414, KS: 0.307, KY: 0.5004, LA: 0.529, MA: 0.456, MD: 0.442,
+  MI: 0.442, MN: 0.444, MO: 0.492, MS: 0.604, MT: 0.403, NC: 0.539, ND: 0.286, NH: 0.391, NJ: 0.425,
+  NM: 0.444, NV: 0.385, NY: 0.440, OH: 0.432, OK: 0.454, OR: 0.391, PA: 0.470, RI: 0.491, SC: 0.507,
+  SD: 0.307, TN: 0.499, TX: 0.468, UT: 0.411, VA: 0.435, VT: 0.283, WA: 0.451, WI: 0.388, WV: 0.519,
+  WY: 0.372,
+  "ME-1": 0.338, "ME-2": 0.338, "ME-AL": 0.338, "NE-1": 0.308, "NE-2": 0.308, "NE-3": 0.308, "NE-AL": 0.308,
+};
+
+const PRIORS_1948: Record<string, number> = {
+  AL: 0.100, AR: 0.746, AZ: 0.551, CA: 0.502, CO: 0.527, CT: 0.492, DE: 0.494, FL: 0.592, GA: 0.769,
+  IA: 0.514, ID: 0.514, IL: 0.504, IN: 0.496, KS: 0.454, KY: 0.578, LA: 0.330, MA: 0.559, MD: 0.493,
+  MI: 0.491, MN: 0.589, MO: 0.583, MS: 0.101, MT: 0.552, NC: 0.640, ND: 0.454, NH: 0.471, NJ: 0.477,
+  NM: 0.568, NV: 0.516, NY: 0.495, OH: 0.501, OK: 0.627, OR: 0.482, PA: 0.480, RI: 0.582, SC: 0.242,
+  SD: 0.476, TN: 0.571, TX: 0.731, UT: 0.545, VA: 0.539, VT: 0.375, WA: 0.552, WI: 0.523, WV: 0.576,
+  WY: 0.522,
+  "ME-1": 0.427, "ME-2": 0.427, "ME-AL": 0.427, "NE-1": 0.459, "NE-2": 0.459, "NE-3": 0.459, "NE-AL": 0.459,
+};
+
 export const SCENARIOS: Record<string, Scenario> = {
   "2024": {
     id: "2024", year: 2024, label: "2024 · Harris v. Trump",
@@ -1158,10 +1351,25 @@ export const SCENARIOS: Record<string, Scenario> = {
     tagline: "Fall, 1960. Television changes everything, the Cold War is at the podium, and a hundred thousand votes decide it all. Win the debate, and win the century's closest race.",
     dem: KENNEDY_1960, rep: NIXON_1960, statePriors: PRIORS_1960, evOverrides: EV_1950C, evNote: "1950-census apportionment: 537 electoral votes, with none for DC until 1964. Maine and Nebraska voted statewide; their district units stand in, with the at-large unit holding the rest of each state's votes. The 15 Byrd electors have no third slot and are folded into the two-party map.", electoralCollege: EC_1960, issueSalience: SAL_1960,
   },
+  "1956": {
+    id: "1956", year: 1956, label: "1956 · Stevenson v. Eisenhower",
+    tagline: "Fall, 1956. Peace, prosperity and a popular general with a weak heart. Stevenson tries again with a New America program, and the farm belt is restless. Two crises abroad are a few weeks away.",
+    dem: STEVENSON_1956, rep: EISENHOWER_1956, statePriors: PRIORS_1956, evOverrides: EV_1950C, evNote: "1950-census apportionment: 48 states and 531 electoral votes, 266 to win. Alaska and Hawaii were territories and DC had no electors. One Alabama elector voted for Walter B. Jones; the model gives Stevenson all eleven.", electoralCollege: EC_48_STATES, issueSalience: SAL_1956,
+  },
+  "1952": {
+    id: "1952", year: 1952, label: "1952 · Stevenson v. Eisenhower",
+    tagline: "Fall, 1952. Twenty years of Democratic presidents, a stalemate in Korea, and the most famous general in the world on the Republican ticket. An Illinois governor has to talk sense to a country that wants a change.",
+    dem: STEVENSON_1952, rep: EISENHOWER_1952, statePriors: PRIORS_1952, evOverrides: EV_1950C, evNote: "1950-census apportionment: 48 states and 531 electoral votes, 266 to win. Alaska and Hawaii were territories and DC had no electors.", electoralCollege: EC_48_STATES, issueSalience: SAL_1952,
+  },
+  "1948": {
+    id: "1948", year: 1948, label: "1948 · Truman v. Dewey",
+    tagline: "Fall, 1948. Every poll says Dewey. The Democrats have split three ways: Thurmond's Dixiecrats in the Deep South and Wallace's Progressives on the left. Truman has a train and a Congress to run against.",
+    dem: TRUMAN_1948, rep: DEWEY_1948, statePriors: PRIORS_1948, evOverrides: EV_1940C, evNote: "1940-census apportionment: 48 states and 531 electoral votes, 266 to win. Thurmond carried Alabama, Louisiana, Mississippi and South Carolina (38 votes) and won one Tennessee elector; there is no third slot, so as with Wallace in 1968 his vote in those four states is counted against the Democrat and they open in the Republican column. Truman was not on the Alabama ballot. Wallace's Progressive vote is left out of the two-party map.", electoralCollege: EC_48_STATES, issueSalience: SAL_1948,
+  },
 };
 
 // Display order for the picker (newest first feels current; keep 2020 prominent).
-export const SCENARIO_IDS = ["2024", "2020", "2016", "2012", "2008", "2004", "2000", "1996", "1992", "1988", "1984", "1980", "1976", "1972", "1968", "1964", "1960"] as const;
+export const SCENARIO_IDS = ["2024", "2020", "2016", "2012", "2008", "2004", "2000", "1996", "1992", "1988", "1984", "1980", "1976", "1972", "1968", "1964", "1960", "1956", "1952", "1948"] as const;
 
 // The electoral college a US scenario plays for (the modern 538 when undeclared).
 export function electoralCollegeOf(id?: string): ElectoralCollege {
