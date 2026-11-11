@@ -38,6 +38,7 @@ export const UK_MODULE: CountryModule = {
     { electionId: "1964", year: 1964, label: "1964 · Wilson v. Douglas-Home", description: "Thirteen years of Tory rule against the Profumo hangover. The narrowest of wins.", difficulty: "easy" },
     { electionId: "1951", year: 1951, label: "1951 · Churchill's comeback", description: "Attlee's exhausted majority against Churchill's last campaign.", difficulty: "hard" },
   ],
+  systemLabel: "First past the post",
   pack: {
     id: "uk-elections",
     name: "United Kingdom",

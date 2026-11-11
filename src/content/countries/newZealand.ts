@@ -330,6 +330,7 @@ export const NEW_ZEALAND_MODULE = countryModule(NEW_ZEALAND, {
     { electionId: "2017", difficulty: "hard",
       description: "Jacindamania meets nine years of National. A seven-week sprint, a fiscal hole row, and NZ First picking the winner." },
   ],
+  systemLabel: "Mixed-member proportional",
   pack: {
     id: "new-zealand",
     name: "New Zealand",

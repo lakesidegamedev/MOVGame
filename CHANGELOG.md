@@ -18,6 +18,24 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   Greens, ACT, NZ First or Te Pāti Māori across nine regions and the seven Māori electorates,
   with each campaign's real story beats, from Jacindamania and the COVID election to Winston
   Peters back as kingmaker.
+- A Store screen. It opens from the landing page, the account menu, the setup and results
+  screens, and every locked election. It leads with the Complete Collection and says exactly
+  what it contains and, if you already own some packs, which ones it would add. Every country
+  has a tile with its photo, election count, years, voting system and price, and a page that
+  lists its elections with difficulty and tags so you can jump straight into one. The free base
+  game shows as yours, and packs you already have (through the Complete Collection, the old
+  Global pack or a Supporter membership) show as owned with the reason and never show a price.
+- Buying keeps your place. Buy takes you through Lakeside sign in if needed and Lakeside
+  checkout, brings you back to the Store, and names what you unlocked with a button to play it.
+  If the payment is slow to show up the Store says so calmly and has a Refresh button. A
+  cancelled checkout says nothing was charged. If the Lakeside store cannot be reached you can
+  still browse and Buy is paused with a reason. A pack that is in the game but not on sale yet
+  says Coming soon.
+- Your account now lists what you own and how you got it (purchase, code, Supporter membership
+  or the old Global pack), with a Refresh button next to your purchase history. Code
+  redemption stays in your account and in the Store.
+- Desktop: checkout and account linking open in your browser, and the game window stays where
+  it is. The Store picks your purchase up as soon as you come back to the window.
 
 ### Changed
 
@@ -46,12 +64,16 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - Results show the verdict, map and standings beside your next election, score and
   post-mortem on wide screens. Election night uses larger maps.
 - Modals close from the same button everywhere and open as bottom sheets on phones.
+- The Unlock prompt on a locked election is now the Store, opened on the right pack with the
+  Complete Collection beside it. The Redeem option in the menu now opens a code-only dialog.
+- Account and menu text no longer quotes prices; the Store shows the current ones.
 
 ### Fixed
 
 - Parties with very dark colors, such as the CDU/CSU in Germany, are now readable on maps,
   seat bars, standings and setup cards.
 - Small text and party-colored names now meet contrast guidelines on the dark panels.
+- Desktop apps now reach the game's servers (they were calling their own address).
 
 ## 2026-10
 

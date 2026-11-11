@@ -150,6 +150,7 @@ export const COUNTRY_NAME: CountryBundle = {
 
 export const COUNTRY_NAME_MODULE = countryModule(COUNTRY_NAME, {
   blurb: "One line for the landing page country card.",
+  systemLabel: "A few words on the voting system, shown on the store tile",
   cover: "images/covers/country-xx.jpg",
   art: { a: "#0b1f3a", b: "#1d6b5c", glow: "rgba(236,240,245,0.2)" },  // scenario art colours
   scenarios: [

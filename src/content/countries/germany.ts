@@ -279,6 +279,7 @@ export const GERMANY_MODULE = countryModule(GERMANY, {
     { electionId: "2017", difficulty: "hard",
       description: "The Schulz train runs out of track and the AfD storms the Bundestag. Merkel's fourth term, a re-entering FDP, and 709 seats." },
   ],
+  systemLabel: "Mixed-member proportional",
   pack: {
     id: "germany",
     name: "Germany",

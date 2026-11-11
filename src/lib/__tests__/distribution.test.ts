@@ -18,6 +18,12 @@ describe("distributionPolicy", () => {
     });
   });
 
+  it("opens checkout in the system browser on direct desktop, in the window on the web, and nowhere else", () => {
+    expect(distributionPolicy("desktop-direct").checkout).toBe("system-browser");
+    expect(distributionPolicy("web").checkout).toBe("window");
+    for (const channel of ["steam", "ios", "android"]) expect(distributionPolicy(channel).checkout).toBeNull();
+  });
+
   it("fails safely to web for missing or unknown build values", () => {
     expect(distributionPolicy()).toEqual(distributionPolicy("web"));
     expect(distributionPolicy("unknown")).toEqual(distributionPolicy("web"));

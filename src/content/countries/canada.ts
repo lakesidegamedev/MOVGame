@@ -329,6 +329,7 @@ export const CANADA_MODULE = countryModule(CANADA, {
     { electionId: "2015", difficulty: "hard",
       description: "A decade of Harper, a 78-day marathon, and a third-place party that wakes up in a majority. Sunny ways over a tired throne." },
   ],
+  systemLabel: "First past the post, 343 ridings",
   pack: {
     id: "canada",
     name: "Canada",

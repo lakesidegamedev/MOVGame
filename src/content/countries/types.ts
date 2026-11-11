@@ -74,6 +74,8 @@ export interface CountryModule {
   bundle?: CountryBundle;
   /** Registry rows in display order, newest first. */
   scenarios: CountryElectionEntry[];
+  /** A few words on how votes become seats, shown on the store tile ("Mixed-member proportional"). */
+  systemLabel: string;
   /** The country's store pack. Holds every paid row of `scenarios`. */
   pack: CountryPackDef;
   /**

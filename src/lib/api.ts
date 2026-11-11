@@ -15,11 +15,15 @@ const GUEST_KEY = "campaign_guest_id";
 // in dev; the sim origin everywhere else.
 export function apiBase(): string {
   if (typeof window === "undefined") return "";
-  const { hostname } = window.location;
-  const sameOriginApi =
+  const { hostname, protocol } = window.location;
+  // The packaged desktop shell serves its bundle from tauri://localhost (macOS,
+  // Linux) or http://tauri.localhost (Windows). "localhost" there is the app
+  // itself, not a dev server, and has no /api.
+  const packaged = protocol === "tauri:" || hostname === "tauri.localhost";
+  const sameOriginApi = !packaged && (
     hostname === "sim.ahousedividedgame.com" ||
     hostname === "localhost" ||
-    hostname === "127.0.0.1";
+    hostname === "127.0.0.1");
   return sameOriginApi ? "" : "https://sim.ahousedividedgame.com";
 }
 
@@ -40,6 +44,19 @@ export interface Purchase {
   currency: string | null;
   status: "paid" | "refunded";
   createdAt: number;
+}
+
+export interface CatalogProduct {
+  id: string;
+  name: string;
+  priceCents: number;
+  scenarios: string[];
+  listed?: boolean;
+}
+
+export interface CatalogResponse {
+  source?: "platform" | "bundled";
+  products: CatalogProduct[];
 }
 
 export interface Unlocked {
@@ -142,14 +159,25 @@ export const api = {
 
   // Product catalog with platform prices (single source of truth on the
   // platform; the server falls back to bundled prices if it is unreachable).
-  catalog: () => call<{ products: { id: string; name: string; priceCents: number; scenarios: string[] }[] }>("/api/catalog"),
+  // `source` says whether the platform answered ("platform") or the bundled
+  // fallback was served ("bundled"); `listed` is true only for products the
+  // platform actually sells.
+  catalog: () => call<CatalogResponse>("/api/catalog"),
 
   // ── Purchases + Lakeside ID ──
   // Commerce is owned by the Lakeside platform now. The Buy button links out to
   // the platform checkout (see lakesideCheckoutUrl); the account view lists the
   // current user's purchases via this same-origin proxy so INTERNAL_TOKEN stays
   // server-side.
-  myEntitlements: () => call<{ purchases: Purchase[] }>("/api/my-entitlements").then((r) => ({ purchases: Array.isArray(r.purchases) ? r.purchases : [] })),
+  myEntitlements: () => call<{ purchases: Purchase[]; verified?: boolean }>("/api/my-entitlements")
+    .then((r) => ({ purchases: Array.isArray(r.purchases) ? r.purchases : [], verified: r.verified !== false })),
+
+  // Ask the platform again what this account owns, bypassing the server's short
+  // entitlement cache. `verified: false` means the platform could not be
+  // reached, so `unlocked` must not be read as "owns nothing".
+  refreshEntitlements: () =>
+    call<{ verified?: boolean; unlocked: Unlocked }>("/api/auth/entitlements/refresh", { method: "POST" })
+      .then((r) => ({ verified: r.verified === true, unlocked: normalizeUnlocked(r.unlocked) })),
 
   lakesideExchange: (code: string) =>
     call<{ token: string; user: ApiUser; unlocked: Unlocked }>(

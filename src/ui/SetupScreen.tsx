@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { useGameStore, type Difficulty } from "@store/gameStore";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { SCENARIOS, SCENARIO_IDS } from "@content/scenarios";
 import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
 import { ElectionTile, PartyCard } from "@ui/ElectionTile";
@@ -90,7 +91,6 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
 }) {
   const newGame = useGameStore((s) => s.newGame);
   const canPlay = useAuthStore((s) => s.canPlay);
-  const openModal = useAuthStore((s) => s.openModal);
   const [step, setStep] = useState<StepId>(0);
   const [scenarioId, setScenarioId] = useState<string>(initialScenarioId ?? "2024");
   const [pick, setPick] = useState<CandidateId>(initialParty === "rep" ? "rep" : "dem");
@@ -117,7 +117,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
 
   const chooseScenario = (id: string) => {
     if (!canPlay(globalId(id))) {
-      openModal("activate", globalId(id));
+      openStoreForScenario(globalId(id));
       return;
     }
     setScenarioId(id);
@@ -149,7 +149,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
 
   const begin = () => {
     if (!unlocked) {
-      openModal("activate", globalId(scenarioId));
+      openStoreForScenario(globalId(scenarioId));
       return;
     }
     newGame({
@@ -214,7 +214,9 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
               </div>
               {PAYWALL_ENABLED && (
                 <p className="setup-note">
-                  <Lock size={12} aria-hidden="true" /> Locked years are part of the <strong>United States</strong> bundle. Pick one to buy it or redeem a code.
+                  <Lock size={12} aria-hidden="true" /> Locked years are part of the <strong>United States</strong> pack. Pick one to see it in the{" "}
+                  <button type="button" className="su-link" onClick={() => openStoreForScenario(globalId(SCENARIO_IDS.find((id) => !canPlay(globalId(id))) ?? SCENARIO_IDS[0]))}>store</button>,
+                  where you can buy it or redeem a code.
                 </p>
               )}
             </div>

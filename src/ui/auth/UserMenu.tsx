@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useAuthStore } from "@store/authStore";
 import { PACKS_BY_ID } from "@content/packs";
-import { CircleUser, KeyRound, LogOut, WifiOff } from "lucide-react";
+import { useStoreNav } from "@store/storeNav";
+import { CircleUser, KeyRound, LogOut, ShoppingBag, WifiOff } from "lucide-react";
 
 // Top-right auth affordance: Login/Register buttons when signed out, a
 // username dropdown (activations, redeem, logout) when signed in. When the
@@ -52,17 +53,20 @@ export function UserMenu() {
           )}
           <div className="tag muted small">MY ACTIVATIONS</div>
           {unlocked.packIds.length === 0 && unlocked.scenarioIds.length === 0 ? (
-            <p className="muted small" style={{ margin: "6px 0 10px" }}>Free scenarios only. Unlock a country for $0.99, or everything for $3.99.</p>
+            <p className="muted small" style={{ margin: "6px 0 10px" }}>Free scenarios only. The store has every country pack and the Complete Collection.</p>
           ) : (
             <div style={{ margin: "6px 0 10px" }}>
               {unlocked.packIds.map((p) => (
-                <div className="kv" key={p}><span className="k">📦 {PACKS_BY_ID[p]?.name ?? p}</span></div>
+                <div className="kv" key={p}><span className="k">{PACKS_BY_ID[p]?.name ?? p}</span></div>
               ))}
               {unlocked.scenarioIds.filter((s) => !unlocked.packIds.some((p) => PACKS_BY_ID[p]?.scenarios.includes(s))).map((s) => (
-                <div className="kv" key={s}><span className="k">🎫 {s}</span></div>
+                <div className="kv" key={s}><span className="k">{s}</span></div>
               ))}
             </div>
           )}
+          <button className="ghost small" style={{ width: "100%", marginBottom: 6 }} onClick={() => { setOpen(false); useStoreNav.getState().openStore(); }}>
+            <ShoppingBag size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Store
+          </button>
           <button className="ghost small" style={{ width: "100%", marginBottom: 6 }} onClick={() => { setOpen(false); openModal("account"); }}>
             <CircleUser size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Your account
           </button>

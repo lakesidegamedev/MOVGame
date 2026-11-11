@@ -325,6 +325,7 @@ export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {
     { electionId: "2019", difficulty: "hard",
       description: "The unlosable election. A big-target Labor agenda, a wall of yellow ads, and a daggy-dad miracle. 151 seats under preferences." },
   ],
+  systemLabel: "Preferential voting",
   pack: {
     id: "australia",
     name: "Australia",

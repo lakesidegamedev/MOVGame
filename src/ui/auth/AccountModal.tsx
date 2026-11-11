@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@store/authStore";
 import { PACKS_BY_ID } from "@content/packs";
+import { useStoreNav } from "@store/storeNav";
 import { isValidActivationCode, normalizeActivationCode } from "@lib/activationCode";
-import { X, KeyRound, CircleUser, Link2, ShoppingBag, LogOut } from "lucide-react";
+import { describeReason, ownershipRows } from "@lib/storeModel";
+import { X, KeyRound, CircleUser, Link2, ShoppingBag, LogOut, RefreshCw, Check, Receipt } from "lucide-react";
 import { Spinner } from "@ui/Skeleton";
 import { LakesideButton } from "./LakesideButton";
 
@@ -24,6 +26,7 @@ export function AccountModal() {
   const unlocked = useAuthStore((s) => s.unlocked);
   const purchases = useAuthStore((s) => s.purchases);
   const loadPurchases = useAuthStore((s) => s.loadPurchases);
+  const refreshEntitlements = useAuthStore((s) => s.refreshEntitlements);
   const activate = useAuthStore((s) => s.activate);
   const closeModal = useAuthStore((s) => s.closeModal);
   const logout = useAuthStore((s) => s.logout);
@@ -31,8 +34,22 @@ export function AccountModal() {
   const [code, setCode] = useState("");
   const [redeemMsg, setRedeemMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshMsg, setRefreshMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => { void loadPurchases(); }, [loadPurchases]);
+
+  const refresh = async () => {
+    setRefreshing(true);
+    setRefreshMsg(null);
+    const [ok] = await Promise.all([refreshEntitlements(), loadPurchases()]);
+    setRefreshing(false);
+    setRefreshMsg(ok
+      ? { ok: true, text: "Up to date with your Lakeside Games account." }
+      : { ok: false, text: "Couldn't reach the Lakeside store. What you own is unchanged." });
+  };
+  const storeOpen = useStoreNav((st) => st.open);
+  const openStore = () => { closeModal(); useStoreNav.getState().openStore(); };
 
   if (!user) return null;
 
@@ -55,7 +72,11 @@ export function AccountModal() {
 
   return (
     <div className="overlay" onClick={closeModal}>
-      <div className="modal" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}
+        role="dialog" aria-modal="true" aria-label="Your account"
+        onKeyDown={(e) => { if (e.key === "Escape") closeModal(); }}
+      >
         <div className="head">
           <div className="tag">Account</div>
           <h2><CircleUser size={18} style={{ verticalAlign: "-3px", marginRight: 6 }} />Your Account</h2>
@@ -83,7 +104,7 @@ export function AccountModal() {
             </div>
             {!user.ahdLinked && (
               <div style={{ marginTop: 10 }}>
-                <LakesideButton />
+                <LakesideButton linkOnly />
               </div>
             )}
             <p className="muted small" style={{ margin: "10px 0 0" }}>
@@ -91,16 +112,48 @@ export function AccountModal() {
             </p>
           </div>
 
-          {/* Purchases */}
+          {/* What you own */}
           <div className="account-card">
-            <div className="account-title">
-              <ShoppingBag size={13} style={{ verticalAlign: "-2px", marginRight: 5 }} />Purchases
+            <div className="account-title row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+              <span><ShoppingBag size={13} style={{ verticalAlign: "-2px", marginRight: 5 }} />What you own</span>
+              <span className="row" style={{ gap: 6 }}>
+                <button className="ghost small" onClick={() => void refresh()} disabled={refreshing} aria-label="Refresh purchases">
+                  <RefreshCw size={12} className={refreshing ? "store-spin" : undefined} style={{ verticalAlign: "-2px", marginRight: 4 }} />Refresh
+                </button>
+                {!storeOpen && <button className="ghost small" onClick={openStore}>Store</button>}
+              </span>
             </div>
-            {purchases.length === 0 ? (
-              <p className="muted small" style={{ margin: "4px 0 0" }}>
-                No purchases yet. US 2024, US 2020 and the daily challenge are free; other countries unlock from any locked election.
-              </p>
-            ) : (
+            <div className="account-owned">
+              {ownershipRows(unlocked, purchases).map((row) => (
+                <div className="account-row" key={row.key}>
+                  <span className="k">
+                    <Check size={12} style={{ verticalAlign: "-2px", marginRight: 5, color: "var(--green)" }} aria-hidden="true" />
+                    <strong>{row.name}</strong>
+                    <span className="muted small" style={{ display: "block", marginLeft: 17 }}>{row.detail}</span>
+                  </span>
+                  <span className="muted small" style={{ textAlign: "right" }}>{describeReason(row.reason)}</span>
+                </div>
+              ))}
+              {unlocked.scenarioIds
+                .filter((sid) => !unlocked.packIds.some((p) => PACKS_BY_ID[p]?.scenarios.includes(sid)))
+                .map((sid) => (
+                  <div className="account-row" key={sid}>
+                    <span className="k"><Check size={12} style={{ verticalAlign: "-2px", marginRight: 5, color: "var(--green)" }} aria-hidden="true" />{sid}</span>
+                    <span className="muted small">Unlocked with a code</span>
+                  </div>
+                ))}
+            </div>
+            {refreshMsg && (
+              <p className="muted small" role="status" style={{ margin: "8px 0 0", color: refreshMsg.ok ? "var(--green)" : "var(--rose)" }}>{refreshMsg.text}</p>
+            )}
+          </div>
+
+          {/* Purchase history */}
+          {purchases.length > 0 && (
+            <div className="account-card">
+              <div className="account-title">
+                <Receipt size={13} style={{ verticalAlign: "-2px", marginRight: 5 }} />Purchase history
+              </div>
               <div>
                 {purchases.map((p, i) => (
                   <div className="account-row" key={i}>
@@ -114,8 +167,8 @@ export function AccountModal() {
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Code redemption */}
           <div className="account-card">
@@ -135,13 +188,6 @@ export function AccountModal() {
             {redeemMsg && (
               <p className="muted small" style={{ margin: "8px 0 0", color: redeemMsg.ok ? "var(--green)" : "var(--rose)" }}>
                 {redeemMsg.text}
-              </p>
-            )}
-            {(unlocked.packIds.length > 0 || unlocked.scenarioIds.length > 0) && (
-              <p className="muted small" style={{ margin: "8px 0 0" }}>
-                Unlocked: {unlocked.packIds.map((p) => PACKS_BY_ID[p]?.name ?? p).join(", ")}
-                {unlocked.packIds.length > 0 && unlocked.scenarioIds.some((s) => !unlocked.packIds.some((p) => PACKS_BY_ID[p]?.scenarios.includes(s))) && ", "}
-                {unlocked.scenarioIds.filter((s) => !unlocked.packIds.some((p) => PACKS_BY_ID[p]?.scenarios.includes(s))).join(", ")}
               </p>
             )}
           </div>

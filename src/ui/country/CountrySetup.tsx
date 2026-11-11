@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { playablePartiesIn, type CountryBundle } from "@engine/countryGame";
 import { ElectionTile, PartyCard } from "@ui/ElectionTile";
 import { partyInk } from "@ui/colors";
@@ -26,7 +27,6 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
 }) {
   const newGame = useCountryStore((s) => s.newGame);
   const canPlay = useAuthStore((s) => s.canPlay);
-  const openModal = useAuthStore((s) => s.openModal);
   const ids = Object.keys(country.elections).sort((a, b) => Number(b) - Number(a));
   const [election, setElection] = useState(initialElection && country.elections[initialElection] ? initialElection : ids[0]);
   const [party, setParty] = useState<PartyId>(initialParty && country.playable.includes(initialParty) ? initialParty : country.playable[0]);
@@ -148,7 +148,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
             className="primary su-next"
             onClick={() => {
               const sid = `${country.id.toLowerCase()}-${election}`;
-              if (!canPlay(sid)) { openModal("activate", sid); return; }
+              if (!canPlay(sid)) { openStoreForScenario(sid); return; }
               newGame(country.id, election, activeParty, seed, difficulty);
             }}
           >

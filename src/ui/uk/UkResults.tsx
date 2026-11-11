@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { partyFill, partyInk } from "@ui/colors";
 import { useUkStore } from "@store/ukStore";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { api } from "@lib/api";
 import { computeScoreFromFacts, multipartyScoreFacts } from "@engine/scoring";
 import { majorityForUk, playablePartiesIn } from "@engine/ukGame";
@@ -184,7 +185,7 @@ export function UkResults() {
                 ctaLabel: `Play ${nextData.year} →`,
                 lockLabel: `Unlock ${nextData.year}`,
                 onPlay: () => newGame(next.id, nextParty, String(Date.now()), difficulty),
-                onUnlock: () => openModal("activate", `uk-${next.id}`),
+                onUnlock: () => openStoreForScenario(`uk-${next.id}`),
                 mapPreview: <UkMiniMap seats={r.seats} />,
               }
             : null

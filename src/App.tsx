@@ -16,6 +16,7 @@ import { money, turnLabel } from "@ui/format";
 import { lazy, Suspense } from "react";
 import { LandingPage, type LandingDestination } from "@ui/LandingPage";
 import { LegalPage } from "@ui/LegalPage";
+import { StoreLayer } from "@ui/store/StoreLayer";
 import { dailyAssignment, utcDateString } from "@lib/daily";
 import { SCENARIOS_BY_ID } from "@content/scenarioRegistry";
 import { registerSavedCustomScenarios } from "@persistence/local";
@@ -485,10 +486,21 @@ export function App() {
     }
   };
 
-  // Everything renders above the shared auth/paywall modals.
+  // Start an election from outside the library (the Store's Play buttons).
+  const playScenario = (scenarioId: string) => {
+    const meta = SCENARIOS_BY_ID[scenarioId];
+    if (!meta) return;
+    if (meta.engine === "us") go({ kind: "us", scenarioId: meta.nativeId });
+    else if (meta.engine === "uk") go({ kind: "uk", electionId: meta.nativeId });
+    else go({ kind: "country", countryId: meta.country, electionId: meta.nativeId });
+  };
+
+  // Everything renders above the shared auth/paywall modals; the Store sits
+  // between them so log in and account dialogs open on top of it.
   const withModals = (node: React.ReactNode) => (
     <>
       {node}
+      <StoreLayer onPlay={playScenario} />
       <Suspense fallback={null}>
         <AuthModals />
       </Suspense>

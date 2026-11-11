@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useGameStore } from "@store/gameStore";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { GRID, SPLIT_UNITS, GRID_COLS, GRID_ROWS } from "@content/mapLayout";
 import { STATE_PATHS } from "@content/statePaths";
 import { isCustomScenarioId } from "@content/customScenario";
@@ -87,7 +88,6 @@ export function ResultsScreen() {
   const popMarginPts = (result.popularShare.dem - result.popularShare.rep) * 100;
 
   const canPlay = useAuthStore((s) => s.canPlay);
-  const openModal = useAuthStore((s) => s.openModal);
 
   // ── Election Night reveal — plays instead of the results until done ──
   const reveal = useMemo(() => usReveal(game), [game]);
@@ -189,7 +189,7 @@ export function ResultsScreen() {
                       eventMode: game.eventMode,
                       difficulty,
                     }),
-                  onUnlock: () => openModal("activate", `us-${next.id}`),
+                  onUnlock: () => openStoreForScenario(`us-${next.id}`),
                   mapPreview: <UsMiniMapPreview byState={byState} cands={cands} />,
                 }
               : null

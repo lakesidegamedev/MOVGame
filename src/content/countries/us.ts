@@ -31,6 +31,7 @@ export const US_MODULE: CountryModule = {
     { electionId: "1964", year: 1964, label: "1964 · Johnson v. Goldwater", description: "A martyred president's heir, a nuclear ad, and the birth of the Sun Belt right.", difficulty: "hard" },
     { electionId: "1960", year: 1960, label: "1960 · Kennedy v. Nixon", description: "Television changes everything, and a hundred thousand votes decide the century's closest race.", difficulty: "easy" },
   ],
+  systemLabel: "Electoral College",
   pack: {
     id: "us-historical",
     name: "United States",

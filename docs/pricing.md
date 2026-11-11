@@ -16,6 +16,16 @@ same ids and the same US price tiers.
 These are one-time prices. There is no subscription because the game does not
 yet deliver enough recurring value to justify one.
 
+## The store screen
+
+The Store opens from the landing page, the account menu, the setup and results
+screens, and every locked election. It leads with the Complete Collection, shows one
+tile per country pack, and has a page per pack listing its elections. Prices and the
+"on sale" answer come from the Lakeside platform catalog; the bundled prices are only
+a fallback for display. A pack the game ships before the platform lists it shows as
+"coming soon" with no Buy button, and while the platform cannot be reached Buy is off
+with a reason. A pack the player already has shows no price and no Buy.
+
 ## Platform rules
 
 - Web and direct desktop builds may use the Lakeside checkout and existing
