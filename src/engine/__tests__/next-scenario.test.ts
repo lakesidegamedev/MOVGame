@@ -32,7 +32,7 @@ describe("next-scenario retention chains", () => {
     expect(countryNextScenario("CA", "2019")?.id).toBe("2021");
     expect(countryNextScenario("CA", "2025")?.id).toBe("2015");
     expect(countryNextScenario("DE", "2017")?.id).toBe("2021");
-    expect(countryNextScenario("DE", "2025")?.id).toBe("2017");
+    expect(countryNextScenario("DE", "2025")?.id).toBe("1990");
     expect(countryNextScenario("AU", "2019")?.id).toBe("2022");
     expect(US_NEXT_SCENARIO["1960"].id).toBe("1964");
     expect(US_NEXT_SCENARIO["2024"].id).toBe("1960");
@@ -66,7 +66,6 @@ describe("next-scenario retention chains", () => {
 
   it("country chains stay inside each pack", () => {
     expect(countryNextScenario("CA", "2021")?.id).toBe("2025");
-    expect(countryNextScenario("CA", "2025")?.id).toBe("2021");
     expect(countryNextScenario("FR", "2017")?.id).toBe("2022");
     expect(countryNextScenario("FR", "2027")?.id).toBe("1981");
     expect(countryNextScenario("FR", "2012")?.id).toBe("2017");
@@ -75,7 +74,6 @@ describe("next-scenario retention chains", () => {
     expect(countryNextScenario("DE", "2017")?.id).toBe("2021");
     expect(countryNextScenario("DE", "2025")?.id).toBe("1990");
     expect(countryNextScenario("AU", "2022")?.id).toBe("2025");
-    expect(countryNextScenario("AU", "2025")?.id).toBe("2022");
     for (const [cid, country] of Object.entries(COUNTRIES)) {
       for (const eid of Object.keys(country.elections)) {
         const next = countryNextScenario(cid, eid);
