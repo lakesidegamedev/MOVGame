@@ -154,7 +154,7 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   seat bar with the majority line, a standings table, a tappable map with a matching region
   list, and End week pinned to the bottom of the screen. Long party lists, such as India's ten
   playable sides, are picked from a full list instead of a dropdown.
-- Android: the campaign library groups all twelve countries and their elections by country,
+- Android: the campaign library groups every country and its elections,
   with search and filters for free and owned elections, difficulty and era. Each election opens
   a briefing with the party picker, difficulty and seed.
 - Android: the Store lists every pack, with the Complete Collection first. It shows what you

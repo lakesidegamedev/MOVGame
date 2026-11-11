@@ -164,7 +164,7 @@ def shot(flow, marker, mode='game', name=None):
         failures.append(f'{name}: {error}')
 
 
-COUNTRIES = ('US', 'UK', 'CA', 'DE', 'FR', 'AU', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP')
+COUNTRIES = ('US', 'UK', 'CA', 'DE', 'FR', 'AU', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP', 'IT')
 
 
 def route_flows():
@@ -177,7 +177,7 @@ def route_flows():
     for country in ('US', 'UK', 'IN', 'JP'):
         shot(f'library-{country}', 'Choose your presidential ticket' if country == 'US' else 'Launch campaign', 'ask')
     # Every new country's map renders and a tap on it selects a region.
-    for country in ('UK', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP'):
+    for country in ('UK', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP', 'IT'):
         shot(f'map-{country}', 'Regional projections')
         try:
             tap_label('Map of', prefix=True)
