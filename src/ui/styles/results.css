@@ -1,0 +1,6 @@
+.results { max-width: 900px; width: 100%; }
+.bigresult { text-align: center; margin-bottom: 18px; }
+.bigresult .tag { letter-spacing: 3px; color: var(--gold); }
+.bigresult .who { font-size: 34px; font-weight: 900; }
+.bigresult .ev { font-size: 60px; font-weight: 900; line-height: 1; font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums; }

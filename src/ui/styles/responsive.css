@@ -1,0 +1,74 @@
+/* ── Mobile ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .topbar { flex-wrap: wrap; gap: 8px; padding: 8px 12px; }
+  .brand-name { font-size: 13px; }
+  .turnchip { font-size: 11px; width: 100%; order: 3; }
+  .evbar { order: 4; width: 100%; max-width: none; margin-top: 4px; }
+  .stat .v { font-size: 13px; }
+  .stat .l { font-size: 9px; }
+
+  /* Single column: size each row to its content and stack from the top.
+     Without this, the fixed-height grid splits into equal rows and the columns
+     (whose min-height is 0) collapse, so Actions overlaps the bottom of the map. */
+  .main { grid-template-columns: 1fr; gap: 16px; padding: 14px; overflow: auto;
+    grid-auto-rows: max-content; align-content: start; }
+  .col { gap: 14px; min-height: 0; }
+
+  .tilegrid { gap: 3px; width: 100%; max-width: 100%; }
+  .tile { font-size: 8px; border-radius: 4px; min-width: 0; padding: 1px; }
+  .tile .ev { font-size: 6px; }
+  .splitstrip { gap: 6px; }
+  .splitgroup .tile { width: 24px; }
+  .mapwrap { gap: 6px; }
+  .geo-map { max-height: 28vh; min-height: 120px; }
+  .card { padding: 12px; }
+  .card h3 { margin-bottom: 8px; font-size: 11px; }
+  .actiongrid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .actionbtn { padding: 8px 6px; }
+  .actionbtn .t { font-size: 10px; }
+  .actionbtn .c { font-size: 8px; }
+  .bloc { padding: 4px 0; gap: 2px 6px; }
+  .bloc .name { font-size: 10px; }
+  .bloc .meta { font-size: 9px; }
+  .issue-row .meta { font-size: 12px; font-weight: 700; color: var(--text-body); }
+  .kv { font-size: 10px; padding: 2px 0; }
+  .pollrow { font-size: 10px; padding: 2px 0; }
+  .queue { gap: 6px; }
+  .qitem { padding: 7px 9px; font-size: 11px; }
+  .field { margin: 6px 0; gap: 2px; }
+  .field select, .field input { padding: 6px 8px; font-size: 12px; }
+
+  .setup .title { font-size: 28px; }
+  .pick { grid-template-columns: 1fr; }
+  .candcard { padding: 12px; }
+  /* !important: several screens set grid-template-columns inline (3-up year
+     grids, minmax(280px) card walls) — on a phone they must collapse to two
+     min-0 columns or the min-content of nowrap labels blows out the page. */
+  .scenario-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .scenario-card { min-width: 0; }
+  .scenario-card .scenario-match { white-space: normal; }
+  /* The wizard step strip scrolls sideways instead of shoving the page wide. */
+  .su-stepper { overflow-x: auto; padding-bottom: 2px; }
+  .su-step { flex: 1 0 auto; padding: 8px; gap: 7px; }
+  .su-step-hint { display: none; }
+  .su-step-label { font-size: 11px; }
+  .su-optgrid, .su-optgrid-3 { grid-template-columns: 1fr; }
+  .su-panel { min-height: 0; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .modal { max-width: 96vw; border-radius: var(--radius-lg); }
+  .modal .head { padding: 14px 16px; }
+  .modal .head h2 { font-size: 18px; }
+  .modal .body { padding: 14px 16px; }
+  .choice { padding: 11px 12px; }
+
+  .bigresult .who { font-size: 24px; }
+  .bigresult .ev { font-size: 42px; }
+}
+
+@media (max-width: 480px) {
+  .tile { font-size: 8px; }
+  .tile .ev { display: none; }
+  .actiongrid { grid-template-columns: 1fr; }
+  .evbar .seg { font-size: 10px; }
+}
