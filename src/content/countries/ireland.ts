@@ -356,7 +356,7 @@ export const IRELAND: CountryBundle = {
       sf: { partyId: "sf", name: "Gerry Adams", charisma: 62, energy: 62, competence: 52, machine: 76 },
       lab: { partyId: "lab", name: "Joan Burton", charisma: 52, energy: 66, competence: 62, machine: 54 },
       grn: { partyId: "grn", name: "Eamon Ryan", charisma: 52, energy: 60, competence: 58, machine: 40 },
-      sd: { partyId: "sd", name: "Róisín Shortall, Catherine Murphy & Stephen Donnelly", charisma: 56, energy: 60, competence: 66, machine: 34 },
+      sd: { partyId: "sd", name: "Shortall, Murphy & Donnelly", charisma: 56, energy: 60, competence: 66, machine: 34 },
       pbp: { partyId: "pbp", name: "Paul Murphy & Richard Boyd Barrett", charisma: 62, energy: 74, competence: 52, machine: 40 },
     },
     "2011": {
