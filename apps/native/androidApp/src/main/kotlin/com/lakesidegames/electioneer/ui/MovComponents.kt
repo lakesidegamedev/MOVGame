@@ -232,11 +232,11 @@ fun Meter(fraction: Float, color: Color, modifier: Modifier = Modifier, height: 
 }
 
 /**
- * Stacked seat bar for every party with a majority mark. Parties are drawn
+ * Stacked seat bar for every party with a majority mark when there is one. Parties are drawn
  * in the order given; the remainder (uncalled or tossup) stays sunken.
  */
 @Composable
-fun SeatBar(segments: List<Pair<Color, Int>>, total: Int, majority: Int, modifier: Modifier = Modifier, height: Dp = 14.dp, description: String) {
+fun SeatBar(segments: List<Pair<Color, Int>>, total: Int, majority: Int?, modifier: Modifier = Modifier, height: Dp = 14.dp, description: String) {
     Canvas(modifier.fillMaxWidth().height(height).semantics { contentDescription = description }) {
         drawRect(Mov.Sunken)
         var x = 0f
@@ -246,8 +246,11 @@ fun SeatBar(segments: List<Pair<Color, Int>>, total: Int, majority: Int, modifie
             if (w > 2f) drawLine(Mov.Surface1, Offset(x + w, 0f), Offset(x + w, size.height), strokeWidth = 1.dp.toPx())
             x += w
         }
-        val m = size.width * majority / total.coerceAtLeast(1)
-        drawLine(Mov.Text1, Offset(m, 0f), Offset(m, size.height), strokeWidth = 2.dp.toPx())
+        // Plurality contests have no majority line.
+        majority?.let {
+            val m = size.width * it / total.coerceAtLeast(1)
+            drawLine(Mov.Text1, Offset(m, 0f), Offset(m, size.height), strokeWidth = 2.dp.toPx())
+        }
     }
 }
 

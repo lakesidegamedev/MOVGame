@@ -180,7 +180,7 @@ def shot(flow, marker, mode='game', name=None):
         failures.append(f'{name}: {error}')
 
 
-COUNTRIES = ('US', 'UK', 'CA', 'DE', 'FR', 'AU', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP', 'IT')
+COUNTRIES = ('US', 'UK', 'CA', 'DE', 'FR', 'AU', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP', 'IT', 'MX')
 
 
 def route_flows():
@@ -193,7 +193,7 @@ def route_flows():
     for country in ('US', 'UK', 'IN', 'JP'):
         shot(f'library-{country}', 'Choose your presidential ticket' if country == 'US' else 'Launch campaign', 'ask')
     # Every new country's map renders and a tap on it selects a region.
-    for country in ('UK', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP', 'IT'):
+    for country in ('UK', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP', 'IT', 'MX'):
         shot(f'map-{country}', 'Regional projections')
         try:
             tap_map()
@@ -202,7 +202,7 @@ def route_flows():
             print(f'FAIL map-{country}-selected: {error}', flush=True)
             failures.append(f'map-{country}-selected: {error}')
     # Election night for each engine, held on screen for the capture.
-    for country in ('US', 'UK', 'IN', 'BR'):
+    for country in ('US', 'UK', 'IN', 'BR', 'MX'):
         shot(f'reveal-{country}', 'Election night')
     for country in COUNTRIES:
         kinds = ('game', 'custom', 'results') if country in ('US', 'UK', 'CA', 'DE', 'FR', 'AU') else ('game', 'results')

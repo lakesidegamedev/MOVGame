@@ -47,13 +47,13 @@ fun ElectionNightScreen(session: GameSession) {
             MovCard {
                 Text(board.status, color = Mov.Warning, style = MaterialTheme.typography.labelLarge, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
                 board.projection?.let { Text(it, style = MaterialTheme.typography.titleLarge, color = Mov.Text1) }
-                SeatBar(board.rows.map { partyFill(it.color) to it.units }, data.totalUnits, data.threshold,
-                    description = board.rows.joinToString("; ") { "${it.name} ${it.units} ${data.unitLabel}" } + ". ${data.threshold} to win.")
+                SeatBar(board.rows.map { partyFill(it.color) to it.units }, data.totalUnits, data.threshold.takeIf { data.pluralityWinner == null },
+                    description = board.rows.joinToString("; ") { "${it.name} ${it.units} ${data.unitLabel}" } + ". ${data.goalLabel()}.")
                 board.rows.forEach { row ->
                     PartyRow(row.color, row.name, listOf("${row.units}"), highlight = row.id == data.playerPartyId, tag = if (row.id == data.playerPartyId) "You" else null)
                 }
                 KeyValue("Called", "${board.calledUnits} of ${data.totalUnits}")
-                KeyValue("To win", "${data.threshold}")
+                KeyValue("Goal", data.goalLabel())
                 KeyValue("Remaining", "${board.remaining}")
             }
             MovCard(tight = true) {

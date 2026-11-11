@@ -128,9 +128,10 @@ internal fun ChoicePicker(label: String, selected: String, choices: List<Pair<St
 
 /** Standings table with a seat bar: the same block on the desk, results and analysis. */
 @Composable
-internal fun StandingsTable(rows: List<NativeStanding>, unit: String, total: Int, majority: Int, player: String?) {
+internal fun StandingsTable(rows: List<NativeStanding>, unit: String, total: Int, majority: Int?, player: String?) {
     SeatBar(rows.map { partyFill(it.color) to it.units }, total, majority,
-        description = rows.joinToString("; ") { "${it.name} ${it.units} $unit" } + ". $majority needed for a majority.")
+        description = rows.joinToString("; ") { "${it.name} ${it.units} $unit" } +
+            (majority?.let { ". $it needed for a majority." } ?: ". The most $unit wins."))
     Row(Modifier.fillMaxWidth().padding(horizontal = MovSpace.s1_5)) {
         Text("PARTY", Modifier.weight(1f), color = Mov.Text4, style = MaterialTheme.typography.labelSmall)
         Text(unit.uppercase(), Modifier.widthIn(min = 40.dp), color = Mov.Text4, style = MaterialTheme.typography.labelSmall, textAlign = androidx.compose.ui.text.style.TextAlign.End)
@@ -199,7 +200,7 @@ fun WorldCampaignScreen(session: GameSession) {
                 Eyebrow(if (game.isOver()) "Election result" else "Week ${game.turn() + 1} of ${game.totalTurns()}", color = Mov.Warning)
                 Text("$flag ${game.label()}".trim(), style = MaterialTheme.typography.headlineSmall, color = Mov.Text1)
                 StatRow {
-                    Metric("${mine?.units ?: 0}/${game.majority()}", "Your $unit", color = partyInk(mine?.color))
+                    Metric(if (game.isPlurality()) "${mine?.units ?: 0}" else "${mine?.units ?: 0}/${game.majority()}", "Your $unit", color = partyInk(mine?.color))
                     Metric("${game.currency()}${number(game.funds())}M", "Cash")
                     if (!game.isOver()) Metric("${game.slotsLeft()}", "Moves left")
                     Metric(percent(mine?.voteShare ?: 0.0), "Vote share")
@@ -216,9 +217,9 @@ fun WorldCampaignScreen(session: GameSession) {
         notice?.let { item { Notice(it) } }
         item {
             MovCard {
-                CardHead(if (game.isOver()) "Final standings" else "Projected standings") { Tag("${game.majority()} to win", TagKind.Outline) }
+                CardHead(if (game.isOver()) "Final standings" else "Projected standings") { Tag(if (game.isPlurality()) "Most $unit wins" else "${game.majority()} to win", TagKind.Outline) }
                 if (game.isOver()) Text(game.outcome(), color = Mov.Text1, style = MaterialTheme.typography.titleSmall)
-                StandingsTable(rows, unit, game.totalUnits(), game.majority(), player)
+                StandingsTable(rows, unit, game.totalUnits(), game.majority().takeUnless { game.isPlurality() }, player)
                 Text(game.goalText(), color = Mov.Text3, style = MaterialTheme.typography.bodySmall)
             }
         }
@@ -331,7 +332,7 @@ fun WorldCampaignScreen(session: GameSession) {
             item { game.resultSummary()?.let { summary -> MovCard {
                 CardHead("Campaign score") { Text("${summary.score} / 1000", style = MaterialTheme.typography.titleLarge.num, color = Mov.Text1, fontWeight = FontWeight.Bold) }
                 KeyValue("Difficulty", summary.difficulty.replaceFirstChar { it.uppercase() })
-                KeyValue("${unit.replaceFirstChar { it.uppercase() }} above majority", "${summary.unitMargin}")
+                KeyValue(game.marginLabel().replaceFirstChar { it.uppercase() }, "${summary.unitMargin}")
                 KeyValue("Vote margin vs. leading rival", "${signed(summary.popularMargin)} pts")
             } } }
             item { MovCard {
