@@ -31,6 +31,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   its real beats, from the nuclear deal and the farm loan waiver to Pulwama and Balakot, NYAY and
   the 2024 result that left the BJP needing its allies, and the results are built from
   constituency counts.
+- Japan: six House of Representatives elections, 2009, 2012, 2014, 2017, 2021 and 2024, as a
+  $0.99 pack (also in the Complete Collection). Lead the LDP, the Democrats (DPJ and later the
+  CDP), Komeito, Ishin, the Communists, Your Party, Hope, the DPP, Reiwa and others across the
+  eleven regional blocks. Parallel voting means a party keeps the districts it wins, so every
+  region combines its single-member seats with its list seats. Each campaign has its real story
+  beats, from the 2009 change of government and Abe's return to the Hope split and the 2024
+  slush fund election.
 - A Store screen. It opens from the landing page, the account menu, the setup and results
   screens, and every locked election. It leads with the Complete Collection and says exactly
   what it contains and, if you already own some packs, which ones it would add. Every country

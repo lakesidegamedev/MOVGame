@@ -1,5 +1,5 @@
 // Generates real-geography SVG map shape files for Canada, Germany, France,
-// Australia, New Zealand and Brazil (src/content/countries/paths/*.ts), following the UK
+// Australia, New Zealand, Brazil, India and Japan (src/content/countries/paths/*.ts), following the UK
 // pipeline in scripts/build_uk_paths.cjs:
 //   source geo data -> (optional group union) -> equirectangular lat-corrected
 //   projection -> Douglas-Peucker simplify -> viewBox fit -> TS emit.
@@ -474,12 +474,61 @@ const IN = wants("IN") && buildCountry({
   regions: inRegionPolys(),
 });
 
+// --------------------------------------------------------------------- JP
+// Eleven units: the proportional blocks of the House of Representatives, each
+// a group of prefectures. Okinawa belongs to the Kyushu block and is drawn as
+// an inset shifted north so it sits west of Kyushu; Tokyo also gets a 2.4x
+// magnified copy in the Pacific; the far southern island chains (Amami, Tokara, Izu,
+// Ogasawara) are dropped.
+function jpRegions() {
+  const jp = neCountry("JPN", ne10);
+  const ringMinLat = (ring) => Math.min(...ring.map((p) => p[1]));
+  // Keep only polygons whose outer ring lies north of a latitude.
+  const northOf = (polys, lat) => polys.filter((poly) => ringMinLat(poly[0]) >= lat);
+  const shift = (polys, dlon, dlat) => polys.map((poly) => poly.map((ring) => ring.map(([x, y]) => [x + dlon, y + dlat])));
+  jp["Kagoshima"] = northOf(jp["Kagoshima"], 30.0);
+  // Tokyo is a speck at map scale. Keep its true outline and add a magnified
+  // copy in the Pacific off Chiba (a lens) so the block can be read and
+  // tapped. Both pieces belong to the one TKY shape.
+  const scaleAbout = (polys, cx, cy, k) => polys.map((poly) => poly.map((ring) => ring.map(([x, y]) => [cx + (x - cx) * k, cy + (y - cy) * k])));
+  const tokyo = northOf(jp["Tokyo"], 35.3);
+  const lens = shift(scaleAbout(tokyo, 139.5, 35.7, 2.4), 3.4, 0.2);
+  jp["Tokyo"] = [...tokyo, ...lens];
+  const okinawa = shift(jp["Okinawa"], 0, 4.2);
+  const merged = groupRegions(jp, {
+    HKD: ["Hokkaidō"],
+    TOH: ["Aomori", "Iwate", "Miyagi", "Akita", "Yamagata", "Fukushima"],
+    NKT: ["Ibaraki", "Tochigi", "Gunma", "Saitama"],
+    SKT: ["Chiba", "Kanagawa", "Yamanashi"],
+    TKY: ["Tokyo"],
+    HSN: ["Niigata", "Toyama", "Ishikawa", "Fukui", "Nagano"],
+    TKI: ["Gifu", "Shizuoka", "Aichi", "Mie"],
+    KNK: ["Shiga", "Kyōto", "Ōsaka", "Hyōgo", "Nara", "Wakayama"],
+    CHG: ["Tottori", "Shimane", "Okayama", "Hiroshima", "Yamaguchi"],
+    SHK: ["Tokushima", "Kagawa", "Ehime", "Kōchi"],
+  }, "JP");
+  const kyushu = groupRegions(jp, { KYU: ["Fukuoka", "Saga", "Nagasaki", "Kumamoto", "Ōita", "Miyazaki", "Kagoshima"] }, "JP");
+  kyushu.KYU = [...kyushu.KYU, ...okinawa];
+  return { ...merged, ...kyushu };
+}
+const JP = wants("JP") && buildCountry({
+  name: "Japan", constName: "JP_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (JPN)",
+  extraNote: "Regions are the 11 proportional blocks. Okinawa (Kyushu block) is an inset shifted north; Tokyo carries a 2.4x magnified lens copy in the Pacific so it can be tapped; Amami, Tokara, Izu and Ogasawara are dropped.",
+  labelNudge: { KYU: [10, -14], SKT: [15, 12], NKT: [-2, -4] },
+  lat0: 36, eps: 0.8, minIslandPx: 4,
+  clip: [122.5, 27.8, 145.9, 45.9],
+  order: ["HKD", "TOH", "NKT", "SKT", "HSN", "TKI", "KNK", "CHG", "SHK", "KYU", "TKY"],
+  regions: jpRegions(),
+});
+
 // ------------------------------------------------------------------- write
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const files = [
   [CA, "ca.ts"], [DE, "de.ts"], [FR, "fr.ts"], [AU, "au.ts"], [NZ, "nz.ts"],
   [BR, "br.ts"],
   [IN, "in.ts"],
+  [JP, "jp.ts"],
 ].filter(([built]) => built);
 for (const [built, name] of files) {
   const bytes = emit(built, path.join(OUT_DIR, name));
@@ -517,4 +566,5 @@ if (AU) assertCountry(AU, ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"],
 if (NZ) assertCountry(NZ, ["NTH", "AKC", "AKS", "WBP", "CNI", "WGN", "UPS", "CAN", "OTS", "MAO"], 0.55, 0.95); // tall
 if (BR) assertCountry(BR, ["AMZ", "NOR", "CPM", "PNE", "CW", "BA", "MG", "ES", "PRSC", "SP", "RJ", "RS"], 0.85, 1.25); // squarish
 if (IN) assertCountry(IN, ["UP", "BJ", "MP", "GR", "MH", "DH", "PB", "HM", "KA", "KL", "TN", "AT", "WB", "OD", "NE"], 0.8, 1.15); // squarish
+if (JP) assertCountry(JP, ["HKD", "TOH", "NKT", "SKT", "TKY", "HSN", "TKI", "KNK", "CHG", "SHK", "KYU"], 0.8, 1.3); // squarish
 console.log("All assertions passed.");
