@@ -29,6 +29,7 @@ import {
 } from "@content/customScenario";
 import { packForScenario } from "@content/packs";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import type { EditorLaunchTarget } from "@ui/SetupScreen";
 import { customScenarioStore } from "@persistence/local";
 import { X, Dices, Trash2, Play, Download, Upload, Save, Lock } from "lucide-react";
@@ -320,7 +321,6 @@ export function EditorScreen({ onClose, onLaunch }: { onClose: () => void; onLau
   const startUk = useUkStore((s) => s.startCustom);
   const startCountry = useCountryStore((s) => s.startCustom);
   const canPlay = useAuthStore((s) => s.canPlay);
-  const openModal = useAuthStore((s) => s.openModal);
   const [draft, setDraft] = useState<CustomScenario>(() => makeDefaultCustomScenario());
   const [saved, setSaved] = useState<CustomScenario[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
@@ -360,7 +360,7 @@ export function EditorScreen({ onClose, onLaunch }: { onClose: () => void; onLau
     return pack ? { scenarioId: id, packName: pack.name } : null;
   };
 
-  const unlock = (scenarioId: string) => openModal("activate", scenarioId);
+  const unlock = (scenarioId: string) => openStoreForScenario(scenarioId);
 
   const play = (cs: CustomScenario) => {
     // Free path stays open (US customs, free bases). A paid base needs its pack.

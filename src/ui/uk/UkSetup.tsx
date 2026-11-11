@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useUkStore } from "@store/ukStore";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { DifficultyPicker, type Difficulty } from "@ui/DifficultyPicker";
 import { UK_ELECTIONS, UK_ELECTION_IDS } from "@content/uk/elections";
 import { ScenarioArt } from "@ui/ScenarioArt";
@@ -24,12 +25,11 @@ function UkBeginButton({ election, party, seed, year, onBegin }: {
 }) {
   void seed;
   const canPlay = useAuthStore((s) => s.canPlay);
-  const openModal = useAuthStore((s) => s.openModal);
   const unlocked = canPlay(`uk-${election}`);
   return (
     <button
       className="primary su-next"
-      onClick={() => (unlocked ? onBegin() : openModal("activate", `uk-${election}`))}
+      onClick={() => (unlocked ? onBegin() : openStoreForScenario(`uk-${election}`))}
     >
       <Flag size={15} /> {unlocked ? `Begin ${year} as ${partyShort(party)}` : "🔒 Unlock to play"}
     </button>

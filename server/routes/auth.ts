@@ -2,8 +2,8 @@ import { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { getDb, type UserRow } from "../db.js";
 import { signToken, hashPassword, checkPassword, requireAuth, type AuthedRequest } from "../auth.js";
-import { unlockedForUserWithPlatform } from "../activation.js";
-import { identityForUser, redeemCodeOnPlatform } from "../entitlements.js";
+import { unlockedForUserWithPlatform, unlockedWithVerification } from "../activation.js";
+import { identityForUser, redeemCodeOnPlatform, clearEntitlementsCacheFor } from "../entitlements.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -94,4 +94,27 @@ authRouter.post("/activate", requireAuth, async (req: AuthedRequest, res) => {
 authRouter.get("/activations", requireAuth, async (req: AuthedRequest, res) => {
   const rows = getDb().prepare("SELECT * FROM activations WHERE user_id = ?").all(req.auth!.userId);
   res.json({ activations: rows, unlocked: await unlockedForUserWithPlatform(req.auth!.userId) });
+});
+
+// Re-ask the platform what this account owns, skipping the ~30s entitlement
+// cache. The store calls this after a checkout returns so a purchase appears as
+// soon as the platform has recorded it. It grants nothing itself: ownership is
+// whatever the platform (plus local codes) says. Throttled per account so a
+// stuck client cannot hammer the platform, and `verified: false` tells the
+// client the platform could not be reached, so it keeps what it had instead of
+// treating an outage as "you own nothing".
+const REFRESH_MIN_MS = 2_000;
+const lastRefresh = new Map<string, number>();
+
+authRouter.post("/entitlements/refresh", requireAuth, async (req: AuthedRequest, res) => {
+  res.set("Cache-Control", "private, no-store");
+  const userId = req.auth!.userId;
+  const identity = identityForUser(userId);
+  const now = Date.now();
+  if (identity?.ahdUserId && now - (lastRefresh.get(userId) ?? 0) >= REFRESH_MIN_MS) {
+    for (const [id, at] of lastRefresh) if (now - at > 60_000) lastRefresh.delete(id);
+    lastRefresh.set(userId, now);
+    clearEntitlementsCacheFor(identity);
+  }
+  res.json(await unlockedWithVerification(userId));
 });

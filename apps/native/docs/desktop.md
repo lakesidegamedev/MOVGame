@@ -16,6 +16,15 @@ uses `steam`, which removes every external Lakeside store link and checkout
 action. The base Steam client is free, and Steam DLC ownership verification is
 not implemented, so paid DLC must not launch until that adapter is complete.
 
+Lakeside checkout and account pages open in the system browser, not in the game
+window. The shell registers the Tauri opener plugin (`src-tauri/src/lib.rs`) and
+`src-tauri/capabilities/default.json` allows it to open only `lakesidegames.net` and
+`sim.ahousedividedgame.com` URLs. The web code calls it through
+`src/lib/externalLink.ts`, and the game picks a purchase up when the window regains
+focus (see `src/store/storeFlow.ts`). Sign in with Lakeside Games is not offered in
+the desktop window, because the return trip cannot reach it; an account that needs
+linking is linked once in the browser. Re-verify this on a real desktop build.
+
 The checked-in master icon is `public/brand/margin-of-victory-icon.png` in
 `MOVGame`; the Tauri-generated sizes for every platform live in
 `src-tauri/icons/` here.

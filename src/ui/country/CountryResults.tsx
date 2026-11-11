@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { api } from "@lib/api";
 import { computeScoreFromFacts, multipartyScoreFacts } from "@engine/scoring";
 import { majorityFor, playablePartiesIn } from "@engine/countryGame";
@@ -196,7 +197,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
                 ctaLabel: `Play ${nextData.year} →`,
                 lockLabel: `🔒 Unlock ${nextData.year}`,
                 onPlay: () => newGame(country.id, next.id, nextParty, String(Date.now()), difficulty),
-                onUnlock: () => openModal("activate", packId),
+                onUnlock: () => openStoreForScenario(packId),
                 mapPreview,
               }
             : null

@@ -3,6 +3,7 @@ import { PAYWALL_ENABLED, SCENARIO_REGISTRY, type CountryCode, type ScenarioMeta
 import { packCovered, STORE_PACKS } from "@content/packs";
 import { countryCover } from "@content/covers";
 import { useAuthStore } from "@store/authStore";
+import { useStoreNav } from "@store/storeNav";
 import { usePackPrices } from "@lib/usePackPrices";
 import { DISTRIBUTION } from "@lib/distribution";
 import { UserMenu } from "@ui/auth/UserMenu";
@@ -109,7 +110,7 @@ function ScenarioCard({ s, unlocked, onPlay, onLocked, showCover = true }: {
       )}
       {!unlocked && (
         <span className="muted small" style={{ fontSize: 10, color: "var(--gold)" }}>
-          <KeyRound size={10} style={{ verticalAlign: "-1px" }} /> Unlock with a code
+          <KeyRound size={10} style={{ verticalAlign: "-1px" }} /> Unlock in the store
         </span>
       )}
     </button>
@@ -239,17 +240,13 @@ function NoticeBanner() {
   const notice = useAuthStore((s) => s.notice);
   const dismiss = useAuthStore((s) => s.dismissNotice);
   if (!notice) return null;
-  const good = notice.kind === "purchase-success" || notice.kind === "lakeside-signed-in";
+  const good = notice.kind === "lakeside-signed-in";
   const text =
-    notice.kind === "purchase-success"
-      ? `Payment complete. ${notice.packName ?? "Your pack"} is unlocked on this account.`
-      : notice.kind === "purchase-cancelled"
-        ? "Checkout cancelled. Nothing was charged."
-        : notice.kind === "lakeside-signed-in"
-          ? `Signed in as ${notice.username} with your Lakeside Games account.`
-          : notice.kind === "lakeside-link-needs-login"
-            ? "A game account already uses that email. Log in with its password first, then link your Lakeside account from Your Account."
-            : "That sign in link expired. Try again from the login screen.";
+    notice.kind === "lakeside-signed-in"
+      ? `Signed in as ${notice.username} with your Lakeside Games account.`
+      : notice.kind === "lakeside-link-needs-login"
+        ? "A game account already uses that email. Log in with its password first, then link your Lakeside account from Your Account."
+        : "That sign in link expired. Try again from the login screen.";
   return (
     <div className={`notice-banner${good ? " good" : ""}`} role="status">
       {good ? <Check size={14} /> : null}
@@ -270,24 +267,13 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
   }
   const canPlay = useAuthStore((s) => s.canPlay);
   const unlocked = useAuthStore((s) => s.unlocked);
-  const openModal = useAuthStore((s) => s.openModal);
-  const buyPack = useAuthStore((s) => s.buyPack);
+  const openStore = useStoreNav((s) => s.openStore);
   const packPrices = usePackPrices();
   const [country, setCountry] = useState<CountryCode | null>(null);
   const [query, setQuery] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<"all" | ScenarioMeta["difficulty"]>("all");
   const [accessFilter, setAccessFilter] = useState<"all" | "playable" | "locked">("all");
   const [catalogView, setCatalogView] = useState<"compact" | "visual">("compact");
-  const [buyBusy, setBuyBusy] = useState<string | null>(null);
-  const [buyError, setBuyError] = useState<string | null>(null);
-
-  const buy = async (packId: string) => {
-    setBuyBusy(packId);
-    setBuyError(null);
-    const err = await buyPack(packId);
-    setBuyBusy(null);
-    if (err) setBuyError(err);
-  };
 
   // Country-first browsing: one card per country, then that country's
   // elections (newest first) once picked.
@@ -345,7 +331,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
   };
 
   const locked = (s: ScenarioMeta) => {
-    openModal("activate", s.scenarioId);
+    openStore({ scenarioId: s.scenarioId });
   };
 
   const playRandom = () => {
@@ -363,11 +349,9 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             <span className="mark"><img src="brand/margin-of-victory-icon.png" alt="" width={24} height={24} /></span>{BRAND.name}
           </span>
           <span className="row" style={{ gap: 6 }}>
-            {DISTRIBUTION.externalStore && (
-              <a className="ghost small" href={BRAND.storeUrl}>
-                <ShoppingBag size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Store
-              </a>
-            )}
+            <button className="ghost small" onClick={() => openStore()}>
+              <ShoppingBag size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Store
+            </button>
             <button className="ghost small" onClick={() => onGo({ kind: "leaderboard" })}>
               <Trophy size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Leaderboard
             </button>
@@ -645,8 +629,8 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
                     {owned ? (
                       <span className="muted small">Owned</span>
                     ) : PAYWALL_ENABLED && DISTRIBUTION.externalStore ? (
-                      <button className="primary small" disabled={buyBusy === p.id} onClick={() => buy(p.id)}>
-                        {buyBusy === p.id ? "Opening…" : "Buy"}
+                      <button className="primary small" onClick={() => openStore({ packId: p.id })}>
+                        View
                       </button>
                     ) : PAYWALL_ENABLED ? (
                       <span className="pack-beta-note">Available through {DISTRIBUTION.nativeStoreName}</span>
@@ -658,7 +642,6 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
               );
             })}
           </div>
-          {buyError && <p className="muted small" style={{ color: "var(--rose)", marginTop: 8 }}>{buyError}</p>}
         </div>
 
         <FaqSection />
@@ -669,7 +652,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
           <button className="ghost small" onClick={() => onGo({ kind: "legal", tab: "terms" })}>Terms</button>
           <a className="ghost small" href={`mailto:${BRAND.supportEmail}`}>Contact</a>
           <a className="ghost small" href="https://ask.lakesidegames.net/?game=electioneer" target="_blank" rel="noopener noreferrer">Ask about the game</a>
-          {DISTRIBUTION.externalStore && <a className="ghost small" href={BRAND.storeUrl}>Store</a>}
+          <button className="ghost small" onClick={() => openStore()}>Store</button>
           <span className="muted small" title="Coming soon">Discord (coming soon)</span>
           <a className="lakeside-credit" href="https://lakesidegames.net" target="_blank" rel="noopener">
             <img src="lakeside-mark.svg" alt="Lakeside Games logo" width={20} height={20} />

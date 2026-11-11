@@ -2,7 +2,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { getDb, type ActivationRow } from "./db.js";
 import { PACKS, PACKS_BY_ID } from "../src/content/packs.js";
 import { isFreeScenario } from "../src/content/scenarioRegistry.js";
-import { identityForUser, ownedProductIds } from "./entitlements.js";
+import { identityForUser, ownedProductIds, lookupPlatformPurchases } from "./entitlements.js";
 
 // CAMP-XXXX-XXXX-XXXX — uppercase alphanumerics minus ambiguous O/0/I/1 (L kept
 // out too for safety).
@@ -208,6 +208,20 @@ export async function unlockedForUserWithPlatform(userId: string): Promise<Unloc
   if (!identity) return local;
   const ownedPacks = await ownedProductIds(identity);
   return mergePackIds(local, ownedPacks);
+}
+
+/**
+ * Same as unlockedForUserWithPlatform, but also says whether the platform
+ * actually answered. When it did not, the platform part of `unlocked` is empty
+ * and must not be read as "owns nothing".
+ */
+export async function unlockedWithVerification(userId: string): Promise<{ unlocked: Unlocked; verified: boolean }> {
+  const local = unlockedForUser(userId);
+  const identity = identityForUser(userId);
+  if (!identity) return { unlocked: local, verified: true };
+  const lookup = await lookupPlatformPurchases(identity);
+  const owned = [...new Set(lookup.purchases.filter((p) => p.status === "paid").map((p) => p.productId))];
+  return { unlocked: mergePackIds(local, owned), verified: lookup.verified };
 }
 
 /** canAccessScenario, considering platform entitlements as well as codes. */

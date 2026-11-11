@@ -16,23 +16,37 @@ export interface CatalogItem {
   name: string;
   priceCents: number;
   scenarios: string[];
+  /**
+   * True only when the platform itself lists this product for sale. A pack the
+   * game ships before the platform sells it (new countries reach the game
+   * first) comes back with listed:false and must render as "coming soon", never
+   * as a Buy button the checkout cannot honour. Always false for the bundled
+   * fallback, where the platform's answer is unknown.
+   */
+  listed: boolean;
+}
+
+export interface CatalogResult {
+  /** "platform" when the live catalog answered, "bundled" when it could not be reached. */
+  source: "platform" | "bundled";
+  items: CatalogItem[];
 }
 
 // Bundled fallback: the game's own membership + last-known price.
 function bundled(): CatalogItem[] {
-  return PACKS.map((p) => ({ id: p.id, name: p.name, priceCents: p.price, scenarios: p.scenarios }));
+  return PACKS.map((p) => ({ id: p.id, name: p.name, priceCents: p.price, scenarios: p.scenarios, listed: false }));
 }
 
-let cache: { at: number; items: CatalogItem[] } | null = null;
+let cache: { at: number; result: CatalogResult } | null = null;
 
 /**
  * The Margin of Victory catalog with platform prices. Fetches the platform catalog
  * (5 min cache) and overlays its prices onto the bundled membership; on any
  * failure returns the bundled fallback so prices always render.
  */
-export async function getCatalog(): Promise<CatalogItem[]> {
+export async function getCatalogResult(): Promise<CatalogResult> {
   const now = Date.now();
-  if (cache && now - cache.at < CACHE_MS) return cache.items;
+  if (cache && now - cache.at < CACHE_MS) return cache.result;
 
   const fallback = bundled();
   const controller = new AbortController();
@@ -43,18 +57,29 @@ export async function getCatalog(): Promise<CatalogItem[]> {
     const body = (await res.json()) as { products?: Array<{ id: string; name?: string; priceCents?: number; scenarios?: string[] }> };
     const platform = new Map((body.products ?? []).map((p) => [p.id, p]));
     // Membership stays the game's; price (and name if present) come from the platform.
-    const items = fallback.map((f) => {
+    const items = fallback.map((f): CatalogItem => {
       const p = platform.get(f.id);
-      return p && typeof p.priceCents === "number"
-        ? { id: f.id, name: p.name ?? f.name, priceCents: p.priceCents, scenarios: f.scenarios }
+      return p && typeof p.priceCents === "number" && Number.isSafeInteger(p.priceCents) && p.priceCents >= 0
+        ? { id: f.id, name: p.name ?? f.name, priceCents: p.priceCents, scenarios: f.scenarios, listed: true }
         : f;
     });
-    cache = { at: now, items };
-    return items;
+    const result: CatalogResult = { source: "platform", items };
+    cache = { at: now, result };
+    return result;
   } catch {
     // Do not cache failures; keep serving bundled prices and retry next call.
-    return fallback;
+    return { source: "bundled", items: fallback };
   } finally {
     clearTimeout(timer);
   }
+}
+
+/** The catalog items alone (platform prices overlaid on the bundled membership). */
+export async function getCatalog(): Promise<CatalogItem[]> {
+  return (await getCatalogResult()).items;
+}
+
+/** Test-only: drop the cached platform catalog. */
+export function clearCatalogCache(): void {
+  cache = null;
 }

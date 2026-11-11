@@ -65,6 +65,27 @@ describe("api host routing", () => {
   });
 });
 
+describe("packaged desktop app", () => {
+  const realFetch = globalThis.fetch;
+  afterEach(() => { globalThis.fetch = realFetch; vi.restoreAllMocks(); });
+
+  it.each([
+    ["tauri:", "localhost"],      // macOS and Linux webviews
+    ["http:", "tauri.localhost"], // Windows webview
+  ])("reaches the campaign server, not the app's own origin (%s//%s)", async (protocol, hostname) => {
+    Object.defineProperty(window, "location", {
+      value: { hostname, protocol, origin: `${protocol}//${hostname}`, pathname: "/", search: "", href: `${protocol}//${hostname}/` },
+      writable: true,
+    });
+    vi.resetModules();
+    const { api } = await import("../api");
+    fetchCalls.length = 0;
+    globalThis.fetch = await mockFetch(200, JSON.stringify({ products: [] }));
+    await api.catalog();
+    expect(fetchCalls[0].url).toBe("https://sim.ahousedividedgame.com/api/catalog");
+  });
+});
+
 describe("malformed 200 payloads (the SPA-fallback HTML case)", () => {
   const realFetch = globalThis.fetch;
 
