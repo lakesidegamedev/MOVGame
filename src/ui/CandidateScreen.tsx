@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { partyInk } from "@ui/colors";
 import { useState } from "react";
 import { getScenario, type ScenarioTicket } from "@content/scenarios";
 import { TRAIT_LABELS, mateBonusChips } from "@ui/labels";
@@ -38,7 +39,7 @@ function CandidateCard({
     >
       <Avatar name={ticket.name} color={ticket.color} size={44} />
       <div className="candinfo">
-        <div className="nm" style={{ color: ticket.color }}>{ticket.name}</div>
+        <div className="nm" style={{ color: partyInk(ticket.color) }}>{ticket.name}</div>
         <div className="rm">{ticket.party}</div>
       </div>
     </div>

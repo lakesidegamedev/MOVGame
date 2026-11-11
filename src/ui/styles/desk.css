@@ -324,12 +324,20 @@
 @media (max-width: 1100px) {
   .desk-bar { flex-wrap: wrap; row-gap: var(--space-2); }
   .desk-score { order: 5; flex: 1 1 100%; max-width: none; }
-  .main { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: var(--space-3) var(--space-4) var(--space-8); }
+  .main {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto auto 1fr;
+    padding: var(--space-3) var(--space-4) var(--space-8);
+  }
   .main > .col { display: contents; }
-  .main .mapwrap { grid-column: 1 / -1; order: 1; }
-  .main > .col:last-child > :first-child { order: 2; }   /* state / region detail */
-  .main > .col:last-child > .card:not(:first-child) { order: 3; grid-row: span 2; } /* plan */
-  .main > .col:first-child > :not(.mapwrap) { order: 4; } /* intel / standings */
+  /* Map across the top; detail and intel stacked on the left, the plan on
+     the right. The flexible last row absorbs the plan's extra height. */
+  .main .mapwrap { grid-column: 1 / -1; grid-row: 1; }
+  .main > .col:last-child > :first-child { grid-column: 1; grid-row: 2; }
+  .main > .col:first-child > :not(.mapwrap) { grid-column: 1; grid-row: 3; }
+  .main > .col:last-child > .card:not(:first-child) { grid-column: 2; grid-row: 2 / span 3; }
+  .desk-subbar { flex-wrap: wrap; gap: 0 var(--space-4); }
+  .desk-subbar > .ticker { flex: 1 1 100%; border-bottom: 1px solid var(--border-subtle); }
+  .desk-tools { flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: var(--space-1) 0; }
 }
 @media (max-width: 640px) {
   /* Phone: the header scrolls with the page; Undo and End week live in a
@@ -362,8 +370,13 @@
   .desk-tools::-webkit-scrollbar { display: none; }
   .deadline-banner { padding: var(--space-2) var(--space-3); }
 
-  .main { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-8); }
-  .main .mapwrap, .main > .col:last-child > .card:not(:first-child) { grid-column: auto; grid-row: auto; }
+  .main { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; gap: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-8); }
+  .main .mapwrap, .main > .col:last-child > :first-child, .main > .col:first-child > :not(.mapwrap),
+  .main > .col:last-child > .card:not(:first-child) { grid-column: auto; grid-row: auto; }
+  .main .mapwrap { order: 1; }
+  .main > .col:last-child > :first-child { order: 2; }
+  .main > .col:last-child > .card:not(:first-child) { order: 3; }
+  .main > .col:first-child > :not(.mapwrap) { order: 4; }
   .card { padding: var(--space-3); }
   .tilegrid { gap: 2px; max-width: 100%; }
   .tile { font-size: 9px; border-radius: var(--radius-xs); padding: 1px; text-shadow: none; }

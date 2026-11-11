@@ -195,7 +195,7 @@ async function run(name, opts) {
 
   // Overlays from the topbar.
   for (const [label, id] of [["Stats", "08-stats"], ["Guide", "09-guide"], ["Candidates", "10-candidates"]]) {
-    const btn = page.locator(".topbar button", { hasText: label }).first();
+    const btn = page.locator(".desk-header button, .topbar button", { hasText: label }).first();
     if (await btn.count()) {
       await btn.click();
       await wait(600);
@@ -204,7 +204,7 @@ async function run(name, opts) {
       await wait(200);
     }
   }
-  const settings = page.locator('.topbar button[aria-label="Settings"]').first();
+  const settings = page.locator('button[aria-label="Settings"]').first();
   if (await settings.count()) {
     await settings.click();
     await wait(500);
