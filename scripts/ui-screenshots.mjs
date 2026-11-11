@@ -329,6 +329,15 @@ async function run(name, opts) {
   }
 
   if (want("leaderboard")) {
+  // Leaderboard, with a sample response so the table itself is captured
+  // (the dev server has no campaign backend). Names are placeholders.
+  await page.route("**/api/leaderboard?**", (route) => route.fulfill({
+    contentType: "application/json",
+    body: JSON.stringify({ entries: Array.from({ length: 12 }, (_, i) => ({
+      rank: i + 1, username: `Player ${i + 1}`, score: 940 - i * 37, evMargin: 120 - i * 14,
+      popularVoteMargin: 4.2 - i * 0.6, turnsPlayed: 13, difficulty: ["hard", "normal", "easy"][i % 3], finishedAt: 0,
+    })) }),
+  }));
   // Leaderboard.
   await nav({ kind: "leaderboard" });
   await wait(1500);
