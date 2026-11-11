@@ -32,11 +32,14 @@
 // the Union of the Centre and Future and Freedom), and Action and Italia Viva
 // in 2022. There was no such list in 2018, when the centrists sat inside the
 // two big coalitions. RAD is the left outside the centre-left coalition: the
-// Rainbow Left in 2008, Civil Revolution in 2013, Free and Equal in 2018 and
-// the Popular Union in 2022 (the Greens and Left Alliance ran inside the
-// centre-left coalition in 2022 and are counted there). Everything else
-// (La Destra, the South Tyrol People's Party, Italians abroad lists, Italexit,
-// Sovereign and Popular Italy and the rest) is in Others.
+// Rainbow Left in 2008, Civil Revolution in 2013, Free and Equal and Power to
+// the People in 2018 (the latter won no seats) and the Popular Union in 2022
+// (the Greens and Left Alliance ran inside the centre-left coalition in 2022
+// and are counted there). Everything else
+// (La Destra in 2008, the South Tyrol People's Party when it ran alone in 2008 and
+// 2022 (in 2013 and 2018 it sat in the centre-left coalition and is counted
+// there), Italians abroad lists, Italexit, Sovereign and Popular Italy and the
+// rest) is in Others.
 //
 // Regions. The 20 regions are merged into 14 domestic units plus one pool for
 // the overseas constituency: Piedmont (with the single-seat Aosta Valley),
@@ -94,7 +97,7 @@
 // Senate was hung and Enrico Letta formed a grand coalition.
 // 2008 (13 and 14 April): 630 seats, 316 for a majority. Centre-right 344
 // (PdL 276, Lega 60, MpA 8), centre-left 246 (PD 217, IdV 29), Union of the
-// Centre 36, others 4. Berlusconi's third government.
+// Centre 36, others 4. Berlusconi's fourth government.
 //
 // Sources. Constituency results: the Italian Wikipedia pages above, which
 // reproduce the Interior Ministry's Eligendo archive. National seat totals and
@@ -249,7 +252,7 @@ export const ITALY: CountryBundle = {
       },
       // The real story beats of 2022, in campaign order.
       events: [
-        { id: "draghi_falls", headline: "Five Star, the Lega and Forza Italia withdraw their confidence in Draghi and he resigns for good. Business mourns him, and {party} promises to keep his agenda", role: "any", party: "cen", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
+        { id: "draghi_falls", headline: "Five Star, the Lega and Forza Italia refuse to back Draghi in the Senate confidence vote and he resigns for good. Business mourns him, and {party} promises to keep his agenda", role: "any", party: "cen", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
         { id: "centre_right_pact", headline: "The centre-right agrees how to share the single-member districts and that the biggest party names the prime minister. Brothers of Italy takes the most seats and {party} looks like a government in waiting", role: "any", party: "cdx", weight: 3, appeal: 0.02, momentum: 6, turn: 1 },
         { id: "calenda_pact", headline: "Calenda signs a pact with Letta on 2 August, Letta signs another with the Greens and the Left four days later, and Calenda tears up the first on the 7th. {party} is left with a coalition that disagrees with itself", role: "any", party: "csx", weight: 3, appeal: -0.03, momentum: -8, turn: 2 },
         { id: "piacenza_video", headline: "Meloni posts a video of an assault in Piacenza and the platforms take it down. Letta calls it indecent and {party} is accused of using a victim for a headline", role: "any", party: "cdx", weight: 3, appeal: -0.02, momentum: -6, turn: 3 },
@@ -293,7 +296,7 @@ export const ITALY: CountryBundle = {
       // The real story beats of 2018, in campaign order.
       events: [
         { id: "grasso_leu", headline: "Pietro Grasso, the Senate president and former anti-mafia prosecutor, takes over Free and Equal, a list of PD dissidents and the old left. {party} has a leader who looks nothing like a party boss", role: "any", party: "rad", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
-        { id: "flat_tax", headline: "Berlusconi promises a flat tax of 23 percent and Salvini says 15. Il Sole 24 Ore prices it at 25 to 40 billion euros a year, and {party} owns the tax debate anyway", role: "any", party: "cdx", weight: 3, appeal: 0.02, momentum: 6, turn: 1 },
+        { id: "flat_tax", headline: "Berlusconi promises a flat tax of 23 percent and Salvini says 15. Economists put the cost at tens of billions of euros a year, and {party} owns the tax debate anyway", role: "any", party: "cdx", weight: 3, appeal: 0.02, momentum: 6, turn: 1 },
         { id: "macerata", headline: "A local man opens fire on African migrants in Macerata days after the murder of a young Italian woman. Immigration takes over the campaign, and {party} gains among voters who want fewer arrivals", role: "any", party: "cdx", weight: 3, appeal: 0.025, momentum: 7, turn: 2 },
         { id: "rimborsopoli", headline: "Reports show several Five Star MPs faked bank transfers to hide that they kept money they had promised to return. {party} spends the week expelling its own", role: "any", party: "m5s", weight: 3, appeal: -0.03, momentum: -8, turn: 3 },
         { id: "rosary_rally", headline: "Salvini closes a huge rally in Milan by swearing on the Gospel and kissing a rosary, and {party} reaches believers the Lega never won", role: "any", party: "cdx", weight: 3, appeal: 0.01, momentum: 4, turn: 4 },
@@ -301,7 +304,7 @@ export const ITALY: CountryBundle = {
         // Unscheduled flavour: joins the weekly draw, fires at most once.
         { id: "gentiloni_steady", headline: "Gentiloni, the calm incumbent, polls better than his party, but {party} cannot turn his popularity into votes", role: "any", party: "csx", weight: 2, appeal: 0.01, momentum: 3 },
         { id: "tajani_pick", headline: "Berlusconi, barred from office by his tax fraud conviction, names Antonio Tajani as his pick for prime minister if Forza Italia comes out on top of the coalition. {party} has to explain who would really lead", role: "any", party: "cdx", weight: 2, appeal: -0.01, momentum: -3 },
-        { id: "minimum_wage", headline: "Renzi promises a minimum wage of 10 euros an hour and 80 euros a month for every child, but {party} still carries the Jobs Act and the lost referendum", role: "any", party: "csx", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "minimum_wage", headline: "Renzi promises a minimum wage of 9 to 10 euros an hour and 80 euros a month for every child, but {party} still carries the Jobs Act and the lost referendum", role: "any", party: "csx", weight: 2, appeal: 0.01, momentum: 3 },
         { id: "three_percent", headline: "The 3 percent bar keeps small lists scrambling, and {party} has to tell voters that a vote under the line only helps someone else", role: "any", party: "rad", weight: 2, appeal: -0.015, momentum: -4 },
       ],
     },
@@ -333,7 +336,7 @@ export const ITALY: CountryBundle = {
       },
       // The real story beats of 2013, in campaign order.
       events: [
-        { id: "monti_runs", headline: "Monti swaps the technocrat's chair for a centrist list and publishes an agenda for Italy, with open backing from the Vatican. {party} offers calm after the storm", role: "any", party: "cen", weight: 3, appeal: 0.03, momentum: 8, turn: 0 },
+        { id: "monti_runs", headline: "Monti swaps the technocrat's chair for a centrist list and publishes an agenda for Italy, to a warm reception from Church leaders. {party} offers calm after the storm", role: "any", party: "cen", weight: 3, appeal: 0.03, momentum: 8, turn: 0 },
         { id: "imu_refund", headline: "Berlusconi works every talk show in sight and promises to refund the 2012 property tax in cash. {party} climbs back from the dead", role: "any", party: "cdx", weight: 3, appeal: 0.035, momentum: 9, turn: 1 },
         { id: "mps_scandal", headline: "Losses at Monte dei Paschi di Siena, the oldest bank in the world and a pillar of the Tuscan left, hit the front pages. {party} cannot shake the smell of the establishment", role: "any", party: "csx", weight: 3, appeal: -0.03, momentum: -8, turn: 2 },
         { id: "mussolini_remark", headline: "On Holocaust Remembrance Day Berlusconi says Mussolini did good things apart from the racial laws. {party} spends a week on damage control", role: "any", party: "cdx", weight: 3, appeal: -0.02, momentum: -6, turn: 3 },

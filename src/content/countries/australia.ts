@@ -276,9 +276,9 @@ export const AUSTRALIA: CountryBundle = {
       salience: { economy_jobs: 0.85, medicare: 0.75, taxes: 0.6, housing: 0.5, budget_debt: 0.5, energy_climate: 0.35, border_security: 0.3 },
       regions: {
         NSW:  { v: { lnp: 0.42, alp: 0.37, grn: 0.09, oth: 0.07, ind: 0.04, onp: 0.01 }, s: { alp: 24, lnp: 23 } },
-        VIC:  { v: { lnp: 0.41, alp: 0.36, grn: 0.13, oth: 0.07, ind: 0.03 }, s: { alp: 18, lnp: 17, grn: 1, ind: 1 } },
+        VIC:  { v: { lnp: 0.42, alp: 0.36, grn: 0.13, oth: 0.06, ind: 0.03 }, s: { alp: 18, lnp: 17, grn: 1, ind: 1 } },
         QLD:  { v: { lnp: 0.43, alp: 0.31, grn: 0.09, oth: 0.06, onp: 0.06, ind: 0.05 }, s: { lnp: 21, alp: 8, ind: 1 } },
-        WA:   { v: { lnp: 0.50, alp: 0.32, grn: 0.12, oth: 0.05, ind: 0.01 }, s: { lnp: 11, alp: 5 } },
+        WA:   { v: { lnp: 0.49, alp: 0.32, grn: 0.12, oth: 0.06, ind: 0.01 }, s: { lnp: 11, alp: 5 } },
         SA:   { v: { lnp: 0.35, alp: 0.32, ind: 0.22, grn: 0.06, oth: 0.05 }, s: { alp: 6, lnp: 4, ind: 1 } },
         TAS:  { v: { alp: 0.38, lnp: 0.35, grn: 0.10, ind: 0.09, oth: 0.08 }, s: { alp: 4, ind: 1 } },
         ACT:  { v: { alp: 0.44, lnp: 0.35, grn: 0.15, oth: 0.04, ind: 0.02 }, s: { alp: 2 } },
@@ -318,17 +318,17 @@ export const AUSTRALIA: CountryBundle = {
       },
       events: [
         // Scheduled beats, in order.
-        { id: "au13_rudd_returns", headline: "Kevin Rudd is restored as prime minister on the eve of the writ, and {party} gets a bounce in the polls", role: "any", party: "alp", weight: 1, appeal: 0.03, momentum: 9, turn: 0 },
+        { id: "au13_rudd_returns", headline: "Kevin Rudd is restored as prime minister weeks before the election is called, and {party} gets a bounce in the polls", role: "any", party: "alp", weight: 1, appeal: 0.03, momentum: 9, turn: 0 },
         { id: "au13_png", headline: "The PNG deal: no asylum seeker arriving by boat will ever settle in Australia, and {party} tries to close the gap on border control", role: "any", party: "alp", weight: 1, appeal: 0.01, momentum: 3, turn: 1 },
         { id: "au13_suppository", headline: "Abbott's 'suppository of wisdom' slip and an awkward remark about a candidate hand {party} two days of bad headlines", role: "any", party: "lnp", weight: 1, appeal: -0.025, momentum: -7, turn: 2 },
         { id: "au13_paid_parental", headline: "{party}'s generous paid parental leave scheme, funded by a levy on big companies, splits its own supporters", role: "any", party: "lnp", weight: 1, appeal: -0.015, momentum: -4, turn: 3 },
-        { id: "au13_costings", headline: "The Coalition releases its costings two days before the poll, and {party} says there is a hole in the budget plans", role: "any", party: "lnp", weight: 1, appeal: -0.02, momentum: -5, turn: 4 },
+        { id: "au13_costings", headline: "The Coalition releases the rest of its costings two days before the poll, and Labor says there is a hole in {party}'s budget plans", role: "any", party: "lnp", weight: 1, appeal: -0.02, momentum: -5, turn: 4 },
         { id: "au13_feud", headline: "Six years of leadership feuding hang over {party}'s final week and no policy can outrun it", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -9, turn: 5 },
         // Unscheduled flavor: joins the weekly draw, fires at most once.
         { id: "au13_axe_the_tax", headline: "'Axe the tax': {party}'s three-word slogan on the carbon price needs no explaining", role: "any", party: "lnp", weight: 3, appeal: 0.03, momentum: 9 },
         { id: "au13_stop_the_boats", headline: "'Stop the boats': {party}'s three-word slogan on asylum seekers needs no explaining either", role: "any", party: "lnp", weight: 3, appeal: 0.03, momentum: 9 },
         { id: "au13_palmer_blitz", headline: "Clive Palmer's party floods the airwaves in Queensland and splits the vote, and {party} loses ground", role: "any", party: "lnp", weight: 2, appeal: -0.015, momentum: -4 },
-        { id: "au13_kick_this_mob", headline: "A tabloid front page tells readers to kick this mob out, and {party} faces a daily campaign against its leader", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "au13_kick_this_mob", headline: "A tabloid front page tells readers to kick this mob out, and {party} faces a hostile press in the final week", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -5 },
       ],
     },
     "2010": {
@@ -356,7 +356,7 @@ export const AUSTRALIA: CountryBundle = {
         { id: "au10_citizens_assembly", headline: "{party}'s promise of a citizens' assembly on climate change is mocked as a retreat from a 'great moral challenge'", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 2 },
         { id: "au10_cabinet_leaks", headline: "Cabinet leaks suggest Gillard opposed pension rises and paid parental leave, and {party} is thrown off message", role: "any", party: "alp", weight: 1, appeal: -0.035, momentum: -10, turn: 3 },
         { id: "au10_costing_error", headline: "The Coalition's costings show an $11 billion error and its shadow treasurer is forced into a hurried correction, hurting {party}", role: "any", party: "lnp", weight: 1, appeal: -0.03, momentum: -8, turn: 4 },
-        { id: "au10_greens_record", headline: "The Greens reach a record high in the polls, and {party} looks set to win its first House seat", role: "any", party: "grn", weight: 1, appeal: 0.03, momentum: 8, turn: 5 },
+        { id: "au10_greens_record", headline: "The Greens reach a record high in the polls, and {party} looks set to win its first House seat at a general election", role: "any", party: "grn", weight: 1, appeal: 0.03, momentum: 8, turn: 5 },
         // Unscheduled flavor: joins the weekly draw, fires at most once.
         { id: "au10_real_julia", headline: "The 'real Julia' reset sets the leader loose, and the campaign starts to lift for {party}", role: "any", party: "alp", weight: 2, appeal: 0.02, momentum: 6 },
         { id: "au10_stop_boats", headline: "Boats and a 'stop the boats' slogan push outer-suburban voters toward {party}", role: "any", party: "lnp", weight: 2, appeal: 0.025, momentum: 7 },
@@ -384,10 +384,10 @@ export const AUSTRALIA: CountryBundle = {
       events: [
         // Scheduled beats, in order.
         { id: "au07_kevin07", headline: "'Kevin07': {party}'s economic-conservative brand and the 'me too' on money wins a hearing from swinging voters", role: "any", party: "alp", weight: 1, appeal: 0.02, momentum: 6, turn: 0 },
-        { id: "au07_workchoices", headline: "The 'Your Rights at Work' campaign turns WorkChoices into a loss of penalty rates in every marginal seat, and {party} cannot shake it", role: "any", party: "lnp", weight: 1, appeal: -0.035, momentum: -10, turn: 1 },
-        { id: "au07_tax_cuts", headline: "Billions in tax cuts and a record surplus: {party} leans on the strongest economy in a generation", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 6, turn: 2 },
-        { id: "au07_rate_rise", headline: "The Reserve Bank lifts interest rates in the middle of the campaign, and the 'keep rates low' pledge sinks {party}", role: "any", party: "lnp", weight: 1, appeal: -0.03, momentum: -9, turn: 3 },
-        { id: "au07_worm_debate", headline: "The audience dial turns for {party}'s leader in the one leaders' debate of the campaign", role: "any", party: "alp", weight: 1, appeal: 0.03, momentum: 9, turn: 4 },
+        { id: "au07_workchoices", headline: "The 'Your Rights at Work' campaign turns WorkChoices into a loss of penalty rates in every marginal seat, and {party} cannot shake it", role: "any", party: "lnp", weight: 1, appeal: -0.035, momentum: -10, turn: 3 },
+        { id: "au07_tax_cuts", headline: "Billions in tax cuts and a record surplus: {party} leans on the strongest economy in a generation", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 6, turn: 1 },
+        { id: "au07_rate_rise", headline: "The Reserve Bank lifts interest rates in the middle of the campaign, and the 'keep rates low' pledge sinks {party}", role: "any", party: "lnp", weight: 1, appeal: -0.03, momentum: -9, turn: 4 },
+        { id: "au07_worm_debate", headline: "The audience dial turns for {party}'s leader in the one leaders' debate of the campaign", role: "any", party: "alp", weight: 1, appeal: 0.03, momentum: 9, turn: 2 },
         { id: "au07_bennelong", headline: "Maxine McKew challenges the prime minister in Bennelong, and {party}'s leader fights for his own seat", role: "any", party: "lnp", weight: 1, appeal: -0.025, momentum: -7, turn: 5 },
         // Unscheduled flavor: joins the weekly draw, fires at most once.
         { id: "au07_kyoto", headline: "Rudd promises to ratify the Kyoto Protocol, and {party}'s pledge on climate wins younger voters", role: "any", party: "alp", weight: 2, appeal: 0.02, momentum: 5 },
@@ -405,7 +405,7 @@ export const AUSTRALIA: CountryBundle = {
       salience: { economy_jobs: 0.65, border_security: 0.6, education: 0.5, medicare: 0.6, taxes: 0.45, energy_climate: 0.3 },
       regions: {
         NSW:  { v: { lnp: 0.46, alp: 0.37, grn: 0.08, oth: 0.04, ind: 0.04, onp: 0.01 }, s: { lnp: 27, alp: 21, ind: 2 } },
-        VIC:  { v: { lnp: 0.48, alp: 0.40, grn: 0.07, oth: 0.04, ind: 0.01 }, s: { alp: 19, lnp: 18 } },
+        VIC:  { v: { lnp: 0.47, alp: 0.40, grn: 0.08, oth: 0.04, ind: 0.01 }, s: { alp: 19, lnp: 18 } },
         QLD:  { v: { lnp: 0.49, alp: 0.35, oth: 0.06, grn: 0.05, ind: 0.03, onp: 0.02 }, s: { lnp: 21, alp: 6, ind: 1 } },
         WA:   { v: { lnp: 0.48, alp: 0.35, grn: 0.08, oth: 0.05, onp: 0.03, ind: 0.01 }, s: { lnp: 10, alp: 5 } },
         SA:   { v: { lnp: 0.49, alp: 0.37, oth: 0.06, grn: 0.05, ind: 0.02, onp: 0.01 }, s: { lnp: 8, alp: 3 } },
@@ -417,12 +417,12 @@ export const AUSTRALIA: CountryBundle = {
         // Scheduled beats, in order.
         { id: "au04_who_trust", headline: "'Who do you trust?' With interest rates at record lows, {party} tells voters it is the one that keeps the mortgage rate down", role: "any", party: "lnp", weight: 1, appeal: 0.03, momentum: 9, turn: 0 },
         { id: "au04_jakarta", headline: "The bombing of the Australian embassy in Jakarta puts security on the agenda, and {party} gains in a week of caution", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 6, turn: 1 },
-        { id: "au04_handshake", headline: "The handshake: Latham grabs and tows Howard in a photo-op, and {party}'s leader is branded as aggressive", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 2 },
-        { id: "au04_tasmanian_forests", headline: "Labor's plan to protect Tasmania's old-growth forests costs {party} timber jobs and seats", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -8, turn: 3 },
-        { id: "au04_medicare_gold", headline: "'Medicare Gold' and a bidding war on family payments: {party}'s big spending offers are picked apart", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 4 },
-        { id: "au04_family_first", headline: "Family First preferences flow to {party} in the marginal seats", role: "any", party: "lnp", weight: 1, appeal: 0.015, momentum: 4, turn: 5 },
+        { id: "au04_handshake", headline: "The handshake: Latham appears to haul Howard towards him outside a radio studio the day before the poll, and {party}'s leader is branded aggressive", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 5 },
+        { id: "au04_tasmanian_forests", headline: "Labor's plan to protect Tasmania's old-growth forests draws fire from timber workers and the state Labor premier, and {party} loses ground in the island's marginal seats", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -8, turn: 4 },
+        { id: "au04_medicare_gold", headline: "'Medicare Gold' and a bidding war on family payments: {party}'s big spending offers are picked apart", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 3 },
+        { id: "au04_family_first", headline: "Family First preferences flow to {party} in the marginal seats", role: "any", party: "lnp", weight: 1, appeal: 0.015, momentum: 4, turn: 2 },
         // Unscheduled flavor: joins the weekly draw, fires at most once.
-        { id: "au04_iraq_withdrawal", headline: "Latham pledges to bring the troops home from Iraq by Christmas, and the war splits {party}'s own side", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -6 },
+        { id: "au04_iraq_withdrawal", headline: "Latham pledges to bring the troops home from Iraq by Christmas, and the government attacks it as a threat to the American alliance, hurting {party}", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -6 },
         { id: "au04_greens_rise", headline: "The Greens poll at a record level in the cities, and {party} gains disaffected Labor voters", role: "any", party: "grn", weight: 2, appeal: 0.02, momentum: 6 },
         { id: "au04_rates_ads", headline: "A relentless advertising campaign on interest rates reaches suburban mortgage-holders, and {party} slides", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -5 },
       ],
@@ -447,9 +447,9 @@ export const AUSTRALIA: CountryBundle = {
       },
       events: [
         // Scheduled beats, in order.
-        { id: "au01_tampa", headline: "The government turns back a Norwegian freighter carrying 433 rescued asylum seekers, and {party} owns the border protection argument", role: "any", party: "lnp", weight: 1, appeal: 0.035, momentum: 11, turn: 0 },
-        { id: "au01_children_overboard", headline: "Ministers claim asylum seekers threw their children overboard, and {party} turns the Navy's story into a campaign weapon", role: "any", party: "lnp", weight: 1, appeal: 0.025, momentum: 8, turn: 1 },
-        { id: "au01_security", headline: "September 11 reshapes the campaign: {party} offers steady hands and a war-on-terror consensus", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 6, turn: 2 },
+        { id: "au01_tampa", headline: "The government refuses entry to a Norwegian freighter carrying 433 rescued asylum seekers, and {party} owns the border protection argument", role: "any", party: "lnp", weight: 1, appeal: 0.035, momentum: 11, turn: 0 },
+        { id: "au01_children_overboard", headline: "Ministers claim asylum seekers threw their children overboard, and {party} turns the Navy's story into a campaign weapon", role: "any", party: "lnp", weight: 1, appeal: 0.025, momentum: 8, turn: 2 },
+        { id: "au01_security", headline: "September 11 reshapes the campaign: {party} offers steady hands and a war-on-terror consensus", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 6, turn: 1 },
         { id: "au01_labor_me_too", headline: "Labor backs the border laws and the troop commitment to Afghanistan, and {party}'s leader struggles to define a difference", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -8, turn: 3 },
         { id: "au01_ansett_gst", headline: "The Ansett collapse and GST paperwork give {party} a hearing among small business in the outer suburbs", role: "any", party: "alp", weight: 1, appeal: 0.02, momentum: 5, turn: 4 },
         { id: "au01_launch", headline: "At the campaign launch, the prime minister says 'we will decide who comes to this country', and {party}'s base roars", role: "any", party: "lnp", weight: 1, appeal: 0.03, momentum: 9, turn: 5 },
@@ -488,7 +488,7 @@ export const AUSTRALIA: CountryBundle = {
         // Unscheduled flavor: joins the weekly draw, fires at most once.
         { id: "au98_asian_crisis", headline: "The Asian financial crisis makes steady economic management the argument, and {party} offers experience as insurance", role: "any", party: "lnp", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "au98_native_title", headline: "The native title fight divides rural and city voters, and {party} is caught in the middle", role: "any", party: "lnp", weight: 2, appeal: -0.015, momentum: -4 },
-        { id: "au98_democrats", headline: "The Democrats poll well on opposing the GST, and {party} loses ground in the cities", role: "any", party: "grn", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "au98_greens_gst", headline: "The Greens campaign against the GST and their preferences flow strongly to Labor, and {party} picks up a few city votes", role: "any", party: "grn", weight: 2, appeal: 0.01, momentum: 3 },
       ],
     },
     "1996": {
@@ -505,21 +505,21 @@ export const AUSTRALIA: CountryBundle = {
         QLD:  { v: { lnp: 0.54, alp: 0.34, oth: 0.08, grn: 0.03, ind: 0.01 }, s: { lnp: 23, alp: 2, ind: 1 } },
         WA:   { v: { lnp: 0.45, alp: 0.35, ind: 0.09, oth: 0.06, grn: 0.05 }, s: { lnp: 8, alp: 3, ind: 3 } },
         SA:   { v: { lnp: 0.50, alp: 0.35, oth: 0.11, grn: 0.03, ind: 0.01 }, s: { lnp: 10, alp: 2 } },
-        TAS:  { v: { lnp: 0.46, alp: 0.44, grn: 0.06, oth: 0.04 }, s: { alp: 3, lnp: 2 } },
+        TAS:  { v: { lnp: 0.45, alp: 0.44, grn: 0.06, oth: 0.05 }, s: { alp: 3, lnp: 2 } },
         ACT:  { v: { alp: 0.48, lnp: 0.41, grn: 0.09, ind: 0.02 }, s: { alp: 3 } },
         NT:   { v: { lnp: 0.46, alp: 0.43, grn: 0.06, ind: 0.05 }, s: { lnp: 1 } },
       },
       events: [
         // Scheduled beats, in order.
-        { id: "au96_keating_calls", headline: "Keating calls the election for 2 March, and {party} starts behind in every poll after a decade in government", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -6, turn: 0 },
+        { id: "au96_keating_calls", headline: "Keating calls the election for 2 March, and {party} starts behind in every poll after thirteen years in government", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -6, turn: 0 },
         { id: "au96_never_ever", headline: "'Never, ever' a GST: Howard's promise to rule out a consumption tax takes the biggest issue of the last election off the table for {party}", role: "any", party: "lnp", weight: 1, appeal: 0.03, momentum: 9, turn: 1 },
         { id: "au96_medicare_safe", headline: "Labor's Medicare scare is neutralised by a Coalition pledge that Medicare is safe, and {party} gains from the reassurance", role: "any", party: "lnp", weight: 1, appeal: 0.015, momentum: 4, turn: 2 },
         { id: "au96_relaxed_comfortable", headline: "'Relaxed and comfortable': {party} offers a steady hand to voters tired of thirteen years of reform", role: "any", party: "lnp", weight: 1, appeal: 0.025, momentum: 7, turn: 3 },
         { id: "au96_hanson", headline: "The Liberals withdraw support from Pauline Hanson over remarks on Indigenous funding, but her name stays on the ballot as {party}'s candidate", role: "any", party: "lnp", weight: 1, appeal: -0.015, momentum: -4, turn: 4 },
-        { id: "au96_its_time", headline: "'It's time' again: thirteen years in, {party} is weighed down by voters who want a change", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -9, turn: 5 },
+        { id: "au96_its_time", headline: "Time for a change: thirteen years in, {party} is weighed down by voters who want a new government", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -9, turn: 5 },
         // Unscheduled flavor: joins the weekly draw, fires at most once.
         { id: "au96_battlers", headline: "The Howard 'battlers' pitch wins over suburban working families, and {party} gains", role: "any", party: "lnp", weight: 3, appeal: 0.03, momentum: 9 },
-        { id: "au96_easton", headline: "The Easton affair and Carmen Lawrence's role in it dog {party}'s campaign in the West", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -6 },
+        { id: "au96_willis_letter", headline: "The treasurer releases a letter said to be Howard's secret correspondence, Howard calls it a forgery, and {party} spends the last week defending the stunt", role: "any", party: "alp", weight: 2, appeal: -0.02, momentum: -6 },
         { id: "au96_keating_manager", headline: "Keating argues he is the better manager of the recovery, and {party} makes a late argument on jobs", role: "any", party: "alp", weight: 2, appeal: 0.015, momentum: 5 },
       ],
     },
@@ -656,13 +656,13 @@ export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {
     { electionId: "2007", addedLater: true, difficulty: "hard",
       description: "Eleven years of Howard, WorkChoices on trial, and the prime minister fighting for his own seat. 150 seats and a Labor landslide." },
     { electionId: "2004", addedLater: true, difficulty: "hard",
-      description: "'Who do you trust?' on interest rates, a handshake that went wrong,. 150 seats." },
+      description: "'Who do you trust?' on interest rates, a handshake that went wrong, and a fourth term for Howard. 150 seats." },
     { electionId: "2001", addedLater: true, difficulty: "hard",
       description: "The Tampa, September 11 and 'we will decide who comes to this country'. 150 seats and a government that wins on security." },
     { electionId: "1998", addedLater: true, difficulty: "medium",
       description: "The GST election. Labor wins more votes but not enough seats, and One Nation splits the right. 148 seats." },
     { electionId: "1996", addedLater: true, difficulty: "hard",
-      description: "Thirteen years of Labor end. 'It's time' meets 'never, ever' a GST, and the Coalition wins big. 148 seats." },
+      description: "Thirteen years of Labor end. A weary electorate meets 'never, ever' a GST, and the Coalition wins big. 148 seats." },
   ],
   systemLabel: "Preferential voting",
   pack: {

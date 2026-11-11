@@ -43,7 +43,7 @@
 // stands for the United Left Alliance in 2011 (Socialist Party, People Before
 // Profit and Workers and Unemployed Action) and Anti-Austerity Alliance-People
 // Before Profit in 2016. Regional electorate weights are the 2024 votes cast;
-// with those weights the national first-preference shares stay within 0.15
+// with those weights the national first-preference shares stay within 0.2
 // points of the official results in every election.
 //
 // 2024 (29 November): 174 seats, 88 for a majority. Fianna Fail 48, Sinn Fein
@@ -62,8 +62,8 @@
 //
 // COALITIONS are one rule set for the whole bundle, so they follow the
 // settled positions rather than any one year. Fianna Fail and Fine Gael can
-// govern together (they did from 2020, after backing each other's minority
-// governments from 2016), but neither will govern with Sinn Fein, which both
+// govern together (they did from 2020, after Fianna Fail backed a Fine Gael
+// minority government from 2016), but neither will govern with Sinn Fein, which both
 // ruled out in 2016, 2020 and 2024. The Social Democrats, PBP-Solidarity and
 // Aontu will not join Fianna Fail or Fine Gael. In 2011 that is harmless:
 // Fine Gael and Labour, the actual coalition, are free to pair.
@@ -200,18 +200,18 @@ export const IRELAND: CountryBundle = {
       // The real story beats of 2024, in campaign order.
       events: [
         { id: "harris_calls", headline: "Simon Harris calls a 29 November election seven months after becoming Taoiseach, on the back of a budget full of giveaways. {party} goes in with a spring in its step", role: "any", party: "fg", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
-        { id: "oleary_teachers", headline: "Michael O'Leary tells a Fine Gael launch there are too many teachers in the Dáil. The unions take offence, and {party} wishes it had never handed him a microphone", role: "any", party: "fg", weight: 3, appeal: -0.02, momentum: -5, turn: 1 },
+        { id: "oleary_teachers", headline: "Michael O'Leary tells a Fine Gael candidate's launch there are too many former teachers in the Dáil. The unions take offence, and {party} wishes it had never handed him a microphone", role: "any", party: "fg", weight: 3, appeal: -0.02, momentum: -5, turn: 1 },
         { id: "ten_leaders", headline: "RTÉ stages the biggest leaders' debate in Irish history, with ten party leaders on one stage, and {party} gets airtime it could never buy", role: "any", party: "sd", weight: 3, appeal: 0.015, momentum: 5, turn: 2 },
-        { id: "rte_pledge", headline: "Sinn Féin's manifesto promises a review of RTÉ's coverage of the war in Gaza. Harris calls it chilling, the journalists' union objects, and {party} spends two days on the defensive", role: "any", party: "sf", weight: 3, appeal: -0.02, momentum: -5, turn: 3 },
+        { id: "rte_pledge", headline: "Sinn Féin's manifesto promises an investigation into RTÉ News coverage of the war in Gaza. Harris calls it chilling, the journalists' union objects, and {party} spends two days on the defensive", role: "any", party: "sf", weight: 3, appeal: -0.02, momentum: -5, turn: 3 },
         { id: "kanturk", headline: "Harris walks away from a disability carer in Kanturk who accuses the government of neglecting her sector. The video runs all weekend and {party} has a problem", role: "any", party: "fg", weight: 3, appeal: -0.025, momentum: -7, turn: 4 },
-        { id: "sutcliffe_quits", headline: "Independent Ireland's Dublin South-Central candidate resigns from the party after a row over his links to Conor McGregor, and {party} spends the final weekend explaining itself", role: "any", party: "ii", weight: 3, appeal: -0.02, momentum: -6, turn: 5 },
+        { id: "sutcliffe_quits", headline: "Independent Ireland's Dublin South-Central candidate resigns from the party after a row over his association with Conor McGregor, and {party} spends the final weekend explaining itself", role: "any", party: "ii", weight: 3, appeal: -0.02, momentum: -6, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
         { id: "apple_windfall", headline: "The government's €14 billion Apple tax windfall becomes a campaign question. {party} says it should build homes and fix hospitals now, not sit in a fund", role: "any", party: "sf", weight: 2, appeal: 0.015, momentum: 4 },
         { id: "immigration_rows", headline: "Immigration climbs the agenda, with calls for tighter controls and stiffer asylum rules, and {party} finds an audience", role: "any", party: "ii", weight: 2, appeal: 0.025, momentum: 6 },
         { id: "green_backlash", headline: "Voters who backed the Greens to get climate action remember who raised the carbon tax, and {party} fights for a single seat", role: "any", party: "grn", weight: 2, appeal: -0.025, momentum: -7 },
         { id: "cairns_pregnant", headline: "Holly Cairns campaigns while heavily pregnant and moves to social media for the last week, and {party} wins a warm round of coverage", role: "any", party: "sd", weight: 2, appeal: 0.015, momentum: 4 },
         { id: "bacik_bloc", headline: "Ivana Bacik pitches Labour as the partner for a left-of-centre bloc, and {party} gets a second look from voters who are tired of both big parties", role: "any", party: "lab", weight: 2, appeal: 0.02, momentum: 5 },
-        { id: "housing_stamp_duty", headline: "A pledge to abolish stamp duty for new buyers makes the housing debate about first-time buyers, and {party} gains with the young", role: "any", party: "sf", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "housing_stamp_duty", headline: "A pledge to abolish stamp duty for first-time buyers on homes under €450,000 keeps the housing debate on young buyers, and {party} gains with the young", role: "any", party: "sf", weight: 2, appeal: 0.015, momentum: 4 },
       ],
     },
 
@@ -277,9 +277,9 @@ export const IRELAND: CountryBundle = {
         { id: "kenny_names_date", headline: "Enda Kenny names 26 February on Twitter while driving to the Áras to dissolve the Dáil and asks the country to keep the recovery going, and {party} owns the early running", role: "any", party: "fg", weight: 3, appeal: 0.015, momentum: 4, turn: 0 },
         { id: "scrap_irish_water", headline: "Fianna Fáil promises to suspend water charges and wind up Irish Water, and {party} finally has a mainstream home for the protest vote", role: "any", party: "ff", weight: 3, appeal: 0.02, momentum: 6, turn: 1 },
         { id: "greens_court", headline: "The High Court rejects the Greens' bid to put Eamon Ryan in the RTÉ leaders' debate, and {party}, with no TDs, struggles for airtime", role: "any", party: "grn", weight: 3, appeal: -0.015, momentum: -4, turn: 2 },
-        { id: "usc_bidding", headline: "A bidding war over the universal social charge ends with Fine Gael, Fianna Fáil and Sinn Féin all promising to scrap it, and {party} is left defending the tax", role: "any", party: "lab", weight: 3, appeal: -0.02, momentum: -5, turn: 3 },
+        { id: "usc_bidding", headline: "A bidding war over the universal social charge has Fine Gael promising to scrap it and Fianna Fáil promising deep cuts, and {party} struggles to be heard", role: "any", party: "lab", weight: 3, appeal: -0.02, momentum: -5, turn: 3 },
         { id: "recovery_gap", headline: "Poll after poll shows the lead slipping, as voters who do not feel the recovery tell the doorstep so, and {party} watches the numbers fall", role: "any", party: "fg", weight: 3, appeal: -0.025, momentum: -6, turn: 4 },
-        { id: "trolley_record", headline: "The nurses' union reports record numbers of patients on trolleys in the last week of the campaign, and {party} carries the health service on its back", role: "any", party: "fg", weight: 3, appeal: -0.02, momentum: -5, turn: 5 },
+        { id: "final_debate", headline: "Kenny faces Martin, Burton and Adams in the final RTÉ leaders' debate three days before polling, and {party} carries the recovery argument into the last week", role: "any", party: "fg", weight: 3, appeal: -0.02, momentum: -5, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
         { id: "right2change", headline: "A Right2Change pact asks left voters to give their transfers to each other, and {party} hopes the water protests turn into seats", role: "any", party: "pbp", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "sf_ruled_out", headline: "Fine Gael and Fianna Fáil both rule out governing with Sinn Féin, and {party} says it is for the voters to decide", role: "any", party: "sf", weight: 2, appeal: 0.015, momentum: 4 },
@@ -433,7 +433,7 @@ export const IRELAND_MODULE = countryModule(IRELAND, {
     { electionId: "2016", difficulty: "medium",
       description: "The recovery election nobody felt. Fine Gael and Labour lose a combined 56 seats and independents multiply." },
     { electionId: "2011", difficulty: "hard",
-      description: "The Troika election. Fianna Fáil falls from 77 seats to 20 and Fine Gael and Labour take 113 between them." },
+      description: "The Troika election. Fianna Fáil falls from 78 seats to 20 and Fine Gael and Labour take 113 between them." },
   ],
   systemLabel: "Single transferable vote",
   pack: {

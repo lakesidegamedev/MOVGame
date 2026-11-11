@@ -176,6 +176,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- History check across the new countries and the older Canada, Australia, Germany, France and US
+  elections: every national seat total and chamber size was checked against published results and
+  held. A few regional vote shares in Canada, Australia and the US were corrected, and France's
+  1981 and 1988 runoff regions now use the official results instead of modelled shares. Story
+  beats that were misdated, misattributed or could not be sourced were corrected or replaced (for
+  example the German Greens' 1990 leaders, the 1993 Campbell line in Canada, and the 1944 US
+  campaign's Pearl Harbor wording), and unverifiable quotes were removed.
 - On Easy, a party that stands in only part of a country (the Bloc Québécois, India's regional
   parties, Spain's Catalan and Basque parties) no longer appears on the ballot in regions where it
   never stood. The Easy head start now applies only where your party is actually running.

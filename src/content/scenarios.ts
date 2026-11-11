@@ -1098,7 +1098,7 @@ const VPS_1956_REP: RunningMate[] = [
     blurb: "The Senate Republican leader from California: an Old Guard conservative with a hard line on China.",
     traitBonuses: { debatePrep: 4, policyKnowledge: 4 }, favorability: { noncollege_white: 0.05, seniors: 0.03 } },
   { id: "halleck56", name: "Charles Halleck", ticket: "rep",
-    blurb: "The Indiana House leader: a farm-belt organizer for the restless Midwest.",
+    blurb: "The Indiana congressman and former House majority leader: a farm-belt organizer for the restless Midwest.",
     traitBonuses: { energy: 4, debatePrep: 4 }, favorability: { noncollege_white: 0.06 } },
 ];
 
@@ -1128,7 +1128,7 @@ const VPS_1952_REP: RunningMate[] = [
     blurb: "Minnesota's former boy governor: an internationalist who moved his delegates to Eisenhower.",
     traitBonuses: { energy: 5, debatePrep: 4 }, favorability: { college_white: 0.04, noncollege_white: 0.03 } },
   { id: "judd52", name: "Walter Judd", ticket: "rep",
-    blurb: "The missionary doctor from Minnesota: a keynote orator and an anti-communist voice on Asia.",
+    blurb: "The missionary doctor from Minnesota: a powerful orator and an anti-communist voice on Asia.",
     traitBonuses: { debatingSkill: 5, policyKnowledge: 4 }, favorability: { seniors: 0.04, noncollege_white: 0.03 } },
 ];
 
@@ -1236,7 +1236,7 @@ const SAL_1948: Partial<Record<IssueId, number>> = { economy: 0.80, race_policin
 // in 1968, so they open in the Republican column. Truman was not on the Alabama
 // ballot; its share is floored at 0.10 so the state stays playable.
 const PRIORS_1956: Record<string, number> = {
-  AL: 0.589, AR: 0.534, AZ: 0.389, CA: 0.444, CO: 0.396, CT: 0.363, DE: 0.447, FL: 0.427, GA: 0.666,
+  AL: 0.589, AR: 0.534, AZ: 0.389, CA: 0.444, CO: 0.401, CT: 0.363, DE: 0.447, FL: 0.427, GA: 0.671,
   IA: 0.408, ID: 0.388, IL: 0.404, IN: 0.399, KS: 0.343, KY: 0.454, LA: 0.426, MA: 0.405, MD: 0.400,
   MI: 0.442, MN: 0.462, MO: 0.501, MS: 0.704, MT: 0.429, NC: 0.507, ND: 0.382, NH: 0.339, NJ: 0.346,
   NM: 0.420, NV: 0.420, NY: 0.388, OH: 0.389, OK: 0.449, OR: 0.448, PA: 0.434, RI: 0.417, SC: 0.643,
@@ -1291,7 +1291,7 @@ const VPS_1944_REP: RunningMate[] = [
     blurb: "Massachusetts' governor: a Yankee moderate for the industrial Northeast.",
     traitBonuses: { debatePrep: 4, policyKnowledge: 4 }, favorability: { college_white: 0.04, suburban_women: 0.03 } },
   { id: "stassen44", name: "Harold Stassen", ticket: "rep",
-    blurb: "The Minnesota governor serving in the Navy: a war record and the young internationalist wing.",
+    blurb: "Minnesota's former governor, now serving in the Navy: a war record and the young internationalist wing.",
     traitBonuses: { energy: 5, charisma: 4 }, favorability: { youth: 0.04, college_white: 0.03 } },
 ];
 
@@ -1300,7 +1300,7 @@ const VPS_1940_DEM: RunningMate[] = [
     blurb: "The Agriculture Secretary: Roosevelt's own pick for a farm-belt New Dealer, forced on a reluctant convention.",
     traitBonuses: { intelligence: 6, policyKnowledge: 6 }, favorability: { noncollege_white: 0.04, college_white: 0.03 } },
   { id: "bankhead40", name: "William Bankhead", ticket: "dem",
-    blurb: "The Speaker from Alabama: the convention's favorite and a comfort to the South.",
+    blurb: "The Speaker from Alabama: the Southern conservatives' candidate and a comfort to the South.",
     traitBonuses: { debatePrep: 4, charisma: 4 }, favorability: { noncollege_white: 0.06, seniors: 0.03 } },
   { id: "mcnutt40", name: "Paul McNutt", ticket: "dem",
     blurb: "Indiana's former governor: handsome, ambitious, and strong in the Midwest.",
@@ -1357,13 +1357,13 @@ const VPS_1936_REP: RunningMate[] = [
 
 const VPS_1932_DEM: RunningMate[] = [
   { id: "garner32", name: "John Nance Garner", ticket: "dem", historical: true,
-    blurb: "The Speaker from Texas: released his delegates to Roosevelt on the fourth ballot and took second place.",
+    blurb: "The Speaker from Texas: his delegates went to Roosevelt on the fourth ballot, and he took second place.",
     traitBonuses: { policyKnowledge: 4, debatePrep: 4 }, favorability: { noncollege_white: 0.06, seniors: 0.03 } },
   { id: "smith32", name: "Al Smith", ticket: "dem",
     blurb: "The Happy Warrior: the 1928 nominee, beloved by Catholic and immigrant voters in the cities.",
     traitBonuses: { charisma: 6, debatingSkill: 5 }, favorability: { noncollege_white: 0.06, college_white: -0.02 } },
   { id: "baker32", name: "Newton Baker", ticket: "dem",
-    blurb: "Wilson's War Secretary: a respected Ohio lawyer and the bosses' compromise candidate.",
+    blurb: "Wilson's War Secretary: a respected Ohio lawyer and the stop-Roosevelt compromise candidate.",
     traitBonuses: { intelligence: 5, policyKnowledge: 5 }, favorability: { college_white: 0.05, seniors: 0.03 } },
   { id: "ritchie32", name: "Albert Ritchie", ticket: "dem",
     blurb: "Maryland's governor: a states' rights wet who campaigns against Prohibition.",
@@ -1375,10 +1375,10 @@ const VPS_1932_REP: RunningMate[] = [
     blurb: "The sitting Vice President from Kansas: a farm-state veteran of the Senate.",
     traitBonuses: { policyKnowledge: 4, debatePrep: 3 }, favorability: { noncollege_white: 0.04, seniors: 0.03 } },
   { id: "dawes32", name: "Charles Dawes", ticket: "rep",
-    blurb: "Coolidge's Vice President and a Nobel laureate: delegates wanted him back on the ticket.",
+    blurb: "Coolidge's Vice President and a Nobel laureate: floated as a replacement for Curtis, but he declined.",
     traitBonuses: { policyKnowledge: 6, fundraisingProwess: 4 }, favorability: { seniors: 0.04, college_white: 0.03 } },
   { id: "macnider32", name: "Hanford MacNider", ticket: "rep",
-    blurb: "The Iowa war hero and former Legion commander: a pitch to veterans after the Bonus Army.",
+    blurb: "The Iowa war hero and former Legion commander: a pitch to veterans.",
     traitBonuses: { energy: 5, charisma: 3 }, favorability: { noncollege_white: 0.05, youth: 0.02 } },
   { id: "mills32", name: "Ogden Mills", ticket: "rep",
     blurb: "Hoover's Treasury Secretary: the administration's sharpest defender on the stump.",
@@ -1468,7 +1468,7 @@ const SAL_1936: Partial<Record<IssueId, number>> = { economy: 0.90, healthcare: 
 const SAL_1932: Partial<Record<IssueId, number>> = { economy: 0.95, law_and_order: 0.50, taxes: 0.50, trade: 0.45, healthcare: 0.40, race_policing: 0.15, immigration: 0.20, climate: 0.05, abortion: 0.05, covid_response: 0 };
 
 const PRIORS_1944: Record<string, number> = {
-  AL: 0.817, AR: 0.701, AZ: 0.590, CA: 0.568, CO: 0.466, CT: 0.527, DE: 0.546, FL: 0.703, GA: 0.826,
+  AL: 0.817, AR: 0.701, AZ: 0.590, CA: 0.568, CO: 0.466, CT: 0.527, DE: 0.546, FL: 0.703, GA: 0.817,
   IA: 0.477, ID: 0.518, IL: 0.518, IN: 0.471, KS: 0.394, KY: 0.547, LA: 0.806, MA: 0.529, MD: 0.519,
   MI: 0.505, MN: 0.528, MO: 0.515, MS: 0.936, MT: 0.547, NC: 0.667, ND: 0.458, NH: 0.521, NJ: 0.507,
   NM: 0.536, NV: 0.546, NY: 0.525, OH: 0.498, OK: 0.557, OR: 0.525, PA: 0.514, RI: 0.587, SC: 0.952,
@@ -1482,13 +1482,13 @@ const PRIORS_1940: Record<string, number> = {
   IA: 0.478, ID: 0.546, IL: 0.513, IN: 0.492, KS: 0.427, KY: 0.576, LA: 0.859, MA: 0.534, MD: 0.588,
   MI: 0.498, MN: 0.519, MO: 0.524, MS: 0.958, MT: 0.594, NC: 0.740, ND: 0.445, NH: 0.532, NJ: 0.518,
   NM: 0.567, NV: 0.601, NY: 0.518, OH: 0.522, OK: 0.576, OR: 0.541, PA: 0.535, RI: 0.568, SC: 0.956,
-  SD: 0.426, TN: 0.675, TX: 0.809, UT: 0.624, VA: 0.683, VT: 0.450, WA: 0.589, WI: 0.509, WV: 0.571,
+  SD: 0.426, TN: 0.675, TX: 0.811, UT: 0.624, VA: 0.683, VT: 0.450, WA: 0.589, WI: 0.509, WV: 0.571,
   WY: 0.530,
   "ME-1": 0.488, "ME-2": 0.488, "ME-AL": 0.488, "NE-1": 0.428, "NE-2": 0.428, "NE-3": 0.428, "NE-AL": 0.428,
 };
 
 const PRIORS_1936: Record<string, number> = {
-  AL: 0.871, AR: 0.820, AZ: 0.722, CA: 0.679, CO: 0.619, CT: 0.578, DE: 0.563, FL: 0.761, GA: 0.874,
+  AL: 0.871, AR: 0.820, AZ: 0.722, CA: 0.679, CO: 0.619, CT: 0.578, DE: 0.549, FL: 0.761, GA: 0.874,
   IA: 0.560, ID: 0.655, IL: 0.592, IN: 0.575, KS: 0.539, KY: 0.595, LA: 0.888, MA: 0.551, MD: 0.627,
   MI: 0.592, MN: 0.666, MO: 0.614, MS: 0.972, MT: 0.715, NC: 0.734, ND: 0.691, NH: 0.509, NJ: 0.600,
   NM: 0.632, NV: 0.728, NY: 0.601, OH: 0.608, OK: 0.671, OR: 0.685, PA: 0.582, RI: 0.568, SC: 0.986,
@@ -1595,7 +1595,7 @@ export const SCENARIOS: Record<string, Scenario> = {
   },
   "1956": {
     id: "1956", year: 1956, label: "1956 · Stevenson v. Eisenhower",
-    tagline: "Fall, 1956. Peace, prosperity and a popular general with a weak heart. Stevenson tries again with a New America program, and the farm belt is restless. Two crises abroad are a few weeks away.",
+    tagline: "Fall, 1956. Peace, prosperity and a popular general with a heart attack behind him. Stevenson tries again with a New America program, and the farm belt is restless. Two crises abroad are a few weeks away.",
     dem: STEVENSON_1956, rep: EISENHOWER_1956, statePriors: PRIORS_1956, evOverrides: EV_1950C, evNote: "1950-census apportionment: 48 states and 531 electoral votes, 266 to win. Alaska and Hawaii were territories and DC had no electors. One Alabama elector voted for Walter B. Jones; the model gives Stevenson all eleven.", electoralCollege: EC_48_STATES, issueSalience: SAL_1956,
   },
   "1952": {
@@ -1625,7 +1625,7 @@ export const SCENARIOS: Record<string, Scenario> = {
   },
   "1932": {
     id: "1932", year: 1932, label: "1932 · Roosevelt v. Hoover",
-    tagline: "Fall, 1932. A quarter of the workforce is unemployed, the banks are failing, and veterans were driven from Washington by the army. The governor of New York promises a new deal. The President says the worst is over.",
+    tagline: "Fall, 1932. A quarter of the workforce is unemployed, the banks are failing, and veterans were driven from Washington by the army. The governor of New York promises a new deal. The President says recovery is under way.",
     dem: ROOSEVELT_1932, rep: HOOVER_1932, statePriors: PRIORS_1932, evOverrides: EV_1930C, evNote: "1930-census apportionment: 48 states and 531 electoral votes, 266 to win. Alaska and Hawaii were territories and DC had no electors.", electoralCollege: EC_48_STATES, issueSalience: SAL_1932,
   },
 };

@@ -43,15 +43,17 @@
 // Trinamool 29, DMK 22, Shiv Sena UBT 9, NCP Sharadchandra Pawar 8), others
 // 16. Modi sworn in for a third term with the BJP short of 272 alone.
 // 2019 (11 April to 19 May, count 23 May): NDA 353 (BJP 303), UPA 91
-// (Congress 52, DMK 23), the rest 99 (Trinamool 22, YSRCP 22, BJD 12, BSP 10).
+// (Congress 52, DMK 24 including Vellore), the rest 99 (Trinamool 22, YSRCP
+// 22, BJD 12, BSP 10). The UPA group in this bundle is a little wider than the
+// published 91.
 // 2014 (7 April to 12 May, count 16 May): NDA 336 (BJP 282, the first
 // single-party majority since 1984), UPA 60 (Congress 44, its lowest ever),
 // AIADMK 37, Trinamool 34, BJD 20.
 // 2009 (16 April to 13 May, count 16 May): UPA 262 (Congress 206, Trinamool
 // 19, DMK 18, NCP 9), NDA 159 (BJP 116, JD(U) 20, Shiv Sena 11), Left 24, BSP
-// 21, SP 23, BJD 14. On this grouping the NDA is 157; some published tallies
-// reach 159 by counting the two Telangana Rashtra Samithi seats with it, and
-// this bundle keeps that party apart.
+// 21, SP 23, BJD 14. On this grouping the NDA is 157; the published tally of
+// 159 rests on a slightly different list of allies, and this bundle keeps the
+// two Telangana Rashtra Samithi seats apart.
 
 import type { CountryBundle } from "@engine/countryGame";
 import { countryModule } from "./types";
@@ -206,7 +208,7 @@ export const INDIA: CountryBundle = {
         { id: "ram_mandir", headline: "The Ram temple at Ayodhya is consecrated, and {party} carries the day's images into every village in the Hindi belt", role: "any", party: "nda", weight: 3, appeal: 0.03, momentum: 8, turn: 0 },
         { id: "nitish_flip", headline: "Nitish Kumar quits the INDIA bloc he helped build and rejoins the NDA, and Mamata Banerjee says she will go alone in Bengal. {party} watches its alliance lose its first bricks", role: "any", party: "upa", weight: 3, appeal: -0.03, momentum: -8, turn: 1 },
         { id: "electoral_bonds", headline: "The Supreme Court strikes down electoral bonds and the list of donors is published, and {party} finds the cash trail dominating the week", role: "any", party: "nda", weight: 3, appeal: -0.02, momentum: -5, turn: 2 },
-        { id: "kejriwal_arrest", headline: "The Enforcement Directorate arrests Arvind Kejriwal on the eve of polling, and {party} loses its best campaigner to a cell", role: "any", party: "aap", weight: 3, appeal: -0.02, momentum: -5, turn: 3 },
+        { id: "kejriwal_arrest", headline: "The Enforcement Directorate arrests Arvind Kejriwal a month before polling opens, and {party} loses its best campaigner to a cell", role: "any", party: "aap", weight: 3, appeal: -0.02, momentum: -5, turn: 3 },
         { id: "revanna_videos", headline: "Videos linked to Prajwal Revanna, the NDA's candidate in Hassan, surface days before Karnataka votes, and {party} spends the week disowning them", role: "any", party: "nda", weight: 3, appeal: -0.02, momentum: -5, turn: 4 },
         { id: "constitution_400", headline: "Opponents turn 'ab ki baar 400 paar' into a charge that the BJP needs 400 seats to change the Constitution, and {party}'s reservation message lands across the Hindi belt", role: "any", party: "upa", weight: 3, appeal: 0.03, momentum: 8, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
@@ -216,7 +218,7 @@ export const INDIA: CountryBundle = {
         { id: "andhra_pact", headline: "The TDP, Jana Sena and BJP seal a three-party pact in Andhra Pradesh, and {party} faces one united opponent for the first time", role: "any", party: "ysr", weight: 2, appeal: -0.025, momentum: -6 },
         { id: "pandian", headline: "The BJP attacks the influence of V. K. Pandian, a Tamil-born former civil servant, over the BJD government in Odisha, and {party} struggles to answer", role: "any", party: "bjd", weight: 2, appeal: -0.03, momentum: -7 },
         { id: "sandeshkhali", headline: "Allegations of land grabs and abuse against local Trinamool leaders in Sandeshkhali spread across Bengal, and {party} is forced onto the defensive", role: "any", party: "tmc", weight: 2, appeal: -0.02, momentum: -5 },
-        { id: "split_parties", headline: "Both the Shiv Sena and the NCP have split and their founders must fight under new names. Maharashtra reads it as a grievance, and {party} benefits", role: "any", party: "upa", weight: 2, appeal: 0.025, momentum: 6 },
+        { id: "split_parties", headline: "Both the Shiv Sena and the NCP have split, and the Uddhav Thackeray and Sharad Pawar factions must fight under new names. Maharashtra reads it as a grievance, and {party} benefits", role: "any", party: "upa", weight: 2, appeal: 0.025, momentum: 6 },
       ],
     },
 
@@ -266,7 +268,7 @@ export const INDIA: CountryBundle = {
       id: "2014",
       year: 2014,
       label: "2014 · Modi v. Rahul Gandhi",
-      tagline: "April to May 2014. Ten years of UPA rule are ending in scandal, price rises and policy drift, and the BJP has bet everything on one man, the three-time Gujarat chief minister Narendra Modi. A new party, the AAP, has just left the Delhi government to go national.",
+      tagline: "April to May 2014. Ten years of UPA rule are ending in scandal, price rises and policy drift, and the BJP has bet everything on one man, the Gujarat chief minister since 2001, Narendra Modi. A new party, the AAP, has just left the Delhi government to go national.",
       salience: { corruption: 0.95, inflation: 0.9, growth: 0.85, jobs: 0.6, identity: 0.45, federalism: 0.4, welfare: 0.4, security: 0.3 },
       regions: {
         UP: { v: { nda: 0.433, upa: 0.084, sp: 0.222, bsp: 0.196, aap: 0.01, oth: 0.055 }, s: { nda: 73, upa: 2, sp: 5 } },
@@ -309,7 +311,7 @@ export const INDIA: CountryBundle = {
       id: "2009",
       year: 2009,
       label: "2009 · Singh v. Advani",
-      tagline: "April to May 2009. Manmohan Singh seeks a second term after the nuclear deal, the farm loan waiver and a global slump, and L. K. Advani makes his last run at the top job. The Left has left the government, the Third Front is hunting for a leader, and Congress is fighting alone in Uttar Pradesh and Bihar.",
+      tagline: "April to May 2009. Manmohan Singh seeks a second term after the nuclear deal, the farm loan waiver and a global slump, and L. K. Advani makes his last run at the top job. The Left has withdrawn its support from the government, the Third Front is hunting for a leader, and Congress is fighting alone in Uttar Pradesh and Bihar.",
       salience: { welfare: 0.8, security: 0.75, inflation: 0.6, growth: 0.6, identity: 0.45, corruption: 0.35, federalism: 0.3 },
       regions: {
         UP: { v: { nda: 0.211, upa: 0.185, sp: 0.233, bsp: 0.274, oth: 0.097 }, s: { nda: 15, upa: 21, sp: 23, bsp: 20, oth: 1 } },
@@ -462,7 +464,7 @@ export const INDIA_MODULE = countryModule(INDIA, {
     { electionId: "2014", difficulty: "hard",
       description: "The Modi wave against a decade of UPA scandal and price rises. The BJP aims for the first single-party majority in thirty years." },
     { electionId: "2009", difficulty: "medium",
-      description: "The UPA seeks a second term after the nuclear deal and the farm loan waiver. Advani's last run, a fourth front, and the Left out of the government." },
+      description: "The UPA seeks a second term after the nuclear deal and the farm loan waiver. Advani's last run, a fourth front, and the Left withdrawn from the government's support." },
   ],
   systemLabel: "First past the post, 543 seats",
   pack: {

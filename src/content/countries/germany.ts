@@ -41,7 +41,8 @@
 // Regional numbers: second-vote shares per Land from the official results,
 // combined into the seven regions weighted by electorate (with an eastern
 // turnout adjustment), so that the combination reproduces each election's
-// national result to within about 0.2 points. Seats: each election's real
+// national result to within about half a point (the Union share runs up to
+// 0.5 high in 1998 and 0.4 high in 2002). Seats: each election's real
 // national totals are split across regions by iterative proportional fitting
 // of the regional votes (a biproportional apportionment), rounded so that
 // rows sum to the regional pools and columns to the national totals. Regional
@@ -248,7 +249,7 @@ export const GERMANY: CountryBundle = {
         { id: "nsa_affaere_2013", headline: "Snowden's NSA files dominate the summer, and the claim that the affair is over leaves {party}'s government on the defensive", role: "any", party: "cdu", weight: 3, appeal: -0.015, momentum: -4, turn: 1 },
         { id: "veggie_day_2013", headline: "The Greens' plan for a weekly meat-free day in canteens becomes the campaign's favourite punchline, and {party} spends August explaining it", role: "any", party: "grn", weight: 3, appeal: -0.03, momentum: -7, turn: 2 },
         { id: "tv_duell_2013", headline: "Merkel and Steinbrück meet in the only TV-Duell. The chancellor keeps her cool and {party} takes a narrow win on points", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 6, turn: 3 },
-        { id: "stinkefinger_2013", headline: "A magazine cover shows Steinbrück with his middle finger raised, and the clip follows {party}'s candidate for days", role: "any", party: "spd", weight: 3, appeal: -0.025, momentum: -6, turn: 4 },
+        { id: "stinkefinger_2013", headline: "A magazine cover shows Steinbrück with his middle finger raised, and the image follows {party}'s candidate for days", role: "any", party: "spd", weight: 3, appeal: -0.025, momentum: -6, turn: 4 },
         { id: "bayern_wahl_2013", headline: "Bavaria votes a week early. The CSU wins an absolute majority and the FDP drops out of the Landtag, so the threshold panic reaches {party}", role: "any", party: "fdp", weight: 3, appeal: -0.03, momentum: -8, turn: 5 },
         { id: "afd_euro_2013", headline: "A party founded this year campaigns against the bailouts and the euro, and {party} collects the protest vote from both flanks", role: "any", party: "afd", weight: 2, appeal: 0.025, momentum: 7 },
         { id: "gruene_1981_2013", headline: "The Greens' 1980s debates about sex with minors resurface in the final weeks, and {party}'s Trittin has to explain a 1981 local programme", role: "any", party: "grn", weight: 2, appeal: -0.03, momentum: -7 },
@@ -277,11 +278,11 @@ export const GERMANY: CountryBundle = {
       // The real story beats of summer 2009, in campaign order.
       events: [
         { id: "abwrackpraemie_2009", headline: "The scrappage bonus and the Opel rescue talks make crisis management the story of the summer, and {party} stays closest to the factory gates", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
-        { id: "landtagswahlen_2009", headline: "Three state elections on August 30 show the Left above 20 percent in the East and the SPD still sinking, and {party} rides the wave", role: "any", party: "lnk", weight: 3, appeal: 0.025, momentum: 7, turn: 1 },
-        { id: "kunduz_2009", headline: "The Kunduz air strike kills civilians and reopens the Afghanistan debate, and the questions land on {party}'s government", role: "any", party: "cdu", weight: 3, appeal: -0.02, momentum: -5, turn: 2 },
-        { id: "tv_duell_2009", headline: "A polite, sleepy TV-Duell with four moderators. Steinmeier is sharper, Merkel is safer, and {party} keeps its lead", role: "any", party: "cdu", weight: 3, appeal: 0.015, momentum: 4, turn: 3 },
-        { id: "netto_brutto_2009", headline: "'More net from gross': Westerwelle's tax-cut pitch fills the halls and the polls for {party}", role: "any", party: "fdp", weight: 3, appeal: 0.03, momentum: 8, turn: 4 },
-        { id: "deutschlandplan_2009", headline: "Steinmeier's 'Germany Plan' promises four million new jobs by 2020, and a public tired of the grand coalition shrugs at {party}", role: "any", party: "spd", weight: 3, appeal: -0.02, momentum: -5, turn: 5 },
+        { id: "landtagswahlen_2009", headline: "Three state elections on August 30 show the Left above 20 percent in the East and the SPD still sinking, and {party} rides the wave", role: "any", party: "lnk", weight: 3, appeal: 0.025, momentum: 7, turn: 2 },
+        { id: "kunduz_2009", headline: "The Kunduz air strike kills civilians and reopens the Afghanistan debate, and the questions land on {party}'s government", role: "any", party: "cdu", weight: 3, appeal: -0.02, momentum: -5, turn: 3 },
+        { id: "tv_duell_2009", headline: "A polite, sleepy TV-Duell with four moderators. Steinmeier is sharper, Merkel is safer, and {party} keeps its lead", role: "any", party: "cdu", weight: 3, appeal: 0.015, momentum: 4, turn: 4 },
+        { id: "netto_brutto_2009", headline: "'More net from gross': Westerwelle's tax-cut pitch fills the halls and the polls for {party}", role: "any", party: "fdp", weight: 3, appeal: 0.03, momentum: 8, turn: 5 },
+        { id: "deutschlandplan_2009", headline: "Steinmeier's 'Germany Plan' promises four million new jobs by 2020, and a public tired of the grand coalition shrugs at {party}", role: "any", party: "spd", weight: 3, appeal: -0.02, momentum: -5, turn: 1 },
         { id: "zensursula_2009", headline: "The web-blocking law and a new Pirate Party carry young online voters away from the big parties, and {party} picks up the protest", role: "any", party: "oth", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "atomstreit_2009", headline: "The Union and FDP want longer nuclear plant lifetimes, and the anti-nuclear camp rallies behind {party}", role: "any", party: "grn", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "opel_magna_2009", headline: "Opel's future is argued out in Berlin in the final weeks, and workers look to {party} to save the plants", role: "any", party: "spd", weight: 2, appeal: 0.015, momentum: 4 },
@@ -308,7 +309,7 @@ export const GERMANY: CountryBundle = {
       // The real story beats of summer 2005, in campaign order.
       events: [
         { id: "vertrauensfrage_2005", headline: "Schröder loses a confidence vote on purpose and calls an early election after the NRW defeat, and {party} starts the race far behind", role: "any", party: "spd", weight: 3, appeal: -0.025, momentum: -6, turn: 0 },
-        { id: "linkspartei_2005", headline: "Lafontaine and Gysi join forces: the PDS renames itself the Left Party and takes in the WASG, and {party} surges in the polls", role: "any", party: "lnk", weight: 3, appeal: 0.035, momentum: 9, turn: 1 },
+        { id: "linkspartei_2005", headline: "Lafontaine and Gysi join forces: the PDS renames itself Linkspartei.PDS and opens its lists to the WASG, and {party} surges in the polls", role: "any", party: "lnk", weight: 3, appeal: 0.035, momentum: 9, turn: 1 },
         { id: "kirchhof_2005", headline: "Merkel's tax expert proposes a flat 25 percent income tax, and Schröder mocks the 'professor from Heidelberg'. The lead shrinks for {party}", role: "any", party: "cdu", weight: 3, appeal: -0.03, momentum: -8, turn: 2 },
         { id: "merkelsteuer_2005", headline: "The Union says it will raise VAT by two points. The 'Merkel tax' gives the SPD a message at last and costs {party} votes", role: "any", party: "cdu", weight: 3, appeal: -0.025, momentum: -6, turn: 3 },
         { id: "tv_duell_2005", headline: "In the only TV-Duell, Schröder comes out ahead on points, and {party} gets a late lift", role: "any", party: "spd", weight: 3, appeal: 0.03, momentum: 9, turn: 4 },
@@ -339,9 +340,9 @@ export const GERMANY: CountryBundle = {
       // The real story beats of summer 2002, in campaign order.
       events: [
         { id: "stoiber_vorsprung_2002", headline: "Stoiber's Union leads by up to ten points through the summer on jobs and a stalled economy, and {party} sets the pace", role: "any", party: "cdu", weight: 3, appeal: 0.03, momentum: 7, turn: 0 },
-        { id: "hartz_bericht_2002", headline: "The Hartz commission reports and Schröder promises to halve unemployment, and {party} has a plan to run on", role: "any", party: "spd", weight: 3, appeal: 0.02, momentum: 5, turn: 1 },
+        { id: "hartz_bericht_2002", headline: "The Hartz commission reports and Schröder promises to halve unemployment, and {party} has a plan to run on", role: "any", party: "spd", weight: 3, appeal: 0.02, momentum: 5, turn: 3 },
         { id: "elbe_flut_2002", headline: "Floods along the Elbe and in Saxony turn the summer. The chancellor in rubber boots looks like a leader, and {party} gains", role: "any", party: "spd", weight: 3, appeal: 0.04, momentum: 10, turn: 2 },
-        { id: "irak_2002", headline: "Schröder rules out German troops in an Iraq war. It plays well in the East and in the SPD's base, and {party} climbs", role: "any", party: "spd", weight: 3, appeal: 0.035, momentum: 9, turn: 3 },
+        { id: "irak_2002", headline: "Schröder rules out German troops in an Iraq war. It plays well in the East and in the SPD's base, and {party} climbs", role: "any", party: "spd", weight: 3, appeal: 0.035, momentum: 9, turn: 1 },
         { id: "tv_duelle_2002", headline: "Germany's first-ever TV-Duelle split: Stoiber holds his own in the first, Schröder wins the second, and {party} takes back the initiative", role: "any", party: "spd", weight: 3, appeal: 0.02, momentum: 6, turn: 4 },
         { id: "moellemann_flyer_2002", headline: "Möllemann's flyer attacking Israel's government and Michel Friedman splits the party, and {party}'s 18 percent project stalls in the last week", role: "any", party: "fdp", weight: 3, appeal: -0.035, momentum: -9, turn: 5 },
         { id: "daeubler_gmelin_2002", headline: "The justice minister is reported to have compared Bush with Hitler, and Schröder asks her to go. The week is bruising for {party}", role: "any", party: "spd", weight: 2, appeal: -0.02, momentum: -4 },
@@ -354,7 +355,7 @@ export const GERMANY: CountryBundle = {
       id: "1998",
       year: 1998,
       label: "1998 · Schröder v. Kohl",
-      tagline: "Autumn 1998. After sixteen years, Kohl is asking for a fifth term with unemployment near five million and an economy that will not move. The SPD has a charismatic candidate from Lower Saxony and a party chairman who does not agree with him on everything. For the first time since 1949, a sitting government could be voted out.",
+      tagline: "Autumn 1998. After sixteen years, Kohl is asking for another term with unemployment that peaked near five million that winter and an economy that will not move. The SPD has a charismatic candidate from Lower Saxony and a party chairman who does not agree with him on everything. No sitting chancellor has ever been voted out at the ballot box.",
       majority: { total: 669, threshold: 335 },
       goalText: "335 of 669 seats",
       salience: { economy: 0.95, pensions: 0.7, energy_climate: 0.5, migration: 0.4, ukraine_security: 0.25, housing: 0.2 },
@@ -385,7 +386,7 @@ export const GERMANY: CountryBundle = {
       id: "1994",
       year: 1994,
       label: "1994 · Kohl v. Scharping",
-      tagline: "Autumn 1994. Nineteen elections in twelve months, and Kohl has won most of them. The economy is turning, the East is recovering unevenly, and the SPD has a candidate it has not made up its mind about, flanked by Lafontaine and Schröder. The PDS needs only three direct seats to stay in the Bundestag.",
+      tagline: "Autumn 1994. Nineteen elections in one year, and Kohl has come back from far behind in the polls. The economy is turning, the East is recovering unevenly, and the SPD has a candidate it has not made up its mind about, flanked by Lafontaine and Schröder. The PDS needs only three direct seats to stay in the Bundestag.",
       majority: { total: 672, threshold: 337 },
       goalText: "337 of 672 seats",
       salience: { economy: 0.8, migration: 0.5, pensions: 0.5, energy_climate: 0.45, ukraine_security: 0.3, housing: 0.25 },
@@ -401,7 +402,7 @@ export const GERMANY: CountryBundle = {
       // The real story beats of the 1994 campaign, in order.
       events: [
         { id: "superwahljahr_1994", headline: "In the superelection year nineteen votes keep every party in permanent campaign mode, and {party}'s steady record helps it most", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 5, turn: 0 },
-        { id: "aufschwung_1994", headline: "The economy leaves recession and Kohl claims the credit: 'the upswing is here'. It lifts {party}", role: "any", party: "cdu", weight: 3, appeal: 0.025, momentum: 7, turn: 1 },
+        { id: "aufschwung_1994", headline: "The economy leaves recession and Kohl claims the credit for the upswing. It lifts {party}", role: "any", party: "cdu", weight: 3, appeal: 0.025, momentum: 7, turn: 1 },
         { id: "troika_1994", headline: "The SPD's troika of Scharping, Lafontaine and Schröder gives voters three faces and no clear leader, and {party} pays", role: "any", party: "spd", weight: 3, appeal: -0.025, momentum: -6, turn: 2 },
         { id: "rote_socken_1994", headline: "The Union's 'red socks' campaign tries to tie the SPD to the PDS. The PDS gets the attention, and {party}'s eastern base loves it", role: "any", party: "lnk", weight: 3, appeal: 0.025, momentum: 7, turn: 3 },
         { id: "kohl_osten_1994", headline: "Kohl campaigns tirelessly across the East, pitching the chancellor of unity against the SPD's three-headed team, and {party} holds its eastern lead", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 6, turn: 4 },
@@ -501,22 +502,22 @@ export const GERMANY: CountryBundle = {
       spd: { partyId: "spd", name: "Gerhard Schröder", charisma: 80, energy: 78, competence: 62, machine: 70 },
       cdu: { partyId: "cdu", name: "Helmut Kohl", charisma: 40, energy: 54, competence: 70, machine: 88 },
       grn: { partyId: "grn", name: "Joschka Fischer", charisma: 72, energy: 64, competence: 66, machine: 54 },
-      lnk: { partyId: "lnk", name: "Gregor Gysi", charisma: 78, energy: 74, competence: 62, machine: 50 },
+      lnk: { partyId: "lnk", name: "Gregor Gysi & Lothar Bisky", charisma: 78, energy: 74, competence: 62, machine: 50 },
       fdp: { partyId: "fdp", name: "Wolfgang Gerhardt", charisma: 36, energy: 52, competence: 56, machine: 56 },
     },
     "1994": {
       cdu: { partyId: "cdu", name: "Helmut Kohl", charisma: 44, energy: 56, competence: 74, machine: 90 },
       spd: { partyId: "spd", name: "Rudolf Scharping", charisma: 42, energy: 56, competence: 58, machine: 62 },
       grn: { partyId: "grn", name: "Joschka Fischer", charisma: 70, energy: 62, competence: 64, machine: 52 },
-      lnk: { partyId: "lnk", name: "Gregor Gysi", charisma: 78, energy: 74, competence: 64, machine: 48 },
+      lnk: { partyId: "lnk", name: "Gregor Gysi & Lothar Bisky", charisma: 78, energy: 74, competence: 64, machine: 48 },
       fdp: { partyId: "fdp", name: "Klaus Kinkel", charisma: 40, energy: 52, competence: 60, machine: 58 },
     },
     "1990": {
       cdu: { partyId: "cdu", name: "Helmut Kohl", charisma: 58, energy: 66, competence: 80, machine: 88 },
       spd: { partyId: "spd", name: "Oskar Lafontaine", charisma: 74, energy: 70, competence: 70, machine: 60 },
-      fdp: { partyId: "fdp", name: "Hans-Dietrich Genscher", charisma: 62, energy: 62, competence: 82, machine: 64 },
+      fdp: { partyId: "fdp", name: "Otto Graf Lambsdorff & Hans-Dietrich Genscher", charisma: 62, energy: 62, competence: 82, machine: 64 },
       lnk: { partyId: "lnk", name: "Gregor Gysi", charisma: 82, energy: 78, competence: 68, machine: 50 },
-      grn: { partyId: "grn", name: "Joschka Fischer", charisma: 66, energy: 60, competence: 60, machine: 46 },
+      grn: { partyId: "grn", name: "Hans-Christian Ströbele & Heide Rühle", charisma: 66, energy: 60, competence: 60, machine: 46 },
     },
   },
 
@@ -584,7 +585,7 @@ export const GERMANY_MODULE = countryModule(GERMANY, {
     { electionId: "2017", difficulty: "hard",
       description: "The Schulz train runs out of track and the AfD storms the Bundestag. Merkel's fourth term, a re-entering FDP, and 709 seats." },
     { electionId: "2013", difficulty: "hard", addedLater: true,
-      description: "A popular chancellor, a threshold-hugging FDP and a six-month-old AfD. Four parties are safe, two are not, and 631 seats are in play." },
+      description: "A popular chancellor, a threshold-hugging FDP and a brand-new AfD. Four parties are safe, two are not, and 631 seats are in play." },
     { electionId: "2009", difficulty: "hard", addedLater: true,
       description: "A grand coalition ends in the shadow of the financial crisis. A buoyant FDP, a surging Left and five parties fight over 622 seats." },
     { electionId: "2005", difficulty: "easy", addedLater: true,
@@ -592,7 +593,7 @@ export const GERMANY_MODULE = countryModule(GERMANY, {
     { electionId: "2002", difficulty: "medium", addedLater: true,
       description: "Stoiber leads until the Elbe floods and Schröder rules out Iraq. A near tie, a PDS below the threshold and 603 seats." },
     { electionId: "1998", difficulty: "hard", addedLater: true,
-      description: "Sixteen years of Kohl against Schröder's new centre. Unemployment near five million, and 669 seats." },
+      description: "Sixteen years of Kohl against Schröder's new centre. Unemployment that peaked near five million, and 669 seats." },
     { electionId: "1994", difficulty: "hard", addedLater: true,
       description: "Kohl's superelection year. A recovering economy, the PDS fighting for direct seats and the SPD's three-headed team, for 672 seats." },
     { electionId: "1990", difficulty: "hard", addedLater: true,
