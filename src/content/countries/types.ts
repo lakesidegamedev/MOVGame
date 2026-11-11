@@ -84,9 +84,12 @@ export interface CountryModule {
    */
   daily: { pair: [string, string]; names: Record<string, string> };
   /**
-   * "Play next" after finishing an election. `chain` is chronological and
-   * wraps; an election missing from the chain continues to the chain's first
-   * entry. `map` is an explicit election -> next table (the US uses it).
+   * Blurbs for "Play next" after finishing an election. The order itself is
+   * derived (every election of the country, oldest first, wrapping), so this
+   * never needs a new entry for a new election. A `chain` entry gives the
+   * blurb shown when continuing to that election; a `map` entry gives the
+   * blurb for one specific step. Elections without one get "Continue the
+   * timeline: <label>".
    */
   next: { chain?: NextLink[]; map?: Record<string, NextLink> };
   /** A "how this system works" entry for the native guide, if the generic ones do not cover it. */

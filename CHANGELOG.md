@@ -111,6 +111,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - Purchases made on another Lakeside app no longer stop the Store from loading what you own
   when that app sells a pack this version does not have yet.
 - A pack the web store cannot sell yet shows as "Coming soon" instead of a Buy button.
+- "Play next" after a result now runs through every election of the country in order, so it no
+  longer skips Canada 2015 and 2019, Germany 2017, Australia 2019 or the US elections before 2000.
 
 ## 2026-10
 
