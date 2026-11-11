@@ -8,7 +8,7 @@ class MobileCampaignTest {
     @Test fun everyWebElectionCanBePlayedAndRestoredNatively() {
         assertEquals(CONTENT_CATALOG.countries.size, MobileCampaign.countries().size)
         assertEquals(listOf("US", "UK", "CA", "DE", "FR", "AU"), MobileCampaign.countries().take(6).map { it.id })
-        assertEquals(17, MobileCampaign.elections("US").size)
+        assertEquals(24, MobileCampaign.elections("US").size)
         for (country in MobileCampaign.countries().filter { it.id != "US" }) {
             assertTrue(MobileCampaign.elections(country.id).isNotEmpty())
             for (election in MobileCampaign.elections(country.id)) {
