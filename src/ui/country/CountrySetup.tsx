@@ -87,7 +87,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
                     key={id}
                     scenarioId={`${country.id.toLowerCase()}-${id}`}
                     year={country.elections[id].year}
-                    title={country.elections[id].label.replace(/^\d{4}\s*·\s*/, "")}
+                    title={country.elections[id].label.replace(/^\d{4}\s*(·\s*)?/, "")}
                     selected={election === id}
                     locked={!canPlay(`${country.id.toLowerCase()}-${id}`)}
                     onClick={() => setElection(id)}

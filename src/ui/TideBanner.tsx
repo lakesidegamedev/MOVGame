@@ -11,7 +11,7 @@ export function TideBanner({ scenarioId, meta }: { scenarioId?: string; meta?: S
   return (
     <div className={`callout ${isTide ? "negative" : "warning"}`}>
       <div className="callout-title">{isTide ? "Historical tide" : "Coin-flip election"}</div>
-      <div className="callout-body">{blurb}</div>
+      <div className="callout-body">{blurb.replace(/^(Historical tide:|Coin-flip election\.)\s*/, "")}</div>
     </div>
   );
 }

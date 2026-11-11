@@ -123,7 +123,7 @@ export function UkSetup({ onBack, initialElection, initialSeed, initialParty }: 
                     key={id}
                     scenarioId={`uk-${id}`}
                     year={UK_ELECTIONS[id].year}
-                    title={UK_ELECTIONS[id].label.replace(/^\d{4}\s*·\s*/, "")}
+                    title={UK_ELECTIONS[id].label.replace(/^\d{4}\s*(·\s*)?/, "")}
                     selected={election === id}
                     locked={!canPlay(`uk-${id}`)}
                     onClick={() => chooseElection(id)}
