@@ -1,5 +1,6 @@
 package com.lakesidegames.electioneer.engine
 
+import com.lakesidegames.electioneer.content.compatible
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min

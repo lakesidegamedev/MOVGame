@@ -3,7 +3,7 @@ import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
 import { api } from "@lib/api";
 import { computeScoreFromFacts, multipartyScoreFacts } from "@engine/scoring";
-import { majorityFor, playablePartiesIn } from "@engine/countryGame";
+import { countryGovernmentText, majorityFor, playablePartiesIn } from "@engine/countryGame";
 import type { Government } from "@engine/types";
 import { countryNextScenario } from "@content/nextScenario";
 import { partyColor, partyName, partyShort, sortBySeats } from "./helpers";
@@ -84,7 +84,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
     (r.government.kind === "coalition" && r.government.parties.includes(game.playerParty));
 
   const name = (p: string) => partyName(country, p);
-  const govText = country.governmentText?.(r.government, name) ?? defaultGovText(r.government, name);
+  const govText = countryGovernmentText(country, r.government, name) ?? defaultGovText(r.government, name);
 
   const reveal = useMemo(() => countryReveal(country, game), [country, game]);
   const [nightDone, setNightDone] = useState(() => !revealSupported() || hasSeenReveal(reveal.storageKey ?? ""));
@@ -285,7 +285,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
           government={r.government}
           nameOf={name}
           unitPlural={country.unitNamePlural}
-          mathLabel={country.id === "FR" ? "RUNOFF RESULT" : undefined}
+          mathLabel={country.runoff ? "RUNOFF RESULT" : undefined}
         />
 
         <div className="card">

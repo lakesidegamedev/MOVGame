@@ -174,10 +174,10 @@ export function CountryStandings() {
   return (
     <div className="card scroll">
       <h3>National Standings</h3>
-      <div className="kv"><span className="k">Projected outcome</span><span style={{ color: partyColor(country, live.largestParty) }}>{country.id === "FR" && live.government.kind === "majority" ? "Wins presidency" : GOV_LABEL[live.government.kind]}</span></div>
+      <div className="kv"><span className="k">Projected outcome</span><span style={{ color: partyColor(country, live.largestParty) }}>{country.runoff && live.government.kind === "majority" ? "Wins presidency" : GOV_LABEL[live.government.kind]}</span></div>
       <div className="kv"><span className="k">Leading</span><span style={{ color: partyColor(country, live.largestParty) }}>{partyName(country, live.largestParty)}</span></div>
       <div className="kv"><span className="k">Your momentum</span><span>{game.resources[game.playerParty].momentum.toFixed(0)}</span></div>
-      {country.id === "FR" && voteShift !== null && (
+      {country.runoff && voteShift !== null && (
         <div className="kv" title="Change in your national runoff vote share since the opening map.">
           <span className="k">Runoff vote movement</span><span>{voteShift >= 0 ? "+" : ""}{voteShift.toFixed(2)} pts</span>
         </div>
@@ -200,7 +200,7 @@ export function CountryStandings() {
             <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: 2, background: partyColor(country, p), marginRight: 6 }} />
             {partyShort(country, p)}
           </span>
-          <span className="meta" title="Units won and national vote share. Votes for parties below a district threshold may yield few or no seats.">{live.seats[p]} {country.unitNamePlural} · {((live.voteShare[p] ?? 0) * 100).toFixed(country.id === "FR" ? 2 : 1)}% votes</span>
+          <span className="meta" title="Units won and national vote share. Votes for parties below a district threshold may yield few or no seats.">{live.seats[p]} {country.unitNamePlural} · {((live.voteShare[p] ?? 0) * 100).toFixed(country.runoff ? 2 : 1)}% votes</span>
           <div className="suppbar"><div style={{ width: `${Math.min(100, (live.seats[p] / total) * 100 * 2)}%`, background: partyColor(country, p) }} /></div>
         </div>
       ))}

@@ -8,6 +8,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { SCENARIO_REGISTRY, SCENARIOS_BY_ID, type CountryCode, type ScenarioMeta } from "../content/scenarioRegistry.js";
+import { COUNTRY_MODULES } from "../content/countries/index.js";
 
 export interface DailyAssignment {
   date: string;       // "YYYY-MM-DD" (UTC)
@@ -27,32 +28,20 @@ export function fnv1a(input: string): number {
   return h >>> 0;
 }
 
-// The two-major pairing per country — the daily keeps everyone on one of the
+// The two-major pairing per country: the daily keeps everyone on one of the
 // big rivals so the shared board is a fair fight (no Greens-on-hard days).
-export const DAILY_ROLE_PAIRS: Record<CountryCode, [string, string]> = {
-  US: ["dem", "rep"],
-  UK: ["lab", "con"],
-  CA: ["lpc", "cpc"],
-  DE: ["cdu", "spd"],
-  FR: ["ens", "rn"],
-  AU: ["alp", "lnp"],
-};
+// Each country module declares its own pair.
+export const DAILY_ROLE_PAIRS: Record<CountryCode, [string, string]> = Object.fromEntries(
+  COUNTRY_MODULES.map((m) => [m.code, [m.daily.pair[0], m.daily.pair[1]]]),
+);
 
 // Short display names for the assigned role ("Play as <name>", share text).
-const ROLE_NAMES: Record<string, string> = {
-  dem: "the Democrats",
-  rep: "the Republicans",
-  lab: "Labour",
-  con: "the Conservatives",
-  lpc: "the Liberals",
-  cpc: "the Conservatives",
-  cdu: "CDU/CSU",
-  spd: "the SPD",
-  ens: "Ensemble",
-  rn: "the RN",
-  alp: "Labor",
-  lnp: "the Coalition",
-};
+// Role ids are shared across countries ("lab" is Labour in the UK and New
+// Zealand); the first registered name wins and tests keep them consistent.
+const ROLE_NAMES: Record<string, string> = {};
+for (const m of COUNTRY_MODULES) {
+  for (const [role, name] of Object.entries(m.daily.names)) if (!(role in ROLE_NAMES)) ROLE_NAMES[role] = name;
+}
 
 export function roleShortName(role: string): string {
   return ROLE_NAMES[role] ?? role.toUpperCase();

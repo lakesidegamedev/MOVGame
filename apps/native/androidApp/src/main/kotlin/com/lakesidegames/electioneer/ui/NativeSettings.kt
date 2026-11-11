@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.lakesidegames.electioneer.engine.NativeCatalog
 import com.lakesidegames.electioneer.engine.NativeHelp
 import com.lakesidegames.electioneer.engine.NativeSound
 import com.lakesidegames.electioneer.BuildConfig
@@ -40,7 +41,7 @@ class NativePreferences(private val context: Context) {
     fun hotkeys(value: Boolean) { hotkeysOn = value; prefs.edit().putBoolean("hotkeys_on", value).apply() }
     fun tourDone(country: String) = prefs.getBoolean("tour_$country", false)
     fun finishTour(country: String) { prefs.edit().putBoolean("tour_$country", true).apply() }
-    fun replayTutorial() { replayRequested = true; prefs.edit().apply { listOf("US", "UK", "CA", "DE", "FR", "AU").forEach { remove("tour_$it") } }.apply(); tutorialNonce++ }
+    fun replayTutorial() { replayRequested = true; prefs.edit().apply { NativeCatalog.countryIds().forEach { remove("tour_$it") } }.apply(); tutorialNonce++ }
     fun play(cue: String) {
         if (!soundOn || volume <= 0f) return
         val file = File(context.cacheDir, "mov-cue-$cue.wav")

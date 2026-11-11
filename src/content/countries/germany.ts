@@ -16,6 +16,7 @@
 // the 735-seat chamber lives beside the 630-seat one.
 
 import type { CountryBundle } from "@engine/countryGame";
+import { countryModule } from "./types";
 import { DE_MAP } from "./paths/de";
 
 export const GERMANY: CountryBundle = {
@@ -51,12 +52,8 @@ export const GERMANY: CountryBundle = {
   abstaining: [],
   // The firewall (Brandmauer): no democratic party partners the AfD, and the
   // Union's incompatibility resolution rules out governing with Die Linke.
-  compatible: (lead, partner) => {
-    if (lead === "afd" || partner === "afd") return false;
-    const cduLnk = new Set([lead, partner]);
-    if (cduLnk.has("cdu") && cduLnk.has("lnk")) return false;
-    return true;
-  },
+  coalitions: { isolated: ["afd"], forbidden: [["cdu", "lnk"]] },
+  goalHint: "Reach {majority} of {total} seats, alone or in a compatible coalition. The 5% national threshold can exclude parties; CSU is exempt.",
 
   issues: [
     { id: "economy", name: "Economy & industry", blurb: "Two years of recession, expensive energy, and an auto industry under siege." },
@@ -268,3 +265,35 @@ export const GERMANY: CountryBundle = {
     },
   ],
 };
+
+// Registry rows, store pack, daily pairing and "play next" chain.
+export const GERMANY_MODULE = countryModule(GERMANY, {
+  blurb: "Proportional Bundestag politics and the firewall.",
+  cover: "images/covers/country-de.jpg",
+  art: { a: "#17191d", b: "#8c6618", glow: "rgba(233,194,65,0.22)" },
+  scenarios: [
+    { electionId: "2025", difficulty: "hard",
+      description: "The traffic-light coalition collapses. Five-plus parties, a firewall under strain, and 630 Bundestag seats." },
+    { electionId: "2021", difficulty: "hard",
+      description: "Merkel departs, a flood reshapes the race, and six parties fight over a 735-seat Bundestag." },
+    { electionId: "2017", difficulty: "hard",
+      description: "The Schulz train runs out of track and the AfD storms the Bundestag. Merkel's fourth term, a re-entering FDP, and 709 seats." },
+  ],
+  pack: {
+    id: "germany",
+    name: "Germany",
+    description: "Three Bundestag elections from 2017 to 2025. Mixed-member proportional, five-plus parties, and coalition math after the count.",
+    price: 99,
+  },
+  daily: { pair: ["cdu", "spd"], names: { cdu: "CDU/CSU", spd: "the SPD" } },
+  next: {
+    chain: [
+      { id: "2021", blurb: "Continue the timeline: the traffic-light era" },
+      { id: "2025", blurb: "Continue the timeline: the centre holds?" },
+    ],
+  },
+  guide: {
+    title: "Germany",
+    body: "National proportional allocation determines seats. Regional plurality map colors do not award every seat to that party. The 5% threshold can exclude parties; CSU is exempt. Compatible coalitions can form a government.",
+  },
+});

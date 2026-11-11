@@ -1,4 +1,4 @@
-// Generated from all six web election-night adapters and schedules.
+// Generated from the web election-night adapters and schedules of every registered country.
 package com.lakesidegames.electioneer.engine
 
 internal val REVEAL_WEB_VECTORS: String by lazy {

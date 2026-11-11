@@ -129,7 +129,7 @@ export interface CountryMapShapes {
 }
 
 export interface CountryBundle {
-  id: string;    // "CA" | "DE" | "FR"
+  id: string;    // country code: "CA", "DE", "NZ"
   label: string; // "Canada"
   flag: string;
   currency: string;        // "$" | "€"
@@ -149,10 +149,71 @@ export interface CountryBundle {
   eventChance: number;
   // Real-geography map; absent ⇒ the tile cartogram is the map.
   map?: CountryMapShapes;
-  // Coalition-compatibility predicate (Germany's firewall, etc.).
-  compatible?: (lead: PartyId, partner: PartyId) => boolean;
-  // Country-specific framing of the outcome (France: "wins the presidency").
-  governmentText?: (g: Government, partyName: (p: PartyId) => string) => string | undefined;
+  // Who may govern with whom (Germany's firewall, etc.). Declarative so the
+  // native engine reads the same rules from the exported bundle. Absent ⇒
+  // every pair is compatible.
+  coalitions?: CoalitionRules;
+  // Country-specific framing of the outcome (France: "wins the presidency"),
+  // one template per government kind. Absent kinds use the shell's default.
+  governmentText?: GovernmentTextTemplates;
+  // Presidential two-round runoff (France): the campaign is the second round,
+  // units are points, and the shell shows runoff framing.
+  runoff?: boolean;
+  // Longer goal line for the native campaign coach. Placeholders: {majority},
+  // {total}. Absent ⇒ the native default for seat-based elections.
+  goalHint?: string;
+}
+
+// ── Declarative coalition rules ───────────────────────────────────────────
+// A pair (lead, partner) may govern together unless any rule forbids it:
+//   none:      no coalitions at all (a runoff has one winner).
+//   isolated:  parties that partner nobody (cordon sanitaire, the Bloc).
+//   forbidden: specific pairs that never partner, in either order.
+//   onlyWith:  a party that may partner only the listed parties.
+export interface CoalitionRules {
+  none?: boolean;
+  isolated?: PartyId[];
+  forbidden?: [PartyId, PartyId][];
+  onlyWith?: Record<PartyId, PartyId[]>;
+}
+
+export function coalitionAllowed(rules: CoalitionRules, lead: PartyId, partner: PartyId): boolean {
+  if (rules.none) return false;
+  if (rules.isolated?.some((p) => p === lead || p === partner)) return false;
+  if (rules.forbidden?.some(([a, b]) => (a === lead && b === partner) || (a === partner && b === lead))) return false;
+  const only = rules.onlyWith ?? {};
+  if (only[lead] && !only[lead].includes(partner)) return false;
+  if (only[partner] && !only[partner].includes(lead)) return false;
+  return true;
+}
+
+/** The engine-facing predicate for a bundle, or undefined when unrestricted. */
+export function countryCompatible(country: CountryBundle): ((lead: PartyId, partner: PartyId) => boolean) | undefined {
+  const rules = country.coalitions;
+  if (!rules) return undefined;
+  return (lead, partner) => coalitionAllowed(rules, lead, partner);
+}
+
+// ── Declarative government text ───────────────────────────────────────────
+// Placeholders: {party} {seats} {parties} (joined with " and ") {lead}
+// {partner} {largest}. Party ids render through the shell's name function.
+export type GovernmentTextTemplates = Partial<Record<Government["kind"], string>>;
+
+export function countryGovernmentText(
+  country: CountryBundle,
+  g: Government,
+  partyName: (p: PartyId) => string,
+): string | undefined {
+  const template = country.governmentText?.[g.kind];
+  if (template === undefined) return undefined;
+  const values: Record<string, string> = {};
+  if ("party" in g) values.party = partyName(g.party);
+  if ("seats" in g) values.seats = String(g.seats);
+  if ("parties" in g) values.parties = g.parties.map(partyName).join(" and ");
+  if ("lead" in g) values.lead = partyName(g.lead);
+  if ("partner" in g) values.partner = partyName(g.partner);
+  if ("largest" in g) values.largest = partyName(g.largest);
+  return template.replace(/\{(\w+)\}/g, (whole, key: string) => values[key] ?? whole);
 }
 
 // ── Region construction (the country-parameterized ukSetup) ───────────────
@@ -643,7 +704,7 @@ function planAiActions(g: CountryGameState, country: CountryBundle, party: Party
       actions: res.actions,
       majority: majorityFor(g, country),
       abstaining: g.abstaining,
-      compatible: country.compatible,
+      compatible: countryCompatible(country),
     },
     party,
     difficulty,
@@ -841,7 +902,7 @@ export function countryAdvanceTurn(g: CountryGameState, country: CountryBundle, 
 }
 
 export function computeCountryResult(g: CountryGameState, country: CountryBundle): CountryResult {
-  const r = computeSeatsResult(g.regions, majorityFor(g, country), g.abstaining, country.compatible);
+  const r = computeSeatsResult(g.regions, majorityFor(g, country), g.abstaining, countryCompatible(country));
   const playerName = g.leaders[g.playerParty]?.name ?? "";
   const postMortem = g.causes
     .filter((c) => playerName.length > 0 && c.marginDelta !== 0 && c.cause.includes(playerName))

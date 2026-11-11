@@ -60,7 +60,7 @@ export function CountryActionPanel() {
   ];
 
   const [type, setType] = useState<CountryActionType>("broadcast");
-  const [regionId, setRegionId] = useState<string>(country.id === "FR" ? "__national" : regions[0]?.id ?? "");
+  const [regionId, setRegionId] = useState<string>(country.runoff ? "__national" : regions[0]?.id ?? "");
   const [mode, setMode] = useState<CountryAdMode>("positive");
   const [issueId, setIssueId] = useState<string>(country.issues[0].id);
   const [spendM, setSpendM] = useState<number>(2);
@@ -160,9 +160,9 @@ export function CountryActionPanel() {
                 <option key={r.id} value={r.id}>{r.name} ({r.seats} {country.unitNamePlural})</option>
               ))}
             </select>
-            {country.id === "FR" && type === "broadcast" && (
+            {country.runoff && type === "broadcast" && (
               <p className="muted small" style={{ margin: "4px 0 0" }}>
-                National broadcasts move runoff support across France. Choose a region for a concentrated push.
+                National broadcasts move runoff support across {country.label}. Choose a region for a concentrated push.
               </p>
             )}
           </div>

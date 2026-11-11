@@ -46,7 +46,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
         </div>
         <div className="title">{BRAND.name}</div>
         <p className="sub">{data.tagline}</p>
-        {country.id === "FR" && (
+        {country.runoff && (
           <p className="muted small">Campaign clock: six planning weeks compress the historical two-week runoff.</p>
         )}
         {country.id === "FR" && FR_FIRST_ROUND[election] && (
@@ -72,7 +72,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
           </div>
         )}
         {(() => {
-          const majors = DAILY_ROLE_PAIRS[country.id as keyof typeof DAILY_ROLE_PAIRS] ?? country.playable.slice(0, 2);
+          const majors = DAILY_ROLE_PAIRS[country.id] ?? country.playable.slice(0, 2);
           return !majors.includes(activeParty) ? (
             <ChallengePartyBanner partyLabel={partyName(country, activeParty)} />
           ) : null;

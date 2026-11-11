@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { PAYWALL_ENABLED, SCENARIO_REGISTRY, type CountryCode, type ScenarioMeta } from "@content/scenarioRegistry";
 import { packCovered, STORE_PACKS } from "@content/packs";
 import { countryCover } from "@content/covers";
+import { COUNTRY_MODULES } from "@content/countries";
 import { useAuthStore } from "@store/authStore";
 import { usePackPrices } from "@lib/usePackPrices";
 import { DISTRIBUTION } from "@lib/distribution";
@@ -18,23 +19,15 @@ import { BRAND } from "../brand";
 import { useGameStore } from "@store/gameStore";
 import { listResumableCampaigns, type ResumeTarget } from "@persistence/resume";
 
-const COUNTRY_NAMES: Record<CountryCode, string> = {
-  US: "United States",
-  UK: "United Kingdom",
-  CA: "Canada",
-  DE: "Germany",
-  FR: "France",
-  AU: "Australia",
-};
+const COUNTRY_NAMES: Record<CountryCode, string> = Object.fromEntries(COUNTRY_MODULES.map((m) => [m.code, m.name]));
 
-const COUNTRY_BLURBS: Record<CountryCode, string> = {
-  US: "Winner-take-all duels for 270 electoral votes.",
-  UK: "Multiparty FPTP: coalitions, landslides, hung parliaments.",
-  CA: "343 seats, five parties, coast to coast to coast.",
-  DE: "Proportional Bundestag politics and the firewall.",
-  FR: "The two-round runoff for the Élysée.",
-  AU: "Preferential voting across 150 seats.",
-};
+const COUNTRY_BLURBS: Record<CountryCode, string> = Object.fromEntries(COUNTRY_MODULES.map((m) => [m.code, m.blurb]));
+
+// "the UK, Canada, ..., and Australia": every registered country after the US.
+function otherCountriesList(): string {
+  const names = COUNTRY_MODULES.filter((m) => m.code !== "US").map((m) => (m.code === "UK" ? "the UK" : m.name));
+  return names.length > 1 ? `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}` : names.join("");
+}
 
 export type LandingDestination =
   | { kind: "us"; scenarioId: string }   // native id, e.g. "2024"
@@ -181,7 +174,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "What do I get if I pay?",
-    a: "Each country is a $0.99 bundle: the rest of the US elections back to 1960, the UK, Canada, Germany, France, and Australia. The Complete Collection unlocks every country for $3.99. Both are one time purchases, not subscriptions.",
+    a: `Each country is a $0.99 bundle: the rest of the US elections back to 1960, ${otherCountriesList()}. The Complete Collection unlocks every country for $3.99. Both are one time purchases, not subscriptions.`,
   },
   {
     q: "Where do I buy bundles?",

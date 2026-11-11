@@ -1,6 +1,6 @@
 {
-  "webHead": "6d343dd4096e8469661d75eb8c337af2b3971514",
-  "exportedAt": "2026-10-05T14:09:26.048Z",
+  "webHead": "c6fb2cf99611c6cd99bc082297d921fa432e9176",
+  "exportedAt": "2026-11-11T16:50:44.736Z",
   "bundles": {
     "editor-defaults": {
       "bytes": 62894
@@ -16,6 +16,9 @@
     },
     "maps": {
       "bytes": 222402
+    },
+    "catalog": {
+      "bytes": 3323
     },
     "us-blocs": {
       "bytes": 2889
@@ -35,17 +38,17 @@
     "uk": {
       "bytes": 70358
     },
-    "countries/au": {
-      "bytes": 18381
-    },
     "countries/ca": {
-      "bytes": 23151
-    },
-    "countries/fr": {
-      "bytes": 18934
+      "bytes": 23212
     },
     "countries/de": {
-      "bytes": 18887
+      "bytes": 19095
+    },
+    "countries/fr": {
+      "bytes": 19460
+    },
+    "countries/au": {
+      "bytes": 18869
     }
   }
 }

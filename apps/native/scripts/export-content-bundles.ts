@@ -4,9 +4,12 @@
 // Usage from the repository root: npm run native:content
 //
 // Reads web content from this checkout and writes bundles plus a
-// manifest into shared/src/commonMain/resources/bundles/. Functions (AI
-// predicates, government text) and map SVG paths do not serialize and stay
-// hand-ported in shared content/ (see UkContent.kt).
+// manifest into shared/src/commonMain/resources/bundles/. Every registered
+// country module (src/content/countries/index.ts) is exported with no
+// per-country code here: its bundle as countries/<code>.json, its map into
+// maps.json, and its metadata (daily pairing, guide entry, packs) into
+// catalog.json. Country rules that look like code on the web (coalition
+// compatibility, government text) are declarative data both engines read.
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -38,19 +41,21 @@ async function main() {
   const ukEvents = await import(`${WEB_REPO}/src/content/uk/events.ts`);
   const ukElectionEvents = await import(`${WEB_REPO}/src/content/uk/electionEvents.ts`);
   const ukElections = await import(`${WEB_REPO}/src/content/uk/elections.ts`);
-  const au = await import(`${WEB_REPO}/src/content/countries/australia.ts`);
-  const ca = await import(`${WEB_REPO}/src/content/countries/canada.ts`);
-  const fr = await import(`${WEB_REPO}/src/content/countries/france.ts`);
-  const de = await import(`${WEB_REPO}/src/content/countries/germany.ts`);
+  const { COUNTRY_MODULES } = await import(`${WEB_REPO}/src/content/countries/index.ts`);
   const { SCENARIO_REGISTRY } = await import(`${WEB_REPO}/src/content/scenarioRegistry.ts`);
-  const { US_NEXT_SCENARIO, UK_NEXT_SCENARIO, countryNextScenario } = await import(`${WEB_REPO}/src/content/nextScenario.ts`);
+  const { PACKS } = await import(`${WEB_REPO}/src/content/packs.ts`);
+  const { nextScenarioFor } = await import(`${WEB_REPO}/src/content/nextScenario.ts`);
   const { GRID, GRID_ROWS, GRID_COLS, SPLIT_UNITS } = await import(`${WEB_REPO}/src/content/mapLayout.ts`);
   const { UK_VIEWBOX, REGION_PATHS } = await import(`${WEB_REPO}/src/content/uk/regionPaths.ts`);
 
   const stripBundle = (b: any) => {
-    const { compatible, governmentText, map, ...rest } = b;
+    const { map, ...rest } = b;
+    for (const [key, value] of Object.entries(rest)) {
+      if (typeof value === "function") throw new Error(`Country ${b.id}: ${key} is a function; country rules must be data so native can read them`);
+    }
     return rest;
   };
+  const multiparty = COUNTRY_MODULES.filter((m: any) => m.engine === "country");
 
   const usTiles = [...GRID, ...SPLIT_UNITS.flatMap((group, row) => group.ids.map((id, col) => ({ id, row: GRID_ROWS + row, col })))];
   const usMap = { viewBox: `0 0 ${GRID_COLS * 40} ${(GRID_ROWS + SPLIT_UNITS.length) * 40}`,
@@ -60,7 +65,7 @@ async function main() {
     })) };
 
   const bundles: Record<string, unknown> = {
-    "editor-defaults": Object.fromEntries(["US", "UK", "CA", "DE", "FR", "AU"].flatMap(country => {
+    "editor-defaults": Object.fromEntries(COUNTRY_MODULES.map((m: any) => m.code).flatMap((country: string) => {
       const elections = country === "US" ? [undefined] : SCENARIO_REGISTRY.filter((m: any) => m.country === country).map((m: any) => m.nativeId);
       return elections.map(election => {
         const draft = country === "US" ? makeDefaultCustomScenario() : makeDefaultMultiparty(country === "UK" ? "uk" : "country", country === "UK" ? undefined : country);
@@ -79,14 +84,23 @@ async function main() {
     "sound-cues": SOUND_CUES,
     "scenario-registry": SCENARIO_REGISTRY,
     "next-campaigns": Object.fromEntries(SCENARIO_REGISTRY.flatMap((meta: any) => {
-      const next = meta.country === "US" ? US_NEXT_SCENARIO[meta.nativeId]
-        : meta.country === "UK" ? UK_NEXT_SCENARIO[meta.nativeId] : countryNextScenario(meta.country, meta.nativeId);
+      const next = nextScenarioFor(meta.country, meta.nativeId);
       const target = next && SCENARIO_REGISTRY.find((m: any) => m.country === meta.country && m.nativeId === next.id);
       return target ? [[meta.scenarioId, { countryId: target.country, electionId: target.nativeId,
         label: target.label, blurb: next.blurb }]] : [];
     })),
     "maps": { US: usMap, UK: { viewBox: UK_VIEWBOX, shapes: REGION_PATHS },
-      CA: ca.CANADA.map, DE: de.GERMANY.map, FR: fr.FRANCE.map, AU: au.AUSTRALIA.map },
+      ...Object.fromEntries(multiparty.map((m: any) => [m.code, m.bundle.map])) },
+    // Everything the native apps list per country, in registration order.
+    "catalog": {
+      countries: COUNTRY_MODULES.map((m: any) => ({
+        id: m.code, name: m.name, flag: m.flag, engine: m.engine,
+        bundle: m.engine === "country" ? `countries/${m.code.toLowerCase()}` : null,
+        dailyPair: m.daily.pair, roleNames: m.daily.names, packId: m.pack.id,
+        guide: m.guide ?? null,
+      })),
+      packs: PACKS.map((p: any) => ({ id: p.id, name: p.name, scenarios: p.scenarios, legacy: p.legacy === true })),
+    },
     "us-blocs": { blocs: Object.values(BLOCS) },
     "us-candidates": { candidates: CANDIDATES, opponentOf: OPPONENT_OF },
     "us-staff": { pool: STAFF_POOL },
@@ -118,10 +132,7 @@ async function main() {
       elections: ukElections.UK_ELECTIONS,
       ids: ukElections.UK_ELECTION_IDS,
     },
-    "countries/au": stripBundle(au.AUSTRALIA),
-    "countries/ca": stripBundle(ca.CANADA),
-    "countries/fr": stripBundle(fr.FRANCE),
-    "countries/de": stripBundle(de.GERMANY),
+    ...Object.fromEntries(multiparty.map((m: any) => [`countries/${m.code.toLowerCase()}`, stripBundle(m.bundle)])),
   };
   // Historical events live in their own module, not the events index.
   (bundles["us-events"] as any).historical = {

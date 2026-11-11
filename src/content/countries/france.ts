@@ -14,8 +14,8 @@
 // identities; the far right (Le Pen) is a first-round casualty that turn.
 
 import type { CountryBundle } from "@engine/countryGame";
+import { countryModule } from "./types";
 import { FR_MAP } from "./paths/fr";
-import type { Government } from "@engine/types";
 import type { TransferMatrix, RoundShares } from "@engine/runoff";
 
 /** National first-round shares (real 2017/2022; polling-informed 2027). */
@@ -87,13 +87,14 @@ export const FRANCE: CountryBundle = {
   playable: ["ens", "rn"],
   abstaining: [],
   // A runoff has no coalitions: one candidate wins the presidency outright.
-  compatible: () => false,
-  governmentText: (g: Government, partyName) => {
-    if (g.kind === "majority") return `${partyName(g.party)} wins the presidency with ${g.seats} points.`;
-    if (g.kind === "minority") return `${partyName(g.party)} scrapes the narrowest of wins: ${g.seats} points.`;
-    if (g.kind === "hung") return `Dead heat. France recounts through the night; the Republic holds its breath.`;
-    return undefined;
+  coalitions: { none: true },
+  governmentText: {
+    majority: "{party} wins the presidency with {seats} points.",
+    minority: "{party} scrapes the narrowest of wins: {seats} points.",
+    hung: "Dead heat. France recounts through the night; the Republic holds its breath.",
   },
+  runoff: true,
+  goalHint: "Win {majority} of {total} presidency points. Six planning weeks compress the historical two-week runoff. First-round transfers are included in the opening support. National broadcasts and platform preparation reach the whole electorate.",
 
   issues: [
     { id: "cost_of_living", name: "Pouvoir d'achat", blurb: "Purchasing power: the issue that decides French elections." },
@@ -353,3 +354,38 @@ export const FRANCE: CountryBundle = {
     },
   ],
 };
+
+// Registry rows, store pack, daily pairing and "play next" chain.
+export const FRANCE_MODULE = countryModule(FRANCE, {
+  blurb: "The two-round runoff for the Élysée.",
+  cover: "images/covers/country-fr.jpg",
+  art: { a: "#142a59", b: "#a82b42", glow: "rgba(245,245,245,0.18)" },
+  scenarios: [
+    { electionId: "2027", label: "2027 · The Republic's runoff", difficulty: "hard",
+      description: "Macron is term-limited. The centre defends the Élysée against the RN in a two-round fight for France." },
+    { electionId: "2022", difficulty: "hard",
+      description: "The rematch. Pouvoir d'achat against the front républicain, and a far narrower runoff than last time." },
+    { electionId: "2017", label: "2017 · Macron v. Le Pen", difficulty: "hard",
+      description: "A 39-year-old insurgent, a movement a year old, and the debate meltdown that sealed a landslide." },
+    { electionId: "2012", difficulty: "hard",
+      description: "A crisis president nobody warmed to against the man who promised to be normal. A left-right runoff decided by a whisker." },
+  ],
+  pack: {
+    id: "france",
+    name: "France",
+    description: "Four presidential elections from 2012 to 2027. Two rounds, a crowded first ballot, and a runoff decided by who the losers back.",
+    price: 99,
+  },
+  daily: { pair: ["ens", "rn"], names: { ens: "Ensemble", rn: "the RN" } },
+  next: {
+    chain: [
+      { id: "2017", blurb: "Continue the timeline: En Marche!" },
+      { id: "2022", blurb: "Continue the timeline: the rematch with Le Pen" },
+      { id: "2027", blurb: "Continue the timeline: the Republic's runoff" },
+    ],
+  },
+  guide: {
+    title: "France",
+    body: "Win a majority of presidency points. Six planning weeks compress the two-week runoff. First-round transfers are included in opening support. National broadcasts and platform preparation reach the whole electorate.",
+  },
+});

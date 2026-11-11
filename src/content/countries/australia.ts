@@ -11,8 +11,8 @@
 // end of nine years of Coalition government.
 
 import type { CountryBundle } from "@engine/countryGame";
+import { countryModule } from "./types";
 import { AU_MAP } from "./paths/au";
-import type { Government } from "@engine/types";
 
 export const AUSTRALIA: CountryBundle = {
   id: "AU",
@@ -47,21 +47,13 @@ export const AUSTRALIA: CountryBundle = {
   // Labor and the Coalition never partner each other; the Greens can back Labor
   // only; the crossbench and One Nation strike no formal arrangement (teal
   // independents negotiate seat-by-seat, not as a bloc).
-  compatible: (lead, partner) => {
-    const rivals = new Set(["alp", "lnp"]);
-    if (rivals.has(lead) && rivals.has(partner)) return false;
-    if (lead === "grn" || partner === "grn") return lead === "alp" || partner === "alp";
-    if (lead === "ind" || partner === "ind") return false;
-    if (lead === "onp" || partner === "onp") return false;
-    return true;
-  },
-  governmentText: (g: Government, partyName) => {
-    if (g.kind === "majority") return `${partyName(g.party)} forms majority government with ${g.seats} seats.`;
-    if (g.kind === "coalition") return `${g.parties.map(partyName).join(" and ")} strike a governing agreement (${g.seats} seats).`;
-    if (g.kind === "confidence_supply") return `${partyName(g.lead)} governs with confidence and supply from ${partyName(g.partner)}.`;
-    if (g.kind === "minority") return `${partyName(g.party)} forms minority government, and the crossbench holds the balance of power.`;
-    if (g.kind === "hung") return `Hung parliament: the crossbench decides who governs.`;
-    return undefined;
+  coalitions: { forbidden: [["alp", "lnp"]], onlyWith: { grn: ["alp"] }, isolated: ["ind", "onp"] },
+  governmentText: {
+    majority: "{party} forms majority government with {seats} seats.",
+    coalition: "{parties} strike a governing agreement ({seats} seats).",
+    confidence_supply: "{lead} governs with confidence and supply from {partner}.",
+    minority: "{party} forms minority government, and the crossbench holds the balance of power.",
+    hung: "Hung parliament: the crossbench decides who governs.",
   },
 
   issues: [
@@ -319,3 +311,31 @@ export const AUSTRALIA: CountryBundle = {
     },
   ],
 };
+
+// Registry rows, store pack, daily pairing and "play next" chain.
+export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {
+  blurb: "Preferential voting across 150 seats.",
+  cover: "images/covers/country-au.jpg",
+  art: { a: "#082a52", b: "#126d66", glow: "rgba(247,205,79,0.22)" },
+  scenarios: [
+    { electionId: "2025", difficulty: "hard",
+      description: "Preferential voting, a cyclone-delayed budget, and a Trump-shaped shadow over 150 seats." },
+    { electionId: "2022", difficulty: "medium",
+      description: "Nine years of Coalition rule, a teal wave on the harbourside, and a PM who doesn't hold a hose." },
+    { electionId: "2019", difficulty: "hard",
+      description: "The unlosable election. A big-target Labor agenda, a wall of yellow ads, and a daggy-dad miracle. 151 seats under preferences." },
+  ],
+  pack: {
+    id: "australia",
+    name: "Australia",
+    description: "Three federal elections from 2019 to 2025. Preferential voting across 150 seats, teals, and the unlosable election.",
+    price: 99,
+  },
+  daily: { pair: ["alp", "lnp"], names: { alp: "Labor", lnp: "the Coalition" } },
+  next: {
+    chain: [
+      { id: "2022", blurb: "Continue the timeline: the teal wave" },
+      { id: "2025", blurb: "Continue the timeline: hold the middle" },
+    ],
+  },
+});

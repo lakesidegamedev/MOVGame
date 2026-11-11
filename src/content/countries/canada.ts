@@ -5,6 +5,7 @@
 // NDP 25, GPC 2 (Trudeau's pandemic snap call buys back the same minority).
 
 import type { CountryBundle } from "@engine/countryGame";
+import { countryModule } from "./types";
 import { CA_MAP } from "./paths/ca";
 
 export const CANADA: CountryBundle = {
@@ -37,12 +38,7 @@ export const CANADA: CountryBundle = {
   abstaining: [],
   // The two governing rivals never partner each other; the Bloc props up no one
   // formally (it extracts concessions vote-by-vote).
-  compatible: (lead, partner) => {
-    const rivals = new Set(["lpc", "cpc"]);
-    if (rivals.has(lead) && rivals.has(partner)) return false;
-    if (partner === "bq" || lead === "bq") return false;
-    return true;
-  },
+  coalitions: { forbidden: [["lpc", "cpc"]], isolated: ["bq"] },
 
   issues: [
     { id: "us_relations", name: "U.S. relations & tariffs", blurb: "Tariff war, '51st state' taunts, and who can stand up to Washington." },
@@ -317,3 +313,33 @@ export const CANADA: CountryBundle = {
     },
   ],
 };
+
+// Registry rows, store pack, daily pairing and "play next" chain.
+export const CANADA_MODULE = countryModule(CANADA, {
+  blurb: "343 seats, five parties, coast to coast to coast.",
+  cover: "images/covers/country-ca.jpg",
+  art: { a: "#5b1620", b: "#c94242", glow: "rgba(255,236,221,0.19)" },
+  scenarios: [
+    { electionId: "2025", difficulty: "easy",
+      description: "A tariff war with the neighbour, a Liberal comeback for the ages, and 343 seats from coast to coast to coast." },
+    { electionId: "2021", difficulty: "easy",
+      description: "A pandemic snap election nobody asked for. Gravel on the trail, a fourth wave rising, and 338 seats in play." },
+    { electionId: "2019", difficulty: "hard",
+      description: "SNC-Lavalin, the blackface photos, and a Liberal government that loses the popular vote but keeps the keys. A minority, 338 seats." },
+    { electionId: "2015", difficulty: "hard",
+      description: "A decade of Harper, a 78-day marathon, and a third-place party that wakes up in a majority. Sunny ways over a tired throne." },
+  ],
+  pack: {
+    id: "canada",
+    name: "Canada",
+    description: "Four federal elections from 2015 to 2025: Sunny ways, two minorities, and the tariff-war comeback across 343 ridings.",
+    price: 99,
+  },
+  daily: { pair: ["lpc", "cpc"], names: { lpc: "the Liberals", cpc: "the Conservatives" } },
+  next: {
+    chain: [
+      { id: "2021", blurb: "Continue the timeline: the pandemic snap" },
+      { id: "2025", blurb: "Continue the timeline: the tariff-war rematch" },
+    ],
+  },
+});

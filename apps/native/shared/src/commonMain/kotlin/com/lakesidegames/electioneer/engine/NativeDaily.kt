@@ -1,5 +1,6 @@
 package com.lakesidegames.electioneer.engine
 
+import com.lakesidegames.electioneer.content.CONTENT_CATALOG
 import kotlinx.serialization.Serializable
 
 data class NativeDailyAssignment(val date: String, val scenarioId: String, val seed: String, val role: String,
@@ -7,13 +8,14 @@ data class NativeDailyAssignment(val date: String, val scenarioId: String, val s
 
 class NativeDaily private constructor() {
     companion object {
-        private val pairs = mapOf("US" to listOf("dem", "rep"), "UK" to listOf("lab", "con"),
-            "CA" to listOf("lpc", "cpc"), "DE" to listOf("cdu", "spd"),
-            "FR" to listOf("ens", "rn"), "AU" to listOf("alp", "lnp"))
-        private val names = mapOf("dem" to "the Democrats", "rep" to "the Republicans", "lab" to "Labour",
-            "con" to "the Conservatives", "lpc" to "the Liberals", "cpc" to "the Conservatives",
-            "cdu" to "CDU/CSU", "spd" to "the SPD", "ens" to "Ensemble", "rn" to "the RN",
-            "alp" to "Labor", "lnp" to "the Coalition")
+        // Each country module's daily pairing, from the exported catalog.
+        private val pairs: Map<String, List<String>> by lazy { CONTENT_CATALOG.countries.associate { it.id to it.dailyPair } }
+        // Role ids are shared across countries; the first registered name wins (web lib/daily.ts).
+        private val names: Map<String, String> by lazy {
+            val out = linkedMapOf<String, String>()
+            for (c in CONTENT_CATALOG.countries) for ((role, name) in c.roleNames) out.getOrPut(role) { name }
+            out
+        }
 
         fun roleName(role: String): String = names[role] ?: role.uppercase()
 

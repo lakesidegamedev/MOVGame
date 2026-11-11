@@ -11,7 +11,15 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ## [Unreleased]
 
-No changes yet.
+### Changed
+
+- Countries are now self-contained add-ons inside the game. Each country carries its own
+  elections, store pack, daily challenge sides and "play next" links, and the web game, the
+  iPhone app and the Android app all list countries and packs from that one source. Nothing
+  changes for players: every election, pack, save and leaderboard entry keeps its id.
+- The Complete Collection automatically includes every paid election of every country, including
+  countries added later. The retired Global pack keeps exactly the fourteen Canada, Germany,
+  France and Australia elections it always had.
 
 ## 2026-10
 
