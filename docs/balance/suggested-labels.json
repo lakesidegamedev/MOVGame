@@ -78,6 +78,10 @@
     "jp-2017": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "jp-2014": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "jp-2012": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
-    "jp-2009": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
+    "jp-2009": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "it-2022": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "it-2018": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "it-2013": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "it-2008": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
   }
 }

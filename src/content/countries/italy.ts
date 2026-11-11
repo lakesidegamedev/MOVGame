@@ -122,11 +122,11 @@ export const ITALY: CountryBundle = {
     id: "IT",
     label: "Italy",
     parties: [
-      { id: "cdx", name: "Centre-right coalition (People of Freedom, Forza Italia, Lega, Brothers of Italy)", shortName: "Centre-right", color: "#1b5aa8" },
-      { id: "csx", name: "Centre-left coalition (Democratic Party and allies)", shortName: "Centre-left", color: "#d9242f" },
+      { id: "cdx", name: "Centre-right (PdL or Forza Italia, Lega, FdI)", shortName: "Centre-right", color: "#1b5aa8" },
+      { id: "csx", name: "Centre-left (Democratic Party and allies)", shortName: "Centre-left", color: "#d9242f" },
       { id: "m5s", name: "Five Star Movement", shortName: "Five Star", color: "#f4b400" },
-      { id: "cen", name: "Centrist lists (Union of the Centre, Monti, Action-Italia Viva)", shortName: "Centrists", color: "#2aa6c9" },
-      { id: "rad", name: "Left lists outside the coalition (Rainbow Left, Civil Revolution, Free and Equal, Popular Union)", shortName: "Radical Left", color: "#8a2f6b" },
+      { id: "cen", name: "Centrists (UDC, Monti, Azione-Italia Viva)", shortName: "Centrists", color: "#2aa6c9" },
+      { id: "rad", name: "Radical left (Arcobaleno to Unione Popolare)", shortName: "Radical Left", color: "#8a2f6b" },
       { id: "oth", name: "Others (La Destra, SVP, Italians abroad, Italexit…)", shortName: "Other", color: "#9aa0a6" },
     ],
     allocation: { id: "regional_seats_curve", label: "Coalition bonus, then mixed proportional and single-member (regional pools)", unit: "seat" },
@@ -258,7 +258,7 @@ export const ITALY: CountryBundle = {
         // Unscheduled flavour: joins the weekly draw, fires at most once.
         { id: "third_pole", headline: "Renzi and Calenda announce a Third Pole on 11 August and promise to bring Draghi back. {party} has a list, a leader and a week to fill the gap", role: "any", party: "cen", weight: 2, appeal: 0.02, momentum: 6 },
         { id: "letta_no_conte", headline: "Letta rules out any pact with Conte, calling the break over Draghi irreversible, and {party} runs alone with a bigger grudge", role: "any", party: "m5s", weight: 2, appeal: 0.015, momentum: 4 },
-        { id: "berlusconi_tiktok", headline: "Berlusconi, 85, joins TikTok and collects a million followers in days, and {party} suddenly looks young", role: "any", party: "cdx", weight: 2, appeal: 0.01, momentum: 4 },
+        { id: "berlusconi_tiktok", headline: "Berlusconi, 85, joins TikTok and gathers more than 350,000 followers in a day, and {party} suddenly looks young", role: "any", party: "cdx", weight: 2, appeal: 0.01, momentum: 4 },
         { id: "b_class_country", headline: "Letta warns that a right-wing victory could turn Italy into a second-rank country like Poland and Hungary. The remark is thrown back at {party} for days", role: "any", party: "csx", weight: 2, appeal: -0.015, momentum: -5 },
         { id: "nuclear_gas", headline: "Calenda and Renzi campaign for nuclear power and gas regasification ships as the answer to the energy crisis, and {party} gets a hearing from employers and engineers", role: "any", party: "cen", weight: 2, appeal: 0.01, momentum: 3 },
         { id: "popular_union", headline: "De Magistris gathers the far left in the Popular Union and spends the campaign fighting for the 3 percent line. {party} needs every vote", role: "any", party: "rad", weight: 2, appeal: 0.01, momentum: 3 },
@@ -337,7 +337,7 @@ export const ITALY: CountryBundle = {
         { id: "imu_refund", headline: "Berlusconi works every talk show in sight and promises to refund the 2012 property tax in cash. {party} climbs back from the dead", role: "any", party: "cdx", weight: 3, appeal: 0.035, momentum: 9, turn: 1 },
         { id: "mps_scandal", headline: "Losses at Monte dei Paschi di Siena, the oldest bank in the world and a pillar of the Tuscan left, hit the front pages. {party} cannot shake the smell of the establishment", role: "any", party: "csx", weight: 3, appeal: -0.03, momentum: -8, turn: 2 },
         { id: "mussolini_remark", headline: "On Holocaust Remembrance Day Berlusconi says Mussolini did good things apart from the racial laws. {party} spends a week on damage control", role: "any", party: "cdx", weight: 3, appeal: -0.02, momentum: -6, turn: 3 },
-        { id: "empy_puppy", headline: "Monti turns up on television with a fluffy dog called Empy to soften his image, and the satire writes itself. {party} loses a week", role: "any", party: "cen", weight: 3, appeal: -0.015, momentum: -4, turn: 4 },
+        { id: "monti_tax_memory", headline: "Monti asks voters to finish the reforms he started, but the property tax and the pension age are still fresh. {party} cannot shake the memory of the bills", role: "any", party: "cen", weight: 3, appeal: -0.015, momentum: -4, turn: 4 },
         { id: "san_giovanni", headline: "Grillo closes his Tsunami Tour in Rome's Piazza San Giovanni before a vast crowd, and {party} surges in every poll that is still allowed", role: "any", party: "m5s", weight: 3, appeal: 0.04, momentum: 10, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
         { id: "bersani_primary", headline: "Bersani won the centre-left primary against Renzi in December and holds the left together with Vendola. {party} enters the race as the favourite", role: "any", party: "csx", weight: 2, appeal: 0.02, momentum: 5 },
