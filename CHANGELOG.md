@@ -31,6 +31,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   its real beats, from the nuclear deal and the farm loan waiver to Pulwama and Balakot, NYAY and
   the 2024 result that left the BJP needing its allies, and the results are built from
   constituency counts.
+- Ireland: the 2011, 2016, 2020 and 2024 Dáil elections under the single transferable vote, as a
+  $0.99 pack (also in the Complete Collection). Lead Fianna Fáil, Fine Gael, Sinn Féin, Labour,
+  the Greens, the Social Democrats, PBP-Solidarity or Aontú across ten regions, with real first
+  preference results by region, a large independent block you can court but not lead, and each
+  campaign's real story beats, from the Troika landslide and the water charge election to Sinn
+  Féin's surge and the 2024 giveaway budget. Fianna Fáil and Fine Gael can govern together;
+  neither will take Sinn Féin.
 - A Store screen. It opens from the landing page, the account menu, the setup and results
   screens, and every locked election. It leads with the Complete Collection and says exactly
   what it contains and, if you already own some packs, which ones it would add. Every country
