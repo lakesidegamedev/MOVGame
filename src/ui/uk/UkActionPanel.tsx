@@ -243,7 +243,7 @@ export function UkActionPanel() {
       </div>
 
       <div className="row" style={{ gap: 8, marginTop: 6 }}>
-        <button className="primary" style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+        <button className="block plan-add"
           disabled={used >= pool || (regionRequired && !regionId) || mpActionCost(buildAction()) > availableFunds}
           onClick={() => { for (const d of DAYS) { if (dayItems(d).length < MAX_PER_DAY) { addToDay(d); break; } } }}>
           <TypeIcon size={14} /> Add to next open day
