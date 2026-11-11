@@ -19,7 +19,8 @@ export function clampScore(x: number, lo: number, hi: number): number {
 
 // The facts a finished game reduces to for scoring. US games: unitMargin =
 // player EV − 270 (of 538). Multiparty games: unitMargin = player seats −
-// majority threshold, normalized to the US scale by (538 / chamber size) so a
+// majority threshold (plurality countries: player units − top rival's units),
+// normalized to the US scale by (538 / chamber size) so a
 // UK majority and a US majority are worth comparable points.
 export interface ScoreFacts {
   // Player's awardable units minus the outright-win threshold (may be negative).
@@ -74,19 +75,35 @@ export interface MultipartyResultFacts {
   voteShare: Record<string, number>;
 }
 
+// Player's units measured against the goal. Majority systems: units minus the
+// threshold. Plurality systems (no threshold): units minus the strongest
+// rival's units, so finishing first by 6 points is +6 and second by 6 is -6.
+export function multipartyUnitMargin(
+  seats: Record<string, number>,
+  player: string,
+  majorityThreshold: number,
+  plurality = false,
+): number {
+  const mine = seats[player] ?? 0;
+  if (!plurality) return mine - majorityThreshold;
+  const rival = Math.max(0, ...Object.keys(seats).filter((p) => p !== player).map((p) => seats[p] ?? 0));
+  return mine - rival;
+}
+
 export function multipartyScoreFacts(
   result: MultipartyResultFacts,
   player: string,
   majorityThreshold: number,
   chamberSize: number,
   difficulty: ScoreDifficulty,
+  plurality = false,
 ): ScoreFacts {
   const rivalShare = Math.max(
     0,
     ...Object.keys(result.voteShare).filter((p) => p !== player).map((p) => result.voteShare[p] ?? 0),
   );
   return {
-    unitMargin: (result.seats[player] ?? 0) - majorityThreshold,
+    unitMargin: multipartyUnitMargin(result.seats, player, majorityThreshold, plurality),
     chamberSize,
     popularMargin: ((result.voteShare[player] ?? 0) - rivalShare) * 100,
     difficulty,

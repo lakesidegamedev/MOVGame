@@ -29,7 +29,8 @@ class NativeRevealTest {
             for (unit in data.units) for ((party, seats) in unit.allocation ?: mapOf(unit.winnerId to unit.units))
                 allocation[party] = (allocation[party] ?: 0) + seats
             for (row in final.rows.filter { it.id != "__others" }) assertEquals(allocation[row.id], row.units)
-            assertEquals(allocation.entries.firstOrNull { it.value >= data.threshold }?.key, actual.projectedId)
+            // Plurality countries project the engine's winner; everyone else the first party over the line.
+            assertEquals(data.pluralityWinner ?: allocation.entries.firstOrNull { it.value >= data.threshold }?.key, actual.projectedId)
             assertEquals(0, night.board(0).calledUnits)
             assertTrue((0 until night.count()).all { night.delay(it, 1) >= 30 && night.delay(it, 2) >= 30 })
         }

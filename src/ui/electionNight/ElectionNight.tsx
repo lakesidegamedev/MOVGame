@@ -37,6 +37,9 @@ export interface RevealProps {
   unitLabel?: string; // "EV" | "seats" | "points"
   map?: RevealMap; // live-filling map centerpiece; omitted ⇒ chip-only layout
   noMajorityLabel?: string; // hung-parliament / contingent-election banner text
+  // Plurality countries: the engine's winner. There is no threshold; the
+  // projection lands once the winner's lead cannot be overturned.
+  pluralityWinner?: string;
   storageKey?: string; // sessionStorage key so refresh/resume doesn't replay
   onDone: () => void;
 }
@@ -86,7 +89,11 @@ export function ElectionNight(props: RevealProps) {
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
-  const { entries, waveCount } = useMemo(() => buildSchedule(units, threshold), [units, threshold]);
+  const pluralityWinner = props.pluralityWinner;
+  const { entries, waveCount } = useMemo(
+    () => buildSchedule(units, threshold, pluralityWinner),
+    [units, threshold, pluralityWinner],
+  );
 
   // Reduced-motion users get the final board immediately (no theater).
   const [speed, setSpeed] = useState<Speed>(() => (prefersReduced() ? "instant" : "1x"));
@@ -256,7 +263,9 @@ export function ElectionNight(props: RevealProps) {
                 <span className="en-party" style={{ color: partyInk(p.color) }}>{p.short}</span>
                 <div className="en-track">
                   <div className="en-fill" style={{ width: `${totalUnits > 0 ? (val / totalUnits) * 100 : 0}%`, background: p.color }} />
-                  <div className="en-thresh" style={{ left: `${totalUnits > 0 ? (threshold / totalUnits) * 100 : 50}%` }} />
+                  {pluralityWinner === undefined && (
+                    <div className="en-thresh" style={{ left: `${totalUnits > 0 ? (threshold / totalUnits) * 100 : 50}%` }} />
+                  )}
                 </div>
                 <span className="en-num">{val}</span>
               </div>
@@ -265,7 +274,7 @@ export function ElectionNight(props: RevealProps) {
         </div>
 
         <div className="en-remaining">
-          {remaining} {unitLabel} still out · {threshold} to win
+          {remaining} {unitLabel} still out · {pluralityWinner === undefined ? `${threshold} to win` : `most ${unitLabel} wins`}
         </div>
 
         <div className="en-feed">

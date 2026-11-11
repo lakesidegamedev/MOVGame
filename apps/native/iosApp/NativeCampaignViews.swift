@@ -247,7 +247,7 @@ struct NativeWorldCampaign: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(game.isOver() ? game.outcome() : "Projected standings").font(.headline)
                         NativeStandingRows(rows: game.standings(), units: game.unitName())
-                        Text("\(game.majority()) of \(game.totalUnits()) \(game.unitName()) to win outright")
+                        Text(game.goalLine())
                             .font(.caption).foregroundStyle(CampaignStyle.muted)
                     }.nativeCampaignCard()
                     if game.hasPendingEvent() { eventCard(game) }
@@ -284,7 +284,7 @@ struct NativeWorldCampaign: View {
                         if let summary = game.resultSummary() {
                             VStack(alignment: .leading, spacing: 7) {
                                 Text("CAMPAIGN SCORE \(summary.score) / 1000").font(.headline).foregroundStyle(CampaignStyle.gold)
-                                Text("\(summary.difficulty.capitalized) difficulty · \(game.unitName().capitalized) above majority: \(summary.unitMargin)").font(.subheadline)
+                                Text("\(summary.difficulty.capitalized) difficulty · \(game.isPlurality() ? "Lead over the runner-up" : "\(game.unitName().capitalized) above majority"): \(summary.unitMargin)").font(.subheadline)
                                 Text(String(format: "Vote margin vs. leading rival: %+.1f points", summary.popularMargin)).font(.subheadline)
                             }.nativeCampaignCard()
                         }

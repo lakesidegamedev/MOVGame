@@ -174,12 +174,17 @@ fun computeSeatsResult(
         voteShare[p] = if (nationalTotal > 0) nationalVotes.getValue(p) / nationalTotal else 0.0
     }
 
-    // Largest party by seats.
+    // Largest party by seats. Under plurality a tie on units goes to the higher
+    // national vote share; an exact tie on both keeps the earlier party.
     var largestParty = ""
     var mostSeats = -1
     for (p in seats.keys) {
         if (seats.getValue(p) > mostSeats) {
             mostSeats = seats.getValue(p)
+            largestParty = p
+        } else if (majority.plurality == true && seats.getValue(p) == mostSeats &&
+            (voteShare[p] ?: 0.0) > (voteShare[largestParty] ?: 0.0)
+        ) {
             largestParty = p
         }
     }
@@ -200,6 +205,12 @@ fun formGovernment(
     largestParty: PartyId,
     compatible: ((lead: PartyId, partner: PartyId) -> Boolean)? = null,
 ): Government {
+    // Plurality: the largest party wins outright, whatever its share.
+    if (majority.plurality == true) {
+        val top = seats[largestParty] ?: 0
+        return if (top > 0) Government.Majority(party = largestParty, seats = top) else Government.Hung(largest = largestParty)
+    }
+
     val abstainSeats = abstainingParties.sumOf { seats[it] ?: 0 }
     // Effective Commons size after abstentions; majority is half of that + 1.
     val effectiveTotal = majority.total - abstainSeats

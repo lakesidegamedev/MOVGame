@@ -92,6 +92,14 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   Chirac's third try in 1995 and Sarkozy against Royal in 2007. The first round is already
   counted, and each campaign has its real story beats. Owners of the old Global pack need the
   France pack or the Complete Collection for these.
+- Mexico: the presidential elections of 2000, 2006, 2012, 2018 and 2024, as a $0.99 pack (also in
+  the Complete Collection). Lead the PAN, the PRD and Morena left, the PRI or Movimiento
+  Ciudadano across eleven regions, from the State of Mexico and Mexico City to the north and the
+  Pacific south, with real results in every region and each campaign's real story beats, from
+  Fox ending 71 years of PRI rule and the 0.58 point race of 2006 to #YoSoy132 and Sheinbaum's
+  landslide. Mexico elects its president in one round: the candidate with the most votes wins,
+  with no share to reach, so the goal bar shows the lead you need and your margin is your lead
+  over the runner-up. The same one-round rule works in the apps.
 
 ### Changed
 

@@ -4,7 +4,7 @@ import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
 import { openStoreForScenario } from "@store/storeNav";
 import { api } from "@lib/api";
-import { computeScoreFromFacts, multipartyScoreFacts } from "@engine/scoring";
+import { computeScoreFromFacts, multipartyScoreFacts, multipartyUnitMargin } from "@engine/scoring";
 import { countryGovernmentText, majorityFor, playablePartiesIn } from "@engine/countryGame";
 import type { Government } from "@engine/types";
 import { countryNextScenario } from "@content/nextScenario";
@@ -19,9 +19,9 @@ import { WhyReport } from "../WhyReport";
 import { TimelineView } from "../TimelineView";
 import { dailyAssignment, utcDateString } from "@lib/daily";
 
-function defaultGovText(g: Government, name: (p: string) => string): string {
+function defaultGovText(g: Government, name: (p: string) => string, plurality = false, unit = "seats"): string {
   switch (g.kind) {
-    case "majority": return `${name(g.party)} wins a majority with ${g.seats} seats.`;
+    case "majority": return plurality ? `${name(g.party)} finishes first with ${g.seats} ${unit}.` : `${name(g.party)} wins a majority with ${g.seats} seats.`;
     case "minority": return `${name(g.party)} forms a minority government on ${g.seats} seats.`;
     case "coalition": return `A ${g.parties.map(name).join("-")} coalition reaches ${g.seats} seats.`;
     case "confidence_supply": return `${name(g.lead)} governs with ${name(g.partner)} confidence-and-supply (${g.seats}).`;
@@ -44,11 +44,12 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
 
   const scenarioId = `${country.id.toLowerCase()}-${game.electionId}`;
   const majority = majorityFor(game, country);
+  const plurality = majority.plurality === true;
   const difficulty = game.difficulty ?? "normal";
 
   const facts = useMemo(
-    () => multipartyScoreFacts(r, game.playerParty, majority.threshold, majority.total, difficulty),
-    [r, game.playerParty, majority, difficulty],
+    () => multipartyScoreFacts(r, game.playerParty, majority.threshold, majority.total, difficulty, plurality),
+    [r, game.playerParty, majority, difficulty, plurality],
   );
   const score = computeScoreFromFacts(facts);
 
@@ -86,7 +87,8 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
     (r.government.kind === "coalition" && r.government.parties.includes(game.playerParty));
 
   const name = (p: string) => partyName(country, p);
-  const govText = countryGovernmentText(country, r.government, name) ?? defaultGovText(r.government, name);
+  const govText = countryGovernmentText(country, r.government, name) ??
+    defaultGovText(r.government, name, plurality, country.unitNamePlural);
 
   const reveal = useMemo(() => countryReveal(country, game), [country, game]);
   const [nightDone, setNightDone] = useState(() => !revealSupported() || hasSeenReveal(reveal.storageKey ?? ""));
@@ -102,7 +104,8 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
   const nextParty = playableNext.includes(game.playerParty) ? game.playerParty : playableNext[0];
 
   const largest = order[0];
-  const seatMargin = playerSeats - majority.threshold;
+  // Plurality: the margin is the lead over the strongest rival, not a line.
+  const seatMargin = multipartyUnitMargin(r.seats, game.playerParty, majority.threshold, plurality);
   const popShare = (r.voteShare[game.playerParty] ?? 0) * 100;
   const leftParty = largest ?? game.playerParty;
   const rightParty = order.find((p) => p !== leftParty) ?? game.playerParty;
@@ -182,8 +185,8 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
           rightLabel: partyShort(country, rightParty),
           leftColor: partyColor(country, leftParty),
           rightColor: partyColor(country, rightParty),
-          unitLabel: "vs maj.",
-          caption: `${country.unitNamePlural} vs majority`,
+          unitLabel: plurality ? "vs rival" : "vs maj.",
+          caption: plurality ? `${country.unitNamePlural} vs top rival` : `${country.unitNamePlural} vs majority`,
         }}
         nextScenario={
           next && nextData
@@ -221,7 +224,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
                     {score}<span className="score-max"> / 1000</span>
                   </div>
                   <div className="muted small">
-                    {country.unitName} margin {facts.unitMargin >= 0 ? "+" : ""}{Math.round(facts.unitMargin)} · popular{" "}
+                    {country.unitName} margin {facts.unitMargin >= 0 ? "+" : ""}{Math.round(facts.unitMargin)}{plurality ? " vs top rival" : ""} · popular{" "}
                     {facts.popularMargin >= 0 ? "+" : ""}{facts.popularMargin.toFixed(1)} pts
                   </div>
                 </div>
@@ -278,10 +281,11 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
           segments={segments}
           total={majority.total}
           threshold={majority.threshold}
+          plurality={plurality}
           government={r.government}
           nameOf={name}
           unitPlural={country.unitNamePlural}
-          mathLabel={country.runoff ? "RUNOFF RESULT" : undefined}
+          mathLabel={country.runoff ? "RUNOFF RESULT" : plurality ? "MOST VOTES WINS" : undefined}
         />
 
         <div className="card">

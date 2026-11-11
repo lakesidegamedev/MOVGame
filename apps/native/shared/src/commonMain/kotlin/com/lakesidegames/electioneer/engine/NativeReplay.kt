@@ -16,7 +16,9 @@ import kotlin.math.abs
 @Serializable data class NativeReplayLog(val version: Int = 1, val engine: String, val scenarioId: String,
     val playerId: String, val unitLabel: String, val unitTotal: Int, val majority: Int, val totalTurns: Int,
     val mode: String, val parties: List<NativeReplayParty>, val contestNames: Map<String, String>,
-    val snapshots: List<NativeReplaySnapshot> = emptyList())
+    val snapshots: List<NativeReplaySnapshot> = emptyList(),
+    // Plurality countries only: most units wins and `majority` is not the goal.
+    val plurality: Boolean? = null)
 @Serializable data class NativeReportPoint(val turn: Int, val value: Double)
 @Serializable data class NativeDecisiveContest(val id: String, val name: String, val finalPlayerShare: Double,
     val marginPts: Double, val won: Boolean)
@@ -84,8 +86,12 @@ object NativeReplay {
         })
         fun partySeries(party: NativeReplayParty, value: (NativeReplayStanding) -> Double) = NativeTrendSeries(party.name, party.color,
             snapshots.mapNotNull { snap -> snap.standings.firstOrNull { it.id == party.id }?.let { NativeTrendPoint(snap.turn, value(it)) } })
+        // Plurality: no fixed line, so the reference is the strongest rival's final count.
+        val rivalFinal = snapshots.lastOrNull()?.standings?.filter { it.id != log.playerId }?.maxOfOrNull { it.units } ?: 0
+        val (reference, referenceLabel) = if (log.plurality == true) rivalFinal.toDouble() to "most ${log.unitLabel} wins"
+            else log.majority.toDouble() to "${log.majority} to win"
         val charts = mutableListOf(
-            NativeTrendChart("replay-units", "Projected ${log.unitLabel}", 0.0, log.unitTotal.toDouble(), log.majority.toDouble(), "${log.majority} to win",
+            NativeTrendChart("replay-units", "Projected ${log.unitLabel}", 0.0, log.unitTotal.toDouble(), reference, referenceLabel,
                 log.parties.map { partySeries(it) { row -> row.units.toDouble() } }),
             NativeTrendChart("replay-polls", "National vote shares (%)", 0.0, 100.0, 50.0, "50%",
                 log.parties.map { partySeries(it) { row -> row.poll * 100 } }),
@@ -124,7 +130,7 @@ object NativeReplay {
         val log = NativeReplayLog(engine = if (uk != null) "uk" else "country",
             scenarioId = uk?.electionId ?: "${country!!.countryId}-${country.electionId}",
             playerId = uk?.playerParty ?: country!!.playerParty, unitLabel = bundle?.unitNamePlural ?: "seats",
-            unitTotal = majority.total, majority = majority.threshold, totalTurns = uk?.totalTurns ?: country!!.totalTurns, mode = mode,
+            unitTotal = majority.total, majority = majority.threshold, plurality = majority.plurality, totalTurns = uk?.totalTurns ?: country!!.totalTurns, mode = mode,
             parties = ids.map { id ->
                 val party = bundle?.system?.parties?.firstOrNull { it.id == id } ?: PARTY_BY_ID[id]
                 NativeReplayParty(id, party?.name ?: id, party?.color ?: "#888")

@@ -22,7 +22,8 @@ difficulty and regenerate the native data.
 
 New Zealand (`src/content/countries/newZealand.ts`) was built this way and is the reference to
 copy. Germany is the other mixed-member proportional example; Canada and Australia are
-first past the post and preferential; France is a two-round runoff.
+first past the post and preferential; France is a two-round runoff; Mexico is a single-round
+plurality presidency (`plurality: true`, section 5).
 
 ## Contents
 
@@ -255,6 +256,27 @@ a bundle are rejected by the native exporter.
   `{largest}`. Missing kinds use the default text.
 - **`runoff: true`**: presidential two-round framing (France): national broadcasts by default,
   "wins the presidency", runoff vote movement.
+- **`plurality: true`**: single-round plurality (Mexico's presidency). The party with the most
+  units wins outright: no threshold, no coalition step, never hung. Use it with
+  `coalitions: { none: true }`, no `abstaining` parties and no `runoff`. Both engines read it
+  through `majorityFor`, which adds `plurality: true` to the majority rule:
+  - **Winner.** Most units. A tie on units goes to the higher national vote share; an exact tie
+    on units and votes goes to the party that comes first in the result order (the order of
+    the region tables). The government is always kind `majority`, so write a
+    `governmentText.majority` template such as `"{party} wins the presidency with {seats} points."`.
+  - **Score.** The unit margin is the lead over the strongest rival (+6 for first by six, -6 for
+    second by six), not units minus the threshold. The server validates with the same rule.
+  - **Screens.** The desk bar marks the lead needed ("to lead") instead of "51 to win", the
+    results say "Wins presidency" with a "MOST VOTES WINS" line, and election night projects the
+    winner once its lead beats every rival plus all units still out.
+  - **`majority`.** Still required. Set `threshold` to the strict majority of `total` for
+    reference; nothing uses it to decide the winner, and the completeness suite does not apply
+    the strict-majority rule to plurality countries. Instead it checks that the real winner
+    (most units in the tables) is unique, wins outright under neutral play and also leads the
+    national vote, and that no goal or result copy mentions a majority.
+  - **Results data.** Points follow votes. Split the 100 points nationally by valid votes first,
+    then across regions (biproportional, as for proportional systems) so the national points
+    order matches the real vote even in a near tie.
 - **`goalHint`**: the native campaign coach's goal line, with `{majority}` and `{total}`.
 - **Ids are free-form.** Party, bloc and region ids are plain lowercase strings. A new country
   can bring bloc ids no other country uses (New Zealand has `maori` and `pasifika`), parties that
@@ -295,6 +317,7 @@ npx tsx apps/native/scripts/export-ask-vectors.ts
 npx tsx apps/native/scripts/export-reveal-vectors.ts
 npx tsx apps/native/scripts/export-daily-percentiles.ts
 npx tsx apps/native/scripts/export-editor-vectors.ts
+npx tsx apps/native/scripts/export-plurality-vectors.ts
 ```
 
 `native:content` writes `countries/<code>.json`, adds the map to `maps.json`, and adds the
@@ -330,6 +353,7 @@ npx tsx apps/native/scripts/export-ask-vectors.ts --check
 npx tsx apps/native/scripts/export-reveal-vectors.ts --check
 npx tsx apps/native/scripts/export-daily-percentiles.ts --check
 npx tsx apps/native/scripts/export-editor-vectors.ts --check
+npx tsx apps/native/scripts/export-plurality-vectors.ts --check
 ```
 
 Native: `./gradlew :shared:jvmTest` (from `apps/native`, through the shared check queue on the
@@ -357,8 +381,12 @@ registered country and election for:
 - government text and goal hint placeholders are ones the engines fill for that kind, and no
   event headline uses `{party}` twice;
 - every region has a map shape (M/L/Z only) and a unique tile; no stray shapes;
-- per election: region seats sum to the chamber, the threshold is a strict majority, vote shares
-  sum to about 1, no party wins seats with no votes, every region has results;
+- per election: region seats sum to the chamber, the threshold is a strict majority (not
+  checked for `plurality` countries), vote shares sum to about 1, no party wins seats with no
+  votes, every region has results;
+- plurality countries: no runoff, no coalitions, no abstaining parties, no effective threshold,
+  a `governmentText.majority` template, no majority wording in goal or result copy, and under
+  neutral play the real winner wins outright and leads the national vote;
 - per election: salience, at least five story beats with a scheduled one, unique event ids,
   leaders for every playable party;
 - neutral play reproduces the real seats within 2 per party;

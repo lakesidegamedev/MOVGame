@@ -142,7 +142,7 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
         val summary = resultSummary() ?: return null
         val rows = standings()
         val facts = multipartyScoreFacts(rows.associate { it.partyId to it.units }, rows.associate { it.partyId to it.voteShare },
-            playerParty(), majority(), totalUnits(), summary.difficulty)
+            playerParty(), majority(), totalUnits(), summary.difficulty, isPlurality())
         return EngineJson.encodeToString(NativeScoreSubmission(
             scenarioId = nativeElections.first { it.country == countryId() && it.nativeId == electionId() }.scenarioId,
             difficulty = summary.difficulty, score = summary.score, facts = facts,
@@ -173,6 +173,18 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
     fun availableFunds(): Double = (funds() - plannedSpend()).coerceAtLeast(0.0)
     fun majority(): Int = uk?.let { majorityForUk(it).threshold } ?: majorityFor(country!!, bundle()!!).threshold
     fun totalUnits(): Int = uk?.let { majorityForUk(it).total } ?: majorityFor(country!!, bundle()!!).total
+    // Single-round plurality country (Mexico): most units wins, no majority line.
+    fun isPlurality(): Boolean = bundle()?.plurality == true
+    // One-line goal under the seat bar.
+    fun goalLine(): String = if (isPlurality()) "Most ${unitName()} wins: finish ahead of every rival"
+        else "${majority()} of ${totalUnits()} ${unitName()} to win outright"
+    // Label for the result margin (score facts unitMargin).
+    fun marginLabel(): String = if (isPlurality()) "lead over the runner-up" else "${unitName()} above majority"
+    // Whether a final unit count meets the goal. Plurality: the player finished first.
+    fun reachedGoal(units: Int): Boolean = if (isPlurality()) {
+        val government = country?.let { (it.result ?: projectCountry(it, bundle()!!)).government }
+        government is Government.Majority && government.party == playerParty()
+    } else units >= majority()
     fun goalText(): String = (bundle()?.goalHint ?: "Reach {majority} of {total} seats. A hung parliament can produce a coalition, confidence and supply, or minority government.")
         .replace("{majority}", majority().toString()).replace("{total}", totalUnits().toString())
 
@@ -202,7 +214,7 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
         if (!isOver()) return null
         val rows = standings()
         val facts = multipartyScoreFacts(rows.associate { it.partyId to it.units }, rows.associate { it.partyId to it.voteShare },
-            playerParty(), majority(), totalUnits(), uk?.difficulty ?: country?.difficulty ?: "normal")
+            playerParty(), majority(), totalUnits(), uk?.difficulty ?: country?.difficulty ?: "normal", isPlurality())
         return NativeResultSummary(computeScoreFromFacts(facts), facts.difficulty, facts.unitMargin.toInt(), facts.popularMargin, true)
     }
 
@@ -318,7 +330,8 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
             ?: country!!.let { (it.result ?: projectCountry(it, bundle()!!)).government }
         bundle()?.let { countryGovernmentText(it, government, ::name) }?.let { return it }
         return when (government) {
-            is Government.Majority -> "${name(government.party)} forms a majority government with ${government.seats} seats."
+            is Government.Majority -> if (isPlurality()) "${name(government.party)} finishes first with ${government.seats} ${unitName()}."
+                else "${name(government.party)} forms a majority government with ${government.seats} seats."
             is Government.Coalition -> "${government.parties.joinToString(" and ", transform = ::name)} form a coalition with ${government.seats} seats."
             is Government.ConfidenceSupply -> "${name(government.lead)} governs with confidence and supply from ${name(government.partner)}."
             is Government.Minority -> "${name(government.party)} forms a minority government with ${government.seats} seats."

@@ -207,6 +207,9 @@ data class CountryBundle(
     val governmentText: Map<String, String> = emptyMap(),
     // Presidential two-round runoff (France).
     val runoff: Boolean = false,
+    // Single-round plurality (Mexico): most units wins outright, no threshold
+    // and no coalition step. Mirrors CountryBundle.plurality in countryGame.ts.
+    val plurality: Boolean = false,
     // Longer goal line for the campaign coach: {majority} and {total} placeholders.
     val goalHint: String? = null,
 )

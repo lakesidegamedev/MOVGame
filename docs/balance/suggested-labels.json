@@ -94,6 +94,11 @@
     "fr-2002": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "fr-1995": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "fr-1988": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
-    "fr-1981": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
+    "fr-1981": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "mx-2024": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "mx-2018": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "mx-2012": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "mx-2006": { "suggested": "medium", "authored": "hard", "underdogWinRate": 0.4 },
+    "mx-2000": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
   }
 }

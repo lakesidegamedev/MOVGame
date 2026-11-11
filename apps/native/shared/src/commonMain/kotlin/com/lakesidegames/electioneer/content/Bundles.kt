@@ -229,6 +229,7 @@ private data class CountryBundleWire(
     val coalitions: CoalitionRules? = null,
     val governmentText: Map<String, String> = emptyMap(),
     val runoff: Boolean = false,
+    val plurality: Boolean = false,
     val goalHint: String? = null,
 ) {
     fun toBundle(): CountryBundle = CountryBundle(
@@ -238,7 +239,7 @@ private data class CountryBundleWire(
         defaultSeatElasticity = defaultSeatElasticity, issues = issues, blocs = blocs,
         regions = regions, elections = elections, leaders = leaders, events = events,
         eventChance = eventChance, coalitions = coalitions, governmentText = governmentText,
-        runoff = runoff, goalHint = goalHint,
+        runoff = runoff, plurality = plurality, goalHint = goalHint,
     )
 }
 
