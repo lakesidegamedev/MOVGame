@@ -196,6 +196,7 @@
   --border-bright: var(--border-strong);
   --text: var(--text-1);
   --text-body: var(--text-2);
+  --text-strong: var(--text-1);
   --muted: var(--text-3);
   --glass-bg: var(--surface-1);
   --glass-blur: 0px;

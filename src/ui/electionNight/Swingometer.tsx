@@ -2,6 +2,7 @@
 // Positive values lean toward leftLabel; negative toward rightLabel.
 // (US: pass Dem−Rep so a Dem lead tips left.) Clamped to ±maxAbs.
 import { useEffect, useState } from "react";
+import { partyFill, partyInk } from "@ui/colors";
 
 function prefersReduced(): boolean {
   return (
@@ -58,9 +59,9 @@ export function Swingometer({
         <svg viewBox="0 0 200 110" className="ens-swing-svg">
           <defs>
             <linearGradient id="ens-swing-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={leftColor} />
+              <stop offset="0%" stopColor={partyFill(leftColor)} />
               <stop offset="50%" stopColor="#94a3b8" />
-              <stop offset="100%" stopColor={rightColor} />
+              <stop offset="100%" stopColor={partyFill(rightColor)} />
             </linearGradient>
           </defs>
           <path
@@ -80,11 +81,11 @@ export function Swingometer({
         </svg>
       </div>
       <div className="ens-swing-labels">
-        <span style={{ color: leftColor }}>{leftLabel}</span>
+        <span style={{ color: partyInk(leftColor) }}>{leftLabel}</span>
         <span className="ens-swing-value">
           {sign}{absStr} {unitLabel}
         </span>
-        <span style={{ color: rightColor }}>{rightLabel}</span>
+        <span style={{ color: partyInk(rightColor) }}>{rightLabel}</span>
       </div>
     </div>
   );

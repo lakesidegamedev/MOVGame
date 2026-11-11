@@ -1,6 +1,13 @@
-.results { max-width: 900px; width: 100%; }
+.results { width: 100%; max-width: var(--desk-max); }
 .bigresult { text-align: center; margin-bottom: 18px; }
-.bigresult .tag { letter-spacing: 3px; color: var(--gold); }
-.bigresult .who { font-size: 34px; font-weight: 900; }
-.bigresult .ev { font-size: 60px; font-weight: 900; line-height: 1; font-family: var(--font-mono);
+.bigresult .tag { letter-spacing: var(--tracking-label); color: var(--gold); }
+.bigresult .who { font-size: var(--fs-3xl); font-weight: var(--fw-heavy); }
+.bigresult .ev { font-size: 60px; font-weight: var(--fw-heavy); line-height: 1; font-variant-numeric: tabular-nums;
   font-variant-numeric: tabular-nums; }
+
+/* ── Score card (all engines) ────────────────────────────────────────── */
+.score-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-3); }
+.score-eyebrow { display: inline-flex; align-items: center; gap: var(--space-1-5); color: var(--warning); margin-bottom: var(--space-1); }
+.score-value { font-size: var(--fs-3xl); font-weight: var(--fw-heavy); line-height: var(--lh-tight); letter-spacing: -0.02em; }
+.score-max { font-size: var(--fs-lg); font-weight: var(--fw-semibold); color: var(--text-3); letter-spacing: 0; }
+.results-map { max-height: 60vh; margin-top: var(--space-2); }

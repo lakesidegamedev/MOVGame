@@ -16,7 +16,7 @@ import { StatsScreen } from "./StatsScreen";
 import { WhyReport } from "./WhyReport";
 import { TimelineView } from "./TimelineView";
 import { pct, votes } from "./format";
-import { Trophy, Lock } from "lucide-react";
+import { Trophy, Lock, Award } from "lucide-react";
 import { ElectionNight, hasSeenReveal, revealSupported } from "./electionNight/ElectionNight";
 import { ElectionNightShell } from "./electionNight/ElectionNightShell";
 import { StateCallGrid } from "./electionNight/StateCallGrid";
@@ -180,7 +180,7 @@ export function ResultsScreen() {
                   blurb: `${next.blurb}${!unlocked ? " · part of the United States bundle" : ""}`,
                   unlocked,
                   ctaLabel: `Play ${nextMeta.year} →`,
-                  lockLabel: `🔒 Unlock ${nextMeta.year}`,
+                  lockLabel: `Unlock ${nextMeta.year}`,
                   onPlay: () =>
                     newGame({
                       seed: String(Date.now()),
@@ -258,17 +258,17 @@ export function ResultsScreen() {
           )}
 
           <div className="card">
-            <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-              <h3 style={{ margin: 0 }}>{done ? "Final Map" : "Election Night"}</h3>
-              <div className="row" style={{ gap: 6 }}>
-                <button className={`ghost small${mapMode === "geo" ? " active" : ""}`} onClick={() => setMapMode("geo")}>Geo</button>
-                <button className={`ghost small${mapMode === "square" ? " active" : ""}`} onClick={() => setMapMode("square")}>Square</button>
-                {!done && <button className="ghost small" onClick={() => setRevealed(calls.length)}>Skip ⏭</button>}
+            <div className="mapcontrols">
+              <h3>{done ? "Final Map" : "Election Night"}</h3>
+              <div className="segmented" role="group" aria-label="Map view">
+                <button aria-pressed={mapMode === "geo"} onClick={() => setMapMode("geo")}>Geo</button>
+                <button aria-pressed={mapMode === "square"} onClick={() => setMapMode("square")}>Square</button>
               </div>
+              {!done && <button className="ghost small" onClick={() => setRevealed(calls.length)}>Skip</button>}
             </div>
 
             {mapMode === "geo" ? (
-              <svg viewBox="0 0 1000 650" className="geo-map" preserveAspectRatio="xMidYMid meet" style={{ maxWidth: 640, margin: "10px auto 0" }}>
+              <svg viewBox="0 0 1000 650" className="geo-map results-map" preserveAspectRatio="xMidYMid meet">
                 {[...GRID.map((t) => t.id), ...SPLIT_UNITS.map((g) => g.ids.find((id) => id.endsWith("-AL"))).filter(Boolean) as string[]].map((id) => {
                   const sr = byState.get(id);
                   const path = STATE_PATHS[id] ?? STATE_PATHS[id.split("-")[0]];
@@ -287,7 +287,7 @@ export function ResultsScreen() {
               </svg>
             ) : (
               <>
-                <div className="tilegrid" style={{ gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`, gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`, aspectRatio: `${GRID_COLS} / ${GRID_ROWS}`, maxWidth: 560, margin: "10px auto 0" }}>
+                <div className="tilegrid" style={{ gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`, gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`, aspectRatio: `${GRID_COLS} / ${GRID_ROWS}`, "--grid-aspect": GRID_COLS / GRID_ROWS, marginTop: 10 } as React.CSSProperties}>
                   {GRID.map((t) => (
                     <div key={t.id} style={{ gridColumn: t.col + 1, gridRow: t.row + 1 }}>{tile(t.id)}</div>
                   ))}
@@ -422,13 +422,13 @@ function ScoreAndAchievements() {
         onReplay={replayDaily}
       />
       <div className="card">
-        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+        <div className="score-row">
           <div>
-            <div className="tag muted small" style={{ color: "var(--gold)", letterSpacing: "2px" }}>
-              <Trophy size={12} style={{ verticalAlign: "-2px" }} /> CAMPAIGN SCORE
+            <div className="eyebrow score-eyebrow">
+              <Trophy size={12} aria-hidden="true" /> Campaign score
             </div>
-            <div style={{ fontSize: 38, fontWeight: 800, lineHeight: 1.1 }}>
-              {score}<span className="muted" style={{ fontSize: 16, fontWeight: 600 }}> / 1000</span>
+            <div className="score-value num">
+              {score}<span className="score-max"> / 1000</span>
             </div>
             <div className="muted small">
               EV margin {evMargin >= 0 ? "+" : ""}{evMargin} · popular{" "}
@@ -463,7 +463,7 @@ function ScoreAndAchievements() {
           <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
             {earned.map((a) => (
               <span key={a.id} className="chip up" title={a.description} style={{ fontSize: 12, padding: "6px 10px" }}>
-                {a.icon} {a.name}
+                <Award size={12} aria-hidden="true" /> {a.name}
               </span>
             ))}
           </div>

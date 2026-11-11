@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { partyFill, partyInk } from "@ui/colors";
 import { useUkStore } from "@store/ukStore";
 import { useAuthStore } from "@store/authStore";
 import { api } from "@lib/api";
@@ -181,7 +182,7 @@ export function UkResults() {
                 blurb: next.blurb,
                 unlocked,
                 ctaLabel: `Play ${nextData.year} →`,
-                lockLabel: `🔒 Unlock ${nextData.year}`,
+                lockLabel: `Unlock ${nextData.year}`,
                 onPlay: () => newGame(next.id, nextParty, String(Date.now()), difficulty),
                 onUnlock: () => openModal("activate", `uk-${next.id}`),
                 mapPreview: <UkMiniMap seats={r.seats} />,
@@ -203,11 +204,11 @@ export function UkResults() {
               onReplay={replayDaily}
             />
             <div className="card">
-              <div className="row" style={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+              <div className="score-row">
                 <div>
-                  <div className="tag muted small" style={{ color: "var(--gold)", letterSpacing: "2px" }}>CAMPAIGN SCORE</div>
-                  <div style={{ fontSize: 34, fontWeight: 800 }}>
-                    {score}<span className="muted" style={{ fontSize: 15, fontWeight: 600 }}> / 1000</span>
+                  <div className="eyebrow score-eyebrow">Campaign score</div>
+                  <div className="score-value num">
+                    {score}<span className="score-max"> / 1000</span>
                   </div>
                   <div className="muted small">
                     Seat margin {facts.unitMargin >= 0 ? "+" : ""}{Math.round(facts.unitMargin)} vs {maj.threshold}
@@ -274,12 +275,12 @@ export function UkResults() {
           <h3>Final standings</h3>
           {order.map((p) => (
             <div className="bloc" key={p}>
-              <span className="name" style={{ color: p === game.playerParty ? partyColor(p) : undefined }}>
-                <span style={{ display: "inline-block", width: 10, height: 10, background: partyColor(p), borderRadius: 2, marginRight: 6 }} />
+              <span className="name" style={{ color: p === game.playerParty ? partyInk(partyColor(p)) : undefined }}>
+                <span className="swatch" style={{ "--party": partyFill(partyColor(p)) } as React.CSSProperties} />
                 {partyShort(p)}
               </span>
               <span className="meta">{r.seats[p]} seats · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
-              <div className="suppbar"><div style={{ width: `${(r.seats[p] / maj.total) * 100 * 1.6}%`, background: partyColor(p) }} /></div>
+              <div className="suppbar"><div style={{ width: `${(r.seats[p] / maj.total) * 100 * 1.6}%`, background: partyFill(partyColor(p)) }} /></div>
             </div>
           ))}
         </div>
