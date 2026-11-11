@@ -378,8 +378,11 @@ results and keep a note of your sources in the file header.
    elections their own `majority` if they lack one.
 2. Add new parties to `system.parties` (and `playable` if they can be led). Existing party ids
    never change.
-3. Add a row to the module's `scenarios` in date order (newest first). The new scenario id is
-   `<code>-<electionId>`; never change an existing row's id.
+3. Add a row to the module's `scenarios` in date order (newest first), after the shipped rows,
+   with `addedLater: true`. The new scenario id is `<code>-<electionId>`; never change an
+   existing row's id. `addedLater` makes the registry list the row after every other row, so the
+   shipped registry prefix and the daily challenge's frozen classic pool do not move (the pin test
+   enforces both).
 4. Add the election to `next.chain` in chronological position.
 5. Rerun the completeness suite, the gauntlet for that country
    (`GAUNTLET_COUNTRIES=XX WRITE_REGISTRY=1 ...`), and the native regeneration in section 7.

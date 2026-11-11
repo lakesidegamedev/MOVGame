@@ -12,6 +12,30 @@
 // and the incumbent right finalist Sarkozy (UMP) onto `rn`: a left-vs-right
 // runoff, not a centre-vs-far-right one. The leaders and labels carry the real
 // identities; the far right (Le Pen) is a first-round casualty that turn.
+//
+// Five older runoffs were added later: 2007 (Sarkozy 53.06 / Royal 46.94),
+// 2002 (Chirac 82.21 / Le Pen 17.79), 1995 (Chirac 52.64 / Jospin 47.36),
+// 1988 (Mitterrand 54.02 / Chirac 45.98) and 1981 (Mitterrand 51.76 / Giscard
+// 48.24). Slots follow the 2012 convention for left-right runoffs: `ens` is
+// the left finalist (Royal, Jospin, Mitterrand) and `rn` the right finalist
+// (Sarkozy, Chirac, Giscard). 2002 is the exception that matches 2017 and
+// 2022: `ens` is the outgoing president Chirac and `rn` is Jean-Marie Le Pen
+// of the Front National, the party that later became the Rassemblement
+// National. In 2002 Jospin finished third, so the first-round shock is an
+// event and the runoff is Chirac against Le Pen.
+//
+// Regional runoff shares: 2007, 2002 and 1995 are the official second-round
+// results by region (Interior Ministry, via the per-region tables), grouped
+// from the old regions into the thirteen regions used here. For 1995 the
+// Corse and overseas group uses Corsica plus the four overseas departments in
+// the ministry file. The 1988 and 1981 official second-round figures by region
+// were not available, so those two maps are derived: the real first-round
+// result by department (France-politique archive, weighted by votes cast) is
+// pushed through that year's transfer matrix, with one uniform shift so the
+// national result matches the real runoff. Their regional shares are
+// therefore modelled, not official. Points (`s`) split each region's pool by
+// its runoff share, rounded so the national total matches the real runoff.
+
 
 import type { CountryBundle } from "@engine/countryGame";
 import { countryModule } from "./types";
@@ -30,6 +54,36 @@ export const FR_FIRST_ROUND: Record<string, RoundShares> = {
   // Bayrou 9.1. `ens` = Hollande (PS), `rn` = Sarkozy (UMP); here `lr` carries
   // the eliminated Le Pen (FN) vote that breaks to the right finalist.
   "2012": { ens: 0.286, rn: 0.272, lfi: 0.111, lr: 0.179, other: 0.152 },
+  // 2007 first round: Sarkozy 31.2, Royal 25.9, Bayrou 18.6, Le Pen 10.4,
+  // Besancenot 4.1, de Villiers 2.2, Buffet 1.9, Voynet 1.6, Laguiller 1.3,
+  // Bové 1.3, Nihous 1.2, Schivardi 0.3. `ens` = Royal, `rn` = Sarkozy;
+  // `lfi` = the left candidates, `lr` = Le Pen and de Villiers, `other` =
+  // Bayrou and Nihous.
+  "2007": { ens: 0.2587, rn: 0.3118, lfi: 0.1057, lr: 0.1267, other: 0.1972 },
+  // 2002 first round: Chirac 19.9, Le Pen 16.9, Jospin 16.2, Bayrou 6.8,
+  // Laguiller 5.7, Chevenement 5.3, Mamere 5.3, Besancenot 4.3, Saint-Josse
+  // 4.2, Madelin 3.9, Hue 3.4, Megret 2.3, Taubira 2.3, Lepage 1.9, Boutin
+  // 1.2, Gluckstein 0.5. `ps` = Jospin, `gauche_rad` = Laguiller, Besancenot,
+  // Hue and Gluckstein, `gauche_plur` = Chevenement, Mamere and Taubira,
+  // `centre_droit` = Bayrou and Madelin, `other` = Saint-Josse, Lepage, Boutin
+  // and Megret.
+  "2002": { ens: 0.1988, rn: 0.1686, ps: 0.1618, gauche_rad: 0.1381, gauche_plur: 0.1290, centre_droit: 0.1075, other: 0.0964 },
+  // 1995 first round: Jospin 23.3, Chirac 20.8, Balladur 18.6, Le Pen 15.0,
+  // Hue 8.6, Laguiller 5.3, de Villiers 4.7, Voynet 3.3, Cheminade 0.3.
+  // `ens` = Jospin, `rn` = Chirac; `lr` = Balladur, `fn` = Le Pen and de
+  // Villiers, `lfi` = Hue, Laguiller, Voynet and Cheminade.
+  "1995": { ens: 0.2330, rn: 0.2084, lr: 0.1858, fn: 0.1974, lfi: 0.1754 },
+  // 1988 first round: Mitterrand 34.1, Chirac 19.9, Barre 16.5, Le Pen 14.4,
+  // Lajoinie 6.8, Waechter 3.8, Juquin 2.1, Laguiller 2.0, Boussel 0.4.
+  // `ens` = Mitterrand, `rn` = Chirac; `lr` = Barre, `fn` = Le Pen, `lfi` =
+  // the four left and green candidates.
+  "1988": { ens: 0.3411, rn: 0.1994, lr: 0.1654, fn: 0.1439, lfi: 0.1501 },
+  // 1981 first round: Giscard 28.3, Mitterrand 25.9, Chirac 18.0, Marchais
+  // 15.4, Lalonde 3.9, Laguiller 2.3, Crepeau 2.2, Debre 1.7, Garaud 1.3,
+  // Bouchardeau 1.1. `ens` = Mitterrand, `rn` = Giscard; `lr` = Chirac, Debre
+  // and Garaud, `lfi` = Marchais, Laguiller and Bouchardeau, `other` = Lalonde
+  // and Crepeau.
+  "1981": { ens: 0.2585, rn: 0.2832, lr: 0.2100, lfi: 0.1875, other: 0.0609 },
 };
 
 /** Bloc-transfer matrices from eliminated first-round candidates into the runoff. */
@@ -59,6 +113,45 @@ export const FR_TRANSFERS: Record<string, TransferMatrix> = {
     lfi: { ens: 0.80, rn: 0.06, _abstain: 0.14 },
     lr: { ens: 0.20, rn: 0.60, _abstain: 0.20 },
     other: { ens: 0.42, rn: 0.38, _abstain: 0.20 },
+  },
+  // 2007: the left breaks for Royal, Le Pen's voters mostly for Sarkozy, and
+  // Bayrou's voters split almost evenly.
+  "2007": {
+    lfi: { ens: 0.80, rn: 0.05, _abstain: 0.15 },
+    lr: { ens: 0.07, rn: 0.72, _abstain: 0.21 },
+    other: { ens: 0.38, rn: 0.37, _abstain: 0.25 },
+  },
+  // 2002: rows are net of the surge in turnout between rounds (abstention fell
+  // from 28 to 20 percent), so they run higher than raw switching. Even so the
+  // model understates the 82 percent landslide, which the authored regional
+  // shares carry exactly.
+  "2002": {
+    ps: { ens: 0.98, rn: 0.00, _abstain: 0.02 },
+    gauche_rad: { ens: 0.93, rn: 0.02, _abstain: 0.05 },
+    gauche_plur: { ens: 0.96, rn: 0.01, _abstain: 0.03 },
+    centre_droit: { ens: 0.96, rn: 0.02, _abstain: 0.02 },
+    other: { ens: 0.74, rn: 0.18, _abstain: 0.08 },
+  },
+  // 1995: Balladur's voters mostly follow him to Chirac, Le Pen's voters
+  // split between Chirac and the couch, the left breaks for Jospin.
+  "1995": {
+    lfi: { ens: 0.86, rn: 0.03, _abstain: 0.11 },
+    lr: { ens: 0.10, rn: 0.76, _abstain: 0.14 },
+    fn: { ens: 0.13, rn: 0.60, _abstain: 0.27 },
+  },
+  // 1988: Barre's centrists and Le Pen's voters go to Chirac in large numbers,
+  // the Communists and Greens to Mitterrand, but the right falls just short.
+  "1988": {
+    lfi: { ens: 0.90, rn: 0.03, _abstain: 0.07 },
+    lr: { ens: 0.17, rn: 0.71, _abstain: 0.12 },
+    fn: { ens: 0.05, rn: 0.80, _abstain: 0.15 },
+  },
+  // 1981: Chirac's Gaullists mostly follow him to Giscard, the Communists and
+  // ecologists to Mitterrand, which is just enough.
+  "1981": {
+    lfi: { ens: 0.86, rn: 0.04, _abstain: 0.10 },
+    lr: { ens: 0.16, rn: 0.74, _abstain: 0.10 },
+    other: { ens: 0.60, rn: 0.12, _abstain: 0.28 },
   },
 };
 
@@ -283,6 +376,179 @@ export const FRANCE: CountryBundle = {
         { id: "meeting_droite_2012", headline: "A giant Concorde rally and a hard pivot to the right rally the incumbent's {party} base in the final days", role: "any", party: "rn", weight: 2, appeal: 0.02, momentum: 5 },
       ],
     },
+
+    "2007": {
+      id: "2007",
+      year: 2007,
+      label: "2007 · Sarkozy v. Royal",
+      // ens = Royal (Parti socialiste); rn = Sarkozy (UMP). A left-vs-right runoff mapped onto the bundle's two slots, as in 2012.
+      tagline: "May 6, 2007. A former interior minister who promises a break with twelve years of Chirac against the first woman to reach a presidential runoff. Bayrou's eighteen percent has no home, Le Pen's voters are being courted openly, and one debate is the only head-to-head of the campaign.",
+      salience: { cost_of_living: 0.85, security: 0.7, immigration_identity: 0.65, public_services: 0.55, europe: 0.45, pensions: 0.45 },
+      regions: {
+        HDF:  { v: { ens: 0.484, rn: 0.516 }, s: { ens: 4, rn: 5 } },
+        NOR:  { v: { ens: 0.467, rn: 0.533 }, s: { ens: 2, rn: 3 } },
+        GE:   { v: { ens: 0.409, rn: 0.591 }, s: { ens: 3, rn: 5 } },
+        BRE:  { v: { ens: 0.526, rn: 0.474 }, s: { ens: 3, rn: 2 } },
+        PDL:  { v: { ens: 0.483, rn: 0.517 }, s: { ens: 3, rn: 3 } },
+        IDF:  { v: { ens: 0.475, rn: 0.525 }, s: { ens: 9, rn: 9 } },
+        BFC:  { v: { ens: 0.452, rn: 0.548 }, s: { ens: 2, rn: 2 } },
+        CVL:  { v: { ens: 0.45, rn: 0.55 }, s: { ens: 2, rn: 2 } },
+        NAQ:  { v: { ens: 0.519, rn: 0.481 }, s: { ens: 5, rn: 4 } },
+        ARA:  { v: { ens: 0.451, rn: 0.549 }, s: { ens: 5, rn: 7 } },
+        OCC:  { v: { ens: 0.498, rn: 0.502 }, s: { ens: 4, rn: 5 } },
+        PACA: { v: { ens: 0.382, rn: 0.618 }, s: { ens: 3, rn: 5 } },
+        COM:  { v: { ens: 0.536, rn: 0.464 }, s: { ens: 2, rn: 1 } },
+      },
+      events: [
+        { id: "tour_un_2007", headline: "Sarkozy tops round one by five points, and {party} needs nearly every Bayrou and left-wing voter to catch him", role: "any", party: "ens", weight: 3, appeal: -0.015, momentum: -4, turn: 0 },
+        { id: "identite_nationale_2007", headline: "Sarkozy's pitch for a Ministry of Immigration and National Identity pulls Le Pen voters into his column, and {party} collects them", role: "any", party: "rn", weight: 3, appeal: 0.03, momentum: 7, turn: 1 },
+        { id: "bayrou_royal_2007", headline: "Bayrou says he will not vote for Sarkozy and talks with Royal in public. He endorses no one, but part of his vote moves to {party}", role: "any", party: "ens", weight: 3, appeal: 0.025, momentum: 7, turn: 2 },
+        { id: "travailler_plus_2007", headline: "'Work more to earn more': the tax-free overtime pledge fills halls in factory towns for {party}", role: "any", party: "rn", weight: 3, appeal: 0.025, momentum: 6, turn: 3 },
+        { id: "debat_colere_2007", headline: "In the entre-deux-tours debate Royal's flash of anger over disabled children's schooling lets Sarkozy play the calm one, and {party} pays", role: "any", party: "ens", weight: 4, appeal: -0.03, momentum: -8, turn: 4 },
+        { id: "royal_derniere_semaine_2007", headline: "Royal's closing message warns that a Sarkozy presidency would divide the country, and {party} brings out the left's last reserves", role: "any", party: "ens", weight: 3, appeal: 0.02, momentum: 5, turn: 5 },
+        { id: "gare_du_nord_2007", headline: "A riot after a ticket check at the Gare du Nord puts security on the front pages, and the ground favours {party}", role: "any", party: "rn", weight: 2, appeal: 0.025, momentum: 6 },
+        { id: "royal_gaffes_2007", headline: "Royal's off-script remarks on trips abroad and the Socialist party's quarrels dent {party}'s image of competence", role: "any", party: "ens", weight: 2, appeal: -0.025, momentum: -6 },
+      ],
+    },
+
+    "2002": {
+      id: "2002",
+      year: 2002,
+      label: "2002 · Chirac v. Le Pen",
+      // ens = Chirac (the outgoing president); rn = Jean-Marie Le Pen (Front National, the party that later became the Rassemblement National). The first-round shock is the opening event.
+      tagline: "April 21, 2002. Prime Minister Jospin finished third and is out, and for the first time a candidate of the Front National stands in a presidential runoff. Jean-Marie Le Pen's party wants sharply lower immigration and priority for French citizens in jobs and housing. Two weeks of street protest, a president who has to win big, and a vote that will not feel like a normal election.",
+      salience: { security: 0.95, immigration_identity: 0.7, cost_of_living: 0.45, public_services: 0.4, europe: 0.35, pensions: 0.3 },
+      regions: {
+        HDF:  { v: { ens: 0.775, rn: 0.225 }, s: { ens: 7, rn: 2 } },
+        NOR:  { v: { ens: 0.824, rn: 0.176 }, s: { ens: 4, rn: 1 } },
+        GE:   { v: { ens: 0.787, rn: 0.213 }, s: { ens: 6, rn: 2 } },
+        BRE:  { v: { ens: 0.886, rn: 0.114 }, s: { ens: 5, rn: 0 } },
+        PDL:  { v: { ens: 0.877, rn: 0.123 }, s: { ens: 5, rn: 1 } },
+        IDF:  { v: { ens: 0.856, rn: 0.144 }, s: { ens: 15, rn: 3 } },
+        BFC:  { v: { ens: 0.805, rn: 0.195 }, s: { ens: 3, rn: 1 } },
+        CVL:  { v: { ens: 0.821, rn: 0.179 }, s: { ens: 3, rn: 1 } },
+        NAQ:  { v: { ens: 0.858, rn: 0.142 }, s: { ens: 8, rn: 1 } },
+        ARA:  { v: { ens: 0.819, rn: 0.181 }, s: { ens: 10, rn: 2 } },
+        OCC:  { v: { ens: 0.803, rn: 0.197 }, s: { ens: 7, rn: 2 } },
+        PACA: { v: { ens: 0.723, rn: 0.277 }, s: { ens: 6, rn: 2 } },
+        COM:  { v: { ens: 0.892, rn: 0.108 }, s: { ens: 3, rn: 0 } },
+      },
+      events: [
+        { id: "choc_21_avril_2002", headline: "Le Pen takes second place in round one, about 200,000 votes ahead of the prime minister, and the country wakes up to a runoff nobody planned for", role: "any", party: "rn", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
+        { id: "manifestations_2002", headline: "Protests against Le Pen fill the streets of every large city, school students lead them, and {party} is the beneficiary of the front républicain", role: "any", party: "ens", weight: 3, appeal: 0.03, momentum: 9, turn: 1 },
+        { id: "jospin_retrait_2002", headline: "Jospin retires from politics on election night. The Socialists, Greens and Communists tell their voters to back Chirac, and {party} gains the left's votes", role: "any", party: "ens", weight: 3, appeal: 0.035, momentum: 9, turn: 2 },
+        { id: "refus_debat_2002", headline: "Chirac refuses a televised debate with Le Pen, and the challenger's campaign is left without its big stage. A hit to {party}", role: "any", party: "rn", weight: 3, appeal: -0.025, momentum: -6, turn: 3 },
+        { id: "premier_mai_2002", headline: "May Day brings roughly a million people into the streets against Le Pen, and the Front National answers with its Joan of Arc parade, a test of {party}'s turnout", role: "any", party: "rn", weight: 3, appeal: 0.01, momentum: 3, turn: 4 },
+        { id: "derniere_ligne_droite_2002", headline: "Polls give Chirac a huge lead and his team fears complacency. A last push to turn out, and {party} has to keep a landslide from becoming an abstention story", role: "any", party: "ens", weight: 3, appeal: 0.015, momentum: 4, turn: 5 },
+        { id: "voter_escroc_2002", headline: "Banners read 'vote for the crook, not the fascist' as left-wing voters hold their noses. The win comes with less warmth for {party}", role: "any", party: "ens", weight: 2, appeal: -0.02, momentum: -6 },
+        { id: "insecurite_2002", headline: "Crime reports have led the news for weeks, and the debate stays on the ground where {party} is strongest", role: "any", party: "rn", weight: 2, appeal: 0.02, momentum: 5 },
+      ],
+    },
+
+    "1995": {
+      id: "1995",
+      year: 1995,
+      label: "1995 · Chirac v. Jospin",
+      // ens = Jospin (Parti socialiste); rn = Chirac (RPR). A left-vs-right runoff mapped onto the bundle's two slots, as in 2012.
+      tagline: "May 7, 1995. Mitterrand is leaving after fourteen years. The right split between Chirac and his own prime minister Balladur, and the Socialist Jospin topped round one with a party that expected to lose. Chirac, on his third try, promises to heal the 'social fracture'. Jospin promises to keep what worked under Mitterrand and drop the rest.",
+      salience: { public_services: 0.7, cost_of_living: 0.8, security: 0.5, immigration_identity: 0.45, europe: 0.45, pensions: 0.4 },
+      regions: {
+        HDF:  { v: { ens: 0.541, rn: 0.459 }, s: { ens: 5, rn: 4 } },
+        NOR:  { v: { ens: 0.483, rn: 0.517 }, s: { ens: 2, rn: 3 } },
+        GE:   { v: { ens: 0.466, rn: 0.534 }, s: { ens: 4, rn: 4 } },
+        BRE:  { v: { ens: 0.496, rn: 0.504 }, s: { ens: 2, rn: 3 } },
+        PDL:  { v: { ens: 0.457, rn: 0.543 }, s: { ens: 3, rn: 3 } },
+        IDF:  { v: { ens: 0.439, rn: 0.561 }, s: { ens: 8, rn: 10 } },
+        BFC:  { v: { ens: 0.485, rn: 0.515 }, s: { ens: 2, rn: 2 } },
+        CVL:  { v: { ens: 0.474, rn: 0.526 }, s: { ens: 2, rn: 2 } },
+        NAQ:  { v: { ens: 0.491, rn: 0.509 }, s: { ens: 4, rn: 5 } },
+        ARA:  { v: { ens: 0.45, rn: 0.55 }, s: { ens: 5, rn: 7 } },
+        OCC:  { v: { ens: 0.508, rn: 0.492 }, s: { ens: 5, rn: 4 } },
+        PACA: { v: { ens: 0.414, rn: 0.586 }, s: { ens: 3, rn: 5 } },
+        COM:  { v: { ens: 0.528, rn: 0.472 }, s: { ens: 2, rn: 1 } },
+      },
+      events: [
+        { id: "tour_un_1995", headline: "Jospin tops round one at 23.3 percent. The Socialists' surprise opens a real contest, and {party} has momentum it did not expect", role: "any", party: "ens", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
+        { id: "balladur_ralliement_1995", headline: "Balladur, eliminated in round one, backs Chirac, and the right closes ranks behind {party}", role: "any", party: "rn", weight: 3, appeal: 0.03, momentum: 8, turn: 1 },
+        { id: "fracture_sociale_1995", headline: "Chirac's 'social fracture' theme wins workers and young voters the right had not reached, and {party} gains", role: "any", party: "rn", weight: 3, appeal: 0.025, momentum: 6, turn: 2 },
+        { id: "inventaire_1995", headline: "Jospin's 'right of inventory' on the Mitterrand years annoys the party's loyalists and reassures independents. {party} gains in the centre", role: "any", party: "ens", weight: 3, appeal: 0.02, momentum: 5, turn: 3 },
+        { id: "debat_1995", headline: "A sober, precise debate wins Jospin praise from commentators but few new votes, and {party} still needs a swing", role: "any", party: "ens", weight: 4, appeal: 0.01, momentum: 2, turn: 4 },
+        { id: "le_pen_pas_de_consigne_1995", headline: "Le Pen, fourth with 15 percent, refuses to endorse either finalist, and much of his vote drifts to {party} or stays home", role: "any", party: "rn", weight: 3, appeal: 0.015, momentum: 4, turn: 5 },
+        { id: "troisieme_essai_1995", headline: "A third run for the presidency: Chirac has lost before, and a campaign built on 'now or never' energises {party}", role: "any", party: "rn", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "chomage_1995", headline: "Unemployment above three million and fatigue after fourteen years of Mitterrand weigh on {party}", role: "any", party: "ens", weight: 2, appeal: -0.025, momentum: -6 },
+        { id: "balladur_rancune_1995", headline: "Balladur's loyalists give only a cold welcome to Chirac, and some of the right's vote stays home. A drag on {party}", role: "any", party: "rn", weight: 2, appeal: -0.02, momentum: -5 },
+      ],
+    },
+
+    "1988": {
+      id: "1988",
+      year: 1988,
+      label: "1988 · Mitterrand v. Chirac",
+      // ens = Mitterrand (the incumbent Socialist president); rn = Chirac (RPR, the sitting prime minister under cohabitation). A left-vs-right runoff mapped onto the bundle's two slots, as in 2012.
+      tagline: "May 8, 1988. Two years of cohabitation have left a Socialist president facing his own prime minister. Mitterrand runs above the parties with a letter to all the French; Chirac has a government record to defend and a rival on his own right. Le Pen's best score yet makes his voters the swing bloc.",
+      salience: { cost_of_living: 0.8, public_services: 0.55, security: 0.6, immigration_identity: 0.55, pensions: 0.4, europe: 0.35 },
+      regions: {
+        HDF:  { v: { ens: 0.602, rn: 0.398 }, s: { ens: 6, rn: 3 } },
+        NOR:  { v: { ens: 0.561, rn: 0.439 }, s: { ens: 3, rn: 2 } },
+        GE:   { v: { ens: 0.525, rn: 0.475 }, s: { ens: 4, rn: 4 } },
+        BRE:  { v: { ens: 0.556, rn: 0.444 }, s: { ens: 3, rn: 2 } },
+        PDL:  { v: { ens: 0.531, rn: 0.469 }, s: { ens: 3, rn: 3 } },
+        IDF:  { v: { ens: 0.513, rn: 0.487 }, s: { ens: 9, rn: 9 } },
+        BFC:  { v: { ens: 0.551, rn: 0.449 }, s: { ens: 2, rn: 2 } },
+        CVL:  { v: { ens: 0.546, rn: 0.454 }, s: { ens: 2, rn: 2 } },
+        NAQ:  { v: { ens: 0.565, rn: 0.435 }, s: { ens: 5, rn: 4 } },
+        ARA:  { v: { ens: 0.518, rn: 0.482 }, s: { ens: 6, rn: 6 } },
+        OCC:  { v: { ens: 0.566, rn: 0.434 }, s: { ens: 5, rn: 4 } },
+        PACA: { v: { ens: 0.474, rn: 0.526 }, s: { ens: 4, rn: 4 } },
+        COM:  { v: { ens: 0.541, rn: 0.459 }, s: { ens: 2, rn: 1 } },
+      },
+      events: [
+        { id: "lettre_france_unie_1988", headline: "Mitterrand's 'Letter to all the French' and a campaign above the parties promise a 'united France', and {party} looks presidential", role: "any", party: "ens", weight: 3, appeal: 0.025, momentum: 6, turn: 0 },
+        { id: "le_pen_record_1988", headline: "Le Pen takes 14.4 percent in round one, a record for the Front National, and {party} courts his voters without striking a deal", role: "any", party: "rn", weight: 3, appeal: 0.02, momentum: 5, turn: 1 },
+        { id: "barre_ralliement_1988", headline: "Barre, eliminated, backs Chirac without warmth, and the centre's voters stay unsure about {party}", role: "any", party: "rn", weight: 3, appeal: 0.01, momentum: 2, turn: 2 },
+        { id: "debat_premier_ministre_1988", headline: "In the debate Chirac says they are equal candidates, and Mitterrand answers 'you are quite right, Prime Minister'. The line sticks to {party}", role: "any", party: "rn", weight: 4, appeal: -0.03, momentum: -8, turn: 3 },
+        { id: "otages_liban_1988", headline: "The last French hostages in Lebanon come home days before the vote, and {party}'s government takes the credit", role: "any", party: "rn", weight: 3, appeal: 0.025, momentum: 6, turn: 4 },
+        { id: "ouvea_1988", headline: "The assault on the Ouvéa cave in New Caledonia ends in 21 deaths three days before the vote, and the questions land on {party}", role: "any", party: "rn", weight: 3, appeal: -0.025, momentum: -6, turn: 5 },
+        { id: "cohabitation_usure_1988", headline: "Two years of cohabitation leave voters tired of the quarrel, and they reward the president who stayed above it, {party}", role: "any", party: "ens", weight: 2, appeal: 0.025, momentum: 6 },
+        { id: "pcf_effondrement_1988", headline: "The Communist vote falls to 6.8 percent in round one, its worst score ever, and its voters line up behind {party} for the runoff", role: "any", party: "ens", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "privatisations_1988", headline: "The privatisation programme and the 1987 stock market crash leave small savers angry, and {party} carries the bill", role: "any", party: "rn", weight: 2, appeal: -0.02, momentum: -5 },
+      ],
+    },
+
+    "1981": {
+      id: "1981",
+      year: 1981,
+      label: "1981 · Mitterrand v. Giscard",
+      // ens = Mitterrand (the Socialist challenger); rn = Giscard d'Estaing (the incumbent president). A left-vs-right runoff mapped onto the bundle's two slots, as in 2012.
+      tagline: "May 10, 1981. Twenty-three years of the right, a second oil shock and more than a million and a half people out of work. Giscard, elected at 48, asks for a second term against the Socialist he beat by 1.6 points in 1974. Chirac's voters hold the key, and the Communists have not yet said what theirs will do.",
+      salience: { cost_of_living: 0.85, public_services: 0.5, security: 0.5, pensions: 0.4, immigration_identity: 0.4, europe: 0.3 },
+      regions: {
+        HDF:  { v: { ens: 0.559, rn: 0.441 }, s: { ens: 5, rn: 4 } },
+        NOR:  { v: { ens: 0.5, rn: 0.5 }, s: { ens: 3, rn: 2 } },
+        GE:   { v: { ens: 0.465, rn: 0.535 }, s: { ens: 4, rn: 4 } },
+        BRE:  { v: { ens: 0.482, rn: 0.518 }, s: { ens: 2, rn: 3 } },
+        PDL:  { v: { ens: 0.458, rn: 0.542 }, s: { ens: 3, rn: 3 } },
+        IDF:  { v: { ens: 0.533, rn: 0.467 }, s: { ens: 10, rn: 8 } },
+        BFC:  { v: { ens: 0.532, rn: 0.468 }, s: { ens: 2, rn: 2 } },
+        CVL:  { v: { ens: 0.506, rn: 0.494 }, s: { ens: 2, rn: 2 } },
+        NAQ:  { v: { ens: 0.546, rn: 0.454 }, s: { ens: 5, rn: 4 } },
+        ARA:  { v: { ens: 0.511, rn: 0.489 }, s: { ens: 6, rn: 6 } },
+        OCC:  { v: { ens: 0.573, rn: 0.427 }, s: { ens: 5, rn: 4 } },
+        PACA: { v: { ens: 0.524, rn: 0.476 }, s: { ens: 4, rn: 4 } },
+        COM:  { v: { ens: 0.291, rn: 0.709 }, s: { ens: 1, rn: 2 } },
+      },
+      events: [
+        { id: "cent_dix_propositions_1981", headline: "Mitterrand's 110 proposals promise retirement at 60, the 39-hour week and nationalisations, and {party} has a programme to run on", role: "any", party: "ens", weight: 3, appeal: 0.025, momentum: 6, turn: 0 },
+        { id: "diamants_1981", headline: "The Bokassa diamonds story resurfaces in the campaign, and the president who wanted to run on his record spends days answering for it. {party} pays", role: "any", party: "rn", weight: 3, appeal: -0.03, momentum: -7, turn: 1 },
+        { id: "chirac_titre_personnel_1981", headline: "Chirac says he will vote for Giscard 'in a personal capacity' and tells no one else what to do, and part of the Gaullist vote stays home on {party}'s account", role: "any", party: "rn", weight: 3, appeal: -0.02, momentum: -5, turn: 2 },
+        { id: "pcf_battre_giscard_1981", headline: "The Communist Party, at 15 percent in round one, tells its voters to beat Giscard, and the left's vote consolidates behind {party}", role: "any", party: "ens", weight: 3, appeal: 0.03, momentum: 8, turn: 3 },
+        { id: "debat_passif_1981", headline: "In the debate Giscard calls Mitterrand 'the man of the past' and gets 'you are the man of the liabilities' back. {party} lands the blow", role: "any", party: "ens", weight: 4, appeal: 0.03, momentum: 9, turn: 4 },
+        { id: "peur_communistes_1981", headline: "Warnings of Communist ministers in a Mitterrand cabinet rally the right's base in the last week for {party}", role: "any", party: "rn", weight: 3, appeal: 0.02, momentum: 5, turn: 5 },
+        { id: "bilan_septennat_1981", headline: "Unemployment near a million and three quarters and inflation above 13 percent weigh on {party}", role: "any", party: "rn", weight: 2, appeal: -0.03, momentum: -7 },
+        { id: "force_tranquille_1981", headline: "'La force tranquille' and a poster of a village church reassure rural voters, and {party} reaches the countryside", role: "any", party: "ens", weight: 2, appeal: 0.025, momentum: 6 },
+        { id: "querelle_droite_1981", headline: "The feud between Giscard and Chirac, open since Chirac quit as prime minister in 1976, shows in every right-wing rally, and {party} pays for it", role: "any", party: "rn", weight: 2, appeal: -0.02, momentum: -5 },
+      ],
+    },
   },
 
   leaders: {
@@ -304,6 +570,26 @@ export const FRANCE: CountryBundle = {
     "2012": {
       ens: { partyId: "ens", name: "François Hollande", charisma: 54, energy: 60, competence: 64, machine: 68 },
       rn:  { partyId: "rn", name: "Nicolas Sarkozy", charisma: 66, energy: 74, competence: 66, machine: 74 },
+    },
+    "2007": {
+      ens: { partyId: "ens", name: "Ségolène Royal", charisma: 70, energy: 74, competence: 52, machine: 56 },
+      rn: { partyId: "rn", name: "Nicolas Sarkozy", charisma: 72, energy: 88, competence: 68, machine: 84 },
+    },
+    "2002": {
+      ens: { partyId: "ens", name: "Jacques Chirac", charisma: 62, energy: 58, competence: 66, machine: 80 },
+      rn: { partyId: "rn", name: "Jean-Marie Le Pen", charisma: 72, energy: 70, competence: 34, machine: 56 },
+    },
+    "1995": {
+      ens: { partyId: "ens", name: "Lionel Jospin", charisma: 46, energy: 58, competence: 78, machine: 66 },
+      rn: { partyId: "rn", name: "Jacques Chirac", charisma: 66, energy: 80, competence: 62, machine: 76 },
+    },
+    "1988": {
+      ens: { partyId: "ens", name: "François Mitterrand", charisma: 82, energy: 56, competence: 86, machine: 86 },
+      rn: { partyId: "rn", name: "Jacques Chirac", charisma: 62, energy: 78, competence: 64, machine: 80 },
+    },
+    "1981": {
+      ens: { partyId: "ens", name: "François Mitterrand", charisma: 74, energy: 62, competence: 78, machine: 78 },
+      rn: { partyId: "rn", name: "Valéry Giscard d'Estaing", charisma: 56, energy: 52, competence: 76, machine: 70 },
     },
   },
 
@@ -369,18 +655,34 @@ export const FRANCE_MODULE = countryModule(FRANCE, {
       description: "A 39-year-old insurgent, a movement a year old, and the debate meltdown that sealed a landslide." },
     { electionId: "2012", difficulty: "hard",
       description: "A crisis president nobody warmed to against the man who promised to be normal. A left-right runoff decided by a whisker." },
+    { electionId: "2007", difficulty: "hard", addedLater: true,
+      description: "A break with twelve years of Chirac against the first woman in a presidential runoff. Bayrou's voters and Le Pen's voters decide a left-right fight." },
+    { electionId: "2002", difficulty: "hard", addedLater: true,
+      description: "Jospin is eliminated and Le Pen reaches the runoff for the first time. Chirac has to win by a margin that counts, with the whole country watching." },
+    { electionId: "1995", difficulty: "hard", addedLater: true,
+      description: "Chirac on his third try against a Socialist who topped round one. The social fracture, the Mitterrand inheritance and a narrow left-right runoff." },
+    { electionId: "1988", difficulty: "hard", addedLater: true,
+      description: "A Socialist president against his own prime minister, two years into cohabitation. Le Pen's voters and a week of hostages and Ouvéa decide it." },
+    { electionId: "1981", difficulty: "hard", addedLater: true,
+      description: "The first left victory of the Fifth Republic is on the table. Mitterrand against an incumbent, with Chirac's cold endorsement and the Communist vote deciding it." },
   ],
   systemLabel: "Two-round presidential runoff",
   setupNote: "Campaign clock: six planning weeks compress the historical two-week runoff.",
   pack: {
     id: "france",
     name: "France",
-    description: "Four presidential elections from 2012 to 2027. Two rounds, a crowded first ballot, and a runoff decided by who the losers back.",
+    description: "Nine presidential elections from 1981 to 2027. Two rounds, a crowded first ballot, and a runoff decided by who the losers back.",
     price: 99,
   },
   daily: { pair: ["ens", "rn"], names: { ens: "Ensemble", rn: "the RN" } },
   next: {
     chain: [
+      { id: "1981", blurb: "Continue the timeline: the left takes the Élysée" },
+      { id: "1988", blurb: "Continue the timeline: cohabitation" },
+      { id: "1995", blurb: "Continue the timeline: the end of the Mitterrand era" },
+      { id: "2002", blurb: "Continue the timeline: the shock of April 21" },
+      { id: "2007", blurb: "Continue the timeline: the break with the past" },
+      { id: "2012", blurb: "Continue the timeline: the crisis president" },
       { id: "2017", blurb: "Continue the timeline: En Marche!" },
       { id: "2022", blurb: "Continue the timeline: the rematch with Le Pen" },
       { id: "2027", blurb: "Continue the timeline: the Republic's runoff" },

@@ -82,6 +82,18 @@
     "it-2022": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "it-2018": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "it-2013": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
-    "it-2008": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
+    "it-2008": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "de-2013": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "de-2009": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "de-2005": { "suggested": "easy", "authored": "hard", "underdogWinRate": 0.75 },
+    "de-2002": { "suggested": "medium", "authored": "hard", "underdogWinRate": 0.3 },
+    "de-1998": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "de-1994": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "de-1990": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "fr-2007": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "fr-2002": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "fr-1995": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "fr-1988": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "fr-1981": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
   }
 }

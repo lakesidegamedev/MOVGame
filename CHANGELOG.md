@@ -79,6 +79,19 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   redemption stays in your account and in the Store.
 - Desktop: checkout and account linking open in your browser, and the game window stays where
   it is. The Store picks your purchase up as soon as you come back to the window.
+- Germany goes back to 1990. Seven earlier Bundestag elections, 2013, 2009, 2005, 2002, 1998, 1994
+  and 1990, join the Germany pack, each with its own chamber size, from 603 to 672 seats. Lead the
+  FDP or the AfD in 2013 with real votes and no seats, fight for the PDS's survival in 1994 and
+  2002, or take the first all-German election after unification, when the East and West had
+  separate thresholds. Each campaign has its real story beats, from the Elbe floods and the Iraq
+  war to the Kirchhof flat tax, Veggie Day and the 2009 financial crisis. Owners of the old
+  Global pack need the Germany pack or the Complete Collection for these.
+- France goes back to 1981. Five earlier presidential runoffs, 2007, 2002, 1995, 1988 and 1981,
+  join the France pack. Play the 2002 runoff between Chirac and Jean-Marie Le Pen after Jospin was
+  eliminated in round one, or take Mitterrand's first win against Giscard, cohabitation in 1988,
+  Chirac's third try in 1995 and Sarkozy against Royal in 2007. The first round is already
+  counted, and each campaign has its real story beats. Owners of the old Global pack need the
+  France pack or the Complete Collection for these.
 
 ### Changed
 

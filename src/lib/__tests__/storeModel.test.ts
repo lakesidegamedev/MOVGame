@@ -79,8 +79,11 @@ describe("covered-by rules", () => {
     }
   });
 
-  it("covers Canada, Germany, France and Australia through the legacy Global pack, and nothing else", () => {
-    for (const id of ["canada", "germany", "france", "australia"]) expect(ownedReason(id, ["global"], [])?.kind).toBe("included");
+  it("covers Canada and Australia through the legacy Global pack, and nothing else", () => {
+    // Germany and France grew past the frozen Global pack (earlier elections were
+    // added to them), so Global alone no longer covers those two packs.
+    for (const id of ["canada", "australia"]) expect(ownedReason(id, ["global"], [])?.kind).toBe("included");
+    for (const id of ["germany", "france"]) expect(ownedReason(id, ["global"], [])).toBeNull();
     expect(ownedReason("uk-elections", ["global"], [])).toBeNull();
     expect(ownedReason("us-historical", ["global"], [])).toBeNull();
   });
@@ -169,7 +172,7 @@ describe("Complete Collection summary", () => {
 
   it("treats packs covered through the legacy Global pack as already had", () => {
     const sum = summarizeComplete(["global"], readyCatalog())!;
-    expect(sum.havePacks.map((p) => p.id).sort()).toEqual(["australia", "canada", "france", "germany"]);
+    expect(sum.havePacks.map((p) => p.id).sort()).toEqual(["australia", "canada"]);
   });
 
   it("computes the saving from current prices", () => {
