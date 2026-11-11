@@ -41,14 +41,14 @@ export function ActivationModal() {
   return (
     <div className="overlay" onClick={closeModal}>
       <div
-        className="modal" style={{ maxWidth: 440 }} onClick={(e) => e.stopPropagation()}
+        className="modal narrow" onClick={(e) => e.stopPropagation()}
         role="dialog" aria-modal="true" aria-labelledby="redeem-title" ref={modalRef}
         onKeyDown={(e) => { if (e.key === "Escape") closeModal(); }}
       >
         <div className="head">
           <div className="tag">Unlock</div>
           <h2 id="redeem-title"><KeyRound size={18} style={{ verticalAlign: "-3px", marginRight: 6 }} />Redeem a code</h2>
-          <button className="sheet-close" onClick={closeModal} aria-label="Close"><X size={18} /></button>
+          <button className="modal-close" onClick={closeModal} aria-label="Close"><X size={16} /></button>
         </div>
         <div className="body">
           {!user ? (
@@ -59,22 +59,22 @@ export function ActivationModal() {
             </p>
           ) : (
             <form onSubmit={submit}>
-              <div className="field" style={{ textAlign: "left" }}>
+              <div className="field">
                 <label htmlFor="redeem-code">Code: CAMP-XXXX-XXXX-XXXX</label>
                 <input
                   id="redeem-code" type="text" value={code} required placeholder="CAMP-…" autoComplete="off"
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   aria-invalid={!formatOk}
-                  style={{ width: "100%", fontFamily: "monospace", letterSpacing: 1 }}
+                  style={{ width: "100%", fontFamily: "var(--font-mono)", letterSpacing: 1 }}
                 />
               </div>
               {!formatOk && (
-                <p className="muted small" style={{ color: "var(--rose)" }}>
+                <p className="small down">
                   Use the form CAMP-XXXX-XXXX-XXXX (letters A-Z except O/I/L, digits 2-9).
                 </p>
               )}
-              {error && <p className="muted small" role="alert" style={{ color: "var(--rose)" }}>{error}</p>}
-              {success && <p className="muted small" role="status" style={{ color: "var(--green)" }}>{success}</p>}
+              {error && <p className="small down" role="alert">{error}</p>}
+              {success && <p className="small up" role="status">{success}</p>}
               <button className="primary" type="submit" disabled={busy || !formatOk || !normalized} style={{ width: "100%", marginTop: 8 }}>
                 {busy ? <Spinner label="Redeeming…" /> : "Redeem"}
               </button>

@@ -121,16 +121,16 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
         ? "HUNG PARLIAMENT"
         : "NO OVERALL MAJORITY";
 
-  const headline =
+  // The headline names one party; its color is always that party's.
+  const headlineParty =
     r.government.kind === "majority"
-      ? name(r.government.party)
+      ? r.government.party
       : r.government.kind === "hung"
-        ? name(r.government.largest)
+        ? r.government.largest
         : inGov
-          ? name(game.playerParty)
-          : largest
-            ? name(largest)
-            : "No majority";
+          ? game.playerParty
+          : largest;
+  const headline = headlineParty ? name(headlineParty) : "No majority";
 
   const replayDaily = () => {
     const today = dailyAssignment(utcDateString());
@@ -157,11 +157,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
       <ElectionNightShell
         eyebrow={eyebrow}
         headline={headline}
-        headlineColor={
-          r.government.kind === "majority"
-            ? partyColor(country, r.government.party)
-            : partyColor(country, game.playerParty)
-        }
+        headlineColor={headlineParty ? partyColor(country, headlineParty) : undefined}
         subhead={
           won
             ? `You won ${country.label}.`

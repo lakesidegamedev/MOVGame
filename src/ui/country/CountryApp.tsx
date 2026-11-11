@@ -104,7 +104,7 @@ export function CountryApp({ countryId, onExit, initialElection, initialSeed, in
           </div>
         ) : undefined}
         tools={<>
-          <button className="ghost small" onClick={onExit}><Home size={14} aria-hidden="true" />Exit</button>
+          <button className="ghost small" onClick={onExit}><Home size={14} aria-hidden="true" />Home</button>
           {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(activeGame, live, country.label))} target="_blank" rel="noopener noreferrer"><MessageCircleQuestion size={14} aria-hidden="true" />Ask about campaign</a>}
         </>}
       />

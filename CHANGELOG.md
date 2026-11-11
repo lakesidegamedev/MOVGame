@@ -101,6 +101,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - The Unlock prompt on a locked election is now the Store, opened on the right pack with the
   Complete Collection beside it. The Redeem option in the menu now opens a code-only dialog.
 - Account and menu text no longer quotes prices; the Store shows the current ones.
+- The button that leaves a campaign says "Home" in every country.
+- The Redeem a code dialog matches the rest of the interface.
 
 ### Fixed
 
@@ -113,6 +115,7 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - A pack the web store cannot sell yet shows as "Coming soon" instead of a Buy button.
 - "Play next" after a result now runs through every election of the country in order, so it no
   longer skips Canada 2015 and 2019, Germany 2017, Australia 2019 or the US elections before 2000.
+- After a hung parliament the results headline is colored by the party it names, not by yours.
 
 ## 2026-10
 

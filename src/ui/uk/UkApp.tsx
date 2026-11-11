@@ -89,7 +89,7 @@ export function UkApp({ onExit, initialElection, initialSeed, initialParty }: { 
           </div>
         ) : undefined}
         tools={<>
-          <button className="ghost small" onClick={onExit}><Home size={14} aria-hidden="true" />Exit</button>
+          <button className="ghost small" onClick={onExit}><Home size={14} aria-hidden="true" />Home</button>
           {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(game, live, "UK"))} target="_blank" rel="noopener noreferrer"><MessageCircleQuestion size={14} aria-hidden="true" />Ask about campaign</a>}
         </>}
       />
