@@ -127,6 +127,11 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Changed
 
+- Canada's Bloc Québécois and India's state parties (Trinamool, the Samajwadi Party, the BJD,
+  the YSRCP and the AIADMK) now play as regional parties, like Spain's Catalan and Basque
+  parties: the setup shows where they stand and why they cannot win a majority, the results
+  score them against their real seat count, and generic campaign events no longer target them
+  with headlines written for national parties.
 - Spain: the Catalan and Basque parties are now playable as regional parties in every election
   they stood in: ERC, CiU and its successors Democràcia i Llibertat and Junts, the PNV, and
   Amaiur and EH Bildu, each with its real lead candidate. They stand only in Catalonia or in the

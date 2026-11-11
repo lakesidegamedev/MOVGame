@@ -94,6 +94,14 @@ export const INDIA: CountryBundle = {
     majority: { total: 543, threshold: 272 },
   },
   playable: ["nda", "upa", "tmc", "left", "sp", "bsp", "bjd", "ysr", "aiadmk", "aap"],
+  // State parties that stand in one region (Trinamool in Bengal, with a few
+  // candidates next door; the Samajwadi Party in Uttar Pradesh; the BJD in
+  // Odisha; the YSRCP in Andhra Pradesh; the AIADMK in Tamil Nadu) cannot
+  // reach 272: the setup says so and the results score them against their
+  // real seat count. The BSP, the Left and the AAP are left out because they
+  // stood across most of the country in at least one election here (the AAP
+  // fielded 432 candidates in 2014), so they are not regional in every year.
+  regional: ["tmc", "sp", "bjd", "ysr", "aiadmk"],
   abstaining: [],
   // The two big alliances never govern together, and the Samajwadi Party and
   // the Left have never joined an NDA government. Everyone else has backed

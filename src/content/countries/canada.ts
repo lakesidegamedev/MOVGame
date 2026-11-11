@@ -58,6 +58,10 @@ export const CANADA: CountryBundle = {
     majority: { total: 343, threshold: 172 },
   },
   playable: ["lpc", "cpc", "ndp", "bq", "ref"],
+  // The Bloc stands only in Quebec (75 to 78 seats), so it cannot reach a
+  // majority: the setup says so, the results score it against its real seat
+  // count, and generic random events, written for national parties, skip it.
+  regional: ["bq"],
   abstaining: [],
   // The two governing rivals never partner each other; the Bloc props up no one
   // formally (it extracts concessions vote-by-vote).
