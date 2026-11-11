@@ -1,5 +1,5 @@
 // Generates real-geography SVG map shape files for Canada, Germany, France,
-// Australia, New Zealand, Brazil, India and Japan (src/content/countries/paths/*.ts), following the UK
+// Australia, New Zealand, Brazil, India, Japan and Mexico (src/content/countries/paths/*.ts), following the UK
 // pipeline in scripts/build_uk_paths.cjs:
 //   source geo data -> (optional group union) -> equirectangular lat-corrected
 //   projection -> Douglas-Peucker simplify -> viewBox fit -> TS emit.
@@ -616,6 +616,47 @@ const JP = wants("JP") && buildCountry({
   regions: jpRegions(),
 });
 
+// --------------------------------------------------------------------- MX
+// Eleven units from the 32 states: the State of Mexico, Mexico City and
+// Veracruz alone, the rest contiguous groups (the Northwest, the North, the
+// Northeast, the West around Jalisco with Aguascalientes, Guanajuato and
+// Querétaro as the Bajío, the Centre around Puebla, the
+// Pacific South with Michoacán, and the Gulf and Yucatán Peninsula). Mexico
+// City is a speck at map scale, so it keeps its true outline and gains a 5x
+// magnified lens copy in the Gulf of Mexico. The clip box drops the
+// Revillagigedo Islands and other far offshore islands.
+function mxRegions() {
+  const mx = neCountry("MEX", ne10);
+  const scaleAbout = (polys, cx, cy, k) => polys.map((poly) => poly.map((ring) => ring.map(([x, y]) => [cx + (x - cx) * k, cy + (y - cy) * k])));
+  const shift = (polys, dlon, dlat) => polys.map((poly) => poly.map((ring) => ring.map(([x, y]) => [x + dlon, y + dlat])));
+  const city = mx["Distrito Federal"];
+  mx["Distrito Federal"] = [...city, ...shift(scaleAbout(city, -99.13, 19.32, 5), 4.4, 3.6)];
+  return groupRegions(mx, {
+    NW: ["Baja California", "Baja California Sur", "Sonora", "Sinaloa"],
+    NOR: ["Chihuahua", "Coahuila", "Durango", "Zacatecas"],
+    NE: ["Nuevo León", "Tamaulipas", "San Luis Potosí"],
+    WES: ["Jalisco", "Nayarit", "Colima", "Aguascalientes"],
+    BAJ: ["Guanajuato", "Querétaro"],
+    MEX: ["México"],
+    CDMX: ["Distrito Federal"],
+    CEN: ["Puebla", "Hidalgo", "Tlaxcala", "Morelos"],
+    VER: ["Veracruz"],
+    SUR: ["Michoacán", "Guerrero", "Oaxaca", "Chiapas"],
+    PEN: ["Tabasco", "Campeche", "Yucatán", "Quintana Roo"],
+  }, "MX");
+}
+const MX = wants("MX") && buildCountry({
+  name: "Mexico", constName: "MX_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (MEX)",
+  extraNote: "Eleven units: two states and Mexico City alone, eight contiguous groups (arc-cancellation union). Mexico City carries a 5x magnified lens copy in the Gulf of Mexico so it can be tapped; far offshore islands clipped.",
+  lat0: 23, eps: 0.9, minIslandPx: 4,
+  clip: [-117.6, 14.3, -86.5, 32.8], // drops Guadalupe and other far Pacific islands
+  order: ["NW", "NOR", "NE", "WES", "BAJ", "MEX", "CDMX", "CEN", "VER", "SUR", "PEN"],
+  regions: mxRegions(),
+  // The central units are small and crowded: push their labels apart.
+  labelNudge: { MEX: [-12, 10], CEN: [2, -10], VER: [-2, 14], BAJ: [-4, -6] },
+});
+
 // ------------------------------------------------------------------- write
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const files = [
@@ -629,6 +670,7 @@ const files = [
   [ES, "es.ts"],
   [IE, "ie.ts"],
   [JP, "jp.ts"],
+  [MX, "mx.ts"],
 ].filter(([built]) => built);
 for (const [built, name] of files) {
   const bytes = emit(built, path.join(OUT_DIR, name));
@@ -669,4 +711,5 @@ if (IN) assertCountry(IN, ["UP", "BJ", "MP", "GR", "MH", "DH", "PB", "HM", "KA",
 if (ES) assertCountry(ES, ["AND", "CAT", "MAD", "VAL", "GAL", "PV", "CYL", "CLE", "ARA", "NAV", "MUR", "AST", "BAL", "CAN"], 1.0, 1.9); // wide
 if (IE) assertCountry(IE, ["BOR", "WES", "MID", "CMB", "DNO", "DSO", "DWE", "SEA", "MUN", "COR"], 0.55, 0.95); // tall-ish
 if (JP) assertCountry(JP, ["HKD", "TOH", "NKT", "SKT", "TKY", "HSN", "TKI", "KNK", "CHG", "SHK", "KYU"], 0.8, 1.3); // squarish
+if (MX) assertCountry(MX, ["NW", "NOR", "NE", "WES", "BAJ", "MEX", "CDMX", "CEN", "VER", "SUR", "PEN"], 1.2, 1.9); // wide
 console.log("All assertions passed.");

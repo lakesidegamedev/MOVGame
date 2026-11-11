@@ -22,7 +22,8 @@ difficulty and regenerate the native data.
 
 New Zealand (`src/content/countries/newZealand.ts`) was built this way and is the reference to
 copy. Germany is the other mixed-member proportional example; Canada and Australia are
-first past the post and preferential; France is a two-round runoff.
+first past the post and preferential; France is a two-round runoff; Mexico is a single-round
+plurality presidency (`plurality: true`, section 5).
 
 ## Contents
 

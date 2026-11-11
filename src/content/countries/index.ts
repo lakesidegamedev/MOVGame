@@ -25,6 +25,7 @@ import { INDIA_MODULE } from "./india";
 import { SPAIN_MODULE } from "./spain";
 import { IRELAND_MODULE } from "./ireland";
 import { JAPAN_MODULE } from "./japan";
+import { MEXICO_MODULE } from "./mexico";
 
 export const COUNTRY_MODULES: readonly CountryModule[] = [
   US_MODULE,
@@ -39,6 +40,7 @@ export const COUNTRY_MODULES: readonly CountryModule[] = [
   SPAIN_MODULE,
   IRELAND_MODULE,
   JAPAN_MODULE,
+  MEXICO_MODULE,
 ];
 
 export const COUNTRY_MODULES_BY_CODE: Record<string, CountryModule> = Object.fromEntries(
