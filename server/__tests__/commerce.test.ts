@@ -87,6 +87,19 @@ describe("platform entitlements consumer", () => {
     const { PAYWALL_ENABLED } = await import("../../src/content/scenarioRegistry.js");
     expect(await activation.canAccessScenarioWithPlatform(user.id, "us-2016")).toBe(!PAYWALL_ENABLED);
   });
+
+  it("opens every country's free election to anyone, signed in or not, with nothing owned", async () => {
+    const { SCENARIO_REGISTRY } = await import("../../src/content/scenarioRegistry.js");
+    const free = SCENARIO_REGISTRY.filter((s) => s.free).map((s) => s.scenarioId);
+    expect(free).toEqual(expect.arrayContaining(["ca-2025", "fr-2022", "uk-2024", "jp-2024"]));
+    const user = makeUser({ ahd: "ahd_ent_4", email: "ent4@example.com" });
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network down"));
+    for (const id of free) {
+      expect(activation.canAccessScenario(null, id), id).toBe(true);
+      expect(await activation.canAccessScenarioWithPlatform(null, id), id).toBe(true);
+      expect(await activation.canAccessScenarioWithPlatform(user.id, id), id).toBe(true);
+    }
+  });
 });
 
 describe("lakeside identity", () => {

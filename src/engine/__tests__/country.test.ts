@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCountryGame, countryAdvanceTurn, computeCountryResult, playablePartiesIn } from "../countryGame";
+import { createCountryGame, countryAdvanceTurn, computeCountryResult, playablePartiesIn, regionalReach } from "../countryGame";
 import { COUNTRIES } from "@content/countries";
 import { computeScoreFromFacts, multipartyScoreFacts } from "../scoring";
 
@@ -87,5 +87,47 @@ describe("country bundles", () => {
     expect(passiveWins).toBe(0);
     expect(preparedWins).toBeGreaterThanOrEqual(2);
     expect(preparedWins).toBeLessThanOrEqual(8);
+  });
+});
+
+describe("regional parties (Spain)", () => {
+  const es = COUNTRIES.ES;
+
+  it("are playable in every election they stood in, with their reach and real result", () => {
+    for (const id of ["2011", "2015", "2019", "2023"]) {
+      for (const p of ["erc", "ciu", "pnv", "bil"]) expect(playablePartiesIn(es, id), `${id} ${p}`).toContain(p);
+    }
+    expect(regionalReach(es, "2023", "erc")).toEqual({ regions: ["CAT"], seats: 48, historical: 7 });
+    expect(regionalReach(es, "2011", "bil")).toMatchObject({ historical: 7 });
+    expect(regionalReach(es, "2023", "bil")?.regions.sort()).toEqual(["NAV", "PV"]);
+    expect(regionalReach(es, "2023", "psoe")).toBeNull();
+  });
+
+  it("are never the target of a generic random event", () => {
+    const shorts = (es.regional ?? []).map((p) => es.system.parties.find((x) => x.id === p)!.shortName);
+    const forbidden = new Set(es.events.filter((e) => e.role !== "player" && !e.party)
+      .flatMap((e) => shorts.map((short) => e.headline.replace("{party}", short))));
+    let checked = 0;
+    for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+      let g = createCountryGame(es, { seed, election: "2023", playerParty: "pp" });
+      for (let t = 0; t < g.totalTurns + 2 && g.phase !== "result"; t++) {
+        g = countryAdvanceTurn(g, es, { autoResolvePlayerEvents: true });
+        for (const n of g.news) { checked++; expect(forbidden.has(n.text), n.text).toBe(false); }
+      }
+    }
+    expect(checked).toBeGreaterThan(0);
+  });
+});
+
+describe("easy difficulty and parties that stand in only some regions", () => {
+  it("the easy tilt never puts a party on the ballot where it did not stand", () => {
+    const es = COUNTRIES.ES;
+    const g = createCountryGame(es, { seed: 3, election: "2023", playerParty: "erc", difficulty: "easy" });
+    for (const r of g.regions) {
+      const stands = r.baselineShare?.erc !== undefined;
+      for (const b of r.blocs) if (!stands) expect((b.support as Record<string, number> | undefined)?.erc ?? 0, `${r.id}`).toBe(0);
+    }
+    const result = computeCountryResult(g, es);
+    expect(result.seats.erc ?? 0).toBeLessThanOrEqual(48);
   });
 });

@@ -457,6 +457,7 @@ export const BRAZIL_MODULE = countryModule(BRAZIL, {
   blurb: "The presidential runoff from Lula's first win to Bolsonaro's last: six elections, twelve regions, one national vote.",
   cover: "images/covers/country-br.jpg",
   art: { a: "#0b4a3a", b: "#c9a400", glow: "rgba(255,244,200,0.22)" },
+  freeElections: ["2022"],
   scenarios: [
     { electionId: "2022", difficulty: "hard",
       description: "A former president against the incumbent who doubted the voting machines. The closest runoff in the democratic era, decided by Minas Gerais and the Northeast." },

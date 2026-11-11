@@ -65,7 +65,9 @@ describe("entitlement refresh", () => {
     expect(res.cache).toBe("private, no-store");
     expect(res.body.verified).toBe(true);
     expect(res.body.unlocked.packIds).toEqual(["canada"]);
-    expect(res.body.unlocked.scenarioIds).toContain("ca-2025");
+    expect(res.body.unlocked.scenarioIds).toContain("ca-2021");
+    // ca-2025 is free to everyone, so it is not part of the pack.
+    expect(res.body.unlocked.scenarioIds).not.toContain("ca-2025");
   });
 
   it("picks up a purchase made after the cached read, without waiting out the cache", async () => {

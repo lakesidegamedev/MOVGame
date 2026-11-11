@@ -18,6 +18,7 @@ import {
   createCountryGame,
   majorityFor,
   playablePartiesIn,
+  regionalReach,
   type CountryBundle,
   type Difficulty,
 } from "@engine/countryGame";
@@ -104,7 +105,13 @@ describe("country modules", () => {
       }
       for (const row of m.scenarios) {
         const playable = playableFor(m, row.electionId);
-        for (const role of [a, b]) expect(playable, `${m.code} ${row.electionId} daily role ${role}`).toContain(role);
+        const pair = row.dailyPair ?? [a, b];
+        expect(pair[0], `${m.code} ${row.electionId}`).not.toBe(pair[1]);
+        for (const role of pair) {
+          expect(playable, `${m.code} ${row.electionId} daily role ${role}`).toContain(role);
+          expect(m.daily.names[role], `${m.code} name for ${role}`).toBeTruthy();
+          expect(roleShortName(role), `${m.code} ${role} name collides with another country`).toBe(m.daily.names[role]);
+        }
       }
     }
   });
@@ -145,6 +152,18 @@ describe("registry rows", () => {
     }
   });
 
+  it("every country has a free election, pinned to real rows, and something left to sell", () => {
+    for (const m of COUNTRY_MODULES) {
+      const rows = m.scenarios.map((r) => r.electionId);
+      const free = SCENARIO_REGISTRY.filter((s) => s.country === m.code && s.free);
+      expect(free.length, `${m.code} free elections`).toBeGreaterThanOrEqual(1);
+      expect(free.length, `${m.code} keeps paid elections`).toBeLessThan(rows.length);
+      for (const id of m.freeElections ?? []) expect(rows, `${m.code} freeElections ${id}`).toContain(id);
+      if (m.freeElections) expect(new Set(m.freeElections).size, `${m.code} duplicate free ids`).toBe(m.freeElections.length);
+      for (const s of free) expect(s.packId, s.scenarioId).toBeUndefined();
+    }
+  });
+
   it("every country pack is on sale and holds exactly that country's paid rows", () => {
     for (const m of COUNTRY_MODULES) {
       const pack = STORE_PACKS.find((p) => p.id === m.pack.id);
@@ -170,6 +189,15 @@ describe.each(multiparty.map((m) => [m.code, m.bundle!] as const))("%s content",
     expect(parties.size, "unique party ids").toBe(country.system.parties.length);
     expect(regionIds.size, "unique region ids").toBe(country.regions.length);
     for (const p of [...country.playable, ...country.abstaining]) expect(parties.has(p), `party ${p}`).toBe(true);
+    // A regional party is a playable one that cannot reach a majority anywhere it stands.
+    for (const p of country.regional ?? []) {
+      expect(country.playable, `regional ${p} is playable`).toContain(p);
+      for (const id of Object.keys(country.elections)) {
+        const reach = regionalReach(country, id, p);
+        const threshold = (country.elections[id].majority ?? country.system.majority).threshold;
+        if (reach) expect(reach.seats, `${p} ${id} reach`).toBeLessThan(threshold);
+      }
+    }
     for (const b of country.blocs) for (const p of Object.keys(b.tilt)) expect(parties.has(p), `bloc ${b.id} tilt ${p}`).toBe(true);
     for (const r of country.regions) {
       for (const b of Object.keys(r.profile ?? {})) expect(blocIds.has(b), `region ${r.id} profile ${b}`).toBe(true);

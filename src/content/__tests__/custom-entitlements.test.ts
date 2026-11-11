@@ -8,7 +8,7 @@ import {
   parseCustomScenario,
 } from "@content/customScenario";
 import { packForScenario } from "@content/packs";
-import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
+import { PAYWALL_ENABLED, SCENARIOS_BY_ID } from "@content/scenarioRegistry";
 import { dailyAssignment, utcDateString } from "@lib/daily";
 import { useAuthStore } from "@store/authStore";
 
@@ -31,17 +31,27 @@ describe("custom base-election entitlement mapping", () => {
 
   it("maps a UK custom to its real base election id", () => {
     const cs = makeDefaultMultiparty("uk");
+    cs.mp!.baseElection = "2019";
     const id = baseScenarioIdForCustom(cs);
-    expect(id).toBe(`uk-${cs.mp!.baseElection}`);
+    expect(id).toBe("uk-2019");
     // That base is a real, paid registry scenario in a pack.
     expect(packForScenario(id!)?.id).toBe("uk-elections");
   });
 
   it("maps a country custom to its lowercased country base election id", () => {
     const cs = makeDefaultMultiparty("country", "DE");
+    cs.mp!.baseElection = "2021";
     const id = baseScenarioIdForCustom(cs);
-    expect(id).toBe(`de-${cs.mp!.baseElection}`);
+    expect(id).toBe("de-2021");
     expect(packForScenario(id!)?.id).toBe("germany");
+  });
+
+  it("a default custom builds on the country's free election, so it plays signed out", () => {
+    for (const [engine, code] of [["uk", undefined], ["country", "DE"], ["country", "CA"]] as const) {
+      const id = baseScenarioIdForCustom(makeDefaultMultiparty(engine, code))!;
+      expect(SCENARIOS_BY_ID[id]?.free, id).toBe(true);
+      expect(useAuthStore.getState().canPlay(id), id).toBe(true);
+    }
   });
 
   it("baseScenarioId handles missing parts safely", () => {
@@ -61,12 +71,14 @@ describe("canPlay gate on custom base elections", () => {
 
   it("paid UK base gate follows the paywall flag when signed out", () => {
     const cs = makeDefaultMultiparty("uk");
+    cs.mp!.baseElection = "2019";
     const id = baseScenarioIdForCustom(cs)!;
     expect(useAuthStore.getState().canPlay(id)).toBe(guestCanPlay(id));
   });
 
   it("paid UK base is allowed once the scenario is unlocked", () => {
     const cs = makeDefaultMultiparty("uk");
+    cs.mp!.baseElection = "2019";
     const id = baseScenarioIdForCustom(cs)!;
     useAuthStore.setState({ unlocked: { scenarioIds: [id], packIds: ["uk-elections"] } });
     expect(useAuthStore.getState().canPlay(id)).toBe(true);
@@ -76,6 +88,7 @@ describe("canPlay gate on custom base elections", () => {
 describe("import of a paid-base custom", () => {
   it("loads without crashing and reports locked state signed out", () => {
     const cs = makeDefaultMultiparty("country", "CA");
+    cs.mp!.baseElection = "2021";
     const restored = parseCustomScenario(serializeCustomScenario(cs));
     const id = baseScenarioIdForCustom(restored)!;
     // The doc is valid and imports fine...

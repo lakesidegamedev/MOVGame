@@ -212,6 +212,9 @@ data class CountryBundle(
     val plurality: Boolean = false,
     // Longer goal line for the campaign coach: {majority} and {total} placeholders.
     val goalHint: String? = null,
+    // Playable parties that stand in only part of the country: never the
+    // target of a generic random event (web CountryBundle.regional).
+    val regional: List<PartyId> = emptyList(),
 )
 
 // Declarative coalition rules, mirroring content/countries on the web

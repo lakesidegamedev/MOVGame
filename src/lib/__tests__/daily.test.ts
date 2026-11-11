@@ -4,6 +4,7 @@ import {
   CLASSIC_DAILY_POOL_IDS,
   DAILY_ROLE_PAIRS,
   dailyAssignment,
+  dailyPairFor,
   isAddedDailyDay,
   fnv1a,
   isDailyDate,
@@ -44,8 +45,7 @@ describe("dailyAssignment", () => {
       const a = dailyAssignment(d);
       const meta = SCENARIOS_BY_ID[a.scenarioId];
       expect(meta).toBeDefined();
-      const pair = DAILY_ROLE_PAIRS[meta!.country];
-      expect(pair).toContain(a.role);
+      expect(dailyPairFor(meta!)).toContain(a.role);
     }
   });
 
@@ -146,5 +146,13 @@ describe("daily rotation as countries are added", () => {
         }
       }
     }
+  });
+});
+
+describe("per-election daily pairs", () => {
+  it("Japan 2026 pairs the LDP with the CRA; other Japan elections keep LDP v DPJ/CDP", () => {
+    expect(dailyPairFor(SCENARIOS_BY_ID["jp-2026"]!)).toEqual(["ldp", "cra"]);
+    expect(dailyPairFor(SCENARIOS_BY_ID["jp-2024"]!)).toEqual(["ldp", "dpj"]);
+    expect(roleShortName("cra")).toBe("the CRA");
   });
 });

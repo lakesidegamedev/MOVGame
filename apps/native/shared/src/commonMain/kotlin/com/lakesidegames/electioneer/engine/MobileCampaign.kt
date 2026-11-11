@@ -10,6 +10,8 @@ data class NativeElection(
     val scenarioId: String, val country: String, val engine: String, val nativeId: String,
     val year: Int, val label: String, @SerialName("description") val blurb: String, val flag: String,
     val free: Boolean = true, val packId: String? = null,
+    // The daily's two sides when they differ from the country's pair (web ScenarioMeta.dailyPair).
+    val dailyPair: List<String>? = null,
 )
 
 data class NativeCountry(val id: String, val name: String, val flag: String)

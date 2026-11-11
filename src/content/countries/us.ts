@@ -12,9 +12,10 @@ export const US_MODULE: CountryModule = {
   blurb: "Winner-take-all duels for 270 electoral votes.",
   cover: "images/covers/country-us.jpg",
   art: { a: "#102f66", b: "#a32d3e", glow: "rgba(129,174,255,0.22)" },
+  freeElections: ["2024", "2020"],
   scenarios: [
-    { electionId: "2024", year: 2024, label: "2024 · Harris v. Trump", description: "A late switch at the top of the ticket, the Sun Belt and the Blue Wall both in play.", difficulty: "hard", free: true },
-    { electionId: "2020", year: 2020, label: "2020 · Biden v. Trump", description: "A pandemic on the ballot and a blue wall to rebuild. The original campaign.", difficulty: "easy", free: true },
+    { electionId: "2024", year: 2024, label: "2024 · Harris v. Trump", description: "A late switch at the top of the ticket, the Sun Belt and the Blue Wall both in play.", difficulty: "hard" },
+    { electionId: "2020", year: 2020, label: "2020 · Biden v. Trump", description: "A pandemic on the ballot and a blue wall to rebuild. The original campaign.", difficulty: "easy" },
     { electionId: "2016", year: 2016, label: "2016 · Clinton v. Trump", description: "The map looks settled and the blue wall looks safe. Don't be the one who let it crack.", difficulty: "easy" },
     { electionId: "2012", year: 2012, label: "2012 · Obama v. Romney", description: "A slow recovery, a re-election fight, and a turnout war in the swing states.", difficulty: "easy" },
     { electionId: "2008", year: 2008, label: "2008 · Obama v. McCain", description: "An open seat, two wars, and a financial system in free fall.", difficulty: "hard" },

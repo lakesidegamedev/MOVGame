@@ -639,6 +639,7 @@ export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {
   blurb: "Preferential voting across 150 seats.",
   cover: "images/covers/country-au.jpg",
   art: { a: "#082a52", b: "#126d66", glow: "rgba(247,205,79,0.22)" },
+  freeElections: ["2025"],
   scenarios: [
     { electionId: "2025", difficulty: "hard",
       description: "Preferential voting, a cyclone-delayed budget, and a Trump-shaped shadow over 150 seats." },

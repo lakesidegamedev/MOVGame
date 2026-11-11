@@ -154,6 +154,7 @@ export const COUNTRY_NAME_MODULE = countryModule(COUNTRY_NAME, {
   systemLabel: "A few words on the voting system, shown on the store tile",
   cover: "images/covers/country-xx.jpg",
   art: { a: "#0b1f3a", b: "#1d6b5c", glow: "rgba(236,240,245,0.2)" },  // scenario art colours
+  freeElections: ["2025"],      // the free taster, set once at ship time and never moved
   scenarios: [
     // Newest first. One row per election in the bundle, no more, no fewer.
     // label defaults to the election's label; override only when they differ.
@@ -178,6 +179,11 @@ Field notes:
   quality 82 (`convert src.jpg -resize '1000x>' -strip -quality 82 country-xx.jpg`), and add an
   `ATTRIBUTION.json` entry with `file`, `commons`, `license`, `artist`, `note` and `sourceUrl`
   (copy the New Zealand entry). The completeness test refuses a country without one.
+- **Free election.** Every country gives one election away free, playable signed out. Name it
+  in `freeElections` when the country ships (normally its newest real election; a speculative
+  future election is never the free one). Every other row is paid and joins the pack. If you
+  leave the field out the newest row is free, but set it: when a newer election is added later
+  the free one must not move, because players already rely on it.
 - **Daily pair.** Two big rivals that are playable in every one of the country's elections.
   Role ids are shared across countries for display names (`lab` is "Labour" in both the UK and
   New Zealand); if your id is already used with a different name, choose another id.
@@ -278,6 +284,12 @@ a bundle are rejected by the native exporter.
     then across regions (biproportional, as for proportional systems) so the national points
     order matches the real vote even in a near tie.
 - **`goalHint`**: the native campaign coach's goal line, with `{majority}` and `{total}`.
+- **`regional`**: playable parties that stand in only part of the country (Spain's ERC, Junts,
+  PNV and Bildu). They are left out of the generic random events, which are written for national
+  parties, so give each one at least one story beat pinned to it with `party`. The web setup
+  tells the player where the party stands, that it cannot win a majority and that success is
+  beating its real seat count, and the results screen scores it against that count. Every
+  `regional` party must be in `playable`, and its regions can never add up to a majority.
 - **Ids are free-form.** Party, bloc and region ids are plain lowercase strings. A new country
   can bring bloc ids no other country uses (New Zealand has `maori` and `pasifika`), parties that
   stand in only some of its elections, and parties with votes but no seats. Neither engine keeps
@@ -375,6 +387,7 @@ registered country and election for:
   not clash with another country's use of the same role id;
 - exactly one registry row per election, each with a label (`2025 · ...`), year, difficulty,
   description, and its paid rows in the country's pack (and the Complete Collection);
+- at least one free election per country, and at least one paid one;
 - a play-next link from every election to a real election in the same country;
 - every party, bloc, issue and region referenced anywhere exists (results, leaders, events,
   coalition rules, profiles, salience, campaign power);
@@ -405,7 +418,9 @@ results and keep a note of your sources in the file header.
    is now the newest election, update `system.majority` and `goalText` to it and give the older
    elections their own `majority` if they lack one.
 2. Add new parties to `system.parties` (and `playable` if they can be led). Existing party ids
-   never change.
+   never change. If one of the country's daily pair does not stand in the new election (a party
+   merged or dissolved), give the row a `dailyPair` with the two rivals that do, and name any new
+   role in `daily.names` (Japan 2026 pairs the LDP with the CRA).
 3. Add a row to the module's `scenarios` in date order (newest first), after the shipped rows,
    with `addedLater: true`. The new scenario id is `<code>-<electionId>`; never change an
    existing row's id. `addedLater` makes the registry list the row after every other row, so the
@@ -414,11 +429,13 @@ results and keep a note of your sources in the file header.
 4. Add the election to `next.chain` in chronological position.
 5. Rerun the completeness suite, the gauntlet for that country
    (`GAUNTLET_COUNTRIES=XX WRITE_REGISTRY=1 ...`), and the native regeneration in section 7.
-6. Packs update themselves: the country pack and the Complete Collection include the new
+6. Do not touch the country's `freeElections`. The new election is paid even if it is now the
+   newest; the free one stays where it was set.
+7. Packs update themselves: the country pack and the Complete Collection include the new
    election. The retired Global pack does **not**: it is frozen at its original fourteen Canada,
    Germany, France and Australia elections, so Global owners need the country pack or Complete
    for anything added later. That is deliberate.
-7. If the election is on the US or UK engine, its content goes where those engines keep it
+8. If the election is on the US or UK engine, its content goes where those engines keep it
    (`src/content/scenarios.ts`, `src/content/uk/`), and its registry row goes in
    `src/content/countries/us.ts` or `uk.ts`.
 
@@ -430,6 +447,9 @@ results and keep a note of your sources in the file header.
   their election unless a newcomer takes them.
 - **Never change a shipped scenario id, pack id or party id.** Saves, purchases and leaderboard
   rows depend on them.
+- **Never move a shipped free election.** A free election is open to everyone and is not in its
+  pack, so making it paid again would lock players out of something they were given. The pins
+  test fixes the free set for every shipped country.
 - **Prices and checkout belong to the platform.** Pack membership is the game's (derived from your
   module), but the price shown and the checkout come from the Lakeside accounts catalog, and the
   apps sell through App Store and Play products. A new pack needs those products created before

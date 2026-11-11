@@ -43,6 +43,11 @@ for (const m of COUNTRY_MODULES) {
   for (const [role, name] of Object.entries(m.daily.names)) if (!(role in ROLE_NAMES)) ROLE_NAMES[role] = name;
 }
 
+/** The two sides the daily may assign for one scenario. */
+export function dailyPairFor(meta: Pick<ScenarioMeta, "country" | "dailyPair">): [string, string] {
+  return meta.dailyPair ?? DAILY_ROLE_PAIRS[meta.country];
+}
+
 export function roleShortName(role: string): string {
   return ROLE_NAMES[role] ?? role.toUpperCase();
 }
@@ -113,7 +118,7 @@ function dailyScenario(dateUTC: string): ScenarioMeta {
  */
 export function dailyAssignment(dateUTC: string): DailyAssignment {
   const meta = dailyScenario(dateUTC);
-  const pair = DAILY_ROLE_PAIRS[meta.country];
+  const pair = dailyPairFor(meta);
   const role = pair[fnv1a(`role:${dateUTC}:${meta.scenarioId}`) % 2];
   return { date: dateUTC, scenarioId: meta.scenarioId, seed: `daily-${dateUTC}`, role };
 }

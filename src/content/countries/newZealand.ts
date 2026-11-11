@@ -322,6 +322,7 @@ export const NEW_ZEALAND_MODULE = countryModule(NEW_ZEALAND, {
   blurb: "Mixed-member proportional: six parties, coalition deals and the Māori electorates.",
   cover: "images/covers/country-nz.jpg",
   art: { a: "#0b1f3a", b: "#1d6b5c", glow: "rgba(236,240,245,0.2)" },
+  freeElections: ["2023"],
   scenarios: [
     { electionId: "2023", difficulty: "hard",
       description: "Ardern has gone, the cost of living has not. Six parties in the House, an overhang, and Winston Peters back as kingmaker." },

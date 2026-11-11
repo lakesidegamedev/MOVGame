@@ -123,8 +123,11 @@
 .store-free { padding: 16px 18px; border-radius: var(--radius-lg); background: var(--panel); border: 1px solid var(--border); }
 .store-free-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
 .store-free-head h2, .store-packs-head h2 { font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
-.store-free-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 8px; }
-.store-free-list li { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-md); background: var(--well); border: 1px solid var(--border); }
+.store-free-sub { margin: -6px 0 12px; font-size: 13px; color: var(--text-body); }
+.store-free-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+.store-free-country { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: var(--radius-md); background: var(--well); border: 1px solid var(--border); }
+.store-free-country-name { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.store-free-row { display: flex; align-items: center; gap: 8px; min-height: 30px; }
 .store-free-name { flex: 1; min-width: 0; font-size: 13px; line-height: 1.35; color: var(--text-body); }
 .store-free-name b { color: var(--text); margin-right: 4px; }
 
@@ -204,6 +207,7 @@
 .store-chip.tag-tide { color: var(--rose); }
 .store-chip.tag-coin, .store-chip.tag-focus { color: var(--gold); border-color: rgba(245, 185, 66, 0.45); }
 .store-chip.tag-challenge { color: var(--water); border-color: rgba(56, 189, 248, 0.4); }
+.store-chip.tag-free { color: var(--green); border-color: rgba(74, 222, 128, 0.45); }
 
 .store-buybox { position: sticky; top: 72px; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: var(--radius-lg); background: var(--panel); border: 1px solid var(--border-hover); box-shadow: var(--shadow-sm); }
 .store-buybox-owned p { margin: 8px 0 0; font-size: 13px; color: var(--text-body); }

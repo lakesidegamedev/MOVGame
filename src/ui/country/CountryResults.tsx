@@ -5,7 +5,7 @@ import { useAuthStore } from "@store/authStore";
 import { openStoreForScenario } from "@store/storeNav";
 import { api } from "@lib/api";
 import { computeScoreFromFacts, multipartyScoreFacts, multipartyUnitMargin } from "@engine/scoring";
-import { countryGovernmentText, majorityFor, playablePartiesIn } from "@engine/countryGame";
+import { countryGovernmentText, majorityFor, playablePartiesIn, regionalReach } from "@engine/countryGame";
 import type { Government } from "@engine/types";
 import { countryNextScenario } from "@content/nextScenario";
 import { partyColor, partyName, partyShort, sortBySeats } from "./helpers";
@@ -103,6 +103,8 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
   const playableNext = next ? playablePartiesIn(country, next.id) : [];
   const nextParty = playableNext.includes(game.playerParty) ? game.playerParty : playableNext[0];
 
+  // A regional party cannot win; it is measured against its real result.
+  const regional = regionalReach(country, game.electionId, game.playerParty);
   const largest = order[0];
   // Plurality: the margin is the lead over the strongest rival, not a line.
   const seatMargin = multipartyUnitMargin(r.seats, game.playerParty, majority.threshold, plurality);
@@ -166,9 +168,11 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
             ? `You won ${country.label}.`
             : inGov
               ? "You're in government."
-              : "You came up short."
+              : regional
+                ? `${playerSeats} ${country.unitNamePlural} against ${regional.historical} in the real election.`
+                : "You came up short."
         }
-        subheadTone={won ? "win" : inGov ? "neutral" : "loss"}
+        subheadTone={won ? "win" : inGov ? "neutral" : regional ? (playerSeats > regional.historical ? "win" : playerSeats === regional.historical ? "neutral" : "loss") : "loss"}
         counterValue={playerSeats}
         counterLabel={`Your ${country.unitNamePlural}`}
         counterColor={partyColor(country, game.playerParty)}

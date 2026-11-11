@@ -55,7 +55,7 @@ class NativeDaily private constructor() {
             require(Regex("\\d{4}-\\d{2}-\\d{2}").matches(dateUTC))
             // Use the exported registry's order, exactly as web and server do.
             val meta = scenario(dateUTC)
-            val role = pairs.getValue(meta.country)[(Rng.hashSeed("role:$dateUTC:${meta.scenarioId}") % 2).toInt()]
+            val role = (meta.dailyPair ?: pairs.getValue(meta.country))[(Rng.hashSeed("role:$dateUTC:${meta.scenarioId}") % 2).toInt()]
             return NativeDailyAssignment(dateUTC, meta.scenarioId, "daily-$dateUTC", role,
                 meta.country, meta.nativeId, meta.label, meta.flag, names.getValue(role))
         }

@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { PACKS_BY_ID, STORE_PACKS } from "@content/packs";
+import { SCENARIO_REGISTRY } from "@content/scenarioRegistry";
 import type { Purchase } from "@lib/api";
 import {
   catalogFromResponse, countryPacks, describeReason, electionsToOffer, offerFor, ownedReason, ownershipRows,
-  packFacts, priceCents, summarizeComplete, unreachableCatalog, LOADING_CATALOG, type CatalogState, type OfferContext,
+  freeElectionsByCountry, packFacts, priceCents, summarizeComplete, unreachableCatalog, LOADING_CATALOG, type CatalogState, type OfferContext,
   type OwnedReason,
 } from "@lib/storeModel";
 
@@ -157,10 +158,13 @@ describe("offers", () => {
 describe("Complete Collection summary", () => {
   it("counts countries and elections from the data", () => {
     const sum = summarizeComplete([], readyCatalog())!;
-    expect(sum.elections).toBe(PACKS_BY_ID.complete.scenarios.length);
+    // Every election counts, free ones included; what it adds is the paid ones.
+    expect(sum.elections).toBe(SCENARIO_REGISTRY.length);
+    expect(sum.freeElections).toBe(SCENARIO_REGISTRY.filter((s) => s.free).length);
+    expect(sum.elections - sum.freeElections).toBe(PACKS_BY_ID.complete.scenarios.length);
     expect(sum.countries).toBe(countryPacks().length);
     expect(sum.addsPacks.map((p) => p.id)).toEqual(countryPacks().map((p) => p.id));
-    expect(sum.addsElections).toBe(sum.elections);
+    expect(sum.addsElections).toBe(PACKS_BY_ID.complete.scenarios.length);
     expect(sum.havePacks).toEqual([]);
   });
 
@@ -169,7 +173,7 @@ describe("Complete Collection summary", () => {
     expect(sum.havePacks.map((p) => p.id).sort()).toEqual(["canada", "germany"]);
     expect(sum.addsPacks.map((p) => p.id)).not.toContain("canada");
     expect(sum.addsPacks).toHaveLength(countryPacks().length - 2);
-    expect(sum.addsElections).toBe(sum.elections - PACKS_BY_ID.canada.scenarios.length - PACKS_BY_ID.germany.scenarios.length);
+    expect(sum.addsElections).toBe(PACKS_BY_ID.complete.scenarios.length - PACKS_BY_ID.canada.scenarios.length - PACKS_BY_ID.germany.scenarios.length);
   });
 
   it("has no pack covered through the legacy Global pack to treat as already had", () => {
@@ -201,10 +205,26 @@ describe("pack facts", () => {
   it("derives flag, count and year range from the scenario registry", () => {
     const f = packFacts(PACKS_BY_ID.canada);
     expect(f.flag).toBe("🇨🇦");
-    expect(f.elections).toHaveLength(PACKS_BY_ID.canada.scenarios.length);
+    // The page lists the paid elections and the country's free one.
+    expect(f.elections).toHaveLength(PACKS_BY_ID.canada.scenarios.length + 1);
+    expect(f.freeCount).toBe(1);
+    expect(f.elections.find((m) => m.free)?.scenarioId).toBe("ca-2025");
+    expect(PACKS_BY_ID.canada.scenarios).not.toContain("ca-2025");
+    expect(f.countLabel).toBe(`${f.elections.length} elections, 1 free`);
     expect(f.yearRange).toBe("1984 to 2025");
     expect(f.yearRange).not.toMatch(/[\u2013\u2014]/);
     expect(f.elections[0].year).toBeGreaterThanOrEqual(f.elections[f.elections.length - 1].year);
+  });
+  it("Complete and Global list only their own scenarios, with no free count", () => {
+    expect(packFacts(PACKS_BY_ID.complete).freeCount).toBe(0);
+    expect(packFacts(PACKS_BY_ID.complete).elections).toHaveLength(PACKS_BY_ID.complete.scenarios.length);
+    expect(packFacts(PACKS_BY_ID.global).elections).toHaveLength(PACKS_BY_ID.global.scenarios.length);
+  });
+  it("groups the free elections by country, one group per country", () => {
+    const groups = freeElectionsByCountry();
+    expect(groups.map((g) => g.country)).toEqual([...new Set(SCENARIO_REGISTRY.map((s) => s.country))]);
+    expect(groups.find((g) => g.country === "US")?.elections.map((m) => m.scenarioId)).toEqual(["us-2024", "us-2020"]);
+    expect(groups.find((g) => g.country === "FR")?.elections.map((m) => m.scenarioId)).toEqual(["fr-2022"]);
   });
   it("names an electoral system for every shipped country", () => {
     for (const p of countryPacks()) expect(packFacts(p).system, p.id).toBeTruthy();

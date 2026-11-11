@@ -35,8 +35,6 @@ export interface CountryElectionEntry {
    * from the balance gauntlet (`npx tsx scripts/balance-report.ts`).
    */
   difficulty: ScenarioDifficulty;
-  /** Free to everyone. Paid rows join the country's pack automatically. */
-  free?: boolean;
   tags?: ScenarioTag[];
   /**
    * Set on a row added to a country after its first release. The scenario
@@ -45,6 +43,12 @@ export interface CountryElectionEntry {
    * such rows newest first within the module, after the shipped rows.
    */
   addedLater?: boolean;
+  /**
+   * The daily challenge's two sides for this election, when the country's
+   * `daily.pair` does not both stand in it (Japan 2026: the CRA replaced the
+   * CDP). Both need a name in `daily.names`.
+   */
+  dailyPair?: [string, string];
 }
 
 export interface CountryPackDef {
@@ -82,6 +86,14 @@ export interface CountryModule {
   /** Registry rows in display order, newest first. */
   scenarios: CountryElectionEntry[];
   /**
+   * Election ids that are free to everyone; every other row is paid and joins
+   * the country's pack. Set once when the country ships and never moved: a
+   * player who started a free election keeps it free when newer elections are
+   * added later. When absent, the newest election (highest year, first row on
+   * a tie) is the free one, so a new country always ships with a free taster.
+   */
+  freeElections?: string[];
+  /**
    * A few words on how votes become seats, shown on the store tile ("Mixed-member proportional").
    * The words before any comma or parenthesis name the system: countries that share a
    * system must use the same words there, so the landing page counts it once.
@@ -111,6 +123,22 @@ export interface CountryModule {
   next: { chain?: NextLink[]; map?: Record<string, NextLink> };
   /** A "how this system works" entry for the native guide, if the generic ones do not cover it. */
   guide?: { title: string; body: string };
+}
+
+/** The year of a registry row: its own, or its bundle election's. */
+export function rowYear(m: CountryModule, row: CountryElectionEntry): number {
+  return row.year ?? m.bundle?.elections[row.electionId]?.year ?? 0;
+}
+
+/**
+ * The election ids of `m` that are free to everyone: the module's explicit
+ * `freeElections`, or else its newest election.
+ */
+export function freeElectionIds(m: CountryModule): string[] {
+  if (m.freeElections) return [...m.freeElections];
+  let newest: CountryElectionEntry | undefined;
+  for (const row of m.scenarios) if (!newest || rowYear(m, row) > rowYear(m, newest)) newest = row;
+  return newest ? [newest.electionId] : [];
 }
 
 /**

@@ -42,6 +42,18 @@ const PINNED_PACK_MEMBERS: Record<string, string[]> = {
   australia: ["au-2025", "au-2022", "au-2019"],
 };
 
+// Free elections. The ids never change. In the release that made one election
+// per country free, exactly these changed: uk-2024, ca-2025, de-2025, fr-2022,
+// au-2025, nz-2023, br-2022, in-2024, es-2023, ie-2024, jp-2024, it-2022 and mx-2024 became free
+// and left their country pack's paid list (us-2024 and us-2020 were already
+// free). Nobody lost anything: a free election is open to every player, signed
+// in or not, and the frozen Global pack still lists its four. A free election
+// stays free when newer elections are added (modules pin `freeElections`).
+const PINNED_FREE = [
+  "us-2024", "us-2020", "uk-2024", "ca-2025", "de-2025", "fr-2022", "au-2025",
+  "nz-2023", "br-2022", "in-2024", "es-2023", "ie-2024", "jp-2024", "it-2022", "mx-2024",
+];
+
 const PINNED_GLOBAL = [
   "ca-2025", "ca-2021", "ca-2019", "ca-2015", "de-2025", "de-2021", "de-2017",
   "fr-2027", "fr-2022", "fr-2017", "fr-2012", "au-2025", "au-2022", "au-2019",
@@ -61,9 +73,25 @@ describe("pinned scenario ids", () => {
       expect(meta.country, id).toBe(country);
       expect(meta.engine, id).toBe(engine);
       expect(meta.nativeId, id).toBe(id.slice(3));
-      const free = id === "us-2024" || id === "us-2020";
+      const free = PINNED_FREE.includes(id);
       expect(meta.free, id).toBe(free);
       expect(meta.packId, id).toBe(free ? undefined : pack);
+    }
+  });
+
+  it("the pinned free elections stay free, and every country has at least one", () => {
+    for (const id of PINNED_FREE) {
+      expect(SCENARIOS_BY_ID[id]?.free, id).toBe(true);
+      expect(SCENARIOS_BY_ID[id]?.packId, id).toBeUndefined();
+    }
+    // Countries that shipped before this list was pinned have exactly the free
+    // elections above; a later country brings its own and is not checked here.
+    const pinnedCountries = new Set(PINNED_FREE.map((id) => SCENARIOS_BY_ID[id]?.country));
+    for (const s of SCENARIO_REGISTRY) {
+      if (pinnedCountries.has(s.country)) expect(s.free, s.scenarioId).toBe(PINNED_FREE.includes(s.scenarioId));
+    }
+    for (const m of COUNTRY_MODULES) {
+      expect(SCENARIO_REGISTRY.some((s) => s.country === m.code && s.free), `${m.code} has a free election`).toBe(true);
     }
   });
 
@@ -83,7 +111,16 @@ describe("pinned packs", () => {
   it("country packs keep every scenario they ever held, and only their own country's", () => {
     for (const [id, members] of Object.entries(PINNED_PACK_MEMBERS)) {
       const pack = PACKS_BY_ID[id];
-      for (const sid of members) expect(pack.scenarios, `${id} keeps ${sid}`).toContain(sid);
+      for (const sid of members) {
+        // A pinned free election left its pack's paid list and is open to
+        // everyone instead; every other member stays in the pack.
+        if (PINNED_FREE.includes(sid)) {
+          expect(pack.scenarios, `${id} no longer sells free ${sid}`).not.toContain(sid);
+          expect(SCENARIOS_BY_ID[sid].free, sid).toBe(true);
+        } else {
+          expect(pack.scenarios, `${id} keeps ${sid}`).toContain(sid);
+        }
+      }
       const country = SCENARIOS_BY_ID[members[0]].country;
       for (const sid of pack.scenarios) expect(SCENARIOS_BY_ID[sid]?.country, `${id} holds ${sid}`).toBe(country);
     }

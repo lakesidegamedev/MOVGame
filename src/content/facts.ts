@@ -19,6 +19,8 @@ export const COUNTRY_COUNT = COUNTRY_MODULES.length;
 export const VOTING_SYSTEM_COUNT = new Set(COUNTRY_MODULES.map((m) => votingSystemKey(m.systemLabel))).size;
 export const ELECTION_COUNT = SCENARIO_REGISTRY.length;
 export const FREE_ELECTION_COUNT = SCENARIO_REGISTRY.filter((s) => s.free).length;
+/** Countries with at least one free election (every country has one). */
+export const FREE_COUNTRY_COUNT = new Set(SCENARIO_REGISTRY.filter((s) => s.free).map((s) => s.country)).size;
 export const FIRST_YEAR = Math.min(...SCENARIO_REGISTRY.map((s) => s.year));
 export const LAST_YEAR = Math.max(...SCENARIO_REGISTRY.map((s) => s.year));
 

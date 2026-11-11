@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Lock } from "lucide-react";
-import { SCENARIOS_BY_ID, scenarioTags } from "@content/scenarioRegistry";
+import { PAYWALL_ENABLED, SCENARIOS_BY_ID, scenarioTags } from "@content/scenarioRegistry";
 import { partyFill, partyInk } from "@ui/colors";
 import { Avatar } from "@ui/Avatar";
 
@@ -35,6 +35,7 @@ export function ElectionTile({
         <span className="election-tile-year num">{year}</span>
         {locked && <Lock size={12} className="election-tile-lock" aria-label="Locked" />}
         {meta && <span className={`tag ${meta.difficulty}`}>{meta.difficulty}</span>}
+        {PAYWALL_ENABLED && meta?.free && <span className="tag positive" title="Free to everyone, no account needed">Free</span>}
       </span>
       <span className="election-tile-title">{title}</span>
       {tags.length > 0 && (

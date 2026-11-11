@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
 import { openStoreForScenario } from "@store/storeNav";
-import { playablePartiesIn, type CountryBundle } from "@engine/countryGame";
+import { playablePartiesIn, regionalReach, type CountryBundle } from "@engine/countryGame";
 import { ElectionTile, PartyCard } from "@ui/ElectionTile";
 import { partyInk } from "@ui/colors";
 import { partyColor, partyName, partyShort } from "./helpers";
@@ -10,8 +10,9 @@ import { Vote, Dices, ChevronLeft, Flag, Lock } from "lucide-react";
 import type { PartyId } from "@engine/system";
 import { BRAND } from "../../brand";
 import { DifficultyPicker, type Difficulty } from "@ui/DifficultyPicker";
-import { TideBanner, ChallengePartyBanner } from "@ui/TideBanner";
-import { DAILY_ROLE_PAIRS } from "@lib/daily";
+import { TideBanner, ChallengePartyBanner, RegionalPartyBanner } from "@ui/TideBanner";
+import { dailyPairFor } from "@lib/daily";
+import { SCENARIOS_BY_ID } from "@content/scenarioRegistry";
 import { FR_FIRST_ROUND } from "@content/countries/france";
 import { COUNTRY_MODULES_BY_CODE } from "@content/countries";
 
@@ -71,7 +72,21 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
           </div>
         )}
         {(() => {
-          const majors = DAILY_ROLE_PAIRS[country.id] ?? country.playable.slice(0, 2);
+          const reach = regionalReach(country, election, activeParty);
+          if (reach) {
+            return (
+              <RegionalPartyBanner
+                partyLabel={partyName(country, activeParty)}
+                regionNames={reach.regions.map((id) => country.regions.find((r) => r.id === id)?.name ?? id)}
+                seats={reach.seats}
+                total={(data.majority ?? country.system.majority).total}
+                unitPlural={country.unitNamePlural}
+                historical={reach.historical}
+              />
+            );
+          }
+          const meta = SCENARIOS_BY_ID[`${country.id.toLowerCase()}-${election}`];
+          const majors = meta ? dailyPairFor(meta) : country.playable.slice(0, 2);
           return !majors.includes(activeParty) ? (
             <ChallengePartyBanner partyLabel={partyName(country, activeParty)} />
           ) : null;

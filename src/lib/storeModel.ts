@@ -196,8 +196,10 @@ export function completePack(): ScenarioPack | undefined {
 
 export interface CompleteSummary {
   pack: ScenarioPack;
-  /** Everything the collection contains, from the data. */
+  /** Every election of the collection's countries, free ones included. */
   elections: number;
+  /** How many of those are free to everyone anyway. */
+  freeElections: number;
   countries: number;
   /** Country packs the player does not have yet, and what they hold. */
   addsPacks: ScenarioPack[];
@@ -217,7 +219,9 @@ export function countryOfScenario(scenarioId: string): CountryCode | undefined {
 export function summarizeComplete(ownedPackIds: readonly string[], catalog: CatalogState): CompleteSummary | null {
   const pack = completePack();
   if (!pack) return null;
-  const countries = new Set(pack.scenarios.map(countryOfScenario).filter(Boolean)).size;
+  const codes = new Set(pack.scenarios.map(countryOfScenario).filter(Boolean));
+  const countries = codes.size;
+  const everything = SCENARIO_REGISTRY.filter((s) => codes.has(s.country));
   const all = countryPacks();
   const havePacks = all.filter((p) => packCovered(p.id, ownedPackIds));
   const addsPacks = all.filter((p) => !packCovered(p.id, ownedPackIds));
@@ -226,7 +230,8 @@ export function summarizeComplete(ownedPackIds: readonly string[], catalog: Cata
   const separateCents = addsPacks.reduce((sum, p) => sum + priceCents(p.id, catalog), 0);
   return {
     pack,
-    elections: pack.scenarios.length,
+    elections: everything.length,
+    freeElections: everything.filter((s) => s.free).length,
     countries,
     addsPacks,
     addsElections,
@@ -242,8 +247,16 @@ export interface PackFacts {
   pack: ScenarioPack;
   country: CountryCode | undefined;
   flag: string;
-  /** Elections in the pack, newest first. */
+  /**
+   * Every election of the pack's country, newest first: the paid ones the pack
+   * sells plus the country's free ones (shown as "Free"). Packs that are not a
+   * country's (Complete, Global) list only their own scenarios.
+   */
   elections: ScenarioMeta[];
+  /** How many of `elections` are free to everyone. */
+  freeCount: number;
+  /** "4 elections, 1 free" or "3 elections". */
+  countLabel: string;
   from: number | null;
   to: number | null;
   yearRange: string;
@@ -251,20 +264,31 @@ export interface PackFacts {
   cover: string | undefined;
 }
 
+/** "4 elections, 1 free" when some are free, "3 elections" otherwise. */
+export function electionCountLabel(total: number, free: number): string {
+  const base = `${total} ${total === 1 ? "election" : "elections"}`;
+  return free > 0 ? `${base}, ${free} free` : base;
+}
+
 export function packFacts(pack: ScenarioPack): PackFacts {
-  const elections = pack.scenarios
-    .map((id) => SCENARIOS_BY_ID[id])
+  const home = COUNTRY_MODULES.find((m) => m.pack.id === pack.id);
+  const free = home ? SCENARIO_REGISTRY.filter((s) => s.country === home.code && s.free) : [];
+  const elections = [...pack.scenarios.map((id) => SCENARIOS_BY_ID[id]), ...free]
     .filter((m): m is ScenarioMeta => !!m)
+    .filter((m, i, all) => all.findIndex((x) => x.scenarioId === m.scenarioId) === i)
     .sort((a, b) => b.year - a.year || b.scenarioId.localeCompare(a.scenarioId));
-  const country = elections[0]?.country;
+  const freeCount = elections.filter((m) => m.free).length;
+  const country = home?.code ?? elections[0]?.country;
   const years = elections.map((e) => e.year);
   const from = years.length ? Math.min(...years) : null;
   const to = years.length ? Math.max(...years) : null;
   return {
     pack,
     country,
-    flag: elections[0]?.flag ?? "",
+    flag: home?.flag ?? elections[0]?.flag ?? "",
     elections,
+    freeCount,
+    countLabel: electionCountLabel(elections.length, freeCount),
     from,
     to,
     yearRange: from == null || to == null ? "" : from === to ? String(from) : `${from} to ${to}`,
@@ -273,9 +297,27 @@ export function packFacts(pack: ScenarioPack): PackFacts {
   };
 }
 
-/** The elections everyone has for free. */
+/** The elections everyone has for free, newest first. */
 export function freeElections(): ScenarioMeta[] {
   return SCENARIO_REGISTRY.filter((s) => s.free).sort((a, b) => b.year - a.year);
+}
+
+export interface FreeCountryGroup {
+  country: CountryCode;
+  name: string;
+  flag: string;
+  /** Newest first. */
+  elections: ScenarioMeta[];
+}
+
+/** The free elections grouped by country, in the countries' registration order. */
+export function freeElectionsByCountry(): FreeCountryGroup[] {
+  return COUNTRY_MODULES.map((m) => ({
+    country: m.code,
+    name: m.name,
+    flag: m.flag,
+    elections: SCENARIO_REGISTRY.filter((s) => s.country === m.code && s.free).sort((a, b) => b.year - a.year),
+  })).filter((g) => g.elections.length > 0);
 }
 
 /** Unique country covers for the Complete Collection collage. */
@@ -303,10 +345,12 @@ export interface OwnershipRow {
 
 /** What the player owns, one row per pack, with why. The free base game leads. */
 export function ownershipRows(unlocked: Unlocked, purchases: readonly Purchase[]): OwnershipRow[] {
+  const free = freeElections();
+  const countries = new Set(free.map((s) => s.country)).size;
   const rows: OwnershipRow[] = [{
     key: "free",
     name: "Base game",
-    detail: `${freeElections().map((s) => `${s.country} ${s.year}`).join(", ")} and the Daily Challenge`,
+    detail: `${free.length} free elections across ${countries} countries, and the Daily Challenge`,
     reason: { kind: "free" },
   }];
   const ids = [...unlocked.packIds].filter((id) => PACKS_BY_ID[id]);
@@ -315,7 +359,7 @@ export function ownershipRows(unlocked: Unlocked, purchases: readonly Purchase[]
     rows.push({
       key: id,
       name: pack.name,
-      detail: `${pack.scenarios.length} elections`,
+      detail: packFacts(pack).countLabel,
       reason: ownedReason(id, ids, purchases) ?? { kind: "account" },
     });
   }

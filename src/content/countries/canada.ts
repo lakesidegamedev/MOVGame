@@ -683,6 +683,7 @@ export const CANADA_MODULE = countryModule(CANADA, {
   blurb: "343 seats, five parties, coast to coast to coast.",
   cover: "images/covers/country-ca.jpg",
   art: { a: "#5b1620", b: "#c94242", glow: "rgba(255,236,221,0.19)" },
+  freeElections: ["2025"],
   scenarios: [
     { electionId: "2025", difficulty: "easy",
       description: "A tariff war with the neighbour, a Liberal comeback for the ages, and 343 seats from coast to coast to coast." },

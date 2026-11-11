@@ -475,6 +475,7 @@ export const ITALY_MODULE = countryModule(ITALY, {
   blurb: "Coalitions, a majority bonus, then a mixed system and a chamber cut to 400: four elections from 2008 to 2022.",
   cover: "images/covers/country-it.jpg",
   art: { a: "#0f3d2e", b: "#c8102e", glow: "rgba(236,240,245,0.2)" },
+  freeElections: ["2022"],
   scenarios: [
     { electionId: "2022", difficulty: "hard",
       description: "Draghi has fallen, the left is split three ways and Meloni leads a united right into a 400-seat chamber. Gas bills decide everything." },

@@ -575,6 +575,7 @@ export const GERMANY_MODULE = countryModule(GERMANY, {
   blurb: "Proportional Bundestag politics and the firewall.",
   cover: "images/covers/country-de.jpg",
   art: { a: "#17191d", b: "#8c6618", glow: "rgba(233,194,65,0.22)" },
+  freeElections: ["2025"],
   scenarios: [
     { electionId: "2025", difficulty: "hard",
       description: "The traffic-light coalition collapses. Five-plus parties, a firewall under strain, and 630 Bundestag seats." },

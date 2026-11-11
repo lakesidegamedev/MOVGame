@@ -36,7 +36,7 @@ export function PackDetail({ packId }: { packId: string }) {
           <div>
             <h2 tabIndex={-1} ref={headingRef}>{pack.name}</h2>
             <p className="store-detail-meta">
-              <b>{plural(facts.elections.length, "election")}</b>
+              <b>{facts.countLabel}</b>
               {facts.yearRange && <> · {facts.yearRange}</>}
               {facts.system && <> · {facts.system}</>}
             </p>
@@ -60,6 +60,7 @@ export function PackDetail({ packId }: { packId: string }) {
                     <span className="store-election-name">{m.flag} {electionName(m)}</span>
                     <span className="store-election-desc">{m.description}</span>
                     <span className="store-election-tags">
+                      {m.free && <span className="store-chip tag-free">Free</span>}
                       <DifficultyChip difficulty={m.difficulty} />
                       {tags.includes("tide") && <span className="store-chip tag-tide">Historical tide</span>}
                       {tags.includes("coin-flip") && <span className="store-chip tag-coin">Coin-flip</span>}
@@ -94,7 +95,7 @@ export function PackDetail({ packId }: { packId: string }) {
               <div className="store-option">
                 <div className="store-option-head">
                   <span className="store-option-name">{pack.name}</span>
-                  <span className="store-option-meta">{plural(facts.elections.length, "election")}</span>
+                  <span className="store-option-meta">{facts.countLabel}</span>
                 </div>
                 <OfferAction packId={packId} label={`Buy ${pack.name}`} />
               </div>

@@ -13,6 +13,12 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Added
 
+- Japan: the February 2026 House of Representatives election, Takaichi v. Noda. Lead the LDP,
+  the new Centrist Reform Alliance of the Constitutional Democrats and Komeito, Ishin, the DPP,
+  Sanseito, Team Mirai, the Communists, Reiwa or the Conservatives, with the real list votes and
+  seats of all eleven blocks and the campaign's story from the snap dissolution to the shortest
+  campaign since the war. It is in the Japan pack; Japan's free election stays 2024. On 2026
+  days the daily challenge pairs the LDP with the CRA.
 - Brazil: six presidential runoffs, 2002, 2006, 2010, 2014, 2018 and 2022, as a $0.99 pack (also in
   the Complete Collection). Lead the PT or its opponent across twelve regions, from São Paulo and
   Minas Gerais on their own to the Northeast and the Amazon, with each campaign's real story
@@ -121,6 +127,18 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Changed
 
+- Spain: the Catalan and Basque parties are now playable as regional parties in every election
+  they stood in: ERC, CiU and its successors Democràcia i Llibertat and Junts, the PNV, and
+  Amaiur and EH Bildu, each with its real lead candidate. They stand only in Catalonia or in the
+  Basque Country and Navarre, so they cannot win a majority; the setup says so and the results
+  screen measures you against the party's real seat count. Two new story beats cover the Catalan
+  lists of 2015 and the PNV's record before April 2019.
+- Every country now has a free election, playable without an account: the newest election of
+  each country (France's 2022 runoff rather than the speculative 2027 one), plus the US 2024 and
+  2020 races as before. The free election stays free when newer elections arrive. Country packs
+  hold the rest of each country's elections; the Store shows the free one on the pack page as
+  "Free", and the base game section lists every free election by country. Nobody loses anything:
+  owners of a pack or the retired Global pack keep every election they had.
 - Countries are now self-contained add-ons inside the game. Each country carries its own
   elections, store pack, daily challenge sides and "play next" links, and the web game, the
   iPhone app and the Android app all list countries and packs from that one source. Nothing
@@ -158,6 +176,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- On Easy, a party that stands in only part of a country (the Bloc Québécois, India's regional
+  parties, Spain's Catalan and Basque parties) no longer appears on the ballot in regions where it
+  never stood. The Easy head start now applies only where your party is actually running.
 - Parties with very dark colors, such as the CDU/CSU in Germany, are now readable on maps,
   seat bars, standings and setup cards.
 - Small text and party-colored names now meet contrast guidelines on the dark panels.

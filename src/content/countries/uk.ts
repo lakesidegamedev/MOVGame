@@ -12,6 +12,7 @@ export const UK_MODULE: CountryModule = {
   blurb: "Multiparty FPTP: coalitions, landslides, hung parliaments.",
   cover: "images/covers/country-uk.jpg",
   art: { a: "#17224d", b: "#8f2135", glow: "rgba(234,191,87,0.2)" },
+  freeElections: ["2024"],
   scenarios: [
     { electionId: "2024", year: 2024, label: "2024 · Starmer's landslide", description: "Fourteen years of Conservative rule end. Or do they? Reform surges on the right.", difficulty: "hard" },
     { electionId: "2019", year: 2019, label: "2019 · Get Brexit Done", description: "Johnson's gamble: smash the Red Wall or lose the majority.", difficulty: "hard" },
