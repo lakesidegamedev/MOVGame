@@ -70,6 +70,18 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   redemption stays in your account and in the Store.
 - Desktop: checkout and account linking open in your browser, and the game window stays where
   it is. The Store picks your purchase up as soon as you come back to the window.
+- Canada now goes back to 1984: the 2011, 2008, 2006, 2004, 2000, 1993, 1988 and 1984 elections
+  join the Canada pack. Lead the Progressive Conservatives or the merged Conservatives, the
+  Liberals, the NDP, the Bloc or, in 1993 and 2000, Reform and the Canadian Alliance, with each
+  year's real chamber (282 to 308 seats), real provincial results and real campaign beats, from
+  the 1984 patronage row and the 1988 free trade debate to the Bloc and Reform breakthrough, the
+  Harper minorities and the 2011 orange wave. Play next now runs through every Canadian election
+  in order.
+- Australia now goes back to 1996: the 2016, 2013, 2010, 2007, 2004, 2001, 1998 and 1996
+  elections join the Australia pack. Real state results and each campaign's real beats, from
+  'never, ever' a GST and the Tampa to WorkChoices, the 2010 hung parliament and the 2016
+  Mediscare, in chambers of 148 and 150 seats. Play next now runs through every Australian
+  election in order.
 
 ### Changed
 

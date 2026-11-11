@@ -78,6 +78,22 @@
     "jp-2017": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "jp-2014": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "jp-2012": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
-    "jp-2009": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
+    "jp-2009": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "ca-2011": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "ca-2008": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0.05 },
+    "ca-2006": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "ca-2004": { "suggested": "easy", "authored": "easy", "underdogWinRate": 0.65 },
+    "ca-2000": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "ca-1993": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "ca-1988": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "ca-1984": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "au-2016": { "suggested": "easy", "authored": "easy", "underdogWinRate": 0.65 },
+    "au-2013": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "au-2010": { "suggested": "easy", "authored": "easy", "underdogWinRate": 0.8 },
+    "au-2007": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "au-2004": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "au-2001": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "au-1998": { "suggested": "medium", "authored": "medium", "underdogWinRate": 0.2 },
+    "au-1996": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
   }
 }

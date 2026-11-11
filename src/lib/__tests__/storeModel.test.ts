@@ -79,8 +79,10 @@ describe("covered-by rules", () => {
     }
   });
 
-  it("covers Canada, Germany, France and Australia through the legacy Global pack, and nothing else", () => {
-    for (const id of ["canada", "germany", "france", "australia"]) expect(ownedReason(id, ["global"], [])?.kind).toBe("included");
+  it("covers the packs whose elections all sit in the legacy Global pack, and nothing else", () => {
+    // Canada and Australia now hold elections added after Global was frozen.
+    for (const id of ["germany", "france"]) expect(ownedReason(id, ["global"], [])?.kind).toBe("included");
+    for (const id of ["canada", "australia"]) expect(ownedReason(id, ["global"], [])).toBeNull();
     expect(ownedReason("uk-elections", ["global"], [])).toBeNull();
     expect(ownedReason("us-historical", ["global"], [])).toBeNull();
   });
@@ -106,7 +108,7 @@ describe("covered-by rules", () => {
     expect(describeReason({ kind: "purchase", provider: "apple", at: null })).toBe("Bought on the App Store");
     const via = ownedReason("canada", ["complete"], [purchase("complete", "supporter")])!;
     expect(describeReason(via)).toBe("Included in your Complete Collection from your Supporter membership");
-    const global = ownedReason("canada", ["global"], [purchase("global")])!;
+    const global = ownedReason("germany", ["global"], [purchase("global")])!;
     expect(describeReason(global)).toBe("Included in your Global Elections Pack");
     const mixed = ownedReason("complete", [], []);
     expect(mixed).toBeNull();
@@ -169,7 +171,7 @@ describe("Complete Collection summary", () => {
 
   it("treats packs covered through the legacy Global pack as already had", () => {
     const sum = summarizeComplete(["global"], readyCatalog())!;
-    expect(sum.havePacks.map((p) => p.id).sort()).toEqual(["australia", "canada", "france", "germany"]);
+    expect(sum.havePacks.map((p) => p.id).sort()).toEqual(["france", "germany"]);
   });
 
   it("computes the saving from current prices", () => {
@@ -197,7 +199,7 @@ describe("pack facts", () => {
     const f = packFacts(PACKS_BY_ID.canada);
     expect(f.flag).toBe("🇨🇦");
     expect(f.elections).toHaveLength(PACKS_BY_ID.canada.scenarios.length);
-    expect(f.yearRange).toBe("2015 to 2025");
+    expect(f.yearRange).toBe("1984 to 2025");
     expect(f.yearRange).not.toMatch(/[\u2013\u2014]/);
     expect(f.elections[0].year).toBeGreaterThanOrEqual(f.elections[f.elections.length - 1].year);
   });

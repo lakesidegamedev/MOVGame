@@ -72,27 +72,35 @@ export function tideBlurb(meta: ScenarioMeta): string | null {
   return null;
 }
 
-export const SCENARIO_REGISTRY: ScenarioMeta[] = COUNTRY_MODULES.flatMap((m) =>
-  m.scenarios.map((row): ScenarioMeta => {
-    const election = m.bundle?.elections[row.electionId];
-    const free = row.free === true;
-    const meta: ScenarioMeta = {
-      scenarioId: row.scenarioId ?? `${m.code.toLowerCase()}-${row.electionId}`,
-      country: m.code,
-      engine: m.engine,
-      nativeId: row.electionId,
-      year: row.year ?? election?.year ?? 0,
-      free,
-      packId: free ? undefined : m.pack.id,
-      difficulty: row.difficulty,
-      label: row.label ?? election?.label ?? row.electionId,
-      description: row.description,
-      flag: m.flag,
-    };
-    if (row.tags) meta.tags = [...row.tags];
-    return meta;
-  }),
+const REGISTRY_ROWS = COUNTRY_MODULES.flatMap((m) =>
+  m.scenarios.map((row) => ({ m, row })),
 );
+
+// Original rows keep module order; rows marked `addedLater` follow them (stable).
+const ORDERED_ROWS = [
+  ...REGISTRY_ROWS.filter(({ row }) => !row.addedLater),
+  ...REGISTRY_ROWS.filter(({ row }) => row.addedLater),
+];
+
+export const SCENARIO_REGISTRY: ScenarioMeta[] = ORDERED_ROWS.map(({ m, row }): ScenarioMeta => {
+  const election = m.bundle?.elections[row.electionId];
+  const free = row.free === true;
+  const meta: ScenarioMeta = {
+    scenarioId: row.scenarioId ?? `${m.code.toLowerCase()}-${row.electionId}`,
+    country: m.code,
+    engine: m.engine,
+    nativeId: row.electionId,
+    year: row.year ?? election?.year ?? 0,
+    free,
+    packId: free ? undefined : m.pack.id,
+    difficulty: row.difficulty,
+    label: row.label ?? election?.label ?? row.electionId,
+    description: row.description,
+    flag: m.flag,
+  };
+  if (row.tags) meta.tags = [...row.tags];
+  return meta;
+});
 
 export const SCENARIOS_BY_ID: Record<string, ScenarioMeta> = Object.fromEntries(
   SCENARIO_REGISTRY.map((s) => [s.scenarioId, s]),

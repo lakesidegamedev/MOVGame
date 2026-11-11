@@ -38,6 +38,12 @@ export interface CountryElectionEntry {
   /** Free to everyone. Paid rows join the country's pack automatically. */
   free?: boolean;
   tags?: ScenarioTag[];
+  /**
+   * Added to an existing country after its first release. The scenario registry
+   * places these rows after every original row, so the order players' daily
+   * challenges were hashed over never shifts (see catalog-pins.test.ts).
+   */
+  addedLater?: boolean;
 }
 
 export interface CountryPackDef {
