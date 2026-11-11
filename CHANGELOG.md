@@ -19,6 +19,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   beats, from Lula's first win and the mensalão to the stabbing in Juiz de Fora and the 2022
   photo finish. The first round is already counted, so the voters of Marina Silva, Ciro Gomes
   and Simone Tebet are part of the opening map.
+- Spain: the 2011, 2015, April 2019 and 2023 Congress of Deputies elections under proportional
+  representation by province, as a $0.99 pack (also in the Complete Collection). Lead the PP,
+  the PSOE, Podemos or Sumar, United Left, Citizens, Vox or UPyD across 14 regions, from the
+  Basque Country to the Canary Islands, with real results in every region. The Catalan, Basque,
+  Galician and Canarian parties win seats of their own and decide close results. Each campaign
+  has its real story beats, from the crash election and the end of two-party Spain to Vox's
+  breakthrough and the summer 2023 deadlock, and a government needs 176 seats at the investiture.
 - New Zealand: the 2017, 2020 and 2023 general elections under mixed-member proportional
   representation, as a $0.99 pack (also in the Complete Collection). Lead Labour, National, the
   Greens, ACT, NZ First or Te Pāti Māori across nine regions and the seven Māori electorates,
