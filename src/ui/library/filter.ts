@@ -1,4 +1,5 @@
 import type { ScenarioMeta } from "@content/scenarioRegistry";
+import { COUNTRY_MODULES_BY_CODE } from "@content/countries";
 
 // Pure filtering and grouping for the election library. Kept free of React
 // so it can be tested directly and so it scales to any number of countries.
@@ -16,35 +17,16 @@ export interface LibraryFilters {
 
 export const EMPTY_FILTERS: LibraryFilters = { query: "", country: null, access: "all", difficulty: "all", era: "all" };
 
-// Country names for registry codes. Known codes use the names players see in
-// the game; any new code falls back to the browser's region name, then the code.
-const NAMES: Record<string, string> = {
-  US: "United States",
-  UK: "United Kingdom",
-  CA: "Canada",
-  DE: "Germany",
-  FR: "France",
-  AU: "Australia",
-  NZ: "New Zealand",
-};
-
-// One line on each country's voting system, shown in the library. Optional:
-// a country without a line simply shows its counts.
-const BLURBS: Record<string, string> = {
-  US: "Winner-take-all duels for 270 electoral votes.",
-  UK: "Multiparty first past the post: coalitions, landslides, hung parliaments.",
-  CA: "343 seats, five parties, coast to coast to coast.",
-  DE: "Proportional Bundestag politics and the firewall.",
-  FR: "The two-round runoff for the Élysée.",
-  AU: "Preferential voting across 150 seats.",
-};
-
+// Country names and the one-line voting system blurb come from the registered
+// country modules, so a new country needs nothing here. An unregistered code
+// falls back to the browser's region name, then the code.
 export function countryBlurb(code: string): string | undefined {
-  return BLURBS[code];
+  return COUNTRY_MODULES_BY_CODE[code]?.blurb;
 }
 
 export function countryName(code: string): string {
-  if (NAMES[code]) return NAMES[code];
+  const known = COUNTRY_MODULES_BY_CODE[code]?.name;
+  if (known) return known;
   try {
     const region = code === "UK" ? "GB" : code;
     const name = new Intl.DisplayNames(["en"], { type: "region" }).of(region);

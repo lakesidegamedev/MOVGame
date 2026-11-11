@@ -13,6 +13,7 @@ import { DifficultyPicker, type Difficulty } from "@ui/DifficultyPicker";
 import { TideBanner, ChallengePartyBanner } from "@ui/TideBanner";
 import { DAILY_ROLE_PAIRS } from "@lib/daily";
 import { FR_FIRST_ROUND } from "@content/countries/france";
+import { COUNTRY_MODULES_BY_CODE } from "@content/countries";
 
 function randomSeed(): string {
   return String(Math.floor(Math.random() * 1_000_000)).padStart(6, "0");
@@ -36,6 +37,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
   const playable = playablePartiesIn(country, election);
   const activeParty = playable.includes(party) ? party : playable[0];
   const leader = country.leaders[election]?.[activeParty];
+  const setupNote = COUNTRY_MODULES_BY_CODE[country.id]?.setupNote;
 
   return (
     <div className="center">
@@ -45,9 +47,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
         </div>
         <div className="title">{BRAND.name}</div>
         <p className="sub">{data.tagline}</p>
-        {country.runoff && (
-          <p className="muted small">Campaign clock: six planning weeks compress the historical two-week runoff.</p>
-        )}
+        {setupNote && <p className="muted small">{setupNote}</p>}
         {country.id === "FR" && FR_FIRST_ROUND[election] && (
           <div className="su-summary">
             <strong>Runoff starting point</strong>

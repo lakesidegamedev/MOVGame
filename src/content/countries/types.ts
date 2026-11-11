@@ -74,8 +74,18 @@ export interface CountryModule {
   bundle?: CountryBundle;
   /** Registry rows in display order, newest first. */
   scenarios: CountryElectionEntry[];
-  /** A few words on how votes become seats, shown on the store tile ("Mixed-member proportional"). */
+  /**
+   * A few words on how votes become seats, shown on the store tile ("Mixed-member proportional").
+   * The words before any comma or parenthesis name the system: countries that share a
+   * system must use the same words there, so the landing page counts it once.
+   */
   systemLabel: string;
+  /**
+   * Optional line under the setup screen's tagline about how the game's
+   * campaign maps onto the real one (France: six planning weeks for a
+   * two-week runoff). Absent: no line.
+   */
+  setupNote?: string;
   /** The country's store pack. Holds every paid row of `scenarios`. */
   pack: CountryPackDef;
   /**

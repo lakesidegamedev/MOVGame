@@ -116,6 +116,11 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - "Play next" after a result now runs through every election of the country in order, so it no
   longer skips Canada 2015 and 2019, Germany 2017, Australia 2019 or the US elections before 2000.
 - After a hung parliament the results headline is colored by the party it names, not by yours.
+- The landing page, FAQ, pricing and page description now count countries, elections and voting
+  systems from the game itself, so they no longer say "6 countries, 6 voting systems", and
+  the FAQ quotes the current store prices.
+- The France-only "six planning weeks" note no longer shows on Brazil's setup screen.
+- The election library shows a one-line summary for every country, not only the first six.
 
 ## 2026-10
 
