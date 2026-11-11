@@ -16,7 +16,7 @@ fun leaderFor(electionId: String, partyId: PartyId, partyName: String): UkLeader
 }
 
 fun headlineFor(ev: UkEvent, partyShort: String): String =
-    ev.headline.replace("{party}", partyShort)
+    ev.headline.replaceFirst("{party}", partyShort)
 
 val UK_MAJORS: List<PartyId> = listOf("lab", "con", "ld", "ref", "grn", "snp", "pc")
 

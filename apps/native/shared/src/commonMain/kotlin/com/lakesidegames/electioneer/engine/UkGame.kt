@@ -518,7 +518,7 @@ fun resolveUkPlayerEvent(g: UkGameState, choiceId: String): UkGameState {
     next.lastRecap = (
         listOf(
             RecapItem(
-                label = ev.headline.replace("{party}", PARTY_BY_ID[target]?.shortName ?: target),
+                label = ev.headline.replaceFirst("{party}", PARTY_BY_ID[target]?.shortName ?: target),
                 detail = choice.resultText,
                 marginDelta = choice.appeal,
             ),

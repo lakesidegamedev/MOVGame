@@ -483,7 +483,7 @@ private fun applyCountryEventEffects(
         res.momentum = clamp(res.momentum + ev.momentum, -100.0, 100.0)
     }
     val short = country.system.parties.find { it.id == target }?.shortName ?: target.uppercase()
-    g.news = (listOf(NewsItem(turn = g.turn, text = ev.headline.replace("{party}", short))) + g.news).take(12)
+    g.news = (listOf(NewsItem(turn = g.turn, text = ev.headline.replaceFirst("{party}", short))) + g.news).take(12)
 }
 
 private fun resolveCountryEventTarget(
@@ -512,7 +512,7 @@ private fun applyCountryEvent(
     if (ev.choices != null && ev.choices.isNotEmpty() && target == g.playerParty && g.pendingEvent == null) {
         g.pendingEvent = CountryPendingEvent(eventId = ev.id, targetParty = target)
         val short = country.system.parties.find { it.id == target }?.shortName ?: target.uppercase()
-        g.news = (listOf(NewsItem(turn = g.turn, text = ev.headline.replace("{party}", short))) + g.news).take(12)
+        g.news = (listOf(NewsItem(turn = g.turn, text = ev.headline.replaceFirst("{party}", short))) + g.news).take(12)
         return
     }
     applyCountryEventEffects(g, country, ev, target)
@@ -549,7 +549,7 @@ fun resolveCountryPlayerEvent(
     next.lastRecap = (
         listOf(
             RecapItem(
-                label = ev.headline.replace("{party}", short),
+                label = ev.headline.replaceFirst("{party}", short),
                 detail = choice.resultText,
                 marginDelta = choice.appeal,
             ),

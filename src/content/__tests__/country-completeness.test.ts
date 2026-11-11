@@ -182,6 +182,29 @@ describe.each(multiparty.map((m) => [m.code, m.bundle!] as const))("%s content",
     expect(country.system.majority.threshold).toBe(Math.floor(country.system.majority.total / 2) + 1);
   });
 
+  it("text templates use only placeholders the engines fill", () => {
+    // Both engines fill these keys per government kind and leave anything else
+    // in the text. Kotlin reads the same templates from the exported bundle.
+    const allowed: Record<string, string[]> = {
+      majority: ["party", "seats"], minority: ["party", "seats"], coalition: ["parties", "seats"],
+      confidence_supply: ["lead", "partner", "seats"], hung: ["largest"],
+    };
+    for (const [kind, template] of Object.entries(country.governmentText ?? {})) {
+      expect(allowed[kind], `governmentText kind ${kind}`).toBeDefined();
+      for (const [, key] of template!.matchAll(/\{(\w+)\}/g)) {
+        expect(allowed[kind], `governmentText.${kind} uses {${key}}`).toContain(key);
+      }
+    }
+    for (const [, key] of (country.goalHint ?? "").matchAll(/\{(\w+)\}/g)) {
+      expect(["majority", "total"], `goalHint uses {${key}}`).toContain(key);
+    }
+    // Headlines are filled with a single replace, which only swaps the first {party}.
+    const events = [...country.events, ...Object.values(country.elections).flatMap((e) => e.events ?? [])];
+    for (const e of events) {
+      expect(e.headline.split("{party}").length, `event ${e.id} uses {party} more than once`).toBeLessThanOrEqual(2);
+    }
+  });
+
   it("every region has a map shape and a unique tile", () => {
     expect(country.map, "map").toBeDefined();
     const tiles = new Set<string>();

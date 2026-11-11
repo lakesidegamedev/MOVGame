@@ -35,7 +35,7 @@ abstract class SerialCodec<T>(
 }
 
 object IssueIdSerial : SerialCodec<IssueId>("IssueId", { it.serial }, { s -> IssueId.entries.first { it.serial == s } })
-object BlocIdSerial : SerialCodec<BlocId>("BlocId", { it.serial }, { s -> BlocId.entries.first { it.serial == s } })
+object BlocIdSerial : SerialCodec<BlocId>("BlocId", { it.serial }, { s -> BlocId(s) })
 object ActionTypeSerial : SerialCodec<ActionType>("ActionType", { it.serial }, { s -> ActionType.entries.first { it.serial == s } })
 object AdModeSerial : SerialCodec<AdMode>("AdMode", { it.serial }, { s -> AdMode.entries.first { it.serial == s } })
 object GamePhaseSerial : SerialCodec<GamePhase>("GamePhase", { it.serial }, { s -> GamePhase.entries.first { it.serial == s } })

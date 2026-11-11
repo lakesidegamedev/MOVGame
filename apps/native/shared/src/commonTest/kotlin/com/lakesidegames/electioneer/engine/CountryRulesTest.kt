@@ -68,8 +68,20 @@ class CountryRulesTest {
         val name = { p: PartyId -> "<$p>" }
         val kinds = listOf(Government.Majority("a", 80), Government.Minority("a", 70),
             Government.Coalition(listOf("a", "b", "c"), 90), Government.ConfidenceSupply("a", "b", 77), Government.Hung("a"))
+        // The fixtures are the functions that existed for these four countries.
+        // Countries added after the move to data never had one.
+        for (code in listOf("AU", "CA", "DE", "FR")) for (g in kinds) {
+            assertEquals(legacyGovernmentText(code, g, name), countryGovernmentText(getCountry(code)!!, g, name), "$code $g")
+        }
+    }
+
+    @Test fun everyCountryGovernmentTextFillsEveryPlaceholder() {
+        val name = { p: PartyId -> "<$p>" }
+        val kinds = listOf(Government.Majority("a", 80), Government.Minority("a", 70),
+            Government.Coalition(listOf("a", "b", "c"), 90), Government.ConfidenceSupply("a", "b", 77), Government.Hung("a"))
         for ((code, country) in COUNTRIES) for (g in kinds) {
-            assertEquals(legacyGovernmentText(code, g, name), countryGovernmentText(country, g, name), "$code $g")
+            val text = countryGovernmentText(country, g, name) ?: continue
+            assertTrue(!text.contains('{') && !text.contains('}'), "$code $g: $text")
         }
     }
 

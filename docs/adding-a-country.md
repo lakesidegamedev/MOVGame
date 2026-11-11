@@ -249,10 +249,18 @@ a bundle are rejected by the native exporter.
   - Absent: every pair is compatible.
 - **`governmentText`**: one template per government kind (`majority`, `minority`,
   `coalition`, `confidence_supply`, `hung`). Placeholders: `{party}`, `{seats}`, `{parties}`
-  (joined with " and "), `{lead}`, `{partner}`, `{largest}`. Missing kinds use the default text.
+  (joined with " and "), `{lead}`, `{partner}`, `{largest}`. Each kind fills only its own keys:
+  `majority` and `minority` take `{party}` and `{seats}`, `coalition` takes `{parties}` and
+  `{seats}`, `confidence_supply` takes `{lead}`, `{partner}` and `{seats}`, `hung` takes
+  `{largest}`. Missing kinds use the default text.
 - **`runoff: true`**: presidential two-round framing (France): national broadcasts by default,
   "wins the presidency", runoff vote movement.
 - **`goalHint`**: the native campaign coach's goal line, with `{majority}` and `{total}`.
+- **Ids are free-form.** Party, bloc and region ids are plain lowercase strings. A new country
+  can bring bloc ids no other country uses (New Zealand has `maori` and `pasifika`), parties that
+  stand in only some of its elections, and parties with votes but no seats. Neither engine keeps
+  a fixed list of them.
+- **Event headlines** may contain `{party}` once. Only the first occurrence is filled.
 
 ## 6. Rating difficulty
 
@@ -326,7 +334,9 @@ npx tsx apps/native/scripts/export-editor-vectors.ts --check
 
 Native: `./gradlew :shared:jvmTest` (from `apps/native`, through the shared check queue on the
 build host) runs the Kotlin calibration, every-election playthrough, daily parity and vector
-tests against your new country without any Kotlin changes.
+tests against your new country without any Kotlin changes. `CountryRobustnessTest` also replays
+every country with a party removed from one election, a seatless party, a region a party does not
+contest and an extra voter bloc.
 
 ## 9. Invariant checklist
 
@@ -344,6 +354,8 @@ registered country and election for:
 - a play-next link from every election to a real election in the same country;
 - every party, bloc, issue and region referenced anywhere exists (results, leaders, events,
   coalition rules, profiles, salience, campaign power);
+- government text and goal hint placeholders are ones the engines fill for that kind, and no
+  event headline uses `{party}` twice;
 - every region has a map shape (M/L/Z only) and a unique tile; no stray shapes;
 - per election: region seats sum to the chamber, the threshold is a strict majority, vote shares
   sum to about 1, no party wins seats with no votes, every region has results;

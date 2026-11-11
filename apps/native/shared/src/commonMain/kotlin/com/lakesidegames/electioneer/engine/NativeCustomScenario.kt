@@ -126,7 +126,7 @@ class NativeCustomScenario private constructor() {
                     val data = t["baseFavorability"] as? JsonObject
                     if (data == null) errors += "$where: favorability data is malformed."
                     else for ((id, value) in data) {
-                        if (BlocId.entries.none { it.serial == id }) errors += "$where: unknown voter bloc \"$id\"."
+                        if (BLOC_IDS.none { it.serial == id }) errors += "$where: unknown voter bloc \"$id\"."
                         else {
                             number(data, id, -1.0, 1.0, "$where: favorability for \"$id\" must be a number.", "$where: favorability for \"$id\" must be between -1 and 1.")
                             if (data.number(id) != 0.0) favor[id] = value
@@ -212,7 +212,7 @@ class NativeCustomScenario private constructor() {
                     field(t, "party", "$side/", title, choices = listOf("Democratic", "Republican"))
                     for (key in customTraits) field(t.getValue("traits").jsonObject, key, "$side/traits/", "$title traits", true)
                     for (issue in IssueId.entries) field(t.getValue("issuePositions").jsonObject, issue.serial, "$side/issuePositions/", "$title issues (-1 to 1)", true)
-                    for (bloc in BlocId.entries) field(t.getValue("baseFavorability").jsonObject, bloc.serial, "$side/baseFavorability/", "$title voters (-1 to 1)", true)
+                    for (bloc in BLOC_IDS) field(t.getValue("baseFavorability").jsonObject, bloc.serial, "$side/baseFavorability/", "$title voters (-1 to 1)", true)
                 }
             } else for ((index, element) in raw.getValue("mp").jsonObject.getValue("parties").jsonArray.withIndex()) {
                 val p = element.jsonObject
