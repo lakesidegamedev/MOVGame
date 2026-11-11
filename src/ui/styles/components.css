@@ -291,7 +291,7 @@ input[type=range] { width: 100%; accent-color: var(--warning); }
 }
 .modal {
   background: var(--surface-1); border: 1px solid var(--border-default); border-radius: var(--radius-xl);
-  max-width: 640px; width: 100%; box-shadow: var(--elev-3); overflow: hidden; max-height: min(90vh, 900px);
+  max-width: 640px; width: 100%; min-width: 0; box-shadow: var(--elev-3); overflow: hidden; max-height: min(90vh, 900px);
   display: flex; flex-direction: column; animation: ahd-modal-in var(--dur-slide) var(--ease);
 }
 .modal.narrow { max-width: 440px; }
@@ -324,8 +324,9 @@ input[type=range] { width: 100%; accent-color: var(--warning); }
   width: 100%; text-align: left; padding: var(--space-3) var(--space-4); margin-bottom: var(--space-2);
   min-height: 0; border-radius: var(--radius-lg);
   display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: var(--space-1-5);
-  background: var(--surface-2); font-weight: var(--fw-regular);
+  background: var(--surface-2); font-weight: var(--fw-regular); min-width: 0; white-space: normal;
 }
+.choice .ct, .modal .prompt, .resulttext { overflow-wrap: anywhere; }
 .choice:hover:not(:disabled) { border-color: var(--warning); background: var(--surface-3); }
 .choice.sel { border-color: var(--warning); background: var(--surface-3); box-shadow: var(--ring-select); }
 .choice .ct { font-weight: var(--fw-semibold); font-size: var(--fs-base); line-height: var(--lh-snug); }

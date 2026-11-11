@@ -44,7 +44,8 @@ async function run(name, opts) {
     if (filter && !id.includes(filter)) return;
     await settle();
     await page.screenshot({ path: join(dir, `${id}.png`), fullPage: full });
-    console.log(`[${name}] ${id}`);
+    const wide = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    console.log(`[${name}] ${id}${wide > 1 ? ` WARNING: page is ${wide}px wider than the viewport` : ""}`);
   };
   const nav = async (view) => {
     await page.evaluate((v) => {

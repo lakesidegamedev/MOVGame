@@ -392,3 +392,11 @@
   .actionbtn .c { display: block; }
   .evbar .endlabel { font-size: var(--fs-base); min-width: 28px; }
 }
+
+/* The wire and the tool rail never set the page width: long headlines are
+   clipped and the tool rail scrolls sideways inside its own box. */
+.desk-header, .desk-subbar, .desk-subbar > .ticker, .desk-tools { min-width: 0; max-width: 100%; }
+.desk-header { width: 100%; }
+@media (max-width: 1100px) {
+  .desk-subbar > .ticker, .desk-tools { width: 100%; }
+}
