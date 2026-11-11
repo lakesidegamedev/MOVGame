@@ -82,12 +82,12 @@ export function SettingsModal({
                 {hotkeysOn ? "On" : "Off"}
               </button>
             </div>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 10 }}>
+            <table className="data-table">
               <tbody>
                 {SHORTCUTS.map((s) => (
-                  <tr key={s.keys} style={{ borderTop: "1px solid var(--border)" }}>
-                    <td style={{ padding: "6px 8px", fontWeight: 700, whiteSpace: "nowrap" }}>{s.keys}</td>
-                    <td style={{ padding: "6px 8px", color: "var(--ink-300)" }}>{s.does}</td>
+                  <tr key={s.keys}>
+                    <td><kbd className="kbd">{s.keys}</kbd></td>
+                    <td className="muted">{s.does}</td>
                   </tr>
                 ))}
               </tbody>

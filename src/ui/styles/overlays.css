@@ -22,7 +22,7 @@
 
 /* ── Recap ──────────────────────────────────────────────────────────── */
 .recapitem { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--border-subtle); font-size: var(--fs-md); }
-.recapitem > :last-child { font-variant-numeric: tabular-nums; font-weight: var(--fw-bold); text-align: right; white-space: nowrap; }
+.recapitem > .delta { font-variant-numeric: tabular-nums; font-weight: var(--fw-bold); text-align: right; white-space: nowrap; }
 .delta.up { color: var(--green); } .delta.down { color: var(--rose); } .delta.flat { color: var(--muted); }
 
 
@@ -112,3 +112,6 @@
 .readiness-v { font-size: var(--fs-base); font-weight: 700; justify-self: end; }
 .readiness-v.up { color: var(--green); } .readiness-v.down { color: var(--rose); } .readiness-v.flat { color: var(--gold); }
 .readiness-note { grid-column: 1 / -1; font-size: var(--fs-xs); color: var(--ink-300); line-height: 1.4; margin-top: 3px; }
+
+.guide-section + .guide-section { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
+.modal.settings .guide-section { gap: var(--space-2-5); }

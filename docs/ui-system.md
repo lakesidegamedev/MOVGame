@@ -201,6 +201,19 @@ Widths: default 640px, `.modal.narrow` 440px, `.modal.wide` 840px. Below 640px
 wide every modal becomes a bottom sheet. The map's state detail sheet on phones
 uses `.sheet-scrim` and `.sheet`.
 
+### Callouts and keys
+
+`.callout.warning` and `.callout.negative` (with `.callout-title` and `.callout-body`)
+are tinted notes about a choice the player is making, for example a historical
+tide on the selected election. `<kbd class="kbd">Esc</kbd>` shows a keyboard key.
+
+### Shared React components
+
+- `DeskHeader` (`src/ui/DeskHeader.tsx`): the campaign desk header used by every engine.
+- `ElectionTile` and `PartyCard` (`src/ui/ElectionTile.tsx`): election and party pickers in setup.
+- `ElectionLibrary` and `LibraryCard` (`src/ui/library/`): the searchable, filterable library.
+  Its filtering lives in `src/ui/library/filter.ts` and reads only the scenario registry.
+
 ### Utilities
 
 `.row`, `.stack`, `.spacer`, `.muted` (text-3), `.faint` (text-4), `.small`,

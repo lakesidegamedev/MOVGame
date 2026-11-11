@@ -193,23 +193,30 @@ async function run(name, opts) {
     }
   });
 
-  // Overlays from the topbar.
-  for (const [label, id] of [["Stats", "08-stats"], ["Guide", "09-guide"], ["Candidates", "10-candidates"]]) {
-    const btn = page.locator(".desk-header button, .topbar button", { hasText: label }).first();
-    if (await btn.count()) {
-      await btn.click();
+  // Overlays from the desk header. Clicks go through the DOM so a scrolled
+  // tool rail on phones does not matter; each overlay closes from its own button.
+  const closeOverlay = async () => {
+    await page.evaluate(() => {
+      const btn = document.querySelector('.overlay button[aria-label="Close"]')
+        ?? [...document.querySelectorAll(".overlay button")].find((b) => b.textContent?.trim() === "Close");
+      btn?.click();
+    });
+    await page.keyboard.press("Escape");
+    await wait(300);
+  };
+  for (const [label, id] of [["Stats", "08-stats"], ["Guide", "09-guide"], ["Candidates", "10-candidates"], ["Settings", "11-settings"]]) {
+    await step(id, async () => {
+      const clicked = await page.evaluate((text) => {
+        const btn = [...document.querySelectorAll(".desk-header button, .topbar button")]
+          .find((b) => b.textContent?.trim() === text || b.getAttribute("aria-label") === text);
+        btn?.click();
+        return !!btn;
+      }, label);
+      if (!clicked) return;
       await wait(600);
       await shot(id);
-      await page.keyboard.press("Escape");
-      await wait(200);
-    }
-  }
-  const settings = page.locator('button[aria-label="Settings"]').first();
-  if (await settings.count()) {
-    await settings.click();
-    await wait(500);
-    await shot("11-settings");
-    await page.keyboard.press("Escape");
+      await closeOverlay();
+    });
   }
   for (const [modal, id] of [["login", "12-signin"], ["register", "12-register"]]) {
     await page.evaluate(async (m) => {
