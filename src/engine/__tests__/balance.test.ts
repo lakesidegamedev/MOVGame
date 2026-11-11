@@ -56,10 +56,10 @@ describe("leans are sticky: the AI can't flip deep-safe states", () => {
   const DEEP_DEM = ["DC"];
   const DEEP_REP = ["WY", "ID", "OK", "UT"];
   // The 1964 Johnson landslide swept the Mountain/Plains states that are deep-red
-  // in every other year, so they are not safe-Republican in that scenario. Truman
-  // carried all four in 1948. (DC has no electoral votes before 1964, so the
-  // deep-blue check simply finds no DC contest in 1948 to 1960.)
-  const NO_DEEP_REP = new Set(["1964", "1948"]);
+  // in every other year, so they are not safe-Republican in that scenario. Roosevelt
+  // and Truman carried all four from 1932 to 1948. (DC has no electoral votes
+  // before 1964, so the deep-blue check finds no DC contest in 1932 to 1960.)
+  const NO_DEEP_REP = new Set(["1964", "1948", "1944", "1940", "1936", "1932"]);
   for (const scenario of SCENARIO_IDS) {
     it(`${scenario}: deep states stay put vs a passive player (hard AI)`, () => {
       const deepRep = NO_DEEP_REP.has(scenario) ? [] : DEEP_REP;

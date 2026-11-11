@@ -1,6 +1,6 @@
 {
-  "webHead": "a50bd0579c4ebf278d47242c66754c3931ac0e57",
-  "exportedAt": "2026-11-11T22:04:28.569Z",
+  "webHead": "ae52ceedd5d899bf92641782e8ce36a25c68a036",
+  "exportedAt": "2026-11-11T22:17:57.171Z",
   "bundles": {
     "editor-defaults": {
       "bytes": 122559
@@ -9,16 +9,16 @@
       "bytes": 779
     },
     "scenario-registry": {
-      "bytes": 24472
+      "bytes": 25657
     },
     "next-campaigns": {
-      "bytes": 9544
+      "bytes": 10091
     },
     "maps": {
       "bytes": 332209
     },
     "catalog": {
-      "bytes": 9053
+      "bytes": 9133
     },
     "us-blocs": {
       "bytes": 2889
@@ -30,10 +30,10 @@
       "bytes": 2028
     },
     "us-events": {
-      "bytes": 206106
+      "bytes": 233547
     },
     "us-setup": {
-      "bytes": 104336
+      "bytes": 123621
     },
     "uk": {
       "bytes": 70358

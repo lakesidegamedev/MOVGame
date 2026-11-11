@@ -97,7 +97,8 @@ class ElectoralCollegeTest {
     @Test
     fun electionsBefore1960ReproduceTheirRealMaps() {
         // Mirror of src/engine/__tests__/us-historical.test.ts.
-        val history = listOf(Triple("1956", 74, 457), Triple("1952", 89, 442), Triple("1948", 304, 227))
+        val history = listOf(Triple("1956", 74, 457), Triple("1952", 89, 442), Triple("1948", 304, 227),
+            Triple("1944", 432, 99), Triple("1940", 449, 82), Triple("1936", 523, 8), Triple("1932", 472, 59))
         for ((id, dem, rep) in history) {
             val game = createGame(NewGameOptions(seed = "calibration", scenario = id))
             assertEquals(ElectoralRule(531, 266), game.electoralRule(), id)

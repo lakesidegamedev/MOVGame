@@ -13,6 +13,11 @@ const HISTORY: { id: string; dem: number; rep: number; winner: "dem" | "rep" }[]
   // Truman 303, Dewey 189, Thurmond 39. Thurmond's four states (38) open in the
   // Republican column (the 1968 Wallace handling); his Tennessee elector stays with Truman.
   { id: "1948", dem: 304, rep: 227, winner: "dem" },
+  // Roosevelt's four elections.
+  { id: "1944", dem: 432, rep: 99, winner: "dem" },
+  { id: "1940", dem: 449, rep: 82, winner: "dem" },
+  { id: "1936", dem: 523, rep: 8, winner: "dem" },
+  { id: "1932", dem: 472, rep: 59, winner: "dem" },
 ];
 
 describe("US elections before 1960", () => {

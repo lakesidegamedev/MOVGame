@@ -97,6 +97,10 @@
     "fr-1981": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "us-1956": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "us-1952": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
-    "us-1948": { "suggested": "easy", "authored": "easy", "underdogWinRate": 1 }
+    "us-1948": { "suggested": "easy", "authored": "easy", "underdogWinRate": 1 },
+    "us-1944": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "us-1940": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "us-1936": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "us-1932": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
   }
 }
