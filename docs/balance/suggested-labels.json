@@ -67,7 +67,7 @@
     "in-2009": { "suggested": "medium", "authored": "medium", "underdogWinRate": 0.4 },
     "ie-2024": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "ie-2020": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0.1 },
-    "ie-2016": { "suggested": "medium", "authored": "hard", "underdogWinRate": 0.4 },
+    "ie-2016": { "suggested": "medium", "authored": "medium", "underdogWinRate": 0.4 },
     "ie-2011": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
   }
 }
