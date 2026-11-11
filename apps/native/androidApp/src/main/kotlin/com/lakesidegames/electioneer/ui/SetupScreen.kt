@@ -92,7 +92,8 @@ fun SetupScreen(session: GameSession) {
                         MovCard(Modifier.width(220.dp), tight = true, accent = selected, color = if (selected) Mov.Surface2 else Mov.Surface1,
                             onClick = { scenarioId = c.id; mateId = "" }) {
                             Text(c.year.toString(), style = MaterialTheme.typography.displaySmall.num, color = if (selected) Mov.AccentText else Mov.Text1)
-                            Text(electionTitle(c.label), style = MaterialTheme.typography.titleSmall, color = Mov.Text1, maxLines = 2)
+                            if (electionTitle(c.label) != "${c.demName} v. ${c.repName}")
+                                Text(electionTitle(c.label), style = MaterialTheme.typography.titleSmall, color = Mov.Text1, maxLines = 2)
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(c.demName, color = Mov.DemText, style = MaterialTheme.typography.bodySmall)
                                 Text(" v. ", color = Mov.Text4, style = MaterialTheme.typography.bodySmall)

@@ -70,5 +70,6 @@ internal fun captureDebugFlow(session: GameSession, flow: String) {
         "saves" -> { check(session.saveNamed("Smoke campaign")); session.go(Screen.SAVES) }
     }
     if (flow.startsWith("reveal-")) { session.captureHoldReveal = true; session.resumeGame() }
+    if (flow.startsWith("map-")) session.captureFocus = "map"
     android.util.Log.i("MOVCapture", "FLOW_READY $flow")
 }

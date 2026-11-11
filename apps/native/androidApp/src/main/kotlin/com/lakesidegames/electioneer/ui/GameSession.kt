@@ -141,6 +141,8 @@ class GameSession : ViewModel() {
     var libraryPick: String? = null
     /** Debug captures keep election night on screen instead of moving on. */
     var captureHoldReveal = false
+    /** Debug captures can open the desk scrolled to its map. */
+    var captureFocus: String? = null
 
     fun dailyAssignment(): NativeDailyAssignment = NativeDaily.assignment(nativeUtcDay())
     fun openDaily(restart: Boolean = false) {

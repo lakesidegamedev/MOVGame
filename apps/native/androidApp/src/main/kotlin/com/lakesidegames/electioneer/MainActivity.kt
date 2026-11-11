@@ -19,6 +19,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.unit.dp
 import com.lakesidegames.electioneer.ui.Mov
 import com.lakesidegames.electioneer.ui.MovTheme
@@ -118,7 +119,7 @@ fun MarginOfVictoryApp(session: GameSession, activity: Activity) {
                     if (screen in listOf(Screen.HOME, Screen.GAME, Screen.WORLD_GAME, Screen.RESULTS)) {
                         Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(if (screen == Screen.HOME) "" else "Margin of Victory", Modifier.padding(start = 12.dp).weight(1f), color = Mov.Text3,
-                                style = MaterialTheme.typography.labelLarge)
+                                style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                             TextButton(onClick = { askUrl = session.askUrl() }, colors = ButtonDefaults.textButtonColors(contentColor = Mov.Info)) {
                                 Text(if (session.hasSave()) "Ask about this campaign" else "Ask about Margin of Victory", style = MaterialTheme.typography.labelLarge)
                             }
@@ -156,7 +157,7 @@ fun MarginOfVictoryApp(session: GameSession, activity: Activity) {
                 },
             ) { inner ->
                 val mod = Modifier.padding(inner)
-                Box(mod) {
+                Box(mod.fillMaxSize(), contentAlignment = Alignment.TopCenter) { Box(Modifier.widthIn(max = 840.dp).fillMaxSize()) {
                     when (screen) {
                         Screen.HOME -> HomeScreen(session)
                         Screen.SETUP -> SetupScreen(session)
@@ -179,7 +180,7 @@ fun MarginOfVictoryApp(session: GameSession, activity: Activity) {
                         Screen.LIBRARY -> CampaignLibraryScreen(session)
                         Screen.WORLD_GAME -> WorldCampaignScreen(session)
                     }
-                }
+                } }
             }
         }
     }

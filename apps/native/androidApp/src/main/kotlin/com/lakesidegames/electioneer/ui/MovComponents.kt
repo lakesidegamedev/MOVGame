@@ -104,7 +104,7 @@ fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
         colors = ButtonDefaults.buttonColors(containerColor = Mov.Accent, contentColor = Mov.OnAccent,
             disabledContainerColor = Mov.Surface3, disabledContentColor = Mov.Text4)) {
         Text(text, style = if (large) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold,
-            maxLines = 2, overflow = TextOverflow.Ellipsis)
+            maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
 
@@ -115,7 +115,8 @@ fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modi
         contentPadding = buttonPadding, border = BorderStroke(1.dp, if (enabled) Mov.BorderStrong else Mov.Border),
         colors = ButtonDefaults.outlinedButtonColors(containerColor = Mov.Surface2, contentColor = Mov.Text1,
             disabledContainerColor = Mov.Surface1, disabledContentColor = Mov.Text4)) {
-        Text(text, style = MaterialTheme.typography.labelLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(text, style = MaterialTheme.typography.labelLarge, maxLines = 2, overflow = TextOverflow.Ellipsis,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
 

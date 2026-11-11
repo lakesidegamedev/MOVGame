@@ -136,8 +136,10 @@ internal fun StandingsTable(rows: List<NativeStanding>, unit: String, total: Int
         Text(unit.uppercase(), Modifier.widthIn(min = 40.dp), color = Mov.Text4, style = MaterialTheme.typography.labelSmall, textAlign = androidx.compose.ui.text.style.TextAlign.End)
         Text("VOTE", Modifier.padding(start = MovSpace.s2).widthIn(min = 52.dp), color = Mov.Text4, style = MaterialTheme.typography.labelSmall, textAlign = androidx.compose.ui.text.style.TextAlign.End)
     }
-    rows.forEach { row ->
-        PartyRow(row.color, row.name, listOf("${row.units}", percent(row.voteShare)), highlight = row.partyId == player, tag = if (row.partyId == player) "You" else null)
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        rows.forEach { row ->
+            PartyRow(row.color, row.name, listOf("${row.units}", percent(row.voteShare)), highlight = row.partyId == player, tag = if (row.partyId == player) "You" else null)
+        }
     }
 }
 
@@ -182,8 +184,15 @@ fun WorldCampaignScreen(session: GameSession) {
         containerColor = Mov.Surface2)
     val regional = type in listOf("rally", "surrogate", "ground_game", "gotv", "canvass")
     val selectedRegion = regions.firstOrNull { it.id == regionId }
+    val list = androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(Unit) {
+        if (session.captureFocus == "map") {
+            session.captureFocus = null
+            list.scrollToItem(3 + (if (game.hasPendingEvent()) 1 else 0) + (if (notice != null) 1 else 0))
+        }
+    }
     Column(Modifier.fillMaxSize()) {
-    LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+    LazyColumn(Modifier.weight(1f), state = list, contentPadding = PaddingValues(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
         item { NativeCampaignCoach(session, game.countryId(), game.goalText(), game.turn(), regionId.takeIf { it.isNotEmpty() }, game.plan().size) }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
@@ -195,7 +204,6 @@ fun WorldCampaignScreen(session: GameSession) {
                     if (!game.isOver()) Metric("${game.slotsLeft()}", "Moves left")
                     Metric(percent(mine?.voteShare ?: 0.0), "Vote share")
                 }
-                Text(game.goalText(), color = Mov.Text3, style = MaterialTheme.typography.bodySmall)
             }
         }
         if (game.hasPendingEvent()) item {
@@ -208,9 +216,10 @@ fun WorldCampaignScreen(session: GameSession) {
         notice?.let { item { Notice(it) } }
         item {
             MovCard {
-                CardHead(if (game.isOver()) game.outcome() else "Projected standings") { Tag("${game.majority()} to win", TagKind.Outline) }
+                CardHead(if (game.isOver()) "Final standings" else "Projected standings") { Tag("${game.majority()} to win", TagKind.Outline) }
+                if (game.isOver()) Text(game.outcome(), color = Mov.Text1, style = MaterialTheme.typography.titleSmall)
                 StandingsTable(rows, unit, game.totalUnits(), game.majority(), player)
-                Text("${game.majority()} of ${game.totalUnits()} $unit to win outright", color = Mov.Text4, style = MaterialTheme.typography.bodySmall)
+                Text(game.goalText(), color = Mov.Text3, style = MaterialTheme.typography.bodySmall)
             }
         }
         item {

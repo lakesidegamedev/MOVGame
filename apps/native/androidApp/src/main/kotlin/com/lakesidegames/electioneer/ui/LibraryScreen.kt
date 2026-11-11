@@ -85,13 +85,11 @@ fun CampaignLibraryScreen(session: GameSession) {
                     "${all.size} elections in ${countries.size} countries. ${all.count { it.free }} are free.")
                 SearchField(query, { query = it }, "Search elections, leaders, years")
                 Segmented(listOf("all" to "All", "owned" to "Free and owned"), ownership, { ownership = it }, label = "Ownership filter")
-                ChipRow {
-                    MovChip("Any difficulty", difficulty == "all", { difficulty = "all" })
-                    listOf("easy", "medium", "hard").forEach { d -> MovChip(d.replaceFirstChar { it.uppercase() }, difficulty == d, { difficulty = if (difficulty == d) "all" else d }) }
-                }
-                ChipRow {
-                    MovChip("Any era", era == "all", { era = "all" })
-                    ERAS.filter { e -> all.any { eraOf(it.year) == e } }.forEach { e -> MovChip(e, era == e, { era = if (era == e) "all" else e }) }
+                Row(horizontalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
+                    ChoicePicker("Difficulty", difficulty, listOf("all" to "Any") + listOf("easy", "medium", "hard").map { it to it.replaceFirstChar { c -> c.uppercase() } },
+                        Modifier.weight(1f)) { difficulty = it }
+                    ChoicePicker("Era", era, listOf("all" to "Any") + ERAS.filter { e -> all.any { eraOf(it.year) == e } }.map { it to it },
+                        Modifier.weight(1f)) { era = it }
                 }
             }
         }

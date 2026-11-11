@@ -175,7 +175,16 @@ def route_flows():
         shot(flow, marker, 'ask')
     # A side picker per engine, including India's ten playable sides.
     for country in ('US', 'UK', 'IN', 'JP'):
-        shot(f'library-{country}', 'Choose your presidential ticket' if country == 'US' else 'Choose your side', 'ask')
+        shot(f'library-{country}', 'Choose your presidential ticket' if country == 'US' else 'Launch campaign', 'ask')
+    # Every new country's map renders and a tap on it selects a region.
+    for country in ('UK', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP'):
+        shot(f'map-{country}', 'Regional projections')
+        try:
+            tap_label('Map of', prefix=True)
+            capture(f'map-{country}-selected', 'Clear region selection')
+        except Exception as error:  # noqa: BLE001
+            print(f'FAIL map-{country}-selected: {error}', flush=True)
+            failures.append(f'map-{country}-selected: {error}')
     # Election night for each engine, held on screen for the capture.
     for country in ('US', 'UK', 'IN', 'BR'):
         shot(f'reveal-{country}', 'Election night')
@@ -212,7 +221,7 @@ def layout_flows():
         adb('shell', 'wm', 'density', density)
         time.sleep(2)
         for flow, marker in [('settings', 'Sound effects'), ('editor', 'SCENARIO EDITOR'), ('saves', 'SAVED CAMPAIGNS'), ('game-DE', 'WEEK'),
-                             ('game-US', 'CAMPAIGN DESK'), ('game-IN', 'WEEK'), ('library', 'Choose your election'), ('library-IN', 'Choose your side'),
+                             ('game-US', 'CAMPAIGN DESK'), ('game-IN', 'WEEK'), ('library', 'Choose your election'), ('library-IN', 'Launch campaign'),
                              ('store', 'Election packs'), ('results-US', 'CAMPAIGN SCORE')]:
             shot(flow, marker, 'ask', name=f'{layout}-{flow}')
     adb('shell', 'settings', 'put', 'system', 'font_scale', '1.0')
@@ -229,7 +238,7 @@ def queue_flows():
     capture('queue-added', '1 planned', 'ask')
     tap_label('Add to day 1')
     capture('queue-added-twice', '2 planned', 'ask')
-    tap_label('Remove Fundraise', prefix=True)
+    tap_label('Fundraise from day 1', suffix=True)
     capture('queue-removed', '1 planned', 'ask')
     tap_label('Clear all', direction='up')
     capture('queue-cleared', '0 planned', 'ask')

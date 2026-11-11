@@ -37,7 +37,7 @@ fun ElectionNightScreen(session: GameSession) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Eyebrow(if (board.finished) "Election night · final" else "Live · Election night", color = Mov.Negative)
+                    Eyebrow(if (board.finished) "Final" else "Live", color = if (board.finished) Mov.Text3 else Mov.Negative)
                     Text(data.title, style = MaterialTheme.typography.headlineSmall, color = Mov.Text1)
                 }
             }
