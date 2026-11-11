@@ -76,6 +76,10 @@ struct GeoMapView: UIViewRepresentable {
 
     private func markup() -> String {
         let shapes = Self.paths.keys.sorted().map { abbr -> String in
+            // No electoral votes this year (AK and HI before 1960, DC before 1964): inert, unlabeled.
+            if abbrToStateId[abbr] == nil {
+                return "<path d='\(Self.paths[abbr] ?? "")' fill='#283649' stroke='#101a27' stroke-width='1.3' opacity='0.5' aria-hidden='true' style='pointer-events:none'></path>"
+            }
             let contest = abbrToStateId[abbr].flatMap { contestsById[$0] }
             let color = MapMargin.color(contest)
             let selected = abbr == selectedAbbr

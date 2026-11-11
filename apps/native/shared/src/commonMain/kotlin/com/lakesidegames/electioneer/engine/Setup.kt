@@ -86,8 +86,10 @@ private fun buildBlocsForState(seed: StateSeed, targetDemShare: Double): List<St
 fun buildStates(
     priors: Map<String, Double>? = null,
     evOverrides: Map<String, Int>? = null,
+    absent: List<String>? = null,
 ): List<StateContest> {
-    return STATE_SEEDS.map { seed ->
+    val skip = absent.orEmpty().toSet()
+    return STATE_SEEDS.filter { it.id !in skip }.map { seed ->
         val isAggregate = seed.electorate <= 0 && seed.aggregateOf != null
         val demShare = priors?.get(seed.id) ?: seed.prior2020DemShare
         val ev = evOverrides?.get(seed.id) ?: seed.ev
@@ -310,7 +312,7 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
         candidates = candidates,
         issues = ISSUES.toMap(),
         salience = salience,
-        states = withEnvironment(buildStates(priors, scenario.evOverrides), player, handicap.environment),
+        states = withEnvironment(buildStates(priors, scenario.evOverrides, scenario.electoralCollege?.absent), player, handicap.environment),
         resources = resources,
         pendingEvents = mutableListOf(),
         firedEventIds = mutableListOf(),

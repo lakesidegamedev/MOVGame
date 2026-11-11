@@ -5,6 +5,7 @@ import type {
   Party,
   RunningMate,
 } from "@engine/types";
+import { STANDARD_EV_TOTAL, type ElectoralCollege } from "@engine/electoralCollege";
 import { CANDIDATES } from "./candidates";
 import { RUNNING_MATES } from "./runningMates";
 
@@ -43,6 +44,11 @@ export interface Scenario {
   evOverrides?: Record<string, number>;
   // Apportionment note shown in the UI.
   evNote?: string;
+  // The year's electoral college: its real total and the contests that cast no
+  // electoral votes (Alaska and Hawaii before 1960, DC before 1964). Absent
+  // contests are left out of the game; the majority is floor(total / 2) + 1.
+  // Absent ⇒ the modern 538-vote map.
+  electoralCollege?: ElectoralCollege;
   // National issue salience for this year (0..1), overriding the issue's base.
   // Omitted issues fall back to content/issues baseSalience; this is how COVID
   // stays out of 2012 and the Iraq war dominates 2004.
@@ -908,18 +914,22 @@ const EV_1960C: Record<string, number> = {
   VA: 12, WA: 9, WV: 7, WI: 12, WY: 3,
 };
 
-// 1950-census apportionment (used 1960). Real 1960 totalled 537 with no votes for
-// DC and with Maine at 5 / Nebraska at 6. The engine forces a 538-EV map with a
-// fixed DC (3) and district-modelled ME (4) / NE (5), so this map hands DC its
-// three modern votes and leaves ME/NE at the engine's counts. Those distortions
-// net out to keep the map at 538; see evNote.
+// 1950-census apportionment (used 1952 to 1960; Alaska and Hawaii are the 1960
+// figures). Maine (5) and Nebraska (6) voted statewide in these years; the map
+// keeps their district units and gives the at-large unit the remaining votes.
+// DC is listed for completeness but cast no votes before 1964 (see EC_1960).
 const EV_1950C: Record<string, number> = {
   AL: 11, AK: 3, AZ: 4, AR: 8, CA: 32, CO: 6, CT: 8, DE: 3, DC: 3, FL: 10, GA: 12,
   HI: 3, ID: 4, IL: 27, IN: 13, IA: 10, KS: 8, KY: 10, LA: 10, MD: 9, MA: 16, MI: 20,
   MN: 11, MS: 8, MO: 13, MT: 4, NV: 3, NH: 4, NJ: 16, NM: 4, NY: 45, NC: 14, ND: 4,
   OH: 25, OK: 8, OR: 6, PA: 32, RI: 4, SC: 8, SD: 4, TN: 11, TX: 24, UT: 4, VT: 3,
-  VA: 12, WA: 9, WV: 8, WI: 12, WY: 3,
+  VA: 12, WA: 9, WV: 8, WI: 12, WY: 3, "ME-AL": 3, "NE-AL": 3,
 };
+
+// Electoral colleges. The modern map is 50 states plus DC. 1960 had no DC
+// electors (the 23rd Amendment was first used in 1964).
+const EC_MODERN: ElectoralCollege = { total: 538 };
+const EC_1960: ElectoralCollege = { total: 537, absent: ["DC"] };
 
 // Two-party Democratic share by state. Third parties are absorbed by the
 // two-party normalization, except 1968, where Wallace's five-state sweep is
@@ -1066,92 +1076,97 @@ export const SCENARIOS: Record<string, Scenario> = {
   "2024": {
     id: "2024", year: 2024, label: "2024 · Harris v. Trump",
     tagline: "Labor Day, 2024. A late switch at the top of the ticket, the Sun Belt and the Blue Wall both in play. Ninety days to find 270.",
-    dem: HARRIS, rep: TRUMP_2024, statePriors: PRIORS_2024, evOverrides: EV_2024, evNote: "2020-census apportionment", issueSalience: SAL_2024,
+    dem: HARRIS, rep: TRUMP_2024, statePriors: PRIORS_2024, evOverrides: EV_2024, evNote: "2020-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_2024,
   },
   "2020": {
     id: "2020", year: 2020, label: "2020 · Biden v. Trump",
     tagline: "September 1st, 2020. Sixty-three days to Election Day, a pandemic on the ballot, and a blue wall to rebuild. Get to 270.",
-    dem: BIDEN, rep: TRUMP_2020, evNote: "2010-census apportionment",
+    dem: BIDEN, rep: TRUMP_2020, evNote: "2010-census apportionment", electoralCollege: EC_MODERN,
   },
   "2016": {
     id: "2016", year: 2016, label: "2016 · Clinton v. Trump",
     tagline: "September, 2016. The map looks settled and the blue wall looks safe, but the Rust Belt is restless. Don't be the one who let it crack.",
-    dem: CLINTON, rep: TRUMP_2016, statePriors: PRIORS_2016, evNote: "2010-census apportionment", issueSalience: SAL_2016
+    dem: CLINTON, rep: TRUMP_2016, statePriors: PRIORS_2016, evNote: "2010-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_2016
   },
   "2012": {
     id: "2012", year: 2012, label: "2012 · Obama v. Romney",
     tagline: "Fall, 2012. A slow recovery, a re-election fight, and a turnout war in the swing states. Defend the coalition that made history.",
-    dem: OBAMA_2012, rep: ROMNEY_2012, statePriors: PRIORS_2012, evNote: "2010-census apportionment", issueSalience: SAL_2012
+    dem: OBAMA_2012, rep: ROMNEY_2012, statePriors: PRIORS_2012, evNote: "2010-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_2012
   },
   "2008": {
     id: "2008", year: 2008, label: "2008 · Obama v. McCain",
     tagline: "Fall, 2008. An open seat, two wars, and a financial system in free fall. Change is in the air, if your coalition turns out.",
-    dem: OBAMA_2008, rep: MCCAIN_2008, statePriors: PRIORS_2008, evOverrides: EV_2008, evNote: "2000-census apportionment", issueSalience: SAL_2008
+    dem: OBAMA_2008, rep: MCCAIN_2008, statePriors: PRIORS_2008, evOverrides: EV_2008, evNote: "2000-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_2008
   },
   "2004": {
     id: "2004", year: 2004, label: "2004 · Bush v. Kerry",
     tagline: "Fall, 2004. A wartime incumbent, a decorated challenger, and a country split down the middle. It runs through Ohio.",
-    dem: KERRY, rep: BUSH_2004, statePriors: PRIORS_2004, evOverrides: EV_2008, evNote: "2000-census apportionment", issueSalience: SAL_2004
+    dem: KERRY, rep: BUSH_2004, statePriors: PRIORS_2004, evOverrides: EV_2008, evNote: "2000-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_2004
   },
   "2000": {
     id: "2000", year: 2000, label: "2000 · Gore v. Bush",
     tagline: "Fall, 2000. Peace, prosperity, and a knife's-edge electorate. Every state matters, and a recount is waiting to happen.",
-    dem: GORE, rep: BUSH, statePriors: PRIORS_2000, evNote: "modern (2010-census) map", issueSalience: SAL_2000
+    dem: GORE, rep: BUSH, statePriors: PRIORS_2000, evNote: "modern (2010-census) map", electoralCollege: EC_MODERN, issueSalience: SAL_2000
   },
   "1996": {
     id: "1996", year: 1996, label: "1996 · Clinton v. Dole",
     tagline: "Fall, 1996. Peace, prosperity, and a bridge to the twenty-first century. The lead is big: hold it, or be the upset of the decade.",
-    dem: CLINTON_1996, rep: DOLE, statePriors: PRIORS_1996, evOverrides: EV_1992, evNote: "1990-census apportionment", issueSalience: SAL_1996
+    dem: CLINTON_1996, rep: DOLE, statePriors: PRIORS_1996, evOverrides: EV_1992, evNote: "1990-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_1996
   },
   "1992": {
     id: "1992", year: 1992, label: "1992 · Clinton v. Bush",
     tagline: "Fall, 1992. A recession, a broken tax pledge, and a kid from Hope with a war room. It's the economy, stupid.",
-    dem: CLINTON_1992, rep: BUSH_1992, statePriors: PRIORS_1992, evOverrides: EV_1992, evNote: "1990-census apportionment", issueSalience: SAL_1992
+    dem: CLINTON_1992, rep: BUSH_1992, statePriors: PRIORS_1992, evOverrides: EV_1992, evNote: "1990-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_1992
   },
   "1988": {
     id: "1988", year: 1988, label: "1988 · Dukakis v. Bush",
     tagline: "Fall, 1988. An open seat, a tank photo-op, and furlough ads on every channel. Competence against a thousand points of light.",
-    dem: DUKAKIS, rep: BUSH_1988, statePriors: PRIORS_1988, evOverrides: EV_1984, evNote: "1980-census apportionment", issueSalience: SAL_1988
+    dem: DUKAKIS, rep: BUSH_1988, statePriors: PRIORS_1988, evOverrides: EV_1984, evNote: "1980-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_1988
   },
   "1984": {
     id: "1984", year: 1984, label: "1984 · Mondale v. Reagan",
     tagline: "Fall, 1984. Morning in America, and a 49-state map in the making. Hold the tide back, or ride it all the way in.",
-    dem: MONDALE, rep: REAGAN_1984, statePriors: PRIORS_1984, evOverrides: EV_1984, evNote: "1980-census apportionment", issueSalience: SAL_1984
+    dem: MONDALE, rep: REAGAN_1984, statePriors: PRIORS_1984, evOverrides: EV_1984, evNote: "1980-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_1984
   },
   "1980": {
     id: "1980", year: 1980, label: "1980 · Carter v. Reagan",
     tagline: "Fall, 1980. Double-digit inflation, hostages in Tehran, and one question at the podium: are you better off than you were four years ago?",
-    dem: CARTER, rep: REAGAN_1980, statePriors: PRIORS_1980, evOverrides: EV_1980, evNote: "1970-census apportionment", issueSalience: SAL_1980
+    dem: CARTER, rep: REAGAN_1980, statePriors: PRIORS_1980, evOverrides: EV_1980, evNote: "1970-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_1980
   },
   "1976": {
     id: "1976", year: 1976, label: "1976 · Carter v. Ford",
     tagline: "Fall, 1976. A pardon still hangs in the air, the country wants a clean start, and a peanut farmer runs against Washington itself. Hold the Solid South, or watch the map slip away.",
-    dem: CARTER_1976, rep: FORD_1976, statePriors: PRIORS_1976, evOverrides: EV_1980, evNote: "1970-census apportionment", issueSalience: SAL_1976,
+    dem: CARTER_1976, rep: FORD_1976, statePriors: PRIORS_1976, evOverrides: EV_1980, evNote: "1970-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_1976,
   },
   "1972": {
     id: "1972", year: 1972, label: "1972 · McGovern v. Nixon",
     tagline: "Fall, 1972. A prairie liberal against a landslide in the making. The war, the counterculture, and a break-in nobody is talking about yet. Fight the tide, or ride it to 520.",
-    dem: MCGOVERN_1972, rep: NIXON_1972, statePriors: PRIORS_1972, evOverrides: EV_1980, evNote: "1970-census apportionment", issueSalience: SAL_1972,
+    dem: MCGOVERN_1972, rep: NIXON_1972, statePriors: PRIORS_1972, evOverrides: EV_1980, evNote: "1970-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_1972,
   },
   "1968": {
     id: "1968", year: 1968, label: "1968 · Humphrey v. Nixon",
     tagline: "Fall, 1968. A party split three ways, a burning summer behind it, and a law-and-order pitch aimed at the middle. Wallace holds the Deep South, and the road to 270 runs through the wreckage.",
-    dem: HUMPHREY_1968, rep: NIXON_1968, statePriors: PRIORS_1968, evOverrides: EV_1960C, evNote: "1960-census apportionment. Wallace's five-state sweep is folded into the two-party map, so the model returns a Nixon win without a third slot.", issueSalience: SAL_1968,
+    dem: HUMPHREY_1968, rep: NIXON_1968, statePriors: PRIORS_1968, evOverrides: EV_1960C, evNote: "1960-census apportionment. Wallace's five-state sweep is folded into the two-party map, so the model returns a Nixon win without a third slot.", electoralCollege: EC_MODERN, issueSalience: SAL_1968,
   },
   "1964": {
     id: "1964", year: 1964, label: "1964 · Johnson v. Goldwater",
     tagline: "Fall, 1964. A martyred president's heir, a landslide already forming, and a nuclear ad that only aired once. Ride the tide, or find out how deep the Sun Belt runs.",
-    dem: JOHNSON_1964, rep: GOLDWATER_1964, statePriors: PRIORS_1964, evOverrides: EV_1960C, evNote: "1960-census apportionment", issueSalience: SAL_1964,
+    dem: JOHNSON_1964, rep: GOLDWATER_1964, statePriors: PRIORS_1964, evOverrides: EV_1960C, evNote: "1960-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_1964,
   },
   "1960": {
     id: "1960", year: 1960, label: "1960 · Kennedy v. Nixon",
     tagline: "Fall, 1960. Television changes everything, the Cold War is at the podium, and a hundred thousand votes decide it all. Win the debate, and win the century's closest race.",
-    dem: KENNEDY_1960, rep: NIXON_1960, statePriors: PRIORS_1960, evOverrides: EV_1950C, evNote: "1950-census apportionment. The real map totalled 537 with no votes for DC; the engine's fixed 538-EV map grants DC three votes and models Maine and Nebraska as districts, distortions that net out.", issueSalience: SAL_1960,
+    dem: KENNEDY_1960, rep: NIXON_1960, statePriors: PRIORS_1960, evOverrides: EV_1950C, evNote: "1950-census apportionment: 537 electoral votes, with none for DC until 1964. Maine and Nebraska voted statewide; their district units stand in, with the at-large unit holding the rest of each state's votes. The 15 Byrd electors have no third slot and are folded into the two-party map.", electoralCollege: EC_1960, issueSalience: SAL_1960,
   },
 };
 
 // Display order for the picker (newest first feels current; keep 2020 prominent).
 export const SCENARIO_IDS = ["2024", "2020", "2016", "2012", "2008", "2004", "2000", "1996", "1992", "1988", "1984", "1980", "1976", "1972", "1968", "1964", "1960"] as const;
+
+// The electoral college a US scenario plays for (the modern 538 when undeclared).
+export function electoralCollegeOf(id?: string): ElectoralCollege {
+  return getScenario(id).electoralCollege ?? { total: STANDARD_EV_TOTAL };
+}
 
 export function getScenario(id?: string): Scenario {
   return (id && SCENARIOS[id]) || SCENARIOS["2020"];

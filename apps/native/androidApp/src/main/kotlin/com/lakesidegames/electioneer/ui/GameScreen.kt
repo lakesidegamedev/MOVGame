@@ -72,7 +72,7 @@ fun GameScreen(session: GameSession) {
     val selectedContest = projection?.contests?.firstOrNull { it.stateId == selectedId }
 
     Column(Modifier.fillMaxSize()) {
-      NativeCampaignCoach(session, "US", "Win 270 electoral votes in ${g.totalTurns} weeks.", g.turn, selectedId, g.queuedActions.size)
+      NativeCampaignCoach(session, "US", "Win ${com.lakesidegames.electioneer.engine.evMajorityOf(g)} electoral votes in ${g.totalTurns} weeks.", g.turn, selectedId, g.queuedActions.size)
       Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(12.dp)) {
         Text("CAMPAIGN DESK", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
         Text(g.customScenario?.let { com.lakesidegames.electioneer.engine.NativeCustomScenario.entry(it)?.label } ?: session.campaigns().firstOrNull { it.id == g.scenarioId }?.label ?: "The election", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -89,7 +89,7 @@ fun GameScreen(session: GameSession) {
                     }
                     Spacer(Modifier.weight(1f))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("270 TO WIN", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelSmall)
+                        Text("${com.lakesidegames.electioneer.engine.evMajorityOf(g)} TO WIN", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelSmall)
                         Text("$tossEv tossup", style = MaterialTheme.typography.labelSmall)
                     }
                     Spacer(Modifier.weight(1f))

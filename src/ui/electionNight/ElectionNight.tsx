@@ -25,6 +25,8 @@ export interface RevealParty {
 export interface RevealMap {
   viewBox: string;
   shapes: Record<string, { d: string; label?: [number, number] }>;
+  // Geography with no vote this election (US states before admission), drawn inert.
+  inert?: string[];
 }
 
 export interface RevealProps {
@@ -201,6 +203,7 @@ export function ElectionNight(props: RevealProps) {
         {map && (
           <div className={`en-map${speed === "instant" ? " instant" : ""}`}>
             <svg viewBox={map.viewBox} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Election map">
+              {map.inert?.map((d, i) => <path key={`inert-${i}`} d={d} className="en-map-unit" opacity={0.4} aria-hidden="true" />)}
               {units.map((u) => {
                 const shape = map.shapes[u.id];
                 if (!shape) return null;

@@ -57,8 +57,8 @@ fun tallyContest(state: StateContest): ContestTally {
 }
 
 // Runs the full electoral model: every contest, the ME/NE at-large
-// aggregates, the EV tally, the national popular vote, and the winner
-// (incl. the 269-269 tie).
+// aggregates, the EV tally, the national popular vote, and the winner (no
+// majority of the scenario's college, such as 269-269, sends it to the House).
 fun computeResult(game: GameState): GameResult {
     val tallies = linkedMapOf<String, ContestTally>()
     for (st in game.states) {
@@ -108,11 +108,7 @@ fun computeResult(game: GameState): GameResult {
     }
 
     val totalPop = popularVote.getValue(CandidateId.DEM.serial) + popularVote.getValue(CandidateId.REP.serial)
-    val winner: String = when {
-        ev.getValue(CandidateId.DEM.serial) >= 270 -> CandidateId.DEM.serial
-        ev.getValue(CandidateId.REP.serial) >= 270 -> CandidateId.REP.serial
-        else -> "tie"
-    }
+    val winner: String = electoralWinner(ev, evTotalOf(game.states.map { it.electoralVotes }))
 
     // Post-mortem: the player's biggest self-caused swings, by magnitude.
     // sortedWith is stable, matching Array.prototype.sort stability.

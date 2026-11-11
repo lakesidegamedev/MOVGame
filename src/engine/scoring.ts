@@ -5,6 +5,8 @@
 // reproduce it. 0–1000, from the PLAYER's perspective (losing scores low).
 // ─────────────────────────────────────────────────────────────────────────
 
+import { evMajority, evTotalOf } from "./electoralCollege";
+
 export type ScoreDifficulty = "easy" | "normal" | "hard";
 
 export const DIFFICULTY_MULTIPLIER: Record<ScoreDifficulty, number> = {
@@ -18,7 +20,7 @@ export function clampScore(x: number, lo: number, hi: number): number {
 }
 
 // The facts a finished game reduces to for scoring. US games: unitMargin =
-// player EV − 270 (of 538). Multiparty games: unitMargin = player seats −
+// player EV − the college majority (270 of 538, 266 of 531). Multiparty games: unitMargin = player seats −
 // majority threshold, normalized to the US scale by (538 / chamber size) so a
 // UK majority and a US majority are worth comparable points.
 export interface ScoreFacts {
@@ -48,21 +50,25 @@ export interface UsResultFacts {
 }
 
 // Display and leaderboard metadata use the actual ticket-to-ticket EV gap.
-// ScoreFacts.unitMargin remains distance from 270 for score calculation.
+// ScoreFacts.unitMargin remains distance from the majority for score calculation.
 export function usOpponentEvMargin(result: UsResultFacts, player: "dem" | "rep"): number {
   const rival = player === "dem" ? "rep" : "dem";
   return (result.electoralVotes[player] ?? 0) - (result.electoralVotes[rival] ?? 0);
 }
 
+// `total` is the scenario's electoral college. Every contest's votes go to one
+// ticket, so a finished result's tallies sum to it; the server passes the
+// scenario's declared total instead of trusting the submission.
 export function usScoreFacts(
   result: UsResultFacts,
   player: "dem" | "rep",
   difficulty: ScoreDifficulty,
+  total: number = evTotalOf(Object.values(result.electoralVotes).map((electoralVotes) => ({ electoralVotes }))),
 ): ScoreFacts {
   const rival = player === "dem" ? "rep" : "dem";
   return {
-    unitMargin: (result.electoralVotes[player] ?? 0) - 270,
-    chamberSize: 538,
+    unitMargin: (result.electoralVotes[player] ?? 0) - evMajority(total),
+    chamberSize: total,
     popularMargin: ((result.popularShare[player] ?? 0) - (result.popularShare[rival] ?? 0)) * 100,
     difficulty,
   };

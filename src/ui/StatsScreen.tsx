@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useGameStore } from "@store/gameStore";
-import type { CandidateId, TurnPoint } from "@engine/index";
+import { electoralRule, type CandidateId, type TurnPoint } from "@engine/index";
 import { money } from "./format";
 import { BarChart3, X } from "lucide-react";
 
@@ -114,6 +114,7 @@ export function StatsScreen({ onClose }: { onClose: () => void }) {
   const dem = cands.dem;
   const rep = cands.rep;
   const tl: TurnPoint[] = game.timeline ?? [];
+  const college = electoralRule(game.states);
 
   const player: CandidateId = game.playerCandidate;
 
@@ -203,9 +204,9 @@ export function StatsScreen({ onClose }: { onClose: () => void }) {
                     { color: rep.color, label: rep.shortName, values: tl.map((p) => p.repEV) },
                   ]}
                   yMin={0}
-                  yMax={538}
+                  yMax={college.total}
                   fmtY={(v) => v.toFixed(0)}
-                  refLines={[{ y: 270, label: "270 to win" }]}
+                  refLines={[{ y: college.majority, label: `${college.majority} to win` }]}
                 />
                 <Legend items={[{ color: dem.color, label: dem.shortName }, { color: rep.color, label: rep.shortName }]} />
               </div>

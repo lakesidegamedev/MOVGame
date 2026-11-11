@@ -56,12 +56,14 @@ function contestShare(game: GameState, id: string): number {
 
 function GeoState({ id, game, onClick, selected }: { id: string; game: GameState; onClick: () => void; selected: boolean }) {
   const st = game.states.find((s) => s.id === id);
-  if (!st) return null;
-  const share = contestShare(game, id);
   // Split-state districts (ME-1, NE-2, etc.) use the parent state path
   const parentId = id.split("-")[0];
   const path = STATE_PATHS[id] ?? STATE_PATHS[parentId];
   if (!path) return null;
+  // Not voting this year (Alaska and Hawaii before 1960, DC before 1964):
+  // drawn for geography only, inert and unlabeled.
+  if (!st) return <path d={path} fill="var(--navy-700)" stroke="#1a2744" strokeWidth={0.5} opacity={0.5} aria-hidden="true" pointerEvents="none" />;
+  const share = contestShare(game, id);
 
   return (
     <g

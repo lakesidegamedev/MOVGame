@@ -37,7 +37,7 @@ struct ResultsView: View {
                         }
                         Text(g.resultWinnerSerial() == g.playerSerial() ? "Victory" : "The race is over")
                             .font(.largeTitle.bold())
-                        Text(g.resultWinnerSerial() == "tie" ? "Electoral College tied. No candidate reaches 270." : "\(g.resultWinnerName()) wins the presidency").font(.title3)
+                        Text(g.resultWinnerSerial() == "tie" ? "Electoral College tied. No candidate reaches \(g.evMajority())." : "\(g.resultWinnerName()) wins the presidency").font(.title3)
                         HStack {
                             Text("DEM \(Int(g.resultDemEv()))").foregroundStyle(CampaignStyle.democrat)
                             Spacer()

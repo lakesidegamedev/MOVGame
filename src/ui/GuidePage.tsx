@@ -253,7 +253,7 @@ export function GuidePage({ onClose }: { onClose: () => void }) {
               </p>
               <h3>Electoral Votes</h3>
               <p className="guide-text">
-                Winner-take-all in every state except Maine and Nebraska (which use congressional districts). The EV bar at the top tracks live projections. 270 wins.
+                Winner-take-all in every state except Maine and Nebraska (which use congressional districts). The EV bar at the top tracks live projections. A majority wins: 270 of 538 on the modern map, 269 of 537 in 1960, and 266 of 531 before Alaska, Hawaii and DC had electoral votes.
               </p>
               <h3>Turnout</h3>
               <p className="guide-text">

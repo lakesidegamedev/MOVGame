@@ -4,11 +4,13 @@ import { projectElection } from "../voteModel";
 import { SCENARIO_IDS, SCENARIOS, getScenario } from "@content/scenarios";
 
 describe("scenarios", () => {
-  it("every scenario's map totals 538 electoral votes", () => {
+  it("every scenario's map totals its year's electoral votes", () => {
     for (const id of SCENARIO_IDS) {
       const game = createGame({ scenario: id, seed: "ev" });
       const total = game.states.reduce((s, st) => s + st.electoralVotes, 0);
-      expect(total, `scenario ${id}`).toBe(538);
+      const year = SCENARIOS[id].year;
+      // 538 since DC first voted in 1964; 537 in 1960; 531 from 1912 to 1956.
+      expect(total, `scenario ${id}`).toBe(year >= 1964 ? 538 : year === 1960 ? 537 : 531);
     }
   });
 

@@ -50,6 +50,9 @@ data class Scenario(
     // Per-state EV overrides for that cycle's apportionment.
     val evOverrides: Map<String, Int>? = null,
     val evNote: String? = null,
+    // The year's electoral college (total and non-voting contests); null is
+    // the modern 538-vote map.
+    val electoralCollege: com.lakesidegames.electioneer.engine.ElectoralCollege? = null,
     // National issue salience for this year, keyed by IssueId.serial.
     val issueSalience: Map<String, Double>? = null,
 )

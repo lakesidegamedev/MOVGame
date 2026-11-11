@@ -3,6 +3,7 @@ import type { Projection } from "@engine/voteModel";
 import type { UkGameState, UkResult } from "@engine/ukGame";
 import type { CountryGameState, CountryResult } from "@engine/countryGame";
 import { getScenario } from "@content/scenarios";
+import { electoralRule } from "@engine/electoralCollege";
 
 export function movAskSnapshot(game: GameState, projection: Projection) {
   const player = game.playerCandidate;
@@ -24,6 +25,9 @@ export function movAskSnapshot(game: GameState, projection: Projection) {
     evPlayer: projection.ev[player],
     evOpponent: projection.ev[opponent],
     tossupEv: projection.tossupEv,
+    // The scenario's college: 538 and 270 on the modern map, 531 and 266 before 1960.
+    evTotal: electoralRule(game.states).total,
+    evMajority: electoralRule(game.states).majority,
     states: projection.contests.map((contest) => ({
       name: names.get(contest.stateId) ?? contest.stateId,
       ev: contest.ev,

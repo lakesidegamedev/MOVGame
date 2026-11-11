@@ -84,7 +84,7 @@ val ACHIEVEMENTS: List<Achievement> = listOf(
     Achievement(
         id = "nailbiter", name = "Nailbiter", icon = "\uD83D\uDE30",
         description = "Win with fewer than 5 electoral votes to spare.",
-        check = { c -> playerWon(c) && (c.result.electoralVotes[c.player.serial] ?: 0) - 270 < 5 },
+        check = { c -> playerWon(c) && (c.result.electoralVotes[c.player.serial] ?: 0) - c.result.electoralRule().majority < 5 },
     ),
     Achievement(
         id = "comeback", name = "Comeback Kid", icon = "\uD83D\uDD04",

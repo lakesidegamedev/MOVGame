@@ -2,6 +2,7 @@
 // shape that drives the ElectionNight reveal. Pure functions over final game
 // state — no store access, so they're trivially testable.
 import type { GameState } from "@engine/types";
+import { evMajority, noMajorityTally } from "@engine/electoralCollege";
 import type { UkGameState } from "@engine/ukGame";
 import { majorityFor, type CountryBundle, type CountryGameState } from "@engine/countryGame";
 import type { PartyId } from "@engine/system";
@@ -31,7 +32,11 @@ function usRevealMap(units: RevealUnit[]): RevealMap {
       STATE_PATHS[u.id] ?? (u.id.endsWith("-AL") ? STATE_PATHS[u.id.split("-")[0]] : undefined);
     if (d) shapes[u.id] = { d };
   }
-  return { viewBox: US_MAP_VIEWBOX, shapes };
+  // States with no electoral votes this year keep their outline, inert.
+  const inert = Object.entries(STATE_PATHS)
+    .filter(([id]) => !(id in shapes) && !(`${id}-AL` in shapes))
+    .map(([, d]) => d);
+  return { viewBox: US_MAP_VIEWBOX, shapes, ...(inert.length ? { inert } : {}) };
 }
 
 // ── US (two-party electoral college) ─────────────────────────────────────
@@ -59,10 +64,15 @@ export function usReveal(game: GameState): RevealData {
 
   const scenarioId = game.scenarioId ?? "2020";
   const year = SCENARIOS[scenarioId]?.year ?? scenarioId;
+  // The scenario's college: 270 of 538, 269 of 537, 266 of 531. No majority
+  // reads as the deadlock (269-269 on the modern map) or the actual tally.
+  const totalUnits = units.reduce((s, u) => s + u.units, 0);
+  const threshold = evMajority(totalUnits);
+  const deadlock = `${threshold - 1}-${threshold - 1}`;
   return {
     title: `Election Night · ${year}`,
-    totalUnits: units.reduce((s, u) => s + u.units, 0),
-    threshold: 270,
+    totalUnits,
+    threshold,
     parties: [
       { id: "dem", short: cands.dem.shortName, color: cands.dem.color },
       { id: "rep", short: cands.rep.shortName, color: cands.rep.color },
@@ -71,7 +81,7 @@ export function usReveal(game: GameState): RevealData {
     playerPartyId: game.playerCandidate,
     unitLabel: "EV",
     map: usRevealMap(units),
-    noMajorityLabel: "269-269: ELECTION GOES TO THE HOUSE",
+    noMajorityLabel: `${result.winner === "tie" ? noMajorityTally(result.electoralVotes) : deadlock}: ELECTION GOES TO THE HOUSE`,
     storageKey: `reveal-${game.seed}-us-${scenarioId}`,
   };
 }

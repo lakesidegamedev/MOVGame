@@ -46,6 +46,9 @@ data class AskCampaignSnapshot(
     val evPlayer: Int,
     val evOpponent: Int,
     val tossupEv: Int,
+    // The scenario's college: 538 and 270 on the modern map, 531 and 266 before 1960.
+    val evTotal: Int = STANDARD_EV_TOTAL,
+    val evMajority: Int = evMajority(STANDARD_EV_TOTAL),
     val states: List<AskCampaignState>,
     val planned: List<AskCampaignPlan>,
 )
@@ -66,6 +69,8 @@ fun askCampaignSnapshot(state: GameState, scenario: String): String {
         evPlayer = projection.ev.getValue(player),
         evOpponent = projection.ev.getValue(if (player == CandidateId.DEM.serial) CandidateId.REP.serial else CandidateId.DEM.serial),
         tossupEv = projection.tossupEv,
+        evTotal = state.electoralRule().total,
+        evMajority = state.electoralRule().majority,
         states = projection.contests.mapNotNull { row ->
             val contest = names[row.stateId] ?: return@mapNotNull null
             AskCampaignState(contest.name, row.ev, (row.demShare - 0.5) * 200 * sign)

@@ -275,7 +275,7 @@ struct SetupView: View {
                         Text("1. Tap a gray, amber-ringed state on the EV map. Those are the closest races.")
                         Text("2. Choose a campaign move and tune its settings. The projected margin updates before you add it.")
                         Text("3. Schedule moves across seven days, then end the week to see what changed.")
-                        Text("Win 270 electoral votes by Election Day.").font(.subheadline.bold())
+                        Text("Win a majority of the electoral votes by Election Day.").font(.subheadline.bold())
                     }
                     .font(.subheadline).foregroundStyle(.white)
                     .padding(12).background(CampaignStyle.background, in: RoundedRectangle(cornerRadius: 12))

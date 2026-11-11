@@ -125,6 +125,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - Account and menu text no longer quotes prices; the Store shows the current ones.
 - The button that leaves a campaign says "Home" in every country.
 - The Redeem a code dialog matches the rest of the interface.
+- Each United States election now uses its own Electoral College. The majority, the EV bar,
+  election night, results, score, achievements and the campaign charts follow that year's
+  total instead of always 270 of 538. States that cast no electoral votes that year are left
+  off the map.
 
 ### Fixed
 
@@ -155,6 +159,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   campaign summary shows each country's own currency.
 - On phones the setup screen's back and start buttons no longer wrap awkwardly with long party
   names.
+- 1960 now has its real 537 electoral votes and 269 to win: the District of Columbia no longer
+  votes (its first presidential election was 1964), and Maine and Nebraska carry their 1960
+  votes of 5 and 6.
 
 ## 2026-10
 

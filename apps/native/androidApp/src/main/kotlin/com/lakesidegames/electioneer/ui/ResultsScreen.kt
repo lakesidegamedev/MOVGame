@@ -79,7 +79,7 @@ fun ResultsScreen(session: GameSession) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("ELECTION NIGHT", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                 Text(if (result.winner == g.playerCandidate.serial) "Victory" else "The race is over", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Black)
-                Text(if (result.winner == "tie") "Electoral College tied. No candidate reaches 270." else "$winnerName wins the presidency", style = MaterialTheme.typography.titleMedium)
+                Text(if (result.winner == "tie") "Electoral College tied. No candidate reaches ${com.lakesidegames.electioneer.engine.evMajorityOf(g)}." else "$winnerName wins the presidency", style = MaterialTheme.typography.titleMedium)
                 Text("DEM $demEv   ·   $repEv REP", style = MaterialTheme.typography.headlineSmall)
                 val demPop = (result.popularShare[CandidateId.DEM.serial] ?: 0.5) * 100
                 Text("Democratic popular vote ${"%.1f".format(demPop)}%", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)

@@ -7,7 +7,7 @@ import { STATE_PATHS } from "@content/statePaths";
 import { isCustomScenarioId } from "@content/customScenario";
 import { SCENARIOS } from "@content/scenarios";
 import { US_NEXT_SCENARIO } from "@content/nextScenario";
-import type { Projection } from "@engine/index";
+import { electoralRule, noMajorityTally, type Projection } from "@engine/index";
 import { computeScoreFromFacts, usOpponentEvMargin, usScoreFacts } from "@engine/scoring";
 import { checkAchievements, recordLocalAchievements } from "@engine/achievements";
 import { api } from "@lib/api";
@@ -37,6 +37,7 @@ export function ResultsScreen() {
 
   const byState = useMemo(() => new Map(result.stateResults.map((s) => [s.stateId, s])), [result]);
   const evOf = (id: string) => game.states.find((s) => s.id === id)?.electoralVotes ?? 0;
+  const college = electoralRule(game.states);
 
   // Call order: safe states first, the closest battlegrounds last — for drama.
   const calls = useMemo(
@@ -68,10 +69,10 @@ export function ResultsScreen() {
     if (c.winner === "dem") demEV += evOf(c.stateId);
     else repEV += evOf(c.stateId);
   }
-  const tossupEV = Math.max(0, 538 - demEV - repEV);
+  const tossupEV = Math.max(0, college.total - demEV - repEV);
   const lastCalled = revealed > 0 ? game.states.find((s) => s.id === calls[revealed - 1].stateId) : null;
 
-  const winnerName = result.winner === "tie" ? "No one: 269-269" : cands[result.winner].name;
+  const winnerName = result.winner === "tie" ? `No one: ${noMajorityTally(result.electoralVotes)}` : cands[result.winner].name;
   const playerWon = result.winner === game.playerCandidate;
 
   // The win/lose sting plays once the state-by-state calls have all landed.
@@ -119,7 +120,7 @@ export function ResultsScreen() {
   const nextMeta = next ? SCENARIOS[next.id] : null;
   const unlocked = next ? canPlay(`us-${next.id}`) : false;
   const winnerEv =
-    result.winner === "tie" ? 269 : result.electoralVotes[result.winner];
+    result.winner === "tie" ? Math.max(result.electoralVotes.dem, result.electoralVotes.rep) : result.electoralVotes[result.winner];
   const winnerPopShare =
     result.winner === "tie"
       ? result.popularShare[game.playerCandidate]
@@ -142,16 +143,16 @@ export function ResultsScreen() {
           headlineColor={!done ? "var(--text-strong)" : winnerColor}
           subhead={
             !done
-              ? `270 to win · ${tossupEV} EV still out`
+              ? `${college.majority} to win · ${tossupEV} EV still out`
               : result.winner === "tie"
-                ? "Neither ticket reached 270. The House decides."
+                ? `Neither ticket reached ${college.majority}. The House decides.`
                 : playerWon
                   ? "You won the campaign."
                   : "You came up short."
           }
           subheadTone={!done ? "neutral" : result.winner === "tie" ? "neutral" : playerWon ? "win" : "loss"}
           counterValue={done ? winnerEv : Math.max(demEV, repEV)}
-          counterLabel={done ? (result.winner === "tie" ? "EV apiece" : "Electoral votes") : "Leading EV"}
+          counterLabel={done ? (result.winner === "tie" ? (result.electoralVotes.dem === result.electoralVotes.rep ? "EV apiece" : "Leading EV") : "Electoral votes") : "Leading EV"}
           counterColor={done && result.winner !== "tie" ? cands[result.winner].color : undefined}
           secondaryCounter={
             done
@@ -272,7 +273,8 @@ export function ResultsScreen() {
                 {[...GRID.map((t) => t.id), ...SPLIT_UNITS.map((g) => g.ids.find((id) => id.endsWith("-AL"))).filter(Boolean) as string[]].map((id) => {
                   const sr = byState.get(id);
                   const path = STATE_PATHS[id] ?? STATE_PATHS[id.split("-")[0]];
-                  if (!sr || !path) return null;
+                  if (!path) return null;
+                  if (!sr) return <path key={id} d={path} fill="#1b2740" opacity={0.4} stroke="#0b1120" strokeWidth={0.6} aria-hidden="true" />;
                   const called = calledIds.has(id);
                   const st = game.states.find((s) => s.id === id);
                   return (
