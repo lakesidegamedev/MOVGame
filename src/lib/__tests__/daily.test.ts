@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   CLASSIC_DAILY_POOL_SIZE,
+  CLASSIC_DAILY_POOL_IDS,
   DAILY_ROLE_PAIRS,
   dailyAssignment,
   isAddedDailyDay,
@@ -111,11 +112,12 @@ describe("roleShortName", () => {
 });
 
 describe("daily rotation as countries are added", () => {
-  const legacy = (date: string) => SCENARIO_REGISTRY[fnv1a(`daily:${date}`) % CLASSIC_DAILY_POOL_SIZE].scenarioId;
+  const legacy = (date: string) => CLASSIC_DAILY_POOL_IDS[fnv1a(`daily:${date}`) % CLASSIC_DAILY_POOL_SIZE];
 
-  it("the classic pool is the first 49 registry rows", () => {
-    expect(SCENARIO_REGISTRY.length).toBeGreaterThanOrEqual(CLASSIC_DAILY_POOL_SIZE);
-    expect(SCENARIO_REGISTRY[CLASSIC_DAILY_POOL_SIZE - 1].scenarioId).toBe("au-2019");
+  it("the classic pool is the frozen original 49, all still registered", () => {
+    expect(CLASSIC_DAILY_POOL_IDS.length).toBe(CLASSIC_DAILY_POOL_SIZE);
+    expect(CLASSIC_DAILY_POOL_IDS[CLASSIC_DAILY_POOL_SIZE - 1]).toBe("au-2019");
+    for (const id of CLASSIC_DAILY_POOL_IDS) expect(SCENARIO_REGISTRY.some((s) => s.scenarioId === id), id).toBe(true);
   });
 
   it("every classic day keeps the scenario the pre-expansion rotation gave it", () => {
@@ -124,7 +126,7 @@ describe("daily rotation as countries are added", () => {
     let classicDays = 0;
     for (const d of dates(730, "2025-07-01")) {
       if (isAddedDailyDay(d, total, added)) {
-        expect(SCENARIO_REGISTRY.findIndex((s) => s.scenarioId === dailyAssignment(d).scenarioId)).toBeGreaterThanOrEqual(CLASSIC_DAILY_POOL_SIZE);
+        expect(CLASSIC_DAILY_POOL_IDS.includes(dailyAssignment(d).scenarioId)).toBe(false);
         continue;
       }
       classicDays++;

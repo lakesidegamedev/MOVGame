@@ -67,6 +67,19 @@ export function isDailyDate(s: string): boolean {
 // reassigns some added days to the newcomers; every other day keeps its
 // scenario, so older app versions stay in step on most days.
 export const CLASSIC_DAILY_POOL_SIZE = 49;
+// The classic pool by id, frozen in its original order. It is no longer "the
+// first 49 registry rows": a country that gains elections (the United States
+// before 1960) adds rows in the middle of the registry, and those join the
+// added pool like any new country without moving a classic day.
+export const CLASSIC_DAILY_POOL_IDS: readonly string[] = [
+  "us-2024", "us-2020", "us-2016", "us-2012", "us-2008", "us-2004", "us-2000", "us-1996",
+  "us-1992", "us-1988", "us-1984", "us-1980", "us-1976", "us-1972", "us-1968", "us-1964",
+  "us-1960", "uk-2024", "uk-2019", "uk-2017", "uk-2015", "uk-2010", "uk-2005", "uk-2001",
+  "uk-1997", "uk-1992", "uk-1987", "uk-1983", "uk-1979", "uk-1974feb", "uk-1974oct", "uk-1970",
+  "uk-1966", "uk-1964", "uk-1951", "ca-2025", "ca-2021", "ca-2019", "ca-2015", "de-2025",
+  "de-2021", "de-2017", "fr-2027", "fr-2022", "fr-2017", "fr-2012", "au-2025", "au-2022",
+  "au-2019",
+];
 
 /** Whether `dateUTC` is drawn from the scenarios added after the classic pool. */
 export function isAddedDailyDay(dateUTC: string, total: number, added: number): boolean {
@@ -77,8 +90,9 @@ export function isAddedDailyDay(dateUTC: string, total: number, added: number): 
 
 function dailyScenario(dateUTC: string): ScenarioMeta {
   const pool: ScenarioMeta[] = SCENARIO_REGISTRY;
-  const classic = pool.slice(0, CLASSIC_DAILY_POOL_SIZE);
-  const added = pool.slice(CLASSIC_DAILY_POOL_SIZE);
+  const classicIds = new Set(CLASSIC_DAILY_POOL_IDS);
+  const classic = CLASSIC_DAILY_POOL_IDS.map((id) => SCENARIOS_BY_ID[id]);
+  const added = pool.filter((m) => !classicIds.has(m.scenarioId));
   if (!isAddedDailyDay(dateUTC, pool.length, added.length)) {
     return classic[fnv1a(`daily:${dateUTC}`) % classic.length];
   }

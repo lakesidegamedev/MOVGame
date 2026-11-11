@@ -16,12 +16,12 @@ class ContentDataTest {
 
     @Test
     fun eventCountsMatchTs() {
-        assertEquals(125, EVENTS_BY_ID.size)
+        assertEquals(160, EVENTS_BY_ID.size)
         val all = EVENTS_BY_ID.values.toList()
-        assertEquals(385, all.sumOf { it.choices.size })
+        assertEquals(483, all.sumOf { it.choices.size })
         assertEquals(18, GENERIC_EVENTS.size)
         assertEquals(2, GENERIC_DEBATES.size)
-        assertEquals(17, HISTORICAL_EVENTS.size)
+        assertEquals(24, HISTORICAL_EVENTS.size)
         assertEquals(8, HISTORICAL_EVENTS.getValue("2020").size)
         assertEquals(5, HISTORICAL_EVENTS.getValue("2024").size)
     }
@@ -40,7 +40,7 @@ class ContentDataTest {
                 }
             }
         }
-        assertTrue(kotlin.math.abs(sum - 19.101999999999958) <= 1e-9, "checksum $sum")
+        assertTrue(kotlin.math.abs(sum - 24.10199999999995) <= 1e-9, "checksum $sum")
     }
 
     @Test

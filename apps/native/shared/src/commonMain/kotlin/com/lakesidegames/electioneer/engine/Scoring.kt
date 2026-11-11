@@ -40,16 +40,18 @@ fun computeScoreFromFacts(f: ScoreFacts): Int {
     return floor(clampScore((500 + evScore + popScore) * mult, 0.0, 1000.0) + 0.5).toInt()
 }
 
+// `total` is the scenario's college; a finished result's tallies sum to it.
 fun usScoreFacts(
     electoralVotes: Map<String, Int>,
     popularShare: Map<String, Double>,
     player: CandidateId,
     difficulty: String,
+    total: Int = evTotalOf(electoralVotes.values),
 ): ScoreFacts {
     val rival = OPPONENT_OF.getValue(player)
     return ScoreFacts(
-        unitMargin = ((electoralVotes[player.serial] ?: 0) - 270).toDouble(),
-        chamberSize = 538,
+        unitMargin = ((electoralVotes[player.serial] ?: 0) - evMajority(total)).toDouble(),
+        chamberSize = total,
         popularMargin = ((popularShare[player.serial] ?: 0.0) - (popularShare[rival.serial] ?: 0.0)) * 100,
         difficulty = difficulty,
     )

@@ -16,7 +16,7 @@ class NativeHelp private constructor() {
             NativeHelpStep("Election night", "Watch the final calls, then inspect results and the campaign report. Standard campaigns with a known difficulty can post scores. Share your result or continue to the next election where available.")
         )
         fun guide(): List<NativeHelpStep> = listOf(
-            NativeHelpStep("United States", "Reach 270 electoral votes. Most states award their votes to the winner; Maine and Nebraska split statewide and district votes. The default campaign lasts nine weeks. Cash, candidate stamina, momentum, readiness and staff capacity constrain the plan."),
+            NativeHelpStep("United States", "Reach a majority of the electoral votes: 270 of 538 on the modern map, 269 of 537 in 1960, 266 of 531 before Alaska, Hawaii and DC voted. Most states award their votes to the winner; Maine and Nebraska split statewide and district votes. The default campaign lasts nine weeks. Cash, candidate stamina, momentum, readiness and staff capacity constrain the plan."),
             NativeHelpStep("Parliamentary elections", "UK, Canadian and Australian regional results produce seats. The majority line depends on the election and eligible seats. A hung parliament can yield a coalition, confidence and supply, or minority government. Check the government explanation in results."),
         ) + CONTENT_CATALOG.countries.mapNotNull { c -> c.guide?.let { NativeHelpStep(it.title, it.body) } } + listOf(
             NativeHelpStep("Advertising and broadcasts", "Positive messages persuade aligned blocs. Contrast messages challenge rivals with backlash risk. Issue messages raise the salience of an issue. Spend, regional cost and diminishing returns affect the result."),

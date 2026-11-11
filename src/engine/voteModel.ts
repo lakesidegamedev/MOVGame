@@ -7,6 +7,7 @@ import type {
   StateResult,
 } from "./types";
 import { sigmoid } from "./setup";
+import { electoralWinner, evTotalOf } from "./electoralCollege";
 
 // Effective two-party Biden share for a single bloc = sigmoid of its baseline
 // margin plus everything the campaign has done to it (campaignMargin). This is
@@ -62,7 +63,9 @@ export function tallyContest(state: StateContest): ContestTally {
 }
 
 // Runs the full electoral model: every contest, the ME/NE at-large aggregates,
-// the EV tally, the national popular vote, and the winner (incl. 269–269 tie).
+// the EV tally, the national popular vote, and the winner (no majority, such
+// as a 269 to 269 tie, sends it to the House). The majority is the scenario's:
+// floor(total / 2) + 1 of the contests in play.
 export function computeResult(game: GameState): GameResult {
   const tallies = new Map<string, ContestTally>();
   for (const st of game.states) {
@@ -110,8 +113,7 @@ export function computeResult(game: GameState): GameResult {
   }
 
   const totalPop = popularVote.dem + popularVote.rep;
-  const winner: GameResult["winner"] =
-    ev.dem >= 270 ? "dem" : ev.rep >= 270 ? "rep" : "tie";
+  const winner: GameResult["winner"] = electoralWinner(ev, evTotalOf(game.states));
 
   // Post-mortem: the player's biggest self-caused swings, by magnitude.
   const postMortem = [...game.causes]

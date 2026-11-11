@@ -19,7 +19,7 @@
     "us-1972": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "us-1968": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0.2 },
     "us-1964": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
-    "us-1960": { "suggested": "easy", "authored": "easy", "underdogWinRate": 0.85 },
+    "us-1960": { "suggested": "easy", "authored": "easy", "underdogWinRate": 1 },
     "uk-2024": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "uk-2019": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "uk-2017": { "suggested": "easy", "authored": "easy", "underdogWinRate": 0.6 },
@@ -115,6 +115,13 @@
     "au-2004": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "au-2001": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "au-1998": { "suggested": "medium", "authored": "medium", "underdogWinRate": 0.2 },
-    "au-1996": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
+    "au-1996": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "us-1956": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "us-1952": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "us-1948": { "suggested": "easy", "authored": "easy", "underdogWinRate": 1 },
+    "us-1944": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "us-1940": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "us-1936": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "us-1932": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
   }
 }

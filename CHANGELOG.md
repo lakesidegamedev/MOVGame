@@ -112,6 +112,12 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   'never, ever' a GST and the Tampa to WorkChoices, the 2010 hung parliament and the 2016
   Mediscare, in chambers of 148 and 150 seats. Owners of the old Global pack need the Australia
   pack or the Complete Collection for these.
+- United States: seven elections from 1932 to 1956 join the United States pack. Play
+  Roosevelt's four campaigns against Hoover, Landon, Willkie and Dewey, Truman's whistle-stop
+  upset with the Democrats split three ways, and Stevenson against Eisenhower twice, from the
+  Bonus Army and Social Security to the Checkers speech and Suez. Each uses that year's
+  Electoral College of 48 states and 531 votes, 266 to win, with real state results and
+  running mates.
 
 ### Changed
 
@@ -145,6 +151,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - Account and menu text no longer quotes prices; the Store shows the current ones.
 - The button that leaves a campaign says "Home" in every country.
 - The Redeem a code dialog matches the rest of the interface.
+- Each United States election now uses its own Electoral College. The majority, the EV bar,
+  election night, results, score, achievements and the campaign charts follow that year's
+  total instead of always 270 of 538. States that cast no electoral votes that year are left
+  off the map.
 
 ### Fixed
 
@@ -175,6 +185,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   campaign summary shows each country's own currency.
 - On phones the setup screen's back and start buttons no longer wrap awkwardly with long party
   names.
+- 1960 now has its real 537 electoral votes and 269 to win: the District of Columbia no longer
+  votes (its first presidential election was 1964), and Maine and Nebraska carry their 1960
+  votes of 5 and 6.
 
 ## 2026-10
 

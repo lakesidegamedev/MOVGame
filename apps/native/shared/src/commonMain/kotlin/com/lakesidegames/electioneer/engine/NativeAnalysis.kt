@@ -78,7 +78,7 @@ object NativeAnalysis {
                 NativeTrendChart("poll-margin", "Your national polling margin (points)", kotlin.math.min(-6.0, kotlin.math.floor(margins.min() - 2)),
                     kotlin.math.max(6.0, kotlin.math.ceil(margins.max() + 2)), 0.0, "Tie",
                     listOf(series(game.candidates.getValue(game.playerCandidate.serial), ::playerMargin))),
-                NativeTrendChart("ev", "Electoral vote projection", 0.0, 538.0, 270.0, "270 to win",
+                NativeTrendChart("ev", "Electoral vote projection", 0.0, game.electoralRule().total.toDouble(), game.electoralRule().majority.toDouble(), "${game.electoralRule().majority} to win",
                     listOf(series(dem) { it.demEV.toDouble() }, series(rep) { it.repEV.toDouble() })),
                 NativeTrendChart("momentum", "National momentum", -100.0, 100.0, 0.0, "Neutral",
                     listOf(series(dem) { it.demMomentum }, series(rep) { it.repMomentum })),

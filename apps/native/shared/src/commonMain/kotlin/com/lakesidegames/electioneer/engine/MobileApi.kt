@@ -182,6 +182,11 @@ class MobileGame private constructor(
 
     fun tossupEv(): Int = projectElection(game).tossupEv
 
+    // The scenario's electoral college and majority (538 and 270 on the modern map).
+    fun evTotal(): Int = game.electoralRule().total
+
+    fun evMajority(): Int = game.electoralRule().majority
+
     fun contests(): List<ContestProjection> = projectElection(game).contests
 
     fun queueAction(typeSerial: String, stateId: String?) {

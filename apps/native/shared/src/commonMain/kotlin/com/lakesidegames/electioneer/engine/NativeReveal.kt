@@ -38,9 +38,13 @@ object NativeReveal {
             }
             val scenarioId = game.scenarioId ?: "2020"
             val title = customDocument(game.customScenario)?.label ?: (SCENARIOS[scenarioId]?.year ?: scenarioId).toString()
-            return NativeRevealData("Election Night · $title", units.sumOf { it.units }, 270,
+            // The scenario's college: 270 of 538, 269 of 537, 266 of 531.
+            val total = units.sumOf { it.units }
+            val threshold = evMajority(total)
+            val deadlock = if (result.winner == "tie") noMajorityTally(result.electoralVotes) else "${threshold - 1}-${threshold - 1}"
+            return NativeRevealData("Election Night · $title", total, threshold,
                 listOf("dem", "rep").map { id -> game.candidates.getValue(id).let { NativeRevealParty(id, it.shortName, it.color) } },
-                units, game.playerCandidate.serial, "EV", "269-269: ELECTION GOES TO THE HOUSE", "reveal-${game.seed}-us-$scenarioId")
+                units, game.playerCandidate.serial, "EV", "$deadlock: ELECTION GOES TO THE HOUSE", "reveal-${game.seed}-us-$scenarioId")
         }
         val world = runCatching { EngineJson.decodeFromString<RevealWorldSave>(snapshot) }.getOrNull() ?: return null
         val uk = world.uk

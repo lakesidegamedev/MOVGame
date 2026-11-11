@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGameStore } from "@store/gameStore";
+import { electoralRule } from "@engine/electoralCollege";
 import "./coach.css";
 
 // First-run onboarding coach: a spotlight-tooltip walkthrough. Shows once
@@ -66,7 +67,7 @@ function buildSteps(props: OnboardingCoachProps): CoachStep[] {
   return [
     {
       title: "Welcome to the war room",
-      body: props.winLine ?? "This is your war room. Win 270 electoral votes in {N} weeks. No pressure.",
+      body: props.winLine ?? "This is your war room. Win {M} electoral votes in {N} weeks. No pressure.",
       next: "Show me",
       target: () => null,
     },
@@ -157,6 +158,7 @@ export function OnboardingCoach(props: OnboardingCoachProps = {}) {
 
   // US store subscriptions (ignored when external props drive the coach).
   const usTotalTurns = useGameStore((s) => s.game?.totalTurns ?? 0);
+  const usMajority = useGameStore((s) => electoralRule(s.game?.states ?? []).majority);
   const usSelected = useGameStore((s) => s.selectedStateId);
   const usQueued = useGameStore((s) => s.game?.queuedActions.length ?? 0);
   const usTurn = useGameStore((s) => s.game?.turn ?? 0);
@@ -232,7 +234,7 @@ export function OnboardingCoach(props: OnboardingCoachProps = {}) {
   const advance = () => (step >= steps.length - 1 ? finish() : setStep(step + 1));
 
   const s = steps[step];
-  const body = s.body.replace("{N}", String(totalTurns));
+  const body = s.body.replace("{N}", String(totalTurns)).replace("{M}", String(usMajority));
 
   const CARD_W = 340;
   const CARD_H = 200;

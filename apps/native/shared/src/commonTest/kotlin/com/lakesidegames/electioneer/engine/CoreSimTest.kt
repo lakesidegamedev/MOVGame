@@ -126,7 +126,8 @@ class CoreSimTest {
     fun computeResultMatchesTs() {
         val r = computeResult(game())
         assertEquals(mapOf("dem" to 26, "rep" to 21), r.electoralVotes)
-        assertEquals("tie", r.winner)
+        // The fixture is its own 47-vote college: 26 clears the majority of 24.
+        assertEquals("dem", r.winner)
         assertEquals(888.2953012467942, r.popularVote.getValue("dem"))
         assertEquals(859.2046987532058, r.popularVote.getValue("rep"))
         assertEquals(0.5083234914144745, r.popularShare.getValue("dem"))

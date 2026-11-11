@@ -115,7 +115,7 @@ object NativeReplay {
         val source = replaySource(snapshot)
         source.us?.let { game ->
             var log = NativeReplayLog(engine = "us", scenarioId = game.scenarioId ?: "2020", playerId = game.playerCandidate.serial,
-                unitLabel = "electoral votes", unitTotal = 538, majority = 270, totalTurns = game.totalTurns, mode = mode,
+                unitLabel = "electoral votes", unitTotal = game.electoralRule().total, majority = game.electoralRule().majority, totalTurns = game.totalTurns, mode = mode,
                 parties = listOf("dem", "rep").map { id -> game.candidates.getValue(id).let { NativeReplayParty(id, it.shortName, it.color) } },
                 contestNames = game.states.associate { it.id to it.name })
             if (game.timeline.isNullOrEmpty()) return append(log, usSnapshot(game))

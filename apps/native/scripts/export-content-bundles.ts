@@ -142,6 +142,8 @@ async function main() {
     "1988": hist.HIST_1988, "1984": hist.HIST_1984, "1980": hist.HIST_1980,
     "1976": hist.HIST_1976, "1972": hist.HIST_1972, "1968": hist.HIST_1968,
     "1964": hist.HIST_1964, "1960": hist.HIST_1960,
+    "1956": hist.HIST_1956, "1952": hist.HIST_1952, "1948": hist.HIST_1948,
+    "1944": hist.HIST_1944, "1940": hist.HIST_1940, "1936": hist.HIST_1936, "1932": hist.HIST_1932,
   };
 
   const check = process.argv.includes("--check");

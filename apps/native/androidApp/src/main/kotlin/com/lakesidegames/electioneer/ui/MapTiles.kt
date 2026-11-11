@@ -80,7 +80,8 @@ fun TileMap(
                             .aspectRatio(1f)
                             .padding(1.dp),
                     ) {
-                        if (abbr != null) {
+                        // States with no electoral votes this year are not on the map.
+                        if (abbr != null && abbr in abbrToStateId) {
                             val stateId = abbrToStateId[abbr]
                             val contest = stateId?.let { byStateId[it] }
                             val isSel = abbr == selectedAbbr

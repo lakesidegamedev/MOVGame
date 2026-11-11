@@ -35,7 +35,9 @@ describe("next-scenario retention chains", () => {
     expect(countryNextScenario("DE", "2025")?.id).toBe("1990");
     expect(countryNextScenario("AU", "2019")?.id).toBe("2022");
     expect(US_NEXT_SCENARIO["1960"].id).toBe("1964");
-    expect(US_NEXT_SCENARIO["2024"].id).toBe("1960");
+    expect(US_NEXT_SCENARIO["2024"].id).toBe("1932");
+    expect(US_NEXT_SCENARIO["1956"].id).toBe("1960");
+    expect(US_NEXT_SCENARIO["1932"].id).toBe("1936");
   });
 
   it("keeps authored blurbs and never repeats the card title", () => {

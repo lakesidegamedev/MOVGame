@@ -88,13 +88,16 @@ function buildBlocsForState(seed: StateSeed, targetDemShare: number): StateBloc[
 }
 
 // Build the contest list. A scenario supplies per-state two-party Dem priors
-// (falling back to the 2020 default) and electoral-vote overrides for its
-// cycle's apportionment.
+// (falling back to the 2020 default), electoral-vote overrides for its cycle's
+// apportionment, and the contests that cast no electoral votes that year
+// (left out of the game entirely).
 export function buildStates(
   priors?: Record<string, number>,
   evOverrides?: Record<string, number>,
+  absent?: readonly string[],
 ): StateContest[] {
-  return STATE_SEEDS.map((seed) => {
+  const skip = new Set(absent ?? []);
+  return STATE_SEEDS.filter((seed) => !skip.has(seed.id)).map((seed) => {
     const isAggregate = (seed.electorate ?? 0) <= 0 && seed.aggregateOf;
     const demShare = priors?.[seed.id] ?? seed.prior2020DemShare;
     const ev = evOverrides?.[seed.id] ?? seed.ev;
@@ -304,7 +307,7 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     candidates,
     issues: structuredClone(ISSUES),
     salience,
-    states: withEnvironment(buildStates(priors, scenario.evOverrides), player, handicap.environment),
+    states: withEnvironment(buildStates(priors, scenario.evOverrides, scenario.electoralCollege?.absent), player, handicap.environment),
     resources,
     pendingEvents: [],
     firedEventIds: [],

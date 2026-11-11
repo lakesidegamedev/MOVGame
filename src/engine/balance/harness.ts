@@ -39,6 +39,7 @@ import {
   type CountryBundle,
 } from "../countryGame";
 import { computeScoreFromFacts, usScoreFacts, multipartyScoreFacts, multipartyUnitMargin } from "../scoring";
+import { electoralRule } from "../electoralCollege";
 import {
   mpFocusedActions,
   mpScattershotActions,
@@ -65,7 +66,7 @@ export interface GauntletRow {
   bot: BotStrategy;
   seeds: number;
   winRate: number; // player wins the unit majority / becomes largest party
-  avgUnitMargin: number; // player units − win threshold (EV−270 / seats−majority)
+  avgUnitMargin: number; // player units − win threshold (EV−majority / seats−majority)
   blowoutRate: number; // |player units − top rival units| > 25% of chamber
   avgScore: number; // leaderboard score (scoring.ts), player perspective
   // Fraction of seeds where the RUN's winner (either side) matches the
@@ -307,10 +308,11 @@ function runUsGame(
   const r = g.result ?? computeResult(g);
   const mine = r.electoralVotes[side] ?? 0;
   const theirs = r.electoralVotes[side === "dem" ? "rep" : "dem"] ?? 0;
+  const college = electoralRule(r.stateResults);
   return {
     won: r.winner === side,
-    unitMargin: mine - 270,
-    blowout: Math.abs(mine - theirs) > 538 * 0.25,
+    unitMargin: mine - college.majority,
+    blowout: Math.abs(mine - theirs) > college.total * 0.25,
     score: computeScoreFromFacts(usScoreFacts(r, side, difficulty)),
     matchedHistory: r.winner === baselineWinner,
     demEV: r.electoralVotes.dem,
