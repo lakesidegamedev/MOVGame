@@ -158,9 +158,8 @@ private fun ElectionBriefing(session: GameSession, election: NativeElection, dai
                     Row(horizontalArrangement = Arrangement.spacedBy(MovSpace.s1_5)) {
                         Tag(election.difficulty, difficultyTag(election.difficulty))
                         if (election.free) Tag("Free", TagKind.Positive) else if (owned) Tag("Owned", TagKind.Positive)
-                        else Tag(NativeCatalog.packName(election.packId), TagKind.Outline)
+                        else Tag("${NativeCatalog.packName(election.packId)} pack", TagKind.Outline)
                     }
-                    country?.guide?.let { Callout(it.title, it.body, kind = NoticeKind.Info) }
                 }
             }
             if (!us) {
@@ -194,6 +193,8 @@ private fun ElectionBriefing(session: GameSession, election: NativeElection, dai
                     }
                 }
             }
+            // How this country's system works, after the choices it explains.
+            country?.guide?.let { guide -> item { Callout("How ${guide.title} works", guide.body, kind = NoticeKind.Info) } }
         }
         ActionBar {
             if (us) PrimaryButton("Choose your presidential ticket", { session.setupScenarioId = election.nativeId; session.go(Screen.SETUP) }, Modifier.weight(1f))

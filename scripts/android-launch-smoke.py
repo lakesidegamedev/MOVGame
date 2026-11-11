@@ -153,6 +153,22 @@ def ask_flows():
 failures = []
 
 
+def tap_map():
+    # Tap inside the map until a region is selected. The middle of a country's
+    # bounding box can be open sea (Japan), so try a few points.
+    name = 'map-probe'
+    semantic_text(name)
+    node = next(n for n in ET.fromstring((output / f'{name}.xml').read_text()).iter('node')
+                if n.get('content-desc', '').startswith('Map of'))
+    left, top, right, bottom = map(int, re.findall(r'\d+', node.get('bounds', '')))
+    for fx, fy in ((0.5, 0.5), (0.7, 0.4), (0.4, 0.6), (0.6, 0.3), (0.45, 0.75), (0.3, 0.45)):
+        adb('shell', 'input', 'tap', str(int(left + (right - left) * fx)), str(int(top + (bottom - top) * fy)))
+        time.sleep(1)
+        if 'CLEAR REGION SELECTION' in semantic_text(name):
+            return
+    raise RuntimeError('No tap on the map selected a region')
+
+
 def shot(flow, marker, mode='game', name=None):
     # One screen per launch. A failure is recorded and the run moves on.
     name = name or flow
@@ -180,7 +196,7 @@ def route_flows():
     for country in ('UK', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP', 'IT'):
         shot(f'map-{country}', 'Regional projections')
         try:
-            tap_label('Map of', prefix=True)
+            tap_map()
             capture(f'map-{country}-selected', 'Clear region selection')
         except Exception as error:  # noqa: BLE001
             print(f'FAIL map-{country}-selected: {error}', flush=True)
