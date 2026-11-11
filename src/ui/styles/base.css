@@ -53,3 +53,11 @@ a { color: var(--info); }
     scroll-behavior: auto !important;
   }
 }
+
+/* Controls inside scrolling rails would have an outer ring clipped by the
+   rail, so they draw the focus ring inside their own edge. */
+.segmented > button:focus-visible, .tabbar > button:focus-visible, .profile-tabs > button:focus-visible,
+.map-mode-toggle > button:focus-visible, .library-countries > button:focus-visible,
+.desk-tools button:focus-visible, .desk-tools a:focus-visible, .su-stepper > button:focus-visible {
+  outline-offset: -2px;
+}

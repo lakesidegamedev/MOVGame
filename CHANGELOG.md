@@ -11,7 +11,29 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ## [Unreleased]
 
-No changes yet.
+### Changed
+
+- The web and desktop game has one consistent look: a shared set of colors, type sizes,
+  spacing, buttons, cards, tabs, tables and modals on every screen, with numbers in aligned
+  figures instead of a typewriter font.
+- The campaign desk works the same way in the US, UK and every other country: race and week
+  on the left, the live seat or electoral vote bar, your resources, and Undo and End Week
+  always in view. On phones Undo and End Week sit in a bar at the bottom of the screen.
+- The map fills the desk and stays fully on screen. Map tiles and regions can be selected with
+  the keyboard.
+- The election library groups every election by country, with search, a country rail, and
+  filters for owned or locked, difficulty and era. It grows with new countries on its own.
+- Setup screens list elections as compact tiles with difficulty and lock state, and parties
+  as cards with their colors.
+- Results show the verdict, map and standings beside your next election, score and
+  post-mortem on wide screens. Election night uses larger maps.
+- Modals close from the same button everywhere and open as bottom sheets on phones.
+
+### Fixed
+
+- Parties with very dark colors, such as the CDU/CSU in Germany, are now readable on maps,
+  seat bars, standings and setup cards.
+- Small text and party-colored names now meet contrast guidelines on the dark panels.
 
 ## 2026-10
 
