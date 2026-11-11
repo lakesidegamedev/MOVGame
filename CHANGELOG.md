@@ -108,6 +108,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   seat bars, standings and setup cards.
 - Small text and party-colored names now meet contrast guidelines on the dark panels.
 - Desktop apps now reach the game's servers (they were calling their own address).
+- Purchases made on another Lakeside app no longer stop the Store from loading what you own
+  when that app sells a pack this version does not have yet.
+- A pack the web store cannot sell yet shows as "Coming soon" instead of a Buy button.
 
 ## 2026-10
 
