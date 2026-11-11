@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MapLabel, placeMapLabels, useMapLabelSizes, viewBoxWidth } from "@ui/mapLabels";
 import { partyFill, textOn } from "@ui/colors";
 import { useUkStore } from "@store/ukStore";
 import { majorityForUk } from "@engine/ukGame";
@@ -33,6 +34,7 @@ export function UkMap() {
   const selected = useUkStore((s) => s.selectedRegionId);
   const select = useUkStore((s) => s.selectRegion);
   const [mode, setMode] = useState<"geo" | "square">("geo");
+  const { ref: labelRef, sizes: labelSizes } = useMapLabelSizes(UK_VIEWBOX);
   const seatsTotal = majorityForUk(game).total;
 
   const header = (
@@ -58,17 +60,28 @@ export function UkMap() {
   );
 
   if (mode === "geo") {
+    const labels = game.regions.flatMap((region) => {
+      const shape = REGION_PATHS[region.id];
+      if (!shape) return [];
+      const { winner, seats } = regionWinner(region);
+      return [{
+        id: region.id, x: shape.label[0], y: shape.label[1], name: region.abbr, weight: region.seats ?? 0,
+        detail: winner ? `${partyShort(winner)} ${seats[winner]}/${region.seats}` : "",
+      }];
+    });
+    const placed = placeMapLabels(labels, selected, labelSizes, viewBoxWidth(UK_VIEWBOX));
     return (
       <div className="card mapwrap sheen">
         {header}
-        <svg viewBox={UK_VIEWBOX} className="geo-map" preserveAspectRatio="xMidYMid meet">
+        <svg ref={labelRef} viewBox={UK_VIEWBOX} className="geo-map" preserveAspectRatio="xMidYMid meet">
           {game.regions.map((region) => {
             const shape = REGION_PATHS[region.id];
             if (!shape) return null;
-            const { winner, seats, lead } = regionWinner(region);
+            const { winner, lead } = regionWinner(region);
             const isSel = selected === region.id;
             return (
               <g key={region.id} style={{ cursor: "pointer" }} onClick={() => select(isSel ? null : region.id)}>
+                <title>{`${region.name}: ${region.seats} seats`}</title>
                 <path
                   d={shape.d}
                   fill={partyFill(partyColor(winner))}
@@ -76,17 +89,10 @@ export function UkMap() {
                   stroke={isSel ? "var(--gold)" : "#0c1322"}
                   strokeWidth={isSel ? 3 : 1}
                 />
-                <text x={shape.label[0]} y={shape.label[1]} textAnchor="middle"
-                  style={{ fontSize: 17, fontWeight: 800, fill: "#fff", pointerEvents: "none", paintOrder: "stroke", stroke: "rgba(0,0,0,0.45)", strokeWidth: 3 }}>
-                  {region.abbr}
-                </text>
-                <text x={shape.label[0]} y={shape.label[1] + 18} textAnchor="middle"
-                  style={{ fontSize: 13, fontWeight: 700, fill: "#fff", pointerEvents: "none", paintOrder: "stroke", stroke: "rgba(0,0,0,0.45)", strokeWidth: 3 }}>
-                  {winner ? `${partyShort(winner)} ${seats[winner]}/${region.seats}` : ""}
-                </text>
               </g>
             );
           })}
+          {labels.map((l) => <MapLabel key={l.id} {...l} x={placed[l.id]!.x} mode={placed[l.id]!.mode} sizes={labelSizes} />)}
         </svg>
         {legend}
       </div>

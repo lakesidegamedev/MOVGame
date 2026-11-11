@@ -3,6 +3,10 @@ import { PAYWALL_ENABLED, SCENARIO_REGISTRY, type ScenarioMeta } from "@content/
 import { packCovered, STORE_PACKS } from "@content/packs";
 import { countryCover } from "@content/covers";
 import { COUNTRY_MODULES } from "@content/countries";
+import {
+  COUNTRY_COUNT, ELECTION_COUNT, FREE_ELECTION_COUNT, VOTING_SYSTEM_COUNT,
+  countWord, countryInSentence, electionCountFor, firstYearFor, joinList,
+} from "@content/facts";
 import { useAuthStore } from "@store/authStore";
 import { useStoreNav } from "@store/storeNav";
 import { usePackPrices } from "@lib/usePackPrices";
@@ -20,13 +24,13 @@ import { BRAND } from "../brand";
 import { useGameStore } from "@store/gameStore";
 import { listResumableCampaigns, type ResumeTarget } from "@persistence/resume";
 
-// "the UK, Canada, ..., and Australia": every registered country after the US.
+// "the UK, Canada, ..., and Japan": every registered country after the US.
 function otherCountriesList(): string {
-  const names = COUNTRY_MODULES.filter((m) => m.code !== "US").map((m) => (m.code === "UK" ? "the UK" : m.name));
-  return names.length > 1 ? `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}` : names.join("");
+  return joinList(COUNTRY_MODULES.filter((m) => m.code !== "US").map((m) => countryInSentence(m.code, m.name)));
 }
-const COUNTRY_FLAGS = [...new Set(SCENARIO_REGISTRY.map((s) => s.flag))];
-const COUNTRY_COUNT = COUNTRY_FLAGS.length;
+const COUNTRY_FLAGS = COUNTRY_MODULES.map((m) => m.flag);
+const VOTING_SYSTEMS_LINE = `${COUNTRY_COUNT} countries, ${VOTING_SYSTEM_COUNT} voting systems`;
+const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
 export type LandingDestination =
   | { kind: "us"; scenarioId: string }   // native id, e.g. "2024"
@@ -93,7 +97,7 @@ function FeaturesSection() {
         </FeatureBlock>
         <FeatureBlock
           icon={<Globe2 size={18} />}
-          title={`${COUNTRY_COUNT} countries, ${COUNTRY_COUNT} voting systems`}
+          title={VOTING_SYSTEMS_LINE}
           blurb="US electoral college duels, UK multiparty first-past-the-post with hung parliaments, French two-round runoffs, German proportional Bundestag seats, and more."
         >
           <div className="feature-flags">
@@ -107,18 +111,21 @@ function FeaturesSection() {
   );
 }
 
-const FAQ_ITEMS: { q: string; a: string }[] = [
+const BUY_QUESTION = "Where do I buy bundles?";
+
+function faqItems(prices: Record<string, number>): { q: string; a: string }[] {
+  return [
   {
     q: "What's actually free?",
-    a: "Two full scenarios plus a new daily challenge every day, no account and no payment required. Nothing is time limited or ad supported.",
+    a: `${countWord(FREE_ELECTION_COUNT, true)} full scenarios plus a new daily challenge every day, no account and no payment required. Nothing is time limited or ad supported.`,
   },
   {
     q: "What do I get if I pay?",
-    a: `Each country is a $0.99 bundle: the rest of the US elections back to 1960, ${otherCountriesList()}. The Complete Collection unlocks every country for $3.99. Both are one time purchases, not subscriptions.`,
+    a: `Each country is a ${money(prices["us-historical"] ?? 99)} bundle: the rest of the US elections back to ${firstYearFor("US")}, ${otherCountriesList()}. The Complete Collection unlocks every country for ${money(prices.complete ?? 399)}. Both are one time purchases, not subscriptions.`,
   },
   {
-    q: "Where do I buy bundles?",
-    a: "Press Buy on any bundle or locked election. You sign in with your Lakeside account and pay through Stripe; the bundle unlocks on that account on every device. Activation codes are redeemed from the same prompt.",
+    q: BUY_QUESTION,
+    a: "Press Buy on any bundle or locked election. You sign in with your Lakeside account and pay through Stripe; the bundle unlocks on that account on every device. Have an activation code? Choose Redeem in the account menu.",
   },
   {
     q: "Can I play offline or without an account?",
@@ -132,15 +139,16 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
     q: "What platforms does this run on?",
     a: "It's a browser game: desktop and mobile, any modern browser, nothing to install.",
   },
-];
+  ];
+}
 
-function FaqSection() {
-  const items = FAQ_ITEMS.map((item) => {
+function FaqSection({ prices }: { prices: Record<string, number> }) {
+  const items = faqItems(prices).map((item) => {
     if (DISTRIBUTION.externalStore) return item;
     if (item.q === "What do I get if I pay?") {
       return { q: item.q, a: `Scenario packs unlock more elections. They are one time purchases managed by ${DISTRIBUTION.nativeStoreName}, not subscriptions.` };
     }
-    if (item.q === "Where do I buy packs?") {
+    if (item.q === BUY_QUESTION) {
       return { q: item.q, a: `Purchases and purchase restoration will be handled by ${DISTRIBUTION.nativeStoreName} in this edition.` };
     }
     if (item.q === "What's your refund policy?") {
@@ -242,9 +250,9 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             <h1>{BRAND.name}</h1>
             <p className="sub">
               Run a real campaign turn by turn: allocate a budget, target battlegrounds, survive debates,
-              and watch the map move. {SCENARIO_REGISTRY.length} elections across {new Set(SCENARIO_REGISTRY.map((s) => s.country)).size} countries.
+              and watch the map move. {ELECTION_COUNT} elections across {COUNTRY_COUNT} countries.
               {PAYWALL_ENABLED
-                ? " Two full scenarios and the daily challenge are free forever. Every other country is $0.99, or $3.99 for everything."
+                ? ` ${countWord(FREE_ELECTION_COUNT, true)} full scenarios and the daily challenge are free forever. Every other country is ${money(packPrices["us-historical"] ?? 99)}, or ${money(packPrices.complete ?? 399)} for everything.`
                 : " All of them are free to play right now."}
             </p>
             <div className="landing-hero-actions">
@@ -274,7 +282,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
           <div className="landing-hero-art" aria-label="Campaigns from around the world">
             <div className="hero-art-card hero-art-main">
               <CoverImg src={countryCover("US")} alt="United States election campaigns" />
-              <span><b>{SCENARIO_REGISTRY.filter((x) => x.country === "US").length} US elections</b><small>Fight for 270</small></span>
+              <span><b>{electionCountFor("US")} US elections</b><small>Fight for 270</small></span>
             </div>
             <div className="hero-art-card hero-art-side hero-art-uk">
               <CoverImg src={countryCover("UK")} alt="United Kingdom election campaigns" />
@@ -282,7 +290,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             </div>
             <div className="hero-art-card hero-art-side hero-art-world">
               <CoverImg src={countryCover("FR")} alt="French election campaigns" />
-              <span><b>{COUNTRY_COUNT} countries</b><small>{COUNTRY_COUNT} voting systems</small></span>
+              <span><b>{COUNTRY_COUNT} countries</b><small>{VOTING_SYSTEM_COUNT} voting systems</small></span>
             </div>
           </div>
         </header>
@@ -329,7 +337,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
               <h3>Free</h3>
               <p className="pricing-price">$0</p>
               <ul className="pricing-list">
-                <li><Check size={13} /> {PAYWALL_ENABLED ? "2 full scenarios" : `All ${SCENARIO_REGISTRY.length} scenarios`}, no account needed</li>
+                <li><Check size={13} /> {PAYWALL_ENABLED ? `${FREE_ELECTION_COUNT} full scenarios` : `All ${ELECTION_COUNT} scenarios`}, no account needed</li>
                 <li><Check size={13} /> A new daily challenge every day</li>
                 <li><Check size={13} /> Leaderboards with a free account</li>
               </ul>
@@ -337,10 +345,10 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             </div>
             <div className="pricing-card">
               <h3>Country bundles</h3>
-              <p className="pricing-price">{PAYWALL_ENABLED ? `$${((packPrices["us-historical"] ?? 99) / 100).toFixed(2)} per country` : "Free for now"}</p>
+              <p className="pricing-price">{PAYWALL_ENABLED ? `${money(packPrices["us-historical"] ?? 99)} per country` : "Free for now"}</p>
               <ul className="pricing-list">
                 <li><Check size={13} /> {SCENARIO_REGISTRY.length - free.length} additional elections across {STORE_PACKS.length - 1} country bundles</li>
-                <li><Check size={13} /> Complete Collection: every country for ${((packPrices.complete ?? 399) / 100).toFixed(2)}</li>
+                <li><Check size={13} /> Complete Collection: every country for {money(packPrices.complete ?? 399)}</li>
                 {PAYWALL_ENABLED ? (
                   <>
                     <li><Check size={13} /> One time purchase, yours to keep, no subscription</li>
@@ -402,7 +410,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
           </div>
         </div>
 
-        <FaqSection />
+        <FaqSection prices={packPrices} />
 
         {/* Footer: legal + studio credit + contact + attribution */}
         <div className="landing-foot">

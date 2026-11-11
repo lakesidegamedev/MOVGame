@@ -37,6 +37,26 @@ function bundled(): CatalogItem[] {
   return PACKS.map((p) => ({ id: p.id, name: p.name, priceCents: p.price, scenarios: p.scenarios, listed: false }));
 }
 
+interface PlatformProduct {
+  id: string;
+  name?: string;
+  priceCents?: number;
+  scenarios?: string[];
+  /** Per-storefront sale state. Newer platform deploys send it; older ones omit it. */
+  channels?: { web?: { purchasable?: unknown } };
+}
+
+/**
+ * Whether the web checkout can sell a product the platform lists. Older
+ * platform deploys send no `channels` block: listing alone means buyable, as
+ * before. When the block is present, only an explicit `purchasable: true` on
+ * the web channel counts; anything else renders as "coming soon".
+ */
+function webPurchasable(p: PlatformProduct): boolean {
+  if (p.channels === undefined || p.channels === null) return true;
+  return p.channels.web?.purchasable === true;
+}
+
 let cache: { at: number; result: CatalogResult } | null = null;
 
 /**
@@ -54,14 +74,13 @@ export async function getCatalogResult(): Promise<CatalogResult> {
   try {
     const res = await fetch(CATALOG_URL, { signal: controller.signal });
     if (!res.ok) throw new Error(`catalog HTTP ${res.status}`);
-    const body = (await res.json()) as { products?: Array<{ id: string; name?: string; priceCents?: number; scenarios?: string[] }> };
+    const body = (await res.json()) as { products?: PlatformProduct[] };
     const platform = new Map((body.products ?? []).map((p) => [p.id, p]));
     // Membership stays the game's; price (and name if present) come from the platform.
     const items = fallback.map((f): CatalogItem => {
       const p = platform.get(f.id);
-      return p && typeof p.priceCents === "number" && Number.isSafeInteger(p.priceCents) && p.priceCents >= 0
-        ? { id: f.id, name: p.name ?? f.name, priceCents: p.priceCents, scenarios: f.scenarios, listed: true }
-        : f;
+      if (!p || typeof p.priceCents !== "number" || !Number.isSafeInteger(p.priceCents) || p.priceCents < 0) return f;
+      return { id: f.id, name: p.name ?? f.name, priceCents: p.priceCents, scenarios: f.scenarios, listed: webPurchasable(p) };
     });
     const result: CatalogResult = { source: "platform", items };
     cache = { at: now, result };

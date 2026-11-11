@@ -69,10 +69,25 @@ describe("shared store proxy", () => {
   it("rejects wrong-owner and malformed authoritative wallets", async () => {
     const a = user(true); platformBody = { owner: "other", packIds: ["global"], verifiedAt: Date.now() };
     expect((await call("/ownership", a.token)).status).toBe(503);
-    platformBody = { owner: a.owner, packIds: ["unrecognized"], verifiedAt: Date.now() };
+    platformBody = { owner: a.owner, packIds: ["global", 7], verifiedAt: Date.now() };
+    expect((await call("/ownership", a.token)).status).toBe(503);
+    platformBody = { owner: a.owner, packIds: "global", verifiedAt: Date.now() };
+    expect((await call("/ownership", a.token)).status).toBe(503);
+    platformBody = { owner: a.owner, packIds: ["global"], verifiedAt: Date.now() - 3_600_000 };
     expect((await call("/ownership", a.token)).status).toBe(503);
     platformBody = { owner: a.owner, packIds: ["global"], verifiedAt: Date.now() };
     expect((await call("/ownership", a.token)).body.packIds).toEqual(["global"]);
+  });
+  it("drops pack ids this build does not know and keeps the rest of the wallet", async () => {
+    const a = user(true);
+    platformBody = { owner: a.owner, packIds: ["future-country", "canada", "__proto__", "constructor"], verifiedAt: Date.now() };
+    const response = await call("/ownership", a.token);
+    expect(response.status).toBe(200);
+    expect(response.body.packIds).toEqual(["canada"]);
+    platformBody = { owner: a.owner, packIds: ["unrecognized"], verifiedAt: Date.now() };
+    const empty = await call("/ownership", a.token);
+    expect(empty.status).toBe(200);
+    expect(empty.body.packIds).toEqual([]);
   });
   it("preserves claim conflicts and keeps upstream auth failures distinct from logout", async () => {
     const a = user(true); platformStatus = 409; platformBody = { error: "This purchase belongs to another Lakeside account." };

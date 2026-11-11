@@ -1,6 +1,8 @@
 // Multiparty seat panel — majority threshold bar, coalition math, hung state.
 // Shared by UK and country results after the Election Night theater.
 import type { Government } from "@engine/types";
+import { useElementWidth } from "@ui/useElementWidth";
+import { segmentLabel } from "@ui/format";
 import { partyFill, textOn } from "@ui/colors";
 import type { PartyId } from "@engine/system";
 import "./shell.css";
@@ -51,6 +53,7 @@ export function MultipartySeatPanel({
   const majority = government.kind === "majority";
   const parts = coalitionParts(government);
   const seatOf = (id: PartyId) => segments.find((s) => s.id === id)?.seats ?? 0;
+  const { ref: trackRef, width: trackWidth } = useElementWidth<HTMLDivElement>(300);
 
   let mathLine: string | null = null;
   if (parts && parts.length >= 2) {
@@ -81,7 +84,7 @@ export function MultipartySeatPanel({
       )}
 
       <div className="ens-seat-bar" title={`${threshold} for a majority of ${total}`}>
-        <div className="ens-seat-track">
+        <div className="ens-seat-track" ref={trackRef}>
           {segments.map((s) => (
             <div
               key={s.id}
@@ -89,7 +92,7 @@ export function MultipartySeatPanel({
               style={{ width: w(s.seats), background: partyFill(s.color), color: textOn(partyFill(s.color)) }}
               title={`${s.short}: ${s.seats}`}
             >
-              {s.seats / total >= 0.07 ? s.short : ""}
+              {segmentLabel(s.seats / total, s.short, trackWidth)}
             </div>
           ))}
           <div

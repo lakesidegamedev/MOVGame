@@ -110,6 +110,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - The Unlock prompt on a locked election is now the Store, opened on the right pack with the
   Complete Collection beside it. The Redeem option in the menu now opens a code-only dialog.
 - Account and menu text no longer quotes prices; the Store shows the current ones.
+- The button that leaves a campaign says "Home" in every country.
+- The Redeem a code dialog matches the rest of the interface.
 
 ### Fixed
 
@@ -117,6 +119,29 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   seat bars, standings and setup cards.
 - Small text and party-colored names now meet contrast guidelines on the dark panels.
 - Desktop apps now reach the game's servers (they were calling their own address).
+- Purchases made on another Lakeside app no longer stop the Store from loading what you own
+  when that app sells a pack this version does not have yet.
+- A pack the web store cannot sell yet shows as "Coming soon" instead of a Buy button.
+- "Play next" after a result now runs through every election of the country in order, so it no
+  longer skips Canada 2015 and 2019, Germany 2017, Australia 2019 or the US elections before 2000.
+- After a hung parliament the results headline is colored by the party it names, not by yours.
+- The landing page, FAQ, pricing and page description now count countries, elections and voting
+  systems from the game itself, so they no longer say "6 countries, 6 voting systems", and
+  the FAQ quotes the current store prices.
+- The France-only "six planning weeks" note no longer shows on Brazil's setup screen.
+- The election library shows a one-line summary for every country, not only the first six.
+- Region names on the geographic maps no longer pile on top of each other in crowded areas such
+  as Tokyo, Delhi, the Basque Country, Auckland or London. Labels keep a readable size on phones
+  and stay inside the map; a region with no room for its label keeps its color and shows its
+  name on hover.
+- Seat bars only print a party's name when it fits its slice, so small parties no longer show
+  cut-off names, and the majority marker no longer cuts through party names.
+- Every country appears in the library's country filter on wide screens instead of running off
+  the edge.
+- The results card's next-election map is visible for parties with dark colors, and the
+  campaign summary shows each country's own currency.
+- On phones the setup screen's back and start buttons no longer wrap awkwardly with long party
+  names.
 
 ## 2026-10
 

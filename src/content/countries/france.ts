@@ -371,6 +371,7 @@ export const FRANCE_MODULE = countryModule(FRANCE, {
       description: "A crisis president nobody warmed to against the man who promised to be normal. A left-right runoff decided by a whisker." },
   ],
   systemLabel: "Two-round presidential runoff",
+  setupNote: "Campaign clock: six planning weeks compress the historical two-week runoff.",
   pack: {
     id: "france",
     name: "France",

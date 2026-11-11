@@ -34,7 +34,7 @@ function govText(g: Government): string {
 function UkMiniMap({ seats }: { seats: Record<string, number> }) {
   // Color a handful of regions by the national largest party as a preview cue.
   const largest = sortBySeats(seats)[0];
-  const color = largest ? partyColor(largest) : "var(--navy-500)";
+  const color = largest ? partyFill(partyColor(largest)) : "var(--navy-500)";
   const ids = Object.keys(REGION_PATHS).slice(0, 12);
   return (
     <svg viewBox={UK_VIEWBOX} preserveAspectRatio="xMidYMid meet">
@@ -122,16 +122,16 @@ export function UkResults() {
         ? "HUNG PARLIAMENT"
         : "NO OVERALL MAJORITY";
 
-  const headline =
+  // The headline names one party; its color is always that party's.
+  const headlineParty =
     r.government.kind === "majority"
-      ? partyName(r.government.party)
+      ? r.government.party
       : r.government.kind === "hung"
-        ? partyName(r.government.largest)
+        ? r.government.largest
         : inGov
-          ? partyName(game.playerParty)
-          : largest
-            ? partyName(largest)
-            : "Hung parliament";
+          ? game.playerParty
+          : largest;
+  const headline = headlineParty ? partyName(headlineParty) : "Hung parliament";
 
   const replayDaily = () => {
     const today = dailyAssignment(utcDateString());
@@ -144,11 +144,7 @@ export function UkResults() {
       <ElectionNightShell
         eyebrow={eyebrow}
         headline={headline}
-        headlineColor={
-          r.government.kind === "majority"
-            ? partyColor(r.government.party)
-            : partyColor(game.playerParty)
-        }
+        headlineColor={headlineParty ? partyColor(headlineParty) : undefined}
         subhead={
           won
             ? "You won a majority."
@@ -280,7 +276,7 @@ export function UkResults() {
                 <span className="swatch" style={{ "--party": partyFill(partyColor(p)) } as React.CSSProperties} />
                 {partyShort(p)}
               </span>
-              <span className="meta">{r.seats[p]} seats · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
+              <span className="meta">{r.seats[p]} {r.seats[p] === 1 ? "seat" : "seats"} · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
               <div className="suppbar"><div style={{ width: `${(r.seats[p] / maj.total) * 100 * 1.6}%`, background: partyFill(partyColor(p)) }} /></div>
             </div>
           ))}

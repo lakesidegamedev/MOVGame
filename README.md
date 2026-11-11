@@ -1,9 +1,10 @@
 # Margin of Victory
 
-Margin of Victory is a single-player, turn-based election campaign simulator with 49
-election scenarios across the United States, United Kingdom, Canada, Germany,
-France, and Australia. Its scenarios span 1951 to 2027 and model each country's
-electoral system, parties, regions, and campaign pressures.
+Margin of Victory is a single-player, turn-based election campaign simulator with
+historical election scenarios from democracies around the world, from the 1950s to
+today. Each scenario models its country's electoral system, parties, regions, and
+campaign pressures. The countries are the modules registered in
+`src/content/countries/index.ts`; the in-game library shows the current counts.
 
 > You are the campaign manager. Read the map, allocate finite resources each
 > week, answer the moments that matter, and rewrite the result.
@@ -70,7 +71,9 @@ daily challenges, replay, and balance simulations.
 
 ## Content and calibration
 
-The scenario registry is the source of truth for the current 49 elections.
+The scenario registry (`src/content/scenarioRegistry.ts`) is the source of truth for
+the elections. Player-facing counts are derived from it (`src/content/facts.ts`),
+including the ones in `index.html`, so no copy needs editing when a country is added.
 Historical scenarios use authored candidates, starting conditions, maps, and
 events. Calibration suites check that neutral play remains close to historical
 baselines while still allowing campaign decisions to change the outcome.

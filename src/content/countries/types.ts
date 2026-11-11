@@ -74,8 +74,18 @@ export interface CountryModule {
   bundle?: CountryBundle;
   /** Registry rows in display order, newest first. */
   scenarios: CountryElectionEntry[];
-  /** A few words on how votes become seats, shown on the store tile ("Mixed-member proportional"). */
+  /**
+   * A few words on how votes become seats, shown on the store tile ("Mixed-member proportional").
+   * The words before any comma or parenthesis name the system: countries that share a
+   * system must use the same words there, so the landing page counts it once.
+   */
   systemLabel: string;
+  /**
+   * Optional line under the setup screen's tagline about how the game's
+   * campaign maps onto the real one (France: six planning weeks for a
+   * two-week runoff). Absent: no line.
+   */
+  setupNote?: string;
   /** The country's store pack. Holds every paid row of `scenarios`. */
   pack: CountryPackDef;
   /**
@@ -84,9 +94,12 @@ export interface CountryModule {
    */
   daily: { pair: [string, string]; names: Record<string, string> };
   /**
-   * "Play next" after finishing an election. `chain` is chronological and
-   * wraps; an election missing from the chain continues to the chain's first
-   * entry. `map` is an explicit election -> next table (the US uses it).
+   * Blurbs for "Play next" after finishing an election. The order itself is
+   * derived (every election of the country, oldest first, wrapping), so this
+   * never needs a new entry for a new election. A `chain` entry gives the
+   * blurb shown when continuing to that election; a `map` entry gives the
+   * blurb for one specific step. Elections without one get a plain
+   * "Continue the timeline".
    */
   next: { chain?: NextLink[]; map?: Record<string, NextLink> };
   /** A "how this system works" entry for the native guide, if the generic ones do not cover it. */

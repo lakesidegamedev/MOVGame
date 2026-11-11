@@ -39,6 +39,28 @@ describe("getCatalogResult", () => {
     expect(items.filter((i) => i.listed)).toEqual([]);
   });
 
+  it("treats a listing without a channels block as buyable on the web (older platform deploys)", async () => {
+    platformAnswers([{ id: "canada", priceCents: 149 }]);
+    const { items } = await getCatalogResult();
+    expect(items.find((i) => i.id === "canada")!.listed).toBe(true);
+  });
+
+  it("sells on the web only what the platform marks web purchasable (newer platform deploys)", async () => {
+    platformAnswers([
+      { id: "canada", priceCents: 149, channels: { web: { purchasable: true }, apple: { purchasable: false } } },
+      { id: "germany", priceCents: 149, channels: { web: { purchasable: false }, apple: { purchasable: true } } },
+      { id: "france", priceCents: 149, channels: { apple: { purchasable: true } } },
+      { id: "australia", priceCents: 149, channels: { web: { purchasable: "yes" } } },
+      { id: "complete", priceCents: 449, channels: {} },
+    ]);
+    const by = Object.fromEntries((await getCatalogResult()).items.map((i) => [i.id, i]));
+    expect(by.canada.listed).toBe(true);
+    expect(by.germany).toMatchObject({ listed: false, priceCents: 149 });
+    expect(by.france.listed).toBe(false);
+    expect(by.australia.listed).toBe(false);
+    expect(by.complete.listed).toBe(false);
+  });
+
   it("falls back to bundled prices, marked unlisted and unreachable, when the platform is down", async () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("down"));
     const { source, items } = await getCatalogResult();

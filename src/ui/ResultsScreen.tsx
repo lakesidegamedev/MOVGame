@@ -17,7 +17,7 @@ import { StatsScreen } from "./StatsScreen";
 import { WhyReport } from "./WhyReport";
 import { TimelineView } from "./TimelineView";
 import { pct, votes } from "./format";
-import { Trophy, Lock, Award } from "lucide-react";
+import { Trophy, Lock, Award, BarChart3 } from "lucide-react";
 import { ElectionNight, hasSeenReveal, revealSupported } from "./electionNight/ElectionNight";
 import { ElectionNightShell } from "./electionNight/ElectionNightShell";
 import { StateCallGrid } from "./electionNight/StateCallGrid";
@@ -217,7 +217,7 @@ export function ResultsScreen() {
                 </div>
                 <div className="row" style={{ gap: 8, marginTop: 4 }}>
                   <button className="ghost" style={{ flex: "0 0 auto", padding: "12px 18px" }} onClick={() => setStatsOpen(true)}>
-                    📊 Race Stats
+                    <BarChart3 size={15} aria-hidden="true" style={{ verticalAlign: "-3px", marginRight: 6 }} />Race Stats
                   </button>
                   {replay && (
                     <button className="ghost" style={{ flex: "0 0 auto", padding: "12px 18px" }} onClick={() => setTimelineOpen(true)}>
