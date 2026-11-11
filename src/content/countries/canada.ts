@@ -68,20 +68,20 @@ export const CANADA: CountryBundle = {
   coalitions: { forbidden: [["lpc", "cpc"]], isolated: ["bq"] },
 
   issues: [
-    { id: "us_relations", name: "U.S. relations & tariffs", blurb: "Tariff war, '51st state' taunts, and who can stand up to Washington." },
+    { id: "us_relations", name: "U.S. relations & tariffs", blurb: "Trade fights, tariffs and who can stand up to Washington." },
     { id: "cost_of_living", name: "Cost of living", blurb: "Groceries, inflation, and the affordability squeeze." },
-    { id: "housing", name: "Housing", blurb: "A generation priced out of the market." },
+    { id: "housing", name: "Housing", blurb: "Prices, rents and who can still afford a home." },
     { id: "healthcare", name: "Health care", blurb: "Wait times and a strained public system." },
-    { id: "energy_climate", name: "Energy & climate", blurb: "Pipelines, carbon pricing, and the resource economy." },
-    { id: "immigration", name: "Immigration", blurb: "Record intake meets an infrastructure crunch." },
-    { id: "reconciliation", name: "Reconciliation", blurb: "Unmarked graves, residential schools, and the Crown's unkept promises to Indigenous peoples." },
+    { id: "energy_climate", name: "Energy & climate", blurb: "Pipelines, the oil patch, emissions and the resource economy." },
+    { id: "immigration", name: "Immigration", blurb: "How many newcomers to admit, and whether housing and services keep up." },
+    { id: "reconciliation", name: "Reconciliation", blurb: "Residential schools, land claims and the Crown's unkept promises to Indigenous peoples." },
     { id: "economy", name: "Jobs & the economy", blurb: "Recessions, unemployment and who can steer the economy through a crash." },
     { id: "ethics", name: "Ethics & accountability", blurb: "Patronage, sponsorship, contempt of Parliament and trust in those at the top." },
     { id: "national_unity", name: "National unity", blurb: "Quebec sovereignty, constitutional wounds and how the country stays together." },
     { id: "deficit", name: "Deficits & debt", blurb: "Annual deficits, a growing debt and who will cut or spend." },
     { id: "taxes", name: "Taxes & the GST", blurb: "Consumption tax, income tax cuts and the price of government." },
     { id: "free_trade", name: "Free trade", blurb: "Open borders for goods with the United States: jobs against sovereignty." },
-    { id: "crime_security", name: "Crime & security", blurb: "Guns, law and order and the mission in Afghanistan." },
+    { id: "crime_security", name: "Crime & security", blurb: "Guns, law and order, and Canada's military missions abroad." },
   ],
 
   blocs: [
@@ -684,7 +684,7 @@ export const CANADA: CountryBundle = {
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const CANADA_MODULE = countryModule(CANADA, {
-  blurb: "343 seats, five parties, coast to coast to coast.",
+  blurb: "282 to 343 seats, five parties, coast to coast to coast.",
   cover: "images/covers/country-ca.jpg",
   art: { a: "#5b1620", b: "#c94242", glow: "rgba(255,236,221,0.19)" },
   freeElections: ["2025"],

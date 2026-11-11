@@ -131,7 +131,7 @@ export const IRELAND: CountryBundle = {
     { id: "tax_spending", name: "Tax & public spending", blurb: "Austerity, the universal social charge and what a surplus is for." },
     { id: "water_charges", name: "Water charges", blurb: "Irish Water, the meters and the biggest protests in a generation." },
     { id: "reform", name: "Political reform", blurb: "A smaller Dáil, no Seanad and cleaner politics after the crash." },
-    { id: "brexit_unity", name: "Brexit & Irish unity", blurb: "The border, the backstop and the case for a united Ireland." },
+    { id: "brexit_unity", name: "The border & Irish unity", blurb: "Northern Ireland, the border and the case for a united Ireland." },
     { id: "climate", name: "Climate & environment", blurb: "Emission targets, the farm lobby and the cost of going green." },
     { id: "immigration", name: "Immigration", blurb: "Asylum numbers, accommodation and the limits of public patience." },
   ],

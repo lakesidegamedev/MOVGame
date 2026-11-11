@@ -84,7 +84,7 @@ export const NEW_ZEALAND: CountryBundle = {
     { id: "crime", name: "Law & order", blurb: "Ram raids, gangs and youth crime." },
     { id: "covid", name: "COVID-19 response", blurb: "Lockdowns, the border and the team of five million." },
     { id: "child_poverty", name: "Child poverty", blurb: "Kids in cold, damp homes and the promise to halve child poverty." },
-    { id: "treaty", name: "Te Tiriti & co-governance", blurb: "Three Waters, co-governance and the Treaty's place in law." },
+    { id: "treaty", name: "Te Tiriti & co-governance", blurb: "Co-governance, Māori rights and the Treaty's place in law." },
   ],
 
   blocs: [

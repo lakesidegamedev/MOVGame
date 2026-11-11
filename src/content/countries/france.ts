@@ -196,10 +196,10 @@ export const FRANCE: CountryBundle = {
 
   issues: [
     { id: "cost_of_living", name: "Pouvoir d'achat", blurb: "Purchasing power: the issue that decides French elections." },
-    { id: "immigration_identity", name: "Immigration & identity", blurb: "The RN's home turf: borders, laïcité, national identity." },
+    { id: "immigration_identity", name: "Immigration & identity", blurb: "The far right's home turf: borders, laïcité, national identity." },
     { id: "security", name: "Security", blurb: "Crime, policing, and the sense of order." },
-    { id: "pensions", name: "Pensions", blurb: "The retirement-age wound that never closed." },
-    { id: "europe", name: "Europe & the franc débat", blurb: "France's place in the EU, and who pays for it." },
+    { id: "pensions", name: "Pensions", blurb: "The retirement age, and who pays for pensions." },
+    { id: "europe", name: "Europe", blurb: "France's place in Europe, the single currency and who pays for it." },
     { id: "public_services", name: "Public services", blurb: "Hospitals, schools, and the deserted countryside." },
   ],
 

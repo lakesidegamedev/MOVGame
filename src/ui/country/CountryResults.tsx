@@ -190,6 +190,9 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
           leftColor: partyColor(country, leftParty),
           rightColor: partyColor(country, rightParty),
           unitLabel: plurality ? "vs rival" : "vs maj.",
+          words: plurality
+            ? { ahead: "ahead", behind: "behind", level: "level" }
+            : { ahead: "over", behind: "short", level: "exactly on" },
           caption: plurality ? `${country.unitNamePlural} vs top rival` : `${country.unitNamePlural} vs majority`,
         }}
         nextScenario={

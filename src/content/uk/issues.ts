@@ -25,15 +25,15 @@ export interface UkIssue {
 export const UK_ISSUES: UkIssue[] = [
   { id: "economy", name: "The Economy", baseSalience: 0.85, blurb: "Growth, jobs, the cost of borrowing." },
   { id: "nhs", name: "The NHS", baseSalience: 0.8, blurb: "Waiting lists, funding, social care." },
-  { id: "immigration", name: "Immigration", baseSalience: 0.65, blurb: "Small boats, net migration, asylum." },
-  { id: "europe", name: "Europe / Brexit", baseSalience: 0.4, blurb: "Membership, the deal, rejoin vs diverge." },
+  { id: "immigration", name: "Immigration", baseSalience: 0.65, blurb: "Asylum, net migration, who gets to settle." },
+  { id: "europe", name: "Europe", baseSalience: 0.4, blurb: "Joining, staying in or leaving, and the terms." },
   { id: "cost_of_living", name: "Cost of Living", baseSalience: 0.75, blurb: "Inflation, energy bills, wages." },
   { id: "crime", name: "Crime & Policing", baseSalience: 0.5, blurb: "Antisocial behaviour, knife crime, courts." },
   { id: "housing", name: "Housing", baseSalience: 0.55, blurb: "Building, planning, rents, the ladder." },
-  { id: "climate", name: "Climate & Energy", baseSalience: 0.45, blurb: "Net zero, bills, green jobs." },
-  { id: "scottish_independence", name: "Scottish Independence", baseSalience: 0.3, blurb: "Indyref2, devolution, the Union." },
+  { id: "climate", name: "Climate & Energy", baseSalience: 0.45, blurb: "Coal, North Sea oil, net zero, bills." },
+  { id: "scottish_independence", name: "Scottish Independence", baseSalience: 0.3, blurb: "Home rule, devolution, the Union." },
   { id: "taxation", name: "Tax", baseSalience: 0.6, blurb: "The burden, who pays, public services." },
-  { id: "defence", name: "Defence & Foreign Affairs", baseSalience: 0.4, blurb: "Ukraine, NATO, the nuclear deterrent." },
+  { id: "defence", name: "Defence & Foreign Affairs", baseSalience: 0.4, blurb: "NATO, the nuclear deterrent, wars abroad." },
 ];
 
 export const UK_ISSUES_BY_ID: Record<UkIssueId, UkIssue> = Object.fromEntries(

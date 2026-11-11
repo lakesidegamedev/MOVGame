@@ -188,6 +188,16 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   beats that were misdated, misattributed or could not be sourced were corrected or replaced (for
   example the German Greens' 1990 leaders, the 1993 Campbell line in Canada, and the 1944 US
   campaign's Pearl Harbor wording), and unverifiable quotes were removed.
+- The results gauge now says which way a seat or point margin goes ("37 behind", "12 short",
+  "5 over") instead of printing the size alone, and "Why you lost" says "5.1 points behind"
+  rather than "-5.1 points against".
+- Issue descriptions shared by every election of a country no longer describe only the newest
+  one: Germany 1990 no longer mentions the war in Ukraine, the UK no longer offers "Brexit" in
+  1951, and Canada, Australia, France, Italy, Spain, Ireland and New Zealand read correctly in
+  every year they cover.
+- Store and landing copy now matches every election in each pack: the United States pack says
+  24 races from 1932 to 2024, Canada says 282 to 343 seats and Australia 148 to 151. Mexico's
+  left is now named "PRD/Morena left".
 - Geographic maps now show every region's name at phone and desktop sizes. Small or crowded
   regions are labelled in the sea next to them (Prince Edward Island and Nova Scotia, Auckland,
   Kerala and Bengal, the three Dublin regions, central Japan, Veneto and Apulia, Espírito Santo

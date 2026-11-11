@@ -83,7 +83,7 @@ export const MEXICO: CountryBundle = {
     parties: [
       { id: "pan", name: "National Action Party (PAN) and allies", shortName: "PAN", color: "#0b4ea2" },
       { id: "pri", name: "Institutional Revolutionary Party (PRI)", shortName: "PRI", color: "#1b8a3c" },
-      { id: "izq", name: "The Left: PRD to 2012, Morena from 2018", shortName: "PRD/Morena", color: "#8b1d3b" },
+      { id: "izq", name: "PRD/Morena left", shortName: "PRD/Morena", color: "#8b1d3b" },
       { id: "mc", name: "Citizens' Movement (MC)", shortName: "MC", color: "#f27c00" },
       { id: "oth", name: "Others (minor candidates, independents)", shortName: "Other", color: "#9aa0a6" },
     ],
