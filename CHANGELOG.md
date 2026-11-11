@@ -45,6 +45,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   campaign's real story beats, from the Troika landslide and the water charge election to Sinn
   Féin's surge and the 2024 giveaway budget. Fianna Fáil and Fine Gael can govern together;
   neither will take Sinn Féin.
+- Japan: six House of Representatives elections, 2009, 2012, 2014, 2017, 2021 and 2024, as a
+  $0.99 pack (also in the Complete Collection). Lead the LDP, the Democrats (DPJ and later the
+  CDP), Komeito, Ishin, the Communists, Your Party, Hope, the DPP, Reiwa and others across the
+  eleven regional blocks. Parallel voting means a party keeps the districts it wins, so every
+  region combines its single-member seats with its list seats. Each campaign has its real story
+  beats, from the 2009 change of government and Abe's return to the Hope split and the 2024
+  slush fund election.
 - A Store screen. It opens from the landing page, the account menu, the setup and results
   screens, and every locked election. It leads with the Complete Collection and says exactly
   what it contains and, if you already own some packs, which ones it would add. Every country
