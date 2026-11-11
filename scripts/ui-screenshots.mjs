@@ -415,6 +415,7 @@ async function run(name, opts) {
       await nav(viewFor(c));
       await advance(storeHook[c.engine], "g.turn >= 3");
       await clearOverlays();
+      await page.evaluate(() => window.scrollTo(0, 0));
       await pressToggle(["Geo", "Geographic"]);
       await shot(id("desk-geo"));
       await shot(id("desk-geo-full"), { full: true });
