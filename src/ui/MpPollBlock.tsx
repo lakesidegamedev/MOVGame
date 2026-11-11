@@ -1,4 +1,5 @@
 import { nationalMpPoll } from "@engine/multipartyPolls";
+import { partyInk } from "@ui/colors";
 import type { PartyId } from "@engine/system";
 import type { StateContest } from "@engine/types";
 
@@ -25,7 +26,7 @@ export function MpPollBlock({
 
   return (
     <>
-      <h3 style={{ marginTop: 14 }}>National poll (noisy)</h3>
+      <h3 className="section-gap">National poll (noisy)</h3>
       <p className="muted small" style={{ marginBottom: 8 }}>
         Blurred view of the true model: house effects and sampling noise. Not ground truth.
       </p>
@@ -34,7 +35,7 @@ export function MpPollBlock({
           <span
             className="name"
             style={{
-              color: p === playerParty ? partyColor(p) : undefined,
+              color: p === playerParty ? partyInk(partyColor(p)) : undefined,
               fontWeight: p === playerParty ? 700 : 500,
             }}
           >

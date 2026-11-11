@@ -1,7 +1,8 @@
 // Captures every main web game screen at phone, tablet and desktop sizes.
 //
 // Usage (with `npm run dev` already running):
-//   node scripts/ui-screenshots.mjs <base-url> <output-dir> [phone,tablet,desktop] [screen-filter]
+//   node scripts/ui-screenshots.mjs <base-url> <output-dir> [phone,tablet,desktop] [screen-filter] [sections]
+// sections: all, or a comma list of landing,setup,us,uk,de,leaderboard
 //
 // Game state is driven through the dev server's own store modules, so the
 // shots show real engine output (seeded) rather than mock data.
@@ -9,7 +10,8 @@ import { chromium } from "playwright";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
-const [, , base = "http://localhost:5173/", out = "shots", which = "phone,tablet,desktop", filter = ""] = process.argv;
+const [, , base = "http://localhost:5173/", out = "shots", which = "phone,tablet,desktop", filter = "", sections = "all"] = process.argv;
+const want = (name) => sections === "all" || sections.split(",").includes(name);
 
 const VIEWPORTS = {
   phone: { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true },
@@ -32,9 +34,15 @@ async function run(name, opts) {
   page.on("dialog", (d) => void d.accept());
   page.on("pageerror", (e) => console.error(`[${name}] pageerror: ${e.message}`));
 
+  // Waits for lazy chunks and loading spinners to finish (the host may be busy).
+  const settle = async () => {
+    await wait(400);
+    await page.waitForFunction(() => !document.querySelector(".spinner") && !/Loading…/.test(document.body.innerText.slice(0, 400)), null, { timeout: 30000 }).catch(() => {});
+    await wait(300);
+  };
   const shot = async (id, { full = false } = {}) => {
     if (filter && !id.includes(filter)) return;
-    await wait(350);
+    await settle();
     await page.screenshot({ path: join(dir, `${id}.png`), fullPage: full });
     console.log(`[${name}] ${id}`);
   };
@@ -43,7 +51,7 @@ async function run(name, opts) {
       window.history.pushState({ movView: v }, "", window.location.pathname);
       window.dispatchEvent(new PopStateEvent("popstate"));
     }, view);
-    await wait(700);
+    await settle();
   };
   const unlockAll = () => page.evaluate(async () => {
     const { useAuthStore } = await import("/src/store/authStore.ts");
@@ -93,9 +101,12 @@ async function run(name, opts) {
   await page.goto(base);
   await page.waitForSelector(".landing");
   await wait(800);
-  await shot("01-landing", { full: true });
-  await shot("01-landing-top");
+  if (want("landing")) {
+    await shot("01-landing", { full: true });
+    await shot("01-landing-top");
+  }
 
+  if (want("landing")) {
   // Library: the catalog, then one country.
   await page.locator("#campaign-catalog").scrollIntoViewIfNeeded();
   const catalog = page.locator(".catalog-search");
@@ -113,6 +124,9 @@ async function run(name, opts) {
   await wait(200);
   await shot("02-library-search");
 
+  }
+
+  if (want("setup")) {
   // Setup flows.
   await nav({ kind: "us", scenarioId: "2024", setup: true });
   await shot("03-setup-us", { full: true });
@@ -122,6 +136,9 @@ async function run(name, opts) {
   await nav({ kind: "country", countryId: "DE", electionId: "2025", setup: true });
   await shot("03-setup-de", { full: true });
 
+  }
+
+  if (want("us")) {
   // US campaign: first event, first debate, then the desk mid-game.
   await page.evaluate(async () => {
     const { useGameStore } = await import("/src/store/gameStore.ts");
@@ -132,7 +149,7 @@ async function run(name, opts) {
   });
   await nav({ kind: "us" });
   await step("event-us", async () => {
-    if (await advance("gameStore", "g.pendingEvents.some((p) => p.forCandidate === g.playerCandidate && !debateIds.has(p.eventId))") === "done") {
+    if (await advance("gameStore", "g.pendingEvents.some((p) => p.forCandidate === g.playerCandidate && !debateIds.has(p.eventId))", 4) === "done") {
       await wait(500);
       await shot("06-event-us");
     }
@@ -220,6 +237,9 @@ async function run(name, opts) {
   await shot("14-results-us");
   await shot("14-results-us-full", { full: true });
 
+  }
+
+  if (want("uk")) {
   // UK campaign desk, night, results.
   await page.evaluate(async () => {
     const { useUkStore } = await import("/src/store/ukStore.ts");
@@ -227,7 +247,7 @@ async function run(name, opts) {
   });
   await nav({ kind: "uk" });
   await step("event-uk", async () => {
-    if (await advance("ukStore", "!!g.pendingEvent") === "done") { await wait(500); await shot("06-event-uk"); }
+    if (await advance("ukStore", "!!g.pendingEvent", 4) === "done") { await wait(500); await shot("06-event-uk"); }
   });
   await advance("ukStore", "g.turn >= 3");
   await clearOverlays();
@@ -266,6 +286,9 @@ async function run(name, opts) {
   await shot("14-results-uk");
   await shot("14-results-uk-full", { full: true });
 
+  }
+
+  if (want("de")) {
   // Germany (country engine).
   await page.evaluate(async () => {
     const { useCountryStore } = await import("/src/store/countryStore.ts");
@@ -273,7 +296,7 @@ async function run(name, opts) {
   });
   await nav({ kind: "country", countryId: "DE" });
   await step("event-de", async () => {
-    if (await advance("countryStore", "!!g.pendingEvent") === "done") { await wait(500); await shot("06-event-de"); }
+    if (await advance("countryStore", "!!g.pendingEvent", 4) === "done") { await wait(500); await shot("06-event-de"); }
   });
   await advance("countryStore", "g.turn >= 3");
   await clearOverlays();
@@ -302,10 +325,15 @@ async function run(name, opts) {
   await shot("14-results-de");
   await shot("14-results-de-full", { full: true });
 
+  }
+
+  if (want("leaderboard")) {
   // Leaderboard.
   await nav({ kind: "leaderboard" });
   await wait(1500);
   await shot("15-leaderboard", { full: true });
+
+  }
 
   await browser.close();
 }

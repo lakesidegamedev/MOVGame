@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { partyFill, textOn } from "@ui/colors";
 import { useUkStore } from "@store/ukStore";
 import { majorityForUk } from "@engine/ukGame";
 import { tallyRegion, allocateRegionSeats } from "@engine/multiparty";
@@ -35,21 +36,21 @@ export function UkMap() {
   const seatsTotal = majorityForUk(game).total;
 
   const header = (
-    <div className="mapcontrols" style={{ justifyContent: "space-between" }}>
-      <h3 style={{ margin: 0, fontSize: 13, textTransform: "uppercase", letterSpacing: 0.8, color: "var(--muted)" }}>Seat Map · {seatsTotal} seats</h3>
-      <div className="row" style={{ gap: 4 }}>
-        <button className={`ghost small${mode === "geo" ? " active" : ""}`} onClick={() => setMode("geo")}>Geo</button>
-        <button className={`ghost small${mode === "square" ? " active" : ""}`} onClick={() => setMode("square")}>Square</button>
+    <div className="mapcontrols">
+      <h3>Seat Map · {seatsTotal} seats</h3>
+      <div className="segmented" role="group" aria-label="Map view">
+        <button aria-pressed={mode === "geo"} onClick={() => setMode("geo")}>Geo</button>
+        <button aria-pressed={mode === "square"} onClick={() => setMode("square")}>Square</button>
       </div>
     </div>
   );
 
   const legend = (
-    <div className="legend" style={{ flexWrap: "wrap", gap: 8 }}>
-      <span className="muted small">Labels show leader seats / region total.</span>
+    <div className="legend">
+      <span className="legend-note">Labels show leader seats / region total.</span>
       {["lab", "con", "ld", "ref", "snp", "grn", "pc"].map((p) => (
-        <span key={p} className="row" style={{ gap: 4, alignItems: "center" }}>
-          <span style={{ width: 10, height: 10, borderRadius: 2, background: partyColor(p) }} />
+        <span key={p} className="legend-item">
+          <span className="swatch" style={{ "--party": partyFill(partyColor(p)) } as React.CSSProperties} />
           {partyShort(p)}
         </span>
       ))}
@@ -70,7 +71,7 @@ export function UkMap() {
               <g key={region.id} style={{ cursor: "pointer" }} onClick={() => select(isSel ? null : region.id)}>
                 <path
                   d={shape.d}
-                  fill={partyColor(winner)}
+                  fill={partyFill(partyColor(winner))}
                   fillOpacity={0.45 + lead * 0.55}
                   stroke={isSel ? "var(--gold)" : "#0c1322"}
                   strokeWidth={isSel ? 3 : 1}
@@ -95,7 +96,7 @@ export function UkMap() {
   return (
     <div className="card mapwrap sheen">
       {header}
-      <div className="tilegrid" style={{ gridTemplateColumns: "repeat(4, 1fr)", gridTemplateRows: "repeat(5, 1fr)", aspectRatio: "4 / 5" }}>
+      <div className="tilegrid" style={{ gridTemplateColumns: "repeat(4, 1fr)", gridTemplateRows: "repeat(5, 1fr)", aspectRatio: "4 / 5", "--grid-aspect": 4 / 5 } as React.CSSProperties}>
         {game.regions.map((region) => {
           const pos = TILES[region.id] ?? { row: 5, col: 0 };
           const { winner, seats } = regionWinner(region);
@@ -104,8 +105,9 @@ export function UkMap() {
             <div key={region.id} style={{ gridColumn: pos.col + 1, gridRow: pos.row + 1 }}>
               <div
                 className={`tile${isSel ? " selected" : ""}`}
-                style={{ background: partyColor(winner), width: "100%" }}
+                style={{ background: partyFill(partyColor(winner)), color: textOn(partyFill(partyColor(winner))), width: "100%" }}
                 onClick={() => select(isSel ? null : region.id)}
+                role="button" tabIndex={0} aria-pressed={isSel} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(isSel ? null : region.id); } }}
                 title={`${region.name}: ${region.seats} seats`}
               >
                 <span>{region.abbr}</span>

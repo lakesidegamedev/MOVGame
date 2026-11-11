@@ -80,3 +80,30 @@ export function partyInk(color: string | undefined): string {
   inkCache.set(color, result);
   return result;
 }
+
+/** Dark or light text, whichever reads better on a filled party color. */
+export function textOn(color: string | undefined): string {
+  const rgb = color ? parseColor(color) : null;
+  if (!rgb) return "#fff";
+  return contrastRatio(rgb, [10, 15, 20]) >= contrastRatio(rgb, [255, 255, 255]) ? "#0a0f14" : "#fff";
+}
+
+// Near-black party colors vanish as map or bar fills on the dark panels.
+// partyFill() keeps the hue but lifts it until it separates from the panel
+// (2.2:1 against --surface-1). Most party colors pass through unchanged.
+const SURFACE_1: [number, number, number] = [17, 27, 38];
+const fillCache = new Map<string, string>();
+export function partyFill(color: string | undefined): string {
+  if (!color) return "var(--gray-500)";
+  const cached = fillCache.get(color);
+  if (cached) return cached;
+  const rgb = parseColor(color);
+  if (!rgb) return color;
+  let out = rgb;
+  for (let t = 0; t <= 1 && contrastRatio(out, SURFACE_1) < 2.2; t += 0.04) {
+    out = rgb.map((v) => Math.round(v + (255 - v) * t)) as [number, number, number];
+  }
+  const result = out === rgb ? color : `rgb(${out[0]}, ${out[1]}, ${out[2]})`;
+  fillCache.set(color, result);
+  return result;
+}
