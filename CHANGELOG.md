@@ -52,6 +52,15 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   region combines its single-member seats with its list seats. Each campaign has its real story
   beats, from the 2009 change of government and Abe's return to the Hope split and the 2024
   slush fund election.
+- Italy: the 2008, 2013, 2018 and 2022 Chamber of Deputies elections, as a $0.99 pack (also in the
+  Complete Collection). Lead the centre-right, the centre-left, Five Star, the centrists or the
+  radical left across fifteen regions, from Lombardy and Veneto to Campania and Sicily, plus a
+  pool for Italians abroad. The electoral law changes between elections and each one says so:
+  the 2008 and 2013 majority bonus, the 2018 Rosatellum with a third of seats in single-member
+  districts, and the 2022 chamber cut from 630 to 400 seats. Results are built from every
+  constituency, and each campaign has its real story beats, from Prodi's fall and the Naples
+  rubbish crisis to Monti's austerity, Grillo's piazzas, Macerata and the summer election that
+  followed Draghi's resignation.
 - A Store screen. It opens from the landing page, the account menu, the setup and results
   screens, and every locked election. It leads with the Complete Collection and says exactly
   what it contains and, if you already own some packs, which ones it would add. Every country

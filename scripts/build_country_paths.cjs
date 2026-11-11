@@ -1,5 +1,5 @@
 // Generates real-geography SVG map shape files for Canada, Germany, France,
-// Australia, New Zealand, Brazil, India and Japan (src/content/countries/paths/*.ts), following the UK
+// Australia, New Zealand, Brazil, India, Japan and Italy (src/content/countries/paths/*.ts), following the UK
 // pipeline in scripts/build_uk_paths.cjs:
 //   source geo data -> (optional group union) -> equirectangular lat-corrected
 //   projection -> Douglas-Peucker simplify -> viewBox fit -> TS emit.
@@ -11,7 +11,7 @@
 //          https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/3_mittel.geo.json
 //   FR:    gregoiredavid/france-geojson regions.geojson (post-2016 régions)
 //          https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions.geojson
-//   NZ/IN/IE: Natural Earth ne_10m_admin_1_states_provinces.geojson (saved as ne10_admin1.geojson)
+//   NZ/IN/IE/IT: Natural Earth ne_10m_admin_1_states_provinces.geojson (saved as ne10_admin1.geojson)
 //          https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson
 //   BR:    the same Natural Earth ne10_admin1.geojson (states of Brazil, adm0_a3 BRA)
 //
@@ -616,6 +616,55 @@ const JP = wants("JP") && buildCountry({
   regions: jpRegions(),
 });
 
+// --------------------------------------------------------------------- IT
+// Fifteen units built from the 110 provinces of Natural Earth, grouped by
+// their region: Piedmont with the Aosta Valley, Lombardy, Veneto, Trentino-Alto
+// Adige with Friuli-Venezia Giulia, Tuscany with Liguria, Emilia-Romagna,
+// Umbria with the Marche, Lazio, Abruzzo with Molise, Campania, Apulia,
+// Basilicata with Calabria, Sicily and Sardinia. EST (the overseas
+// constituency) covers voters who live abroad and is drawn as an inset box in
+// the Ionian Sea. The clip box drops Lampedusa and Linosa.
+function itRegions() {
+  const prov = {};
+  const regionOf = {};
+  for (const f of ne10.features) {
+    if (f.properties.adm0_a3 !== "ITA") continue;
+    prov[f.properties.name] = featurePolygons(f.geometry);
+    (regionOf[f.properties.region] = regionOf[f.properties.region] || []).push(f.properties.name);
+  }
+  const members = (...regs) => regs.flatMap((r) => {
+    if (!regionOf[r]) throw new Error(`IT: no provinces for region ${r}`);
+    return regionOf[r];
+  });
+  const box = (lon0, lat0, lon1, lat1) => [[[[lon0, lat0], [lon1, lat0], [lon1, lat1], [lon0, lat1], [lon0, lat0]]]];
+  const merged = groupRegions(prov, {
+    PIE: members("Piemonte", "Valle d'Aosta"),
+    LOM: members("Lombardia"),
+    VEN: members("Veneto"),
+    NEA: members("Trentino-Alto Adige", "Friuli-Venezia Giulia"),
+    TOS: members("Toscana", "Liguria"),
+    EMR: members("Emilia-Romagna"),
+    UMA: members("Umbria", "Marche"),
+    LAZ: members("Lazio"),
+    ABM: members("Abruzzo", "Molise"),
+    CAM: members("Campania"),
+    PUG: members("Apulia"),
+    BAC: members("Basilicata", "Calabria"),
+    SIC: members("Sicily"),
+    SAR: members("Sardegna"),
+  }, "IT");
+  return { ...merged, EST: box(17.9, 36.7, 19.4, 38.1) };
+}
+const IT = wants("IT") && buildCountry({
+  name: "Italy", constName: "IT_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (ITA)",
+  extraNote: "Regions are groups of the 110 provinces (arc-cancellation union). EST (Italians abroad) is an inset box in the Ionian Sea, not a place. Lampedusa and Linosa are clipped.",
+  lat0: 42, eps: 0.8, minIslandPx: 4,
+  clip: [6.0, 36.2, 19.6, 47.3],
+  order: ["PIE", "LOM", "VEN", "NEA", "TOS", "EMR", "UMA", "LAZ", "ABM", "CAM", "PUG", "BAC", "SIC", "SAR", "EST"],
+  regions: itRegions(),
+});
+
 // ------------------------------------------------------------------- write
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const files = [
@@ -629,6 +678,7 @@ const files = [
   [ES, "es.ts"],
   [IE, "ie.ts"],
   [JP, "jp.ts"],
+  [IT, "it.ts"],
 ].filter(([built]) => built);
 for (const [built, name] of files) {
   const bytes = emit(built, path.join(OUT_DIR, name));
@@ -669,4 +719,5 @@ if (IN) assertCountry(IN, ["UP", "BJ", "MP", "GR", "MH", "DH", "PB", "HM", "KA",
 if (ES) assertCountry(ES, ["AND", "CAT", "MAD", "VAL", "GAL", "PV", "CYL", "CLE", "ARA", "NAV", "MUR", "AST", "BAL", "CAN"], 1.0, 1.9); // wide
 if (IE) assertCountry(IE, ["BOR", "WES", "MID", "CMB", "DNO", "DSO", "DWE", "SEA", "MUN", "COR"], 0.55, 0.95); // tall-ish
 if (JP) assertCountry(JP, ["HKD", "TOH", "NKT", "SKT", "TKY", "HSN", "TKI", "KNK", "CHG", "SHK", "KYU"], 0.8, 1.3); // squarish
+if (IT) assertCountry(IT, ["PIE", "LOM", "VEN", "NEA", "TOS", "EMR", "UMA", "LAZ", "ABM", "CAM", "PUG", "BAC", "SIC", "SAR", "EST"], 0.6, 1.2); // tall-ish
 console.log("All assertions passed.");
