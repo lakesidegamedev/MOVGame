@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { COUNTRY_MODULES, COUNTRIES } from "@content/countries";
 import type { CountryModule } from "@content/countries/types";
+import type { MajorityRule } from "@engine/system";
 import { SCENARIO_REGISTRY, SCENARIOS_BY_ID } from "@content/scenarioRegistry";
 import { PACKS, STORE_PACKS, packForScenario } from "@content/packs";
 import { countryCover } from "@content/covers";
@@ -191,10 +192,11 @@ describe.each(multiparty.map((m) => [m.code, m.bundle!] as const))("%s content",
       expect(country.runoff, "plurality and runoff are exclusive").toBeFalsy();
       expect(country.coalitions?.none, "coalitions.none").toBe(true);
       expect(country.abstaining, "no abstaining parties").toEqual([]);
-      for (const m of [country.system.majority, ...Object.values(country.elections).map((e) => e.majority).filter(Boolean)]) {
-        expect(m!.effectiveThreshold, "no effective threshold").toBeUndefined();
-        expect(m!.threshold, "threshold is a unit count").toBeGreaterThan(0);
-        expect(m!.threshold, "threshold is a unit count").toBeLessThanOrEqual(m!.total);
+      const rules: MajorityRule[] = [country.system.majority, ...Object.values(country.elections).flatMap((e) => (e.majority ? [e.majority] : []))];
+      for (const m of rules) {
+        expect(m.effectiveThreshold, "no effective threshold").toBeUndefined();
+        expect(m.threshold, "threshold is a unit count").toBeGreaterThan(0);
+        expect(m.threshold, "threshold is a unit count").toBeLessThanOrEqual(m.total);
       }
       expect(country.governmentText?.majority, "a winner template").toBeDefined();
       const copy = [country.goalText, country.goalHint ?? "", country.governmentText?.majority ?? "",

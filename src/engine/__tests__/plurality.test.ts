@@ -105,7 +105,8 @@ describe("plurality election night", () => {
     const units = [unit("A", { pan: 30, prd: 20 }, 10), unit("B", { prd: 30, pan: 20 }, 2)];
     const { projectedId, entries } = buildSchedule(units, 51, "prd");
     expect(projectedId).toBe("prd");
-    expect(entries.filter((e) => e.kind === "call").at(-1)?.projectedId).toBe("prd");
+    const calls = entries.filter((e) => e.kind === "call");
+    expect(calls[calls.length - 1]?.projectedId).toBe("prd");
   });
 
   it("without a plurality winner the projection waits for the threshold", () => {
