@@ -398,6 +398,7 @@ export const MEXICO_MODULE = countryModule(MEXICO, {
   blurb: "The presidency from the fall of the PRI to Sheinbaum: five elections, eleven regions, one round, most votes wins.",
   cover: "images/covers/country-mx.jpg",
   art: { a: "#0b3d2e", b: "#8b1d3b", glow: "rgba(255,236,214,0.22)" },
+  freeElections: ["2024"],
   scenarios: [
     { electionId: "2024", difficulty: "hard",
       description: "López Obrador's successor against an opposition alliance of the PAN, the PRI and the PRD, with Movimiento Ciudadano chasing young voters." },

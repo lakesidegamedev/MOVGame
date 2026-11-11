@@ -44,14 +44,14 @@ const PINNED_PACK_MEMBERS: Record<string, string[]> = {
 
 // Free elections. The ids never change. In the release that made one election
 // per country free, exactly these changed: uk-2024, ca-2025, de-2025, fr-2022,
-// au-2025, nz-2023, br-2022, in-2024, es-2023, ie-2024, jp-2024 and it-2022 became free
+// au-2025, nz-2023, br-2022, in-2024, es-2023, ie-2024, jp-2024, it-2022 and mx-2024 became free
 // and left their country pack's paid list (us-2024 and us-2020 were already
 // free). Nobody lost anything: a free election is open to every player, signed
 // in or not, and the frozen Global pack still lists its four. A free election
 // stays free when newer elections are added (modules pin `freeElections`).
 const PINNED_FREE = [
   "us-2024", "us-2020", "uk-2024", "ca-2025", "de-2025", "fr-2022", "au-2025",
-  "nz-2023", "br-2022", "in-2024", "es-2023", "ie-2024", "jp-2024", "it-2022",
+  "nz-2023", "br-2022", "in-2024", "es-2023", "ie-2024", "jp-2024", "it-2022", "mx-2024",
 ];
 
 const PINNED_GLOBAL = [

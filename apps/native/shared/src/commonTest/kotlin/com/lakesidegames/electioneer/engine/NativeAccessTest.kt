@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 // us-2024 and us-2020 were already free. Mirrors PINNED_FREE in catalog-pins.test.ts.
 private val PINNED_FREE = listOf(
     "us-2024", "us-2020", "uk-2024", "ca-2025", "de-2025", "fr-2022", "au-2025",
-    "nz-2023", "br-2022", "in-2024", "es-2023", "ie-2024", "jp-2024", "it-2022",
+    "nz-2023", "br-2022", "in-2024", "es-2023", "ie-2024", "jp-2024", "it-2022", "mx-2024",
 )
 
 class NativeAccessTest {
