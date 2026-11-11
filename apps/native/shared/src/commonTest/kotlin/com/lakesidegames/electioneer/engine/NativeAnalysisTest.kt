@@ -34,7 +34,7 @@ class NativeAnalysisTest {
 
     @Test
     fun everyWorldEngineCanUndoAndReplayTheSameWeek() {
-        for (country in listOf("UK", "CA", "DE", "FR", "AU")) {
+        for (country in MobileCampaign.countries().map { it.id }.filter { it != "US" }) {
             val election = MobileCampaign.elections(country).first().nativeId
             val party = MobileCampaign.parties(country, election).first().id
             val game = MobileCampaign.start(country, election, party, "normal", "world-undo")

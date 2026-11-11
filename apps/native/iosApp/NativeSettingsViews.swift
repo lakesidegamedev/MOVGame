@@ -29,7 +29,7 @@ final class NativePreferences: ObservableObject {
         player.play()
     }
     func replayTutorial() {
-        for country in ["US", "UK", "CA", "DE", "FR", "AU"] { UserDefaults.standard.removeObject(forKey: "mov_tour_\(country)") }
+        for country in NativeCatalog.shared.countryIds() { UserDefaults.standard.removeObject(forKey: "mov_tour_\(country)") }
         tutorialNonce += 1
     }
 }

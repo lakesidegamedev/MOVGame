@@ -7,7 +7,8 @@ import com.lakesidegames.electioneer.engine.PoliticalSystem
 import kotlinx.serialization.Serializable
 
 // UK + country content descriptors (mirrors content/uk/* and
-// content/countries/*). Data tables are generated; functions are hand ports.
+// content/countries/*). Data tables are generated; country rules are data
+// interpreted here exactly as the web engine interprets them.
 
 // ── UK ─────────────────────────────────────────────────────────────────────
 
@@ -200,8 +201,60 @@ data class CountryBundle(
     val leaders: Map<String, Map<String, CountryLeader>>,
     val events: List<CountryEventDef>,
     val eventChance: Double,
-    // Coalition-compatibility predicate (Germany's firewall, etc.).
-    val compatible: ((lead: PartyId, partner: PartyId) -> Boolean)? = null,
-    // Country-specific framing of the outcome.
-    val governmentText: ((g: Government, partyName: (PartyId) -> String) -> String?)? = null,
+    // Who may govern with whom (Germany's firewall, etc.), as exported data.
+    val coalitions: CoalitionRules? = null,
+    // Country-specific framing of the outcome, one template per government kind.
+    val governmentText: Map<String, String> = emptyMap(),
+    // Presidential two-round runoff (France).
+    val runoff: Boolean = false,
+    // Longer goal line for the campaign coach: {majority} and {total} placeholders.
+    val goalHint: String? = null,
 )
+
+// Declarative coalition rules, mirroring content/countries on the web
+// (engine/countryGame.ts coalitionAllowed). A pair may govern together unless
+// a rule forbids it.
+@Serializable
+data class CoalitionRules(
+    val none: Boolean = false,
+    val isolated: List<PartyId> = emptyList(),
+    val forbidden: List<List<PartyId>> = emptyList(),
+    val onlyWith: Map<PartyId, List<PartyId>> = emptyMap(),
+)
+
+fun coalitionAllowed(rules: CoalitionRules, lead: PartyId, partner: PartyId): Boolean {
+    if (rules.none) return false
+    if (rules.isolated.any { it == lead || it == partner }) return false
+    if (rules.forbidden.any { (a, b) -> (a == lead && b == partner) || (a == partner && b == lead) }) return false
+    rules.onlyWith[lead]?.let { if (partner !in it) return false }
+    rules.onlyWith[partner]?.let { if (lead !in it) return false }
+    return true
+}
+
+/** The engine-facing predicate, or null when every pair is compatible. */
+val CountryBundle.compatible: ((lead: PartyId, partner: PartyId) -> Boolean)?
+    get() = coalitions?.let { rules -> { lead: PartyId, partner: PartyId -> coalitionAllowed(rules, lead, partner) } }
+
+private fun governmentKind(g: Government): String = when (g) {
+    is Government.Majority -> "majority"
+    is Government.Minority -> "minority"
+    is Government.Coalition -> "coalition"
+    is Government.ConfidenceSupply -> "confidence_supply"
+    is Government.Hung -> "hung"
+}
+
+/**
+ * The country's own outcome line, or null for the shell default. Placeholders
+ * match the web: {party} {seats} {parties} {lead} {partner} {largest}.
+ */
+fun countryGovernmentText(country: CountryBundle, g: Government, partyName: (PartyId) -> String): String? {
+    val template = country.governmentText[governmentKind(g)] ?: return null
+    val values = when (g) {
+        is Government.Majority -> mapOf("party" to partyName(g.party), "seats" to g.seats.toString())
+        is Government.Minority -> mapOf("party" to partyName(g.party), "seats" to g.seats.toString())
+        is Government.Coalition -> mapOf("parties" to g.parties.joinToString(" and ", transform = partyName), "seats" to g.seats.toString())
+        is Government.ConfidenceSupply -> mapOf("lead" to partyName(g.lead), "partner" to partyName(g.partner), "seats" to g.seats.toString())
+        is Government.Hung -> mapOf("largest" to partyName(g.largest))
+    }
+    return Regex("\\{(\\w+)\\}").replace(template) { values[it.groupValues[1]] ?: it.value }
+}

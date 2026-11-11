@@ -33,6 +33,7 @@ import {
   computeCountryResult,
   playablePartiesIn,
   majorityFor,
+  countryCompatible,
   type CountryGameState,
   type CountryAction,
   type CountryBundle,
@@ -390,7 +391,7 @@ function runCountryGame(
       actions: g.resources[side].actions,
       majority,
       abstaining: g.abstaining,
-      compatible: bundle.compatible,
+      compatible: countryCompatible(bundle),
     };
     g.queuedActions = mpBotActions(bot, view, side) as CountryAction[];
     g = countryAdvanceTurn(g, bundle, { autoResolvePlayerEvents: true });

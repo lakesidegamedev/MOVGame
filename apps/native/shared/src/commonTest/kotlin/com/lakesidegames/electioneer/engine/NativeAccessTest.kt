@@ -3,6 +3,7 @@ package com.lakesidegames.electioneer.engine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class NativeAccessTest {
     @Test fun gatingOffKeepsEveryElectionPlayable() {
@@ -27,10 +28,25 @@ class NativeAccessTest {
         assertEquals("us-historical", NativeAccess.lockedPack("US", "1980", listOf("global"), true, null))
     }
     @Test fun everyPaidRegistryElectionMapsToASellableBundle() {
-        val sellable = setOf("us-historical", "uk-elections", "canada", "germany", "france", "australia")
+        val sellable = NativeCatalog.packs().filter { !it.legacy && it.id != "complete" }.map { it.id }.toSet()
+        assertTrue(sellable.containsAll(setOf("us-historical", "uk-elections", "canada", "germany", "france", "australia")))
         val paid = nativeElections.filter { !it.free }
-        assertEquals(47, paid.size)
+        assertTrue(paid.size >= 47)
         paid.forEach { assertEquals(true, it.packId in sellable, it.scenarioId) }
+        assertEquals(paid.map { it.scenarioId }.toSet(), NativeCatalog.pack("complete")!!.scenarios.toSet())
         assertEquals(2, nativeElections.count { it.free })
+    }
+    @Test fun theRetiredGlobalPackStaysFrozen() {
+        val global = NativeCatalog.pack("global")!!
+        assertTrue(global.legacy)
+        assertEquals(listOf("ca-2025", "ca-2021", "ca-2019", "ca-2015", "de-2025", "de-2021", "de-2017",
+            "fr-2027", "fr-2022", "fr-2017", "fr-2012", "au-2025", "au-2022", "au-2019"), global.scenarios)
+        // Global owners own those scenarios through the country packs, but a
+        // pack is only "covered" while every one of its scenarios is.
+        assertTrue(NativeAccess.covers("canada", listOf("global")) == NativeCatalog.pack("canada")!!.scenarios.all { it in global.scenarios })
+        assertTrue(NativeAccess.covers("canada", listOf("complete")))
+        assertEquals(false, NativeAccess.covers("us-historical", listOf("global")))
+        assertEquals("Complete Collection", NativeCatalog.packName("complete"))
+        assertEquals("country", NativeCatalog.packName(null))
     }
 }

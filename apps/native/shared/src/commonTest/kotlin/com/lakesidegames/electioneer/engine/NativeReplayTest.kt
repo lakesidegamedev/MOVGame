@@ -35,7 +35,8 @@ class NativeReplayTest {
     @Test
     fun recordingAndReportsMatchTheWebAcrossEveryEngine() {
         val vectors = EngineJson.decodeFromString<List<ReplayVector>>(REPLAY_WEB_VECTORS)
-        assertEquals(7, vectors.size)
+        // Two US campaigns, then one per seat-based country.
+        assertEquals(MobileCampaign.countries().size + 1, vectors.size)
         for (v in vectors) {
             var us = if (v.country == "US") beginGame(createGame(NewGameOptions(seed = v.seed, scenario = v.election,
                 playerCandidate = CandidateId.entries.first { it.serial == v.player }, difficulty = "hard"))) else null

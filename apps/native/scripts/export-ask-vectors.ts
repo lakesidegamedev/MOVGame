@@ -4,9 +4,10 @@ import { createUkGame, projectUk, playablePartiesIn as ukParties } from "../../.
 import { createCountryGame, projectCountry, playablePartiesIn } from "../../../src/engine/countryGame";
 import { COUNTRIES } from "../../../src/content/countries";
 import { movSeatAskSnapshot } from "../../../src/lib/ask";
+import { seatFixtureElections } from "./fixtureCountries";
 
 const vectors = [];
-for (const [id, election] of [["UK", "2024"], ["CA", "2021"], ["DE", "2025"], ["FR", "2022"], ["AU", "2025"]]) {
+for (const [id, election] of seatFixtureElections()) {
   const country = COUNTRIES[id];
   const parties = id === "UK" ? ukParties(election) : playablePartiesIn(country, election);
   for (const player of [parties[0], parties.at(-1)!]) {
@@ -32,4 +33,4 @@ const destination = new URL("../shared/src/commonTest/kotlin/com/lakesidegames/e
 if (process.argv.includes("--check")) {
   if (readFileSync(fileURLToPath(destination), "utf8") !== output) throw new Error("Native Ask snapshots differ from web. Regenerate the campaign handoff fixtures.");
 } else writeFileSync(fileURLToPath(destination), output);
-console.log(`Verified ${vectors.length} web Ask snapshots across all five seat-based engines.`);
+console.log(`Verified ${vectors.length} web Ask snapshots across every seat-based country.`);

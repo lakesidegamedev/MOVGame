@@ -4,45 +4,8 @@ import { COUNTRIES } from "@content/countries";
 import { computeScoreFromFacts, multipartyScoreFacts } from "../scoring";
 
 describe("country bundles", () => {
-  it("every election's seats total its chamber; every result region has meta", () => {
-    // The bundle's newest election matches system.majority; older cycles may
-    // override (Canada 2021: 338, Bundestag 2021: 735 with overhang).
-    for (const [cid, country] of Object.entries(COUNTRIES)) {
-      for (const election of Object.values(country.elections)) {
-        const majority = election.majority ?? country.system.majority;
-        expect(majority.threshold, `${cid} ${election.id} threshold`).toBe(Math.floor(majority.total / 2) + 1);
-        let total = 0;
-        for (const [rid, res] of Object.entries(election.regions)) {
-          const meta = country.regions.find((r) => r.id === rid);
-          expect(meta, `${cid}: region meta ${rid}`).toBeDefined();
-          total += Object.values(res.s).reduce((s, x) => s + x, 0);
-        }
-        expect(total, `${cid} ${election.id} chamber`).toBe(majority.total);
-      }
-    }
-  });
-
-  it("neutral play reproduces each election's real result (calibration anchor)", () => {
-    for (const country of Object.values(COUNTRIES)) {
-      for (const election of Object.values(country.elections)) {
-        let g = createCountryGame(country, { election: election.id, seed: 42 });
-        for (let t = 0; t < g.totalTurns; t++) g = countryAdvanceTurn(g, country, { disableAi: true });
-        const result = g.result ?? computeCountryResult(g, country);
-
-        // Baseline seats per party across regions:
-        const expected: Record<string, number> = {};
-        for (const res of Object.values(election.regions)) {
-          for (const [p, s] of Object.entries(res.s)) expected[p] = (expected[p] ?? 0) + s;
-        }
-        for (const [p, s] of Object.entries(expected)) {
-          expect(
-            Math.abs((result.seats[p] ?? 0) - s),
-            `${country.id} ${election.id} ${p}: got ${result.seats[p]}, real ${s}`,
-          ).toBeLessThanOrEqual(2); // largest-remainder wobble tolerance
-        }
-      }
-    }
-  });
+  // Seat sums and neutral-play calibration for every election live in
+  // src/content/__tests__/country-completeness.test.ts.
 
   it("known winners: LPC largest in CA-2025, Union in DE-2025, Centre wins FR-2027", () => {
     const expectWinner = (cid: string, party: string) => {

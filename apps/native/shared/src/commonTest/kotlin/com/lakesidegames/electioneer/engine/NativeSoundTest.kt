@@ -19,8 +19,9 @@ class NativeSoundTest {
         assertTrue(NativeSound.wav("unknown", 0.6).isEmpty())
     }
     @Test fun guidesCoverEveryEngineAndUseActualVictoryRules() {
-        assertEquals(10, NativeHelp.guide().size)
-        for (country in listOf("US", "UK", "CA", "DE", "FR", "AU")) {
+        assertEquals(8 + com.lakesidegames.electioneer.content.CONTENT_CATALOG.countries.count { it.guide != null }, NativeHelp.guide().size)
+        assertEquals(listOf("Germany", "France"), NativeHelp.guide().map { it.title }.filter { it == "Germany" || it == "France" })
+        for (country in MobileCampaign.countries().map { it.id }) {
             val goal = if (country == "US") "Win 270 electoral votes" else MobileCampaign.start(country, MobileCampaign.elections(country).first().nativeId, MobileCampaign.parties(country, MobileCampaign.elections(country).first().nativeId).first().id, "normal", "guide").goalText()
             val steps = NativeHelp.steps(country, goal)
             assertEquals(8, steps.size)

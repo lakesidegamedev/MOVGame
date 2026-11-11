@@ -6,7 +6,8 @@ import kotlinx.serialization.encodeToString
 
 class MobileCampaignTest {
     @Test fun everyWebElectionCanBePlayedAndRestoredNatively() {
-        assertEquals(6, MobileCampaign.countries().size)
+        assertEquals(CONTENT_CATALOG.countries.size, MobileCampaign.countries().size)
+        assertEquals(listOf("US", "UK", "CA", "DE", "FR", "AU"), MobileCampaign.countries().take(6).map { it.id })
         assertEquals(17, MobileCampaign.elections("US").size)
         for (country in MobileCampaign.countries().filter { it.id != "US" }) {
             assertTrue(MobileCampaign.elections(country.id).isNotEmpty())
@@ -76,16 +77,17 @@ class MobileCampaignTest {
 
     @Test fun nativeFacadeUsesTheExistingEnginesWithoutChangingTheirOutcomes() {
         val native = MobileCampaign.start("FR", "2022", "rn", "normal", "same-seed")
-        var reference = createCountryGame(FRANCE, NewCountryGameOptions(seed = "same-seed", election = "2022", playerParty = "rn"))
+        val france = getCountry("FR")!!
+        var reference = createCountryGame(france, NewCountryGameOptions(seed = "same-seed", election = "2022", playerParty = "rn"))
         repeat(6) {
             assertTrue(native.endWeek())
-            reference = countryAdvanceTurn(reference, FRANCE, CountryAdvanceOptions(autoResolvePlayerEvents = false))
+            reference = countryAdvanceTurn(reference, france, CountryAdvanceOptions(autoResolvePlayerEvents = false))
             reference.pendingEvent?.let {
                 val choice = native.eventChoices().last().id
                 assertTrue(native.answerEvent(choice))
-                reference = resolveCountryPlayerEvent(reference, FRANCE, choice)
+                reference = resolveCountryPlayerEvent(reference, france, choice)
             }
-            val projection = reference.result ?: projectCountry(reference, FRANCE)
+            val projection = reference.result ?: projectCountry(reference, france)
             assertEquals(projection.seats, native.standings().associate { it.partyId to it.units })
             assertEquals(reference.rngState, EngineJson.decodeFromString<kotlinx.serialization.json.JsonObject>(native.saveSnapshot())["country"]?.let {
                 EngineJson.decodeFromString<CountryGameState>(it.toString()).rngState

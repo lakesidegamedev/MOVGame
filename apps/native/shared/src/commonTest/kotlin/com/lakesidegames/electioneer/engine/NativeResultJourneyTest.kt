@@ -7,9 +7,9 @@ import kotlin.test.*
 @Serializable private data class PercentileFixture(val score: Int, val scores: List<Int>?, val rank: Int?, val result: Int?)
 
 class NativeResultJourneyTest {
-    @Test fun sharesScoresAndNextCampaignsMatchAllSixWebResultFlows() {
+    @Test fun sharesScoresAndNextCampaignsMatchEveryCountryWebResultFlow() {
         val fixtures = EngineJson.decodeFromString<List<JourneyFixture>>(REVEAL_WEB_VECTORS)
-        assertEquals(6, fixtures.size)
+        assertEquals(MobileCampaign.countries().size, fixtures.size)
         for (fixture in fixtures) {
             assertEquals(fixture.journey, NativeResultsJourney.create(fixture.snapshot, "2000-01-01"))
             val next = fixture.journey.next!!

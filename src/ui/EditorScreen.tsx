@@ -440,7 +440,7 @@ export function EditorScreen({ onClose, onLaunch }: { onClose: () => void; onLau
   const ENGINE_OPTS: { id: CustomEngine; name: string; blurb: string }[] = [
     { id: "us", name: "United States", blurb: "Two tickets, the Electoral College." },
     { id: "uk", name: "United Kingdom", blurb: "Multiparty, first past the post." },
-    { id: "country", name: "Other country", blurb: "Canada, Germany, France, Australia." },
+    { id: "country", name: "Other country", blurb: `${Object.values(COUNTRIES).map((c) => c.label).join(", ")}.` },
   ];
 
   const subtitle = (cs: CustomScenario) =>

@@ -1,22 +1,7 @@
+import type { CSSProperties } from "react";
 import type { CountryCode } from "@content/scenarioRegistry";
-
-const COUNTRY_FLAGS: Record<CountryCode, string> = {
-  US: "🇺🇸",
-  UK: "🇬🇧",
-  CA: "🇨🇦",
-  DE: "🇩🇪",
-  FR: "🇫🇷",
-  AU: "🇦🇺",
-};
-
-const COUNTRY_NAMES: Record<CountryCode, string> = {
-  US: "United States",
-  UK: "United Kingdom",
-  CA: "Canada",
-  DE: "Germany",
-  FR: "France",
-  AU: "Australia",
-};
+import { countryModuleFor } from "@content/countries";
+import { countryArt } from "@content/covers";
 
 function variantFor(scenarioId: string): number {
   let hash = 2166136261;
@@ -37,14 +22,18 @@ export function ScenarioArt({
   year: number;
 }) {
   const variant = variantFor(scenarioId);
+  const module = countryModuleFor(country);
+  const art = countryArt(country);
+  const palette = { "--art-a": art.a, "--art-b": art.b, "--art-glow": art.glow } as CSSProperties;
   return (
     <div
       className={`scenario-cover scenario-art art-${country.toLowerCase()} art-v${variant}`}
+      style={palette}
       data-scenario-art={scenarioId}
       aria-hidden="true"
     >
       <span className="scenario-art-top">
-        <span>{COUNTRY_FLAGS[country]} {COUNTRY_NAMES[country]}</span>
+        <span>{module?.flag} {module?.name}</span>
         <span>Margin of Victory archive</span>
       </span>
       <span className="scenario-art-year">{year}</span>

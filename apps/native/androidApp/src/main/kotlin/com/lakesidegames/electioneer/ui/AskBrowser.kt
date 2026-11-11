@@ -22,6 +22,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.lakesidegames.electioneer.BuildConfig
+import com.lakesidegames.electioneer.engine.NativeCatalog
 import java.util.concurrent.atomic.AtomicInteger
 
 private enum class AskPhase { LOADING, RETRYING, READY, FAILED }
@@ -174,7 +175,7 @@ private class AskBrowser(private val context: Context, private val smoke: String
                         "(() => { try { const s = JSON.parse(sessionStorage.getItem('ask.movSnapshot')); return s?.version === 1 && s?.game === 'electioneer' && typeof s?.scenario === 'string' ? s.country : null; } catch { return null; } })()"
                     ) {
                         val country = it.trim('"')
-                        if (country in listOf("US", "UK", "Canada", "Germany", "France", "Australia")) {
+                        if (country in NativeCatalog.askCountryNames()) {
                             android.util.Log.i("MOVAsk", "MOV_ASK_SNAPSHOT_READY")
                             android.util.Log.i("MOVAsk", "MOV_ASK_SNAPSHOT_COUNTRY_$country")
                         }

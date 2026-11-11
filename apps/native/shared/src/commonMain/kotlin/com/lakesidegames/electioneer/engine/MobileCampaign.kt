@@ -70,12 +70,8 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
         return true
     }
     companion object {
-        fun countries(): List<NativeCountry> = listOf(NativeCountry("US", "United States", "🇺🇸"),
-            NativeCountry("UK", "United Kingdom", "🇬🇧")) +
-            listOf("CA", "DE", "FR", "AU").map { id ->
-                val c = COUNTRIES.getValue(id)
-                NativeCountry(id, c.label, c.flag)
-            }
+        /** Every registered country, in the web's registration order. */
+        fun countries(): List<NativeCountry> = NativeCatalog.countries()
 
         fun elections(countryId: String): List<NativeElection> = nativeElections.filter { it.country == countryId }
 
@@ -177,10 +173,8 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
     fun availableFunds(): Double = (funds() - plannedSpend()).coerceAtLeast(0.0)
     fun majority(): Int = uk?.let { majorityForUk(it).threshold } ?: majorityFor(country!!, bundle()!!).threshold
     fun totalUnits(): Int = uk?.let { majorityForUk(it).total } ?: majorityFor(country!!, bundle()!!).total
-    fun goalText(): String = if (countryId() == "FR")
-        "Win ${majority()} of ${totalUnits()} presidency points. Six planning weeks compress the historical two-week runoff. First-round transfers are included in the opening support. National broadcasts and platform preparation reach the whole electorate."
-        else if (countryId() == "DE") "Reach ${majority()} of ${totalUnits()} seats, alone or in a compatible coalition. The 5% national threshold can exclude parties; CSU is exempt."
-        else "Reach ${majority()} of ${totalUnits()} seats. A hung parliament can produce a coalition, confidence and supply, or minority government."
+    fun goalText(): String = (bundle()?.goalHint ?: "Reach {majority} of {total} seats. A hung parliament can produce a coalition, confidence and supply, or minority government.")
+        .replace("{majority}", majority().toString()).replace("{total}", totalUnits().toString())
 
     private fun bundle(): CountryBundle? = country?.let { countryForGame(it)!! }
     private fun partyDefs(): List<PartyDef> = bundle()?.system?.parties ?: UK_SYSTEM.parties
@@ -322,7 +316,7 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
     fun outcome(): String {
         val government = uk?.let { (it.result ?: projectUk(it)).government }
             ?: country!!.let { (it.result ?: projectCountry(it, bundle()!!)).government }
-        bundle()?.governmentText?.invoke(government, ::name)?.let { return it }
+        bundle()?.let { countryGovernmentText(it, government, ::name) }?.let { return it }
         return when (government) {
             is Government.Majority -> "${name(government.party)} forms a majority government with ${government.seats} seats."
             is Government.Coalition -> "${government.parties.joinToString(" and ", transform = ::name)} form a coalition with ${government.seats} seats."

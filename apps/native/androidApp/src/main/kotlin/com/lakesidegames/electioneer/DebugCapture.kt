@@ -14,13 +14,13 @@ internal fun captureDebugFlow(session: GameSession, flow: String) {
         "settings" to Screen.SETTINGS, "guide" to Screen.GUIDE, "editor" to Screen.EDITOR)
     if (flow in routes) { session.go(routes.getValue(flow)); return }
     if (flow.startsWith("ask")) {
-        val country = flow.substringAfter('-', "US").takeIf { it in listOf("US", "UK", "CA", "DE", "FR", "AU") } ?: "US"
+        val country = flow.substringAfter('-', "US").takeIf { it in NativeCatalog.countryIds() } ?: "US"
         captureDebugFlow(session, "game-$country")
         return
     }
     if (flow == "resume") { session.resumeGame(); return }
     val country = flow.substringAfter('-', "US")
-    require(country in listOf("US", "UK", "CA", "DE", "FR", "AU"))
+    require(country in NativeCatalog.countryIds())
     session.settings.finishTour(country)
     val custom = flow.startsWith("custom-")
     var snapshot = if (custom) NativeCustomScenario.start(NativeCustomScenario.create(country, "custom-smoke-$country", null, 100)!!)!!

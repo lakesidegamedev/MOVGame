@@ -15,8 +15,10 @@ class AskSnapshotTest {
     @Test
     fun everySeatEngineMatchesTheWebCampaignHandoff() {
         val vectors = EngineJson.decodeFromString<List<AskSeatVector>>(ASK_SEAT_WEB_VECTORS)
-        assertEquals(setOf("UK", "CA", "DE", "FR", "AU"), vectors.map { it.country }.toSet())
-        assertEquals(20, vectors.size)
+        val seatCountries = MobileCampaign.countries().map { it.id }.filter { it != "US" }
+        assertTrue(seatCountries.containsAll(listOf("UK", "CA", "DE", "FR", "AU")))
+        assertEquals(seatCountries.toSet(), vectors.map { it.country }.toSet())
+        assertEquals(seatCountries.size * 4, vectors.size)
         for (vector in vectors) {
             val campaign = MobileCampaign.start(vector.country, vector.election, vector.player, "normal", vector.seed)
             if (vector.planned) {

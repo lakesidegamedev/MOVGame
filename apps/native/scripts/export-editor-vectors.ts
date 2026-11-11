@@ -9,8 +9,9 @@ import { advanceCampaignWeek } from "../../../src/engine/campaignWeek";
 import { projectElection, computeResult } from "../../../src/engine/voteModel";
 import { ukAdvanceTurn, projectUk } from "../../../src/engine/ukGame";
 import { countryAdvanceTurn, projectCountry } from "../../../src/engine/countryGame";
+import { MULTIPARTY_COUNTRY_CODES } from "./fixtureCountries";
 
-const defaults = [makeDefaultCustomScenario(), makeDefaultMultiparty("uk"), ...["CA", "DE", "FR", "AU"].map(id => makeDefaultMultiparty("country", id))];
+const defaults = [makeDefaultCustomScenario(), makeDefaultMultiparty("uk"), ...MULTIPARTY_COUNTRY_CODES.map(id => makeDefaultMultiparty("country", id))];
 for (const [i, doc] of defaults.entries()) { doc.id = `custom-editor-${i}`; doc.createdAt = 100; doc.updatedAt = 200; }
 const validations: { input: string; result: unknown }[] = [];
 function capture(raw: unknown) { validations.push({ input: JSON.stringify(raw), result: validateCustomScenario(raw) }); }

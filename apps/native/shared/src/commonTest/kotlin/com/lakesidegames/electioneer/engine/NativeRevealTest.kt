@@ -11,7 +11,8 @@ import kotlin.test.*
 class NativeRevealTest {
     @Test fun completeRevealMatchesTheWebAndActualSeatAllocations() {
         val fixtures = EngineJson.decodeFromString<List<RevealFixture>>(REVEAL_WEB_VECTORS)
-        assertEquals(6, fixtures.size)
+        // One election night per registered country.
+        assertEquals(MobileCampaign.countries().size, fixtures.size)
         for (fixture in fixtures) {
             val data = NativeReveal.data(fixture.snapshot)!!
             assertEquals(fixture.data, data)

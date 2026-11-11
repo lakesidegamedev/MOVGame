@@ -333,7 +333,7 @@ final class GameSession: ObservableObject {
             game = nil
             playScreen = .worldGame
             touch()
-        } else if let countryId = ["UK", "CA", "DE", "FR", "AU"].first(where: {
+        } else if let countryId = NativeCatalog.shared.countryIds().filter({ $0 != "US" }).first(where: {
             arguments.contains("--mov-capture-world-\($0.lowercased())") || ($0 == "DE" && arguments.contains("--mov-capture-world-results"))
         }) {
             guard let election = MobileCampaign.companion.elections(countryId: countryId).first,

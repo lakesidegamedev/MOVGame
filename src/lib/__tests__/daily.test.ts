@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
+  CLASSIC_DAILY_POOL_SIZE,
   DAILY_ROLE_PAIRS,
   dailyAssignment,
+  isAddedDailyDay,
   fnv1a,
   isDailyDate,
   roleShortName,
@@ -105,5 +107,42 @@ describe("roleShortName", () => {
       expect(roleShortName(b)).not.toBe(b.toUpperCase());
     }
     expect(roleShortName("xyz")).toBe("XYZ");
+  });
+});
+
+describe("daily rotation as countries are added", () => {
+  const legacy = (date: string) => SCENARIO_REGISTRY[fnv1a(`daily:${date}`) % CLASSIC_DAILY_POOL_SIZE].scenarioId;
+
+  it("the classic pool is the first 49 registry rows", () => {
+    expect(SCENARIO_REGISTRY.length).toBeGreaterThanOrEqual(CLASSIC_DAILY_POOL_SIZE);
+    expect(SCENARIO_REGISTRY[CLASSIC_DAILY_POOL_SIZE - 1].scenarioId).toBe("au-2019");
+  });
+
+  it("every classic day keeps the scenario the pre-expansion rotation gave it", () => {
+    const total = SCENARIO_REGISTRY.length;
+    const added = total - CLASSIC_DAILY_POOL_SIZE;
+    let classicDays = 0;
+    for (const d of dates(730, "2025-07-01")) {
+      if (isAddedDailyDay(d, total, added)) {
+        expect(SCENARIO_REGISTRY.findIndex((s) => s.scenarioId === dailyAssignment(d).scenarioId)).toBeGreaterThanOrEqual(CLASSIC_DAILY_POOL_SIZE);
+        continue;
+      }
+      classicDays++;
+      expect(dailyAssignment(d).scenarioId, d).toBe(legacy(d));
+    }
+    // Added scenarios take roughly their share of days, no more.
+    const share = 1 - classicDays / 730;
+    expect(share).toBeGreaterThan(0);
+    expect(share).toBeLessThan((added / total) * 2 + 0.02);
+  });
+
+  it("registering more scenarios only converts classic days, never the reverse", () => {
+    for (const d of dates(365, "2026-01-01")) {
+      for (let added = 1; added < 60; added++) {
+        if (isAddedDailyDay(d, CLASSIC_DAILY_POOL_SIZE + added, added)) {
+          expect(isAddedDailyDay(d, CLASSIC_DAILY_POOL_SIZE + added + 1, added + 1), `${d} +${added}`).toBe(true);
+        }
+      }
+    }
   });
 });
