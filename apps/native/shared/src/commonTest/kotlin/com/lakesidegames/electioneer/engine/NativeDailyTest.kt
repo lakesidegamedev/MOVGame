@@ -100,4 +100,12 @@ class NativeDailyTest {
         assertEquals(4, NativeDaily.nextStreak("2026-10-01", "2026-09-30", "2026-10-01", 4))
         assertEquals(1, NativeDaily.nextStreak("2026-10-01", "2026-09-30", "2026-09-29", 3))
     }
+
+    @Test
+    fun anElectionCanCarryItsOwnDailyPair() {
+        // Japan 2026: the CRA replaced the CDP, so the daily pairs the LDP with the CRA there.
+        assertEquals(listOf("ldp", "cra"), nativeElections.first { it.scenarioId == "jp-2026" }.dailyPair)
+        assertNull(nativeElections.first { it.scenarioId == "jp-2024" }.dailyPair)
+        assertEquals("the CRA", NativeDaily.roleName("cra"))
+    }
 }

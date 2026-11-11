@@ -38,6 +38,8 @@ export interface ScenarioMeta {
   // "tide" = historical landslide (flip-history fantasy is a challenge).
   // "challenge" = minor-party / kingmaker path, not tuned for majority wins.
   tags?: ScenarioTag[];
+  // The daily's two sides when they differ from the country's pair.
+  dailyPair?: [string, string];
 }
 
 /** Landslide / known-unwinnable years — surface a "historical tide" warning. */
@@ -101,6 +103,7 @@ export const SCENARIO_REGISTRY: ScenarioMeta[] = [
     flag: m.flag,
   };
   if (row.tags) meta.tags = [...row.tags];
+  if (row.dailyPair) meta.dailyPair = [row.dailyPair[0], row.dailyPair[1]];
   return meta;
 });
 

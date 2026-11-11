@@ -418,7 +418,9 @@ results and keep a note of your sources in the file header.
    is now the newest election, update `system.majority` and `goalText` to it and give the older
    elections their own `majority` if they lack one.
 2. Add new parties to `system.parties` (and `playable` if they can be led). Existing party ids
-   never change.
+   never change. If one of the country's daily pair does not stand in the new election (a party
+   merged or dissolved), give the row a `dailyPair` with the two rivals that do, and name any new
+   role in `daily.names` (Japan 2026 pairs the LDP with the CRA).
 3. Add a row to the module's `scenarios` in date order (newest first), after the shipped rows,
    with `addedLater: true`. The new scenario id is `<code>-<electionId>`; never change an
    existing row's id. `addedLater` makes the registry list the row after every other row, so the

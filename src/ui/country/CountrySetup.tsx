@@ -11,7 +11,8 @@ import type { PartyId } from "@engine/system";
 import { BRAND } from "../../brand";
 import { DifficultyPicker, type Difficulty } from "@ui/DifficultyPicker";
 import { TideBanner, ChallengePartyBanner, RegionalPartyBanner } from "@ui/TideBanner";
-import { DAILY_ROLE_PAIRS } from "@lib/daily";
+import { dailyPairFor } from "@lib/daily";
+import { SCENARIOS_BY_ID } from "@content/scenarioRegistry";
 import { FR_FIRST_ROUND } from "@content/countries/france";
 import { COUNTRY_MODULES_BY_CODE } from "@content/countries";
 
@@ -84,7 +85,8 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
               />
             );
           }
-          const majors = DAILY_ROLE_PAIRS[country.id] ?? country.playable.slice(0, 2);
+          const meta = SCENARIOS_BY_ID[`${country.id.toLowerCase()}-${election}`];
+          const majors = meta ? dailyPairFor(meta) : country.playable.slice(0, 2);
           return !majors.includes(activeParty) ? (
             <ChallengePartyBanner partyLabel={partyName(country, activeParty)} />
           ) : null;

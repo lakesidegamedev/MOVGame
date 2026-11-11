@@ -13,6 +13,12 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Added
 
+- Japan: the February 2026 House of Representatives election, Takaichi v. Noda. Lead the LDP,
+  the new Centrist Reform Alliance of the Constitutional Democrats and Komeito, Ishin, the DPP,
+  Sanseito, Team Mirai, the Communists, Reiwa or the Conservatives, with the real list votes and
+  seats of all eleven blocks and the campaign's story from the snap dissolution to the shortest
+  campaign since the war. It is in the Japan pack; Japan's free election stays 2024. On 2026
+  days the daily challenge pairs the LDP with the CRA.
 - Brazil: six presidential runoffs, 2002, 2006, 2010, 2014, 2018 and 2022, as a $0.99 pack (also in
   the Complete Collection). Lead the PT or its opponent across twelve regions, from São Paulo and
   Minas Gerais on their own to the Northeast and the Amazon, with each campaign's real story

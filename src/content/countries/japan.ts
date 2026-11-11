@@ -1,4 +1,4 @@
-// JAPAN: six House of Representatives elections, one bundle.
+// JAPAN: seven House of Representatives elections, one bundle.
 //
 // Parallel voting: about 290 members are elected in single-member districts
 // and 176 from party lists in eleven regional blocks, and the two tiers are
@@ -46,8 +46,27 @@
 // Social Democrats and the People's New Party are on the ballot and win
 // seats but are not offered as playable sides.
 //
+// The Centrist Reform Alliance (2026). In January 2026 the Constitutional
+// Democrats and Komeito merged their House of Representatives campaigns into
+// one party, `cra`, led by Yoshihiko Noda and Tetsuo Saito. Komeito stood
+// only on the CRA lists. The CRA is its own side: the `dpj` and `kom` lines
+// end in 2024, and the 2026 daily challenge pairs the LDP with the CRA.
+// Team Mirai (`mirai`) and the Genzei Yukoku alliance first stood in 2026;
+// Genzei Yukoku's one district seat (Aichi 1st) sits in Others.
+//
+// 2026 sources. List votes and list seats are the 2026 tables of the eleven
+// English Wikipedia block pages; district winners by block come from the
+// "Results of the 2026 Japanese general election" page and the Japanese
+// Wikipedia block tallies for Chugoku, Shikoku and Kyushu. Block list votes
+// sum to the official national shares (LDP 36.72, CRA 18.23, DPP 9.73, Ishin
+// 8.63, Sanseito 7.44, Team Mirai 6.66, JCP 4.40, Reiwa 2.92, Conservatives
+// 2.54, Genzei Yukoku 1.42, SDP 1.27) and block seats to the official result.
+//
 // Real national result of each election (seats, then the share of the list
 // vote):
+// 2026 (8 February): 465 seats. LDP 316 (249 districts, 67 list), CRA 49,
+// Ishin 36, DPP 28, Sanseito 15, Team Mirai 11, JCP 4, Reiwa 1, Genzei
+// Yukoku 1, independents 4. The LDP alone passed two thirds of the House.
 // 2024 (27 October): 465 seats, 233 for a majority. LDP 191, CDP 148, Ishin
 // 38, DPP 28, Komeito 24, Reiwa 9, JCP 8, Sanseito 3, Conservative 3, SDP 1,
 // others 12. The LDP and Komeito lost their majority for the first time since
@@ -110,12 +129,14 @@ export const JAPAN: CountryBundle = {
       { id: "reiwa", name: "Reiwa Shinsengumi", shortName: "Reiwa", color: "#c2185b" },
       { id: "sansei", name: "Sanseito", shortName: "Sanseito", color: "#ef7a1a" },
       { id: "cpj", name: "Conservative Party of Japan", shortName: "Conservatives", color: "#4c4a7a" },
+      { id: "cra", name: "Centrist Reform Alliance (CDP and Komeito)", shortName: "CRA", color: "#2b6cb0" },
+      { id: "mirai", name: "Team Mirai", shortName: "Team Mirai", color: "#16a39a" },
       { id: "oth", name: "Others (independents, regional parties)", shortName: "Other", color: "#9aa0a6" },
     ],
     allocation: { id: "regional_seats_curve", label: "Parallel voting (districts and regional lists)", unit: "seat" },
     majority: { total: 465, threshold: 233 },
   },
-  playable: ["ldp", "dpj", "kom", "ishin", "jcp", "kibo", "dpp", "yp", "tpj", "reiwa", "sansei", "cpj"],
+  playable: ["ldp", "dpj", "kom", "ishin", "jcp", "kibo", "dpp", "yp", "tpj", "reiwa", "sansei", "cpj", "cra", "mirai"],
   abstaining: [],
   // The LDP and Komeito have governed together almost without a break since
   // 1999, and the LDP has never governed with the Democrats. The Communists
@@ -128,11 +149,12 @@ export const JAPAN: CountryBundle = {
       ["ldp", "dpj"], ["kom", "dpj"], ["kom", "ishin"], ["dpj", "ishin"],
       ["dpj", "sansei"], ["dpj", "cpj"], ["kom", "sansei"], ["kom", "cpj"],
       ["ldp", "tpj"], ["ldp", "reiwa"], ["ldp", "sdp"], ["kom", "reiwa"],
+      ["ldp", "cra"], ["cra", "ishin"], ["cra", "sansei"], ["cra", "cpj"],
     ],
     onlyWith: {
-      jcp: ["dpj", "sdp", "reiwa"],
-      reiwa: ["dpj", "jcp", "sdp"],
-      sdp: ["dpj", "jcp", "reiwa", "pnp", "dpp"],
+      jcp: ["dpj", "sdp", "reiwa", "cra"],
+      reiwa: ["dpj", "jcp", "sdp", "cra"],
+      sdp: ["dpj", "jcp", "reiwa", "pnp", "dpp", "cra"],
     },
     isolated: ["oth"],
   },
@@ -160,21 +182,21 @@ export const JAPAN: CountryBundle = {
 
   blocs: [
     { id: "young", name: "Young voters (18-34)", share: 0.22, turnoutPropensity: 0.46,
-      tilt: { ldp: 0.1, dpj: -0.15, kom: -0.5, ishin: 0.35, jcp: -0.1, kibo: 0.2, dpp: 0.45, yp: 0.5, reiwa: 0.55, sansei: 0.5, cpj: 0.3 } },
+      tilt: { ldp: 0.1, dpj: -0.15, kom: -0.5, ishin: 0.35, jcp: -0.1, kibo: 0.2, dpp: 0.45, yp: 0.5, reiwa: 0.55, sansei: 0.5, cpj: 0.3, cra: -0.4, mirai: 0.7 } },
     { id: "urban", name: "Urban salaried workers", share: 0.28, turnoutPropensity: 0.62,
-      tilt: { ldp: -0.1, dpj: 0.25, kom: -0.15, ishin: 0.2, jcp: 0.15, kibo: 0.3, yp: 0.45, reiwa: 0.15 } },
+      tilt: { ldp: -0.1, dpj: 0.25, kom: -0.15, ishin: 0.2, jcp: 0.15, kibo: 0.3, yp: 0.45, reiwa: 0.15, cra: 0.1, mirai: 0.6 } },
     { id: "senior", name: "Seniors (65+)", share: 0.30, turnoutPropensity: 0.78,
-      tilt: { ldp: 0.3, dpj: 0.1, kom: 0.2, ishin: -0.3, jcp: 0.1, dpp: -0.3, yp: -0.3, reiwa: -0.5, sansei: -0.3, cpj: 0.1 } },
+      tilt: { ldp: 0.3, dpj: 0.1, kom: 0.2, ishin: -0.3, jcp: 0.1, dpp: -0.3, yp: -0.3, reiwa: -0.5, sansei: -0.3, cpj: 0.1, cra: 0.35, mirai: -0.5 } },
     { id: "rural", name: "Farm and provincial voters", share: 0.18, turnoutPropensity: 0.7,
-      tilt: { ldp: 0.55, dpj: 0.05, kom: -0.1, ishin: -0.5, jcp: -0.4, kibo: -0.1, yp: -0.4, reiwa: -0.5 } },
+      tilt: { ldp: 0.55, dpj: 0.05, kom: -0.1, ishin: -0.5, jcp: -0.4, kibo: -0.1, yp: -0.4, reiwa: -0.5, cra: -0.1, mirai: -0.6 } },
     { id: "union", name: "Union households", share: 0.09, turnoutPropensity: 0.68,
-      tilt: { ldp: -0.45, dpj: 0.75, kom: -0.4, ishin: -0.3, jcp: 0.2, kibo: 0.3, dpp: 0.65 } },
+      tilt: { ldp: -0.45, dpj: 0.75, kom: -0.4, ishin: -0.3, jcp: 0.2, kibo: 0.3, dpp: 0.65, cra: 0.6, mirai: 0.1 } },
     { id: "soka", name: "Komeito's Soka Gakkai base", share: 0.07, turnoutPropensity: 0.88,
-      tilt: { ldp: 0.1, dpj: -0.7, kom: 2.8, ishin: -0.5, jcp: -1.5, reiwa: -0.7 } },
+      tilt: { ldp: 0.1, dpj: -0.7, kom: 2.8, ishin: -0.5, jcp: -1.5, reiwa: -0.7, cra: 2.0, mirai: -0.5 } },
     { id: "business", name: "Business owners and shopkeepers", share: 0.10, turnoutPropensity: 0.75,
-      tilt: { ldp: 0.5, dpj: -0.25, kom: 0.1, ishin: 0.3, jcp: -0.9, dpp: -0.1, yp: 0.3, reiwa: -0.7 } },
+      tilt: { ldp: 0.5, dpj: -0.25, kom: 0.1, ishin: 0.3, jcp: -0.9, dpp: -0.1, yp: 0.3, reiwa: -0.7, cra: -0.2, mirai: 0.2 } },
     { id: "kansai", name: "Osaka and Kansai reformists", share: 0.08, turnoutPropensity: 0.65,
-      tilt: { ldp: -0.15, dpj: -0.2, kom: 0.1, ishin: 1.6, jcp: 0.05, yp: 0.5, tpj: 0.3 } },
+      tilt: { ldp: -0.15, dpj: -0.2, kom: 0.1, ishin: 1.6, jcp: 0.05, yp: 0.5, tpj: 0.3, cra: -0.3 } },
   ],
 
   // Pools are the 2024 sizes (districts plus list seats); each election's `s`
@@ -205,6 +227,39 @@ export const JAPAN: CountryBundle = {
   ],
 
   elections: {
+    "2026": {
+      id: "2026",
+      year: 2026,
+      label: "2026 · Takaichi v. Noda",
+      tagline: "February 2026. Sanae Takaichi, Japan's first woman prime minister, has governed for three months with Ishin since Komeito walked out of the coalition. She dissolves the House to ask for a mandate of her own in the shortest campaign since the war. Against her, the Constitutional Democrats and Komeito have merged into the Centrist Reform Alliance.",
+      salience: { economy: 0.85, security: 0.65, consumption_tax: 0.6, pensions: 0.45, childcare: 0.4, politics_money: 0.4 },
+      regions: {
+        HKD: { v: { ldp: 0.37, cra: 0.246, ishin: 0.038, jcp: 0.054, dpp: 0.089, sdp: 0.013, reiwa: 0.031, sansei: 0.066, cpj: 0.024, mirai: 0.055, oth: 0.013 }, s: { ldp: 15, cra: 4, dpp: 1 } },
+        TOH: { v: { ldp: 0.412, cra: 0.212, ishin: 0.042, jcp: 0.04, dpp: 0.099, sdp: 0.014, reiwa: 0.031, sansei: 0.071, cpj: 0.019, mirai: 0.06 }, s: { ldp: 25, cra: 4, dpp: 2, sansei: 1, mirai: 1 } },
+        NKT: { v: { ldp: 0.37, cra: 0.193, ishin: 0.053, jcp: 0.042, dpp: 0.103, sdp: 0.013, reiwa: 0.03, sansei: 0.083, cpj: 0.025, mirai: 0.077, oth: 0.012 }, s: { ldp: 38, cra: 4, ishin: 1, jcp: 1, dpp: 3, sansei: 2, mirai: 1, oth: 2 } },
+        SKT: { v: { ldp: 0.356, cra: 0.192, ishin: 0.062, jcp: 0.042, dpp: 0.106, sdp: 0.012, reiwa: 0.027, sansei: 0.072, cpj: 0.025, mirai: 0.092, oth: 0.013 }, s: { ldp: 39, cra: 8, ishin: 2, jcp: 1, dpp: 3, reiwa: 1, sansei: 2, mirai: 3 } },
+        TKY: { v: { ldp: 0.331, cra: 0.165, ishin: 0.057, jcp: 0.06, dpp: 0.11, sdp: 0.012, reiwa: 0.026, sansei: 0.063, cpj: 0.031, mirai: 0.131, oth: 0.013 }, s: { ldp: 33, cra: 5, ishin: 1, jcp: 1, dpp: 3, sansei: 2, mirai: 4 } },
+        HSN: { v: { ldp: 0.421, cra: 0.198, ishin: 0.07, jcp: 0.043, dpp: 0.098, sdp: 0.015, reiwa: 0.03, sansei: 0.087, cpj: 0.022, oth: 0.016 }, s: { ldp: 21, cra: 4, ishin: 1, dpp: 1, sansei: 1 } },
+        TKI: { v: { ldp: 0.377, cra: 0.172, ishin: 0.057, jcp: 0.035, dpp: 0.12, sdp: 0.009, reiwa: 0.031, sansei: 0.076, cpj: 0.025, mirai: 0.069, oth: 0.03 }, s: { ldp: 39, cra: 4, ishin: 1, dpp: 6, sansei: 2, mirai: 1, oth: 1 } },
+        KNK: { v: { ldp: 0.304, cra: 0.143, ishin: 0.232, jcp: 0.051, dpp: 0.07, sdp: 0.008, reiwa: 0.026, sansei: 0.068, cpj: 0.028, mirai: 0.059, oth: 0.011 }, s: { ldp: 33, cra: 6, ishin: 28, jcp: 1, dpp: 2, sansei: 2, oth: 1 } },
+        CHG: { v: { ldp: 0.432, cra: 0.206, ishin: 0.071, jcp: 0.037, dpp: 0.091, sdp: 0.013, reiwa: 0.029, sansei: 0.084, cpj: 0.024, oth: 0.013 }, s: { ldp: 22, cra: 2, ishin: 1, dpp: 1, sansei: 1 } },
+        SHK: { v: { ldp: 0.42, cra: 0.182, ishin: 0.074, jcp: 0.042, dpp: 0.13, sdp: 0.011, reiwa: 0.03, sansei: 0.084, cpj: 0.027 }, s: { ldp: 12, cra: 2, dpp: 2 } },
+        KYU: { v: { ldp: 0.399, cra: 0.187, ishin: 0.059, jcp: 0.033, dpp: 0.08, sdp: 0.023, reiwa: 0.033, sansei: 0.082, cpj: 0.024, mirai: 0.059, oth: 0.02 }, s: { ldp: 39, cra: 6, ishin: 1, dpp: 4, sansei: 2, mirai: 1, oth: 1 } },
+      },
+      // The real story beats of 2026, in campaign order.
+      events: [
+        { id: "takaichi_dissolves", headline: "Takaichi announces on 19 January that she will dissolve the House at the opening of the Diet, turning the vote into a referendum on her leadership and the coalition with Ishin, and {party} rides her approval ratings", role: "any", party: "ldp", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
+        { id: "cra_launch", headline: "The House is dissolved on 23 January. The Constitutional Democrats and Komeito fight it as one party, the Centrist Reform Alliance, with Komeito on the lists only, and old voters of both have to find {party} on the ballot", role: "any", party: "cra", weight: 3, appeal: -0.015, momentum: -4, turn: 1 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "shortest_campaign", headline: "Sixteen days from dissolution to polling day, the shortest campaign since the war, and critics say {party} called the vote to avoid a debate", role: "any", party: "ldp", weight: 2, appeal: -0.015, momentum: -4 },
+        { id: "china_row", headline: "The row with Beijing over Takaichi's November remarks on Taiwan, with Chinese tourists told to stay away, keeps security at the top of the news, and {party} gains", role: "any", party: "ldp", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "ishin_seat_cut", headline: "Ishin campaigns on the cut in the number of Diet seats it made the price of joining the coalition, and {party} holds Osaka", role: "any", party: "ishin", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "tamaki_threshold", headline: "Tamaki campaigns on take-home pay and the higher tax-free income threshold his party won from the government, and {party} keeps its young voters", role: "any", party: "dpp", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "japanese_first", headline: "Sanseito carries its 'Japanese First' message on foreign residents from its 2025 upper house breakthrough into the lower house, and {party} climbs", role: "any", party: "sansei", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "mirai_engineers", headline: "Takahiro Anno's Team Mirai, a young party of engineers, campaigns on technology and open government and draws crowds of city voters, and {party} rises", role: "any", party: "mirai", weight: 2, appeal: 0.02, momentum: 6 },
+      ],
+    },
+
     "2024": {
       id: "2024",
       year: 2024,
@@ -435,6 +490,18 @@ export const JAPAN: CountryBundle = {
   },
 
   leaders: {
+    "2026": {
+      ldp: { partyId: "ldp", name: "Sanae Takaichi", charisma: 74, energy: 82, competence: 66, machine: 80 },
+      // Co-led with Komeito's Tetsuo Saito.
+      cra: { partyId: "cra", name: "Yoshihiko Noda", charisma: 54, energy: 64, competence: 70, machine: 64 },
+      ishin: { partyId: "ishin", name: "Hirofumi Yoshimura", charisma: 68, energy: 70, competence: 62, machine: 66 },
+      jcp: { partyId: "jcp", name: "Tomoko Tamura", charisma: 52, energy: 64, competence: 56, machine: 62 },
+      dpp: { partyId: "dpp", name: "Yuichiro Tamaki", charisma: 72, energy: 74, competence: 60, machine: 56 },
+      reiwa: { partyId: "reiwa", name: "Taro Yamamoto", charisma: 76, energy: 70, competence: 46, machine: 40 },
+      sansei: { partyId: "sansei", name: "Sohei Kamiya", charisma: 74, energy: 80, competence: 46, machine: 56 },
+      cpj: { partyId: "cpj", name: "Naoki Hyakuta", charisma: 62, energy: 60, competence: 40, machine: 40 },
+      mirai: { partyId: "mirai", name: "Takahiro Anno", charisma: 62, energy: 72, competence: 72, machine: 34 },
+    },
     "2024": {
       ldp: { partyId: "ldp", name: "Shigeru Ishiba", charisma: 52, energy: 60, competence: 72, machine: 60 },
       dpj: { partyId: "dpj", name: "Yoshihiko Noda", charisma: 58, energy: 68, competence: 70, machine: 66 },
@@ -540,11 +607,13 @@ export const JAPAN: CountryBundle = {
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const JAPAN_MODULE = countryModule(JAPAN, {
-  blurb: "Parallel voting: districts plus regional lists, from the 2009 change of government to the 2024 slush fund election.",
+  blurb: "Parallel voting: districts plus regional lists, from the 2009 change of government to Takaichi's 2026 landslide.",
   cover: "images/covers/country-jp.jpg",
   art: { a: "#14213d", b: "#b3202a", glow: "rgba(255,240,235,0.22)" },
   freeElections: ["2024"],
   scenarios: [
+    { electionId: "2026", difficulty: "hard", dailyPair: ["ldp", "cra"],
+      description: "Takaichi dissolves the House three months into the job, with Ishin as her partner. The Constitutional Democrats and Komeito have merged into the Centrist Reform Alliance, and Team Mirai and Sanseito chase the young vote." },
     { electionId: "2024", difficulty: "easy",
       description: "Ishiba calls a quick election to save a government hurt by the slush fund scandal. The opposition is split several ways, and the coalition's majority is in play." },
     { electionId: "2021", difficulty: "hard",
@@ -562,10 +631,11 @@ export const JAPAN_MODULE = countryModule(JAPAN, {
   pack: {
     id: "japan",
     name: "Japan",
-    description: "Six House of Representatives elections from 2009 to 2024: the Democratic landslide, Abe's return, the Hope split, and the slush fund election that cost the coalition its majority.",
+    description: "Seven House of Representatives elections from 2009 to 2026: the Democratic landslide, Abe's return, the Hope split, the slush fund election that cost the coalition its majority, and Takaichi's two-thirds landslide.",
     price: 99,
   },
-  daily: { pair: ["ldp", "dpj"], names: { ldp: "the LDP", dpj: "the DPJ/CDP" } },
+  // 2026 pairs the LDP with the CRA, which replaced the CDP (row dailyPair).
+  daily: { pair: ["ldp", "dpj"], names: { ldp: "the LDP", dpj: "the DPJ/CDP", cra: "the CRA" } },
   next: {
     chain: [
       { id: "2009", blurb: "Continue the timeline: the change of government" },
@@ -574,10 +644,11 @@ export const JAPAN_MODULE = countryModule(JAPAN, {
       { id: "2017", blurb: "Continue the timeline: the Hope split" },
       { id: "2021", blurb: "Continue the timeline: Kishida's first test" },
       { id: "2024", blurb: "Continue the timeline: the slush fund election" },
+      { id: "2026", blurb: "Continue the timeline: Takaichi's snap election" },
     ],
   },
   guide: {
     title: "Japan",
-    body: "Parallel voting. About 290 seats come from single-member districts and 176 from party lists in eleven regional blocks, and the two tiers do not offset each other. Each block is one region here, and its seats combine its districts and its list seats, so the party that wins a block takes most of them and a swing moves more seats than a pure list system would. The LDP and Komeito govern together by habit. The LDP never partners the Democrats, and the Communists only ever work with the left of the opposition. Chamber size changes: 480 seats in 2009 and 2012, 475 in 2014, 465 since.",
+    body: "Parallel voting. About 290 seats come from single-member districts and 176 from party lists in eleven regional blocks, and the two tiers do not offset each other. Each block is one region here, and its seats combine its districts and its list seats, so the party that wins a block takes most of them and a swing moves more seats than a pure list system would. The LDP and Komeito govern together by habit until 2025; in 2026 the LDP governs with Ishin, and Komeito stands inside the Centrist Reform Alliance with the Constitutional Democrats. The LDP never partners the Democrats or the CRA, and the Communists only ever work with the left of the opposition. Chamber size changes: 480 seats in 2009 and 2012, 475 in 2014, 465 since.",
   },
 });

@@ -43,6 +43,12 @@ export interface CountryElectionEntry {
    * such rows newest first within the module, after the shipped rows.
    */
   addedLater?: boolean;
+  /**
+   * The daily challenge's two sides for this election, when the country's
+   * `daily.pair` does not both stand in it (Japan 2026: the CRA replaced the
+   * CDP). Both need a name in `daily.names`.
+   */
+  dailyPair?: [string, string];
 }
 
 export interface CountryPackDef {

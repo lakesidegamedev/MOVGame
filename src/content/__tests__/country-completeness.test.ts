@@ -105,7 +105,13 @@ describe("country modules", () => {
       }
       for (const row of m.scenarios) {
         const playable = playableFor(m, row.electionId);
-        for (const role of [a, b]) expect(playable, `${m.code} ${row.electionId} daily role ${role}`).toContain(role);
+        const pair = row.dailyPair ?? [a, b];
+        expect(pair[0], `${m.code} ${row.electionId}`).not.toBe(pair[1]);
+        for (const role of pair) {
+          expect(playable, `${m.code} ${row.electionId} daily role ${role}`).toContain(role);
+          expect(m.daily.names[role], `${m.code} name for ${role}`).toBeTruthy();
+          expect(roleShortName(role), `${m.code} ${role} name collides with another country`).toBe(m.daily.names[role]);
+        }
       }
     }
   });
