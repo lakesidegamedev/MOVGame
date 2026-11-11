@@ -157,6 +157,18 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - Platform, Debate Prep and Issue Pivot reach the whole country for free, so repeating them all
   week was stronger than any other plan. The second one in a week now has half the effect, the
   third a quarter, and so on.
+- iPhone and iPad: the campaign library lists all 14 countries and 121 elections by country, with
+  search, Free and Owned filters, challenge and era filters, and a briefing for each election that
+  says how it is won before you pick a side. India's ten sides, Spain's regional parties and every
+  other party list fit on a small phone and with large text.
+- iPhone and iPad: the store lists every pack from the catalog with the Complete Collection first,
+  says what you own and why, marks each country's free elections, shows the App Store price when a
+  pack is on sale and "Coming soon" when it is not, and keeps Restore purchases.
+- iPhone and iPad: the rules read correctly for every election. Mexico says most points wins, the
+  United States shows that year's electoral college (266 of 531 to win from 1932 to 1956) on setup,
+  the desk and results, states that cast no electoral votes have no tile, election night names the
+  real candidates and parties, and a regional party in Spain is told where it stands and is
+  measured against its real seat count.
 - Spain: the Catalan and Basque parties are now playable as regional parties in every election
   they stood in: ERC, CiU and its successors Democràcia i Llibertat and Junts, the PNV, and
   Amaiur and EH Bildu, each with its real lead candidate. They stand only in Catalonia or in the

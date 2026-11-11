@@ -63,6 +63,12 @@ class MobileGame private constructor(
             CampaignChoice(s.id, s.year, s.label, s.tagline, s.dem.shortName, s.rep.shortName)
         }
 
+        /** Read-only: the electoral college a scenario plays with (531 and 266 for 1948, 538 and 270 today). */
+        fun electoralRule(scenarioId: String): ElectoralRule {
+            val total = SCENARIOS[scenarioId]?.electoralCollege?.total ?: STANDARD_EV_TOTAL
+            return ElectoralRule(total, evMajority(total))
+        }
+
         fun mates(scenarioId: String, playerSerial: String): List<MateChoice> {
             val s = SCENARIOS.getValue(scenarioId)
             val roster = if (playerSerial == CandidateId.DEM.serial) s.dem.runningMates else s.rep.runningMates

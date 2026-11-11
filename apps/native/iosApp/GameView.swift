@@ -124,7 +124,7 @@ struct GameView: View {
                                 .position(x: geometry.size.width * CGFloat(g.evMajority()) / CGFloat(g.evTotal()), y: 6)
                         }
                         .frame(height: 12)
-                        Text("\(g.evMajority()) TO WIN").font(.caption2.bold()).foregroundStyle(CampaignStyle.muted)
+                        Text("\(g.evMajority()) OF \(g.evTotal()) TO WIN").font(.caption2.bold()).foregroundStyle(CampaignStyle.muted)
                             .frame(maxWidth: .infinity)
                         HStack(spacing: 8) {
                             headerStat("WEEK", "\(Int(g.turn()) + 1)/\(Int(g.totalTurns()))")
