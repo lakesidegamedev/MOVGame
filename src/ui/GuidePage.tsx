@@ -1,11 +1,14 @@
 import { X } from "lucide-react";
 import { useState } from "react";
+import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
+import { FREE_ELECTIONS_NOTE, REGIONAL_PARTIES_NOTE, regionalPartiesGuide, regionalPartiesLine, votingSystemsGuide } from "@content/guide";
 
 const TABS = [
   { id: "actions", label: "Actions" },
   { id: "blocs", label: "Voter Blocs" },
   { id: "turns", label: "Turn Structure" },
   { id: "scoring", label: "Scoring & Polls" },
+  { id: "systems", label: "Voting Systems" },
   { id: "changelog", label: "Changelog" },
 ] as const;
 
@@ -268,6 +271,36 @@ export function GuidePage({ onClose }: { onClose: () => void }) {
                 <li>Opposition research (scandal or backfire)</li>
                 <li>Ground game + GOTV (turnout, not margin)</li>
               </ul>
+            </div>
+          )}
+
+          {tab === "systems" && (
+            <div className="guide-section">
+              <p className="guide-intro">
+                Each country plays under its own rules. The map, the goal line and the results screen follow the system of the election you pick.
+              </p>
+              {votingSystemsGuide().map((sys) => (
+                <div className="guide-card" key={sys.key}>
+                  <div className="guide-header">
+                    <strong>{sys.name}</strong>
+                    <span className="guide-meta">{sys.countries.map((c) => `${c.flag} ${c.name}`).join(" · ")}</span>
+                  </div>
+                  <p className="guide-text">{sys.note}</p>
+                </div>
+              ))}
+              <div className="guide-card">
+                <div className="guide-header"><strong>Regional parties</strong></div>
+                <p className="guide-text">{REGIONAL_PARTIES_NOTE}</p>
+                <ul className="guide-list">
+                  {regionalPartiesGuide().map((r) => <li key={r.code}>{r.flag} {regionalPartiesLine(r)}</li>)}
+                </ul>
+              </div>
+              {PAYWALL_ENABLED && (
+                <div className="guide-card">
+                  <div className="guide-header"><strong>Free elections</strong></div>
+                  <p className="guide-text">{FREE_ELECTIONS_NOTE}</p>
+                </div>
+              )}
             </div>
           )}
 

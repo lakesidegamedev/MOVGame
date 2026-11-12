@@ -53,10 +53,11 @@
 // the 735-seat chamber lives beside the 630-seat one.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { DE_MAP } from "./paths/de";
 
-export const GERMANY: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const GERMANY: CountryBundle = oncePerCampaign({
   id: "DE",
   label: "Germany",
   flag: "🇩🇪",
@@ -93,12 +94,12 @@ export const GERMANY: CountryBundle = {
   goalHint: "Reach {majority} of {total} seats, alone or in a compatible coalition. The 5% national threshold can exclude parties; CSU is exempt.",
 
   issues: [
-    { id: "economy", name: "Economy & industry", blurb: "Two years of recession, expensive energy, and an auto industry under siege." },
-    { id: "migration", name: "Migration", blurb: "Border control and asylum policy after a string of attacks." },
-    { id: "ukraine_security", name: "Ukraine & security", blurb: "War on the continent, defence spending, and the American question." },
-    { id: "energy_climate", name: "Energy & climate", blurb: "The Energiewende's costs and the path off Russian gas." },
+    { id: "economy", name: "Economy & industry", blurb: "Growth, unemployment, the cost of energy and the future of German industry." },
+    { id: "migration", name: "Migration", blurb: "Asylum, border control and how many newcomers the country can take in." },
+    { id: "ukraine_security", name: "Security & defence", blurb: "NATO, the Bundeswehr's missions abroad, defence spending and Russia." },
+    { id: "energy_climate", name: "Energy & climate", blurb: "Nuclear power, coal, the energy transition and what it costs." },
     { id: "pensions", name: "Pensions & welfare", blurb: "An ageing society and the future of the social state." },
-    { id: "housing", name: "Housing & rents", blurb: "Rent pressure in every big city." },
+    { id: "housing", name: "Housing & rents", blurb: "Rents and house prices in the big cities." },
   ],
 
   blocs: [
@@ -569,7 +570,7 @@ export const GERMANY: CountryBundle = {
       ],
     },
   ],
-};
+}, ["tv_duell"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const GERMANY_MODULE = countryModule(GERMANY, {

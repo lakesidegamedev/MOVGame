@@ -170,6 +170,7 @@ export function UkResults() {
           leftColor: partyColor(leftParty),
           rightColor: partyColor(rightParty),
           unitLabel: "vs maj.",
+          words: { ahead: "over", behind: "short", level: "exactly on" },
           caption: "Seats vs majority threshold",
         }}
         nextScenario={

@@ -68,10 +68,11 @@
 // Coalition win one or two seats and stay in the results only.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { ES_MAP } from "./paths/es";
 
-export const SPAIN: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const SPAIN: CountryBundle = oncePerCampaign({
   id: "ES",
   label: "Spain",
   flag: "🇪🇸",
@@ -137,7 +138,7 @@ export const SPAIN: CountryBundle = {
     { id: "austerity", name: "Austerity & the deficit", blurb: "Brussels, the bond markets and the budget cuts that follow." },
     { id: "prices", name: "Prices & mortgages", blurb: "Food and energy bills, rising interest rates and variable mortgages." },
     { id: "corruption", name: "Corruption", blurb: "Gürtel, the Bárcenas papers and ministers who did not resign." },
-    { id: "catalonia", name: "Catalonia & the unity of Spain", blurb: "Independence, the 2017 referendum, the trial, pardons and what Madrid owes the regions." },
+    { id: "catalonia", name: "Catalonia & the unity of Spain", blurb: "Independence, the referendums, the courts and what Madrid owes the regions." },
     { id: "pensions", name: "Pensions", blurb: "The pension bill, the freeze and who pays for retirement." },
     { id: "housing", name: "Housing", blurb: "Rents that outrun wages, tourist flats and a generation that cannot leave home." },
     { id: "immigration", name: "Immigration", blurb: "Boats to the Canaries, the border at Ceuta and Melilla and who gets to stay." },
@@ -476,7 +477,7 @@ export const SPAIN: CountryBundle = {
       ],
     },
   ],
-};
+}, ["leaders_debate"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const SPAIN_MODULE = countryModule(SPAIN, {

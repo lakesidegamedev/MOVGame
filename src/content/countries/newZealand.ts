@@ -26,10 +26,11 @@
 // Green 8, ACT 1. NZ First chose Labour; the Greens gave confidence and supply.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { NZ_MAP } from "./paths/nz";
 
-export const NEW_ZEALAND: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const NEW_ZEALAND: CountryBundle = oncePerCampaign({
   id: "NZ",
   label: "New Zealand",
   flag: "🇳🇿",
@@ -84,7 +85,7 @@ export const NEW_ZEALAND: CountryBundle = {
     { id: "crime", name: "Law & order", blurb: "Ram raids, gangs and youth crime." },
     { id: "covid", name: "COVID-19 response", blurb: "Lockdowns, the border and the team of five million." },
     { id: "child_poverty", name: "Child poverty", blurb: "Kids in cold, damp homes and the promise to halve child poverty." },
-    { id: "treaty", name: "Te Tiriti & co-governance", blurb: "Three Waters, co-governance and the Treaty's place in law." },
+    { id: "treaty", name: "Te Tiriti & co-governance", blurb: "Co-governance, Māori rights and the Treaty's place in law." },
   ],
 
   blocs: [
@@ -315,7 +316,7 @@ export const NEW_ZEALAND: CountryBundle = {
       ],
     },
   ],
-};
+}, ["leaders_debate"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const NEW_ZEALAND_MODULE = countryModule(NEW_ZEALAND, {

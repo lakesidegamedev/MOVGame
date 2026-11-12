@@ -202,22 +202,19 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
                 <p className="store-free-sub">
                   {plural(freeElections().length, "election")} in {plural(freeElectionsByCountry().length, "country", "countries")}, no account needed, plus the Daily Challenge.
                 </p>
+                {/* One cell per free election, so a country with two (the US) does not stretch its row. */}
                 <ul className="store-free-list">
-                  {freeElectionsByCountry().map((g) => (
-                    <li key={g.country} className="store-free-country">
+                  {freeElectionsByCountry().flatMap((g) => g.elections.map((m) => (
+                    <li key={m.scenarioId} className="store-free-country" data-country={g.country}>
                       <span className="store-free-country-name"><span aria-hidden="true">{g.flag}</span> {g.name}</span>
-                      {g.elections.map((m) => (
-                        <span key={m.scenarioId} className="store-free-row">
-                          <span className="store-free-name"><b>{electionYearLabel(m)}</b> {electionName(m)}</span>
-                          <DifficultyChip difficulty={m.difficulty} />
-                          <button type="button" className="ghost small" onClick={() => onPlay(m.scenarioId)} aria-label={`Play ${m.label}`}>Play</button>
-                        </span>
-                      ))}
+                      <DifficultyChip difficulty={m.difficulty} />
+                      <span className="store-free-name"><span className="store-free-flag" aria-hidden="true">{g.flag}</span><b>{electionYearLabel(m)}</b> {electionName(m)}</span>
+                      <button type="button" className="ghost small" onClick={() => onPlay(m.scenarioId)} aria-label={`Play ${m.label}`}>Play</button>
                     </li>
-                  ))}
+                  )))}
                   <li className="store-free-country store-free-daily">
                     <span className="store-free-country-name">Daily Challenge</span>
-                    <span className="store-free-row"><span className="store-free-name">A new seeded race every day, the same for everyone.</span></span>
+                    <span className="store-free-name">A new seeded race every day, the same for everyone.</span>
                   </li>
                 </ul>
               </section>

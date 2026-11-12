@@ -21,6 +21,24 @@ export interface SwingometerProps {
   rightColor: string;
   unitLabel?: string; // "pts" | "EV" | "seats"
   caption?: string;
+  /**
+   * Words for a player-relative margin, used instead of the sign and unit:
+   * "37 behind" rather than "37 vs rival". `level` is shown at zero.
+   */
+  words?: { ahead: string; behind: string; level: string };
+}
+
+/** The margin as printed under the gauge. */
+export function swingValueText(value: number, unitLabel: string, words?: SwingometerProps["words"]): string {
+  const abs = Math.abs(value);
+  const absStr = abs.toFixed(abs >= 10 ? 0 : 1);
+  if (words) {
+    if (value === 0) return words.level;
+    return `${absStr.replace(/\.0$/, "")} ${value > 0 ? words.ahead : words.behind}`;
+  }
+  // Without words the margin is directional (US: Dem minus Rep): the needle
+  // shows the side, and the number is its size.
+  return `${value > 0 ? "+" : ""}${absStr} ${unitLabel}`;
 }
 
 export function Swingometer({
@@ -32,6 +50,7 @@ export function Swingometer({
   rightColor,
   unitLabel = "pts",
   caption,
+  words,
 }: SwingometerProps) {
   const span = Math.max(1, maxAbs ?? Math.max(Math.abs(value) * 1.35, 5));
   const clamped = Math.max(-span, Math.min(span, value));
@@ -48,9 +67,6 @@ export function Swingometer({
     const h = requestAnimationFrame(() => setDeg(targetDeg));
     return () => cancelAnimationFrame(h);
   }, [targetDeg]);
-
-  const sign = value > 0 ? "+" : "";
-  const absStr = Math.abs(value).toFixed(Math.abs(value) >= 10 ? 0 : 1);
 
   return (
     <div className="ens-swing" data-testid="swingometer">
@@ -83,7 +99,7 @@ export function Swingometer({
       <div className="ens-swing-labels">
         <span style={{ color: partyInk(leftColor) }}>{leftLabel}</span>
         <span className="ens-swing-value">
-          {sign}{absStr} {unitLabel}
+          {swingValueText(value, unitLabel, words)}
         </span>
         <span style={{ color: partyInk(rightColor) }}>{rightLabel}</span>
       </div>

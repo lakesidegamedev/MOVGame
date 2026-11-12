@@ -43,7 +43,7 @@
 
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { FR_MAP } from "./paths/fr";
 import type { TransferMatrix, RoundShares } from "@engine/runoff";
 
@@ -160,7 +160,8 @@ export const FR_TRANSFERS: Record<string, TransferMatrix> = {
   },
 };
 
-export const FRANCE: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const FRANCE: CountryBundle = oncePerCampaign({
   id: "FR",
   label: "France",
   flag: "🇫🇷",
@@ -196,10 +197,10 @@ export const FRANCE: CountryBundle = {
 
   issues: [
     { id: "cost_of_living", name: "Pouvoir d'achat", blurb: "Purchasing power: the issue that decides French elections." },
-    { id: "immigration_identity", name: "Immigration & identity", blurb: "The RN's home turf: borders, laïcité, national identity." },
+    { id: "immigration_identity", name: "Immigration & identity", blurb: "The far right's home turf: borders, laïcité, national identity." },
     { id: "security", name: "Security", blurb: "Crime, policing, and the sense of order." },
-    { id: "pensions", name: "Pensions", blurb: "The retirement-age wound that never closed." },
-    { id: "europe", name: "Europe & the franc débat", blurb: "France's place in the EU, and who pays for it." },
+    { id: "pensions", name: "Pensions", blurb: "The retirement age, and who pays for pensions." },
+    { id: "europe", name: "Europe", blurb: "France's place in Europe, the single currency and who pays for it." },
     { id: "public_services", name: "Public services", blurb: "Hospitals, schools, and the deserted countryside." },
   ],
 
@@ -644,7 +645,7 @@ export const FRANCE: CountryBundle = {
       ],
     },
   ],
-};
+}, ["debat_entre_deux"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const FRANCE_MODULE = countryModule(FRANCE, {

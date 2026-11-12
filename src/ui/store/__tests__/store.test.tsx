@@ -98,8 +98,9 @@ describe("the shelf", () => {
     expect(free.textContent).toContain("Harris v. Trump");
     expect(free.textContent).toContain("Biden v. Trump");
     expect(free.textContent).toContain("Daily Challenge");
-    // One group per country, each with its free election.
-    expect(free.querySelectorAll(".store-free-country:not(.store-free-daily)")).toHaveLength(countryPacks().length);
+    // One cell per free election, and every country has one.
+    const cells = [...free.querySelectorAll<HTMLElement>(".store-free-country:not(.store-free-daily)")];
+    expect(new Set(cells.map((c) => c.dataset.country)).size).toBe(countryPacks().length);
     expect(free.textContent).toContain("France");
     click(buttons(/Play 2024/)[0]);
     expect(onPlay).toHaveBeenCalledWith("us-2024");

@@ -13,6 +13,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Added
 
+- The guide has a Voting Systems tab: each of the game's ten systems explained once, with the
+  countries that use it, plus regional parties and the free elections. The app guide gains
+  entries for Canada, Australia, regional parties and free elections, and its parliamentary
+  entry no longer names only three countries.
 - Japan: the February 2026 House of Representatives election, Takaichi v. Noda. Lead the LDP,
   the new Centrist Reform Alliance of the Constitutional Democrats and Komeito, Ishin, the DPP,
   Sanseito, Team Mirai, the Communists, Reiwa or the Conservatives, with the real list votes and
@@ -127,6 +131,11 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Changed
 
+- Canada's Bloc Québécois and India's state parties (Trinamool, the Samajwadi Party, the BJD,
+  the YSRCP and the AIADMK) now play as regional parties, like Spain's Catalan and Basque
+  parties: the setup shows where they stand and why they cannot win a majority, the results
+  score them against their real seat count, and generic campaign events no longer target them
+  with headlines written for national parties.
 - Spain: the Catalan and Basque parties are now playable as regional parties in every election
   they stood in: ERC, CiU and its successors Democràcia i Llibertat and Junts, the PNV, and
   Amaiur and EH Bildu, each with its real lead candidate. They stand only in Catalonia or in the
@@ -183,6 +192,33 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   beats that were misdated, misattributed or could not be sourced were corrected or replaced (for
   example the German Greens' 1990 leaders, the 1993 Campbell line in Canada, and the 1944 US
   campaign's Pearl Harbor wording), and unverifiable quotes were removed.
+- Landing page: the opening paragraph no longer says "across 14 countries" twice, the country
+  bundle cards line up their prices and buttons, and the Complete Collection card counts every
+  election.
+- Store: the country pack tiles show their cover photo, flag and country name again (they had
+  collapsed to text only). The free base game lists one election per cell, so the two free US
+  elections no longer stretch a row, and on phones each free election is one line with its
+  flag, difficulty and Play. The Complete Collection figures stay on one row on phones.
+- A campaign no longer shows the same debate win twice ("X's candidate wins the debate" could
+  fire in week 1 and again in week 2). The leaders' debate win is now a once-per-campaign beat
+  in every country, and Mexico's campaigns draw from four more generic events.
+- The results gauge now says which way a seat or point margin goes ("37 behind", "12 short",
+  "5 over") instead of printing the size alone, and "Why you lost" says "5.1 points behind"
+  rather than "-5.1 points against".
+- Issue descriptions shared by every election of a country no longer describe only the newest
+  one: Germany 1990 no longer mentions the war in Ukraine, the UK no longer offers "Brexit" in
+  1951, and Canada, Australia, France, Italy, Spain, Ireland and New Zealand read correctly in
+  every year they cover.
+- Store and landing copy now matches every election in each pack: the United States pack says
+  24 races from 1932 to 2024, Canada says 282 to 343 seats and Australia 148 to 151. Mexico's
+  left is now named "PRD/Morena left".
+- Geographic maps now show every region's name at phone and desktop sizes. Small or crowded
+  regions are labelled in the sea next to them (Prince Edward Island and Nova Scotia, Auckland,
+  Kerala and Bengal, the three Dublin regions, central Japan, Veneto and Apulia, Espírito Santo
+  and Rio, the centre of Mexico), and a region's name is always placed before any neighbour's
+  seat count, so a seat count never hides a name. Japan's blocks use short labels ("Hok",
+  "N Kan", "Kinki"), as do Ireland's commuter belt and Dublin regions, Abruzzo-Molise and
+  Mexico's Yucatán; the full name is still on hover and in the region panel.
 - On Easy, a party that stands in only part of a country (the Bloc Québécois, India's regional
   parties, Spain's Catalan and Basque parties) no longer appears on the ballot in regions where it
   never stood. The Easy head start now applies only where your party is actually running.

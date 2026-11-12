@@ -10,6 +10,23 @@ import { money } from "./format";
 
 const pts = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}`;
 
+/** Where the player finished against the top rival, in words, never a signed number. */
+export function verdictText(marginPts: number, rivalName: string, won: boolean | null, unitLabel: string): string {
+  const size = Math.abs(marginPts).toFixed(1);
+  const standing = Math.abs(marginPts) < 0.05
+    ? `level with ${rivalName}`
+    : `${size} ${size === "1.0" ? "point" : "points"} ${marginPts > 0 ? "ahead of" : "behind"} ${rivalName}`;
+  if (won === null) return `You finished ${standing}.`;
+  if (won) {
+    return marginPts > 0
+      ? `You finished ${standing} and took the lead in ${unitLabel}.`
+      : `You finished ${standing} on the vote but took the lead in ${unitLabel}.`;
+  }
+  return marginPts > 0
+    ? `You finished ${standing} on the vote but fell short in ${unitLabel}.`
+    : `You finished ${standing} and fell short in ${unitLabel}.`;
+}
+
 export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | null }) {
   const r = useMemo(() => deriveReport(log), [log]);
   if (!r.hasData) return null;
@@ -19,12 +36,7 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
   const flipsAway = r.flips.length - flipsToPlayer;
 
   // One plain-English read of the arc.
-  const verdict =
-    won === null
-      ? `You finished ${pts(r.finalMarginPts)} points against ${rivalName}.`
-      : won
-        ? `You closed ${pts(r.finalMarginPts)} points ahead of ${rivalName} and took the lead in ${r.unitLabel}.`
-        : `You finished ${pts(r.finalMarginPts)} points against ${rivalName} and fell short in ${r.unitLabel}.`;
+  const verdict = verdictText(r.finalMarginPts, rivalName, won, r.unitLabel);
 
   const debates = r.events.filter((e) => e.text.startsWith("Debate:"));
   const otherEvents = r.events.filter((e) => !e.text.startsWith("Debate:"));

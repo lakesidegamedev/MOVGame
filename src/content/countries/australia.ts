@@ -29,10 +29,11 @@
 // 1996 (March 2): LNP 94, ALP 49, crossbench 5.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { AU_MAP } from "./paths/au";
 
-export const AUSTRALIA: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const AUSTRALIA: CountryBundle = oncePerCampaign({
   id: "AU",
   label: "Australia",
   flag: "🇦🇺",
@@ -75,12 +76,12 @@ export const AUSTRALIA: CountryBundle = {
   },
 
   issues: [
-    { id: "cost_of_living", name: "Cost of living", blurb: "Groceries, rents, mortgage rates: the squeeze that framed the whole campaign." },
-    { id: "housing", name: "Housing", blurb: "A generation locked out; both sides bid with deposits and super." },
-    { id: "medicare", name: "Medicare & health", blurb: "Bulk billing, urgent-care clinics, and the little green card at every Labor event." },
-    { id: "energy_climate", name: "Energy & climate", blurb: "Renewables versus the Coalition's seven nuclear plants." },
-    { id: "trump_security", name: "Trump, tariffs & security", blurb: "Liberation Day tariffs land mid-campaign; who can steady the ship?" },
-    { id: "immigration", name: "Immigration", blurb: "Record intake, migration caps, and the housing crunch blame game." },
+    { id: "cost_of_living", name: "Cost of living", blurb: "Groceries, rents and mortgage rates: the squeeze on household budgets." },
+    { id: "housing", name: "Housing", blurb: "Prices, rents and first home buyers locked out of the market." },
+    { id: "medicare", name: "Medicare & health", blurb: "Bulk billing, hospital waits and the little green card." },
+    { id: "energy_climate", name: "Energy & climate", blurb: "Coal, renewables, carbon pricing and the cost of power." },
+    { id: "trump_security", name: "Trade & the United States", blurb: "Tariffs, the alliance with Washington and who can steady the ship." },
+    { id: "immigration", name: "Immigration", blurb: "Migration levels, caps and who gets the blame for the housing crunch." },
     { id: "economy_jobs", name: "Jobs & the economy", blurb: "Unemployment, a mining boom, a financial crisis and the slogans that promise growth." },
     { id: "budget_debt", name: "Budget & debt", blurb: "Deficits, surpluses and the argument over who can manage the nation's finances." },
     { id: "taxes", name: "Tax reform", blurb: "The GST, income tax cuts and company tax: who pays and who gains." },
@@ -632,11 +633,11 @@ export const AUSTRALIA: CountryBundle = {
       ],
     },
   ],
-};
+}, ["debate_win"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {
-  blurb: "Preferential voting across 150 seats.",
+  blurb: "Preferential voting across 148 to 151 seats.",
   cover: "images/covers/country-au.jpg",
   art: { a: "#082a52", b: "#126d66", glow: "rgba(247,205,79,0.22)" },
   freeElections: ["2025"],
@@ -686,5 +687,9 @@ export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {
       { id: "2022", blurb: "Continue the timeline: the teal wave" },
       { id: "2025", blurb: "Continue the timeline: hold the middle" },
     ],
+  },
+  guide: {
+    title: "Australia",
+    body: "Preferential voting in single-member seats, 148 in 1996 and 1998, 150 or 151 since. The game has no preference count: each state's seats follow its vote with preferences folded into the seat curve, so the Greens and One Nation matter mostly through where their votes flow. The Liberal and National parties play as one Coalition. A majority of the House governs alone; a hung parliament needs the crossbench.",
   },
 });

@@ -27,10 +27,11 @@
 // The 2008 and 2006 independents (Casey, Arthur) and others are `oth`.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { CA_MAP } from "./paths/ca";
 
-export const CANADA: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const CANADA: CountryBundle = oncePerCampaign({
   id: "CA",
   label: "Canada",
   flag: "🇨🇦",
@@ -58,26 +59,30 @@ export const CANADA: CountryBundle = {
     majority: { total: 343, threshold: 172 },
   },
   playable: ["lpc", "cpc", "ndp", "bq", "ref"],
+  // The Bloc stands only in Quebec (75 to 78 seats), so it cannot reach a
+  // majority: the setup says so, the results score it against its real seat
+  // count, and generic random events, written for national parties, skip it.
+  regional: ["bq"],
   abstaining: [],
   // The two governing rivals never partner each other; the Bloc props up no one
   // formally (it extracts concessions vote-by-vote).
   coalitions: { forbidden: [["lpc", "cpc"]], isolated: ["bq"] },
 
   issues: [
-    { id: "us_relations", name: "U.S. relations & tariffs", blurb: "Tariff war, '51st state' taunts, and who can stand up to Washington." },
+    { id: "us_relations", name: "U.S. relations & tariffs", blurb: "Trade fights, tariffs and who can stand up to Washington." },
     { id: "cost_of_living", name: "Cost of living", blurb: "Groceries, inflation, and the affordability squeeze." },
-    { id: "housing", name: "Housing", blurb: "A generation priced out of the market." },
+    { id: "housing", name: "Housing", blurb: "Prices, rents and who can still afford a home." },
     { id: "healthcare", name: "Health care", blurb: "Wait times and a strained public system." },
-    { id: "energy_climate", name: "Energy & climate", blurb: "Pipelines, carbon pricing, and the resource economy." },
-    { id: "immigration", name: "Immigration", blurb: "Record intake meets an infrastructure crunch." },
-    { id: "reconciliation", name: "Reconciliation", blurb: "Unmarked graves, residential schools, and the Crown's unkept promises to Indigenous peoples." },
+    { id: "energy_climate", name: "Energy & climate", blurb: "Pipelines, the oil patch, emissions and the resource economy." },
+    { id: "immigration", name: "Immigration", blurb: "How many newcomers to admit, and whether housing and services keep up." },
+    { id: "reconciliation", name: "Reconciliation", blurb: "Residential schools, land claims and the Crown's unkept promises to Indigenous peoples." },
     { id: "economy", name: "Jobs & the economy", blurb: "Recessions, unemployment and who can steer the economy through a crash." },
     { id: "ethics", name: "Ethics & accountability", blurb: "Patronage, sponsorship, contempt of Parliament and trust in those at the top." },
     { id: "national_unity", name: "National unity", blurb: "Quebec sovereignty, constitutional wounds and how the country stays together." },
     { id: "deficit", name: "Deficits & debt", blurb: "Annual deficits, a growing debt and who will cut or spend." },
     { id: "taxes", name: "Taxes & the GST", blurb: "Consumption tax, income tax cuts and the price of government." },
     { id: "free_trade", name: "Free trade", blurb: "Open borders for goods with the United States: jobs against sovereignty." },
-    { id: "crime_security", name: "Crime & security", blurb: "Guns, law and order and the mission in Afghanistan." },
+    { id: "crime_security", name: "Crime & security", blurb: "Guns, law and order, and Canada's military missions abroad." },
   ],
 
   blocs: [
@@ -676,11 +681,11 @@ export const CANADA: CountryBundle = {
       ],
     },
   ],
-};
+}, ["debate_en", "debate_fr"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const CANADA_MODULE = countryModule(CANADA, {
-  blurb: "343 seats, five parties, coast to coast to coast.",
+  blurb: "282 to 343 seats, five parties, coast to coast to coast.",
   cover: "images/covers/country-ca.jpg",
   art: { a: "#5b1620", b: "#c94242", glow: "rgba(255,236,221,0.19)" },
   freeElections: ["2025"],
@@ -733,5 +738,9 @@ export const CANADA_MODULE = countryModule(CANADA, {
       { id: "2021", blurb: "Continue the timeline: the pandemic snap" },
       { id: "2025", blurb: "Continue the timeline: the tariff-war rematch" },
     ],
+  },
+  guide: {
+    title: "Canada",
+    body: "First past the post in every riding, 282 seats in 1984 rising to 343 in 2025, grouped here into eleven regions with the three territories as one. Seats follow each region's vote along a curve that rewards the leader. Reform and the Canadian Alliance split the right with the Progressive Conservatives until the 2003 merger. The Bloc Québécois stands only in Quebec and plays as a regional party: it cannot win a majority, and the results measure it against its real seat count. Short of a majority, the largest party governs as a minority with case-by-case support.",
   },
 });
