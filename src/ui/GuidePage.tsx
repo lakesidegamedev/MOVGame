@@ -157,6 +157,16 @@ const BLOC_GUIDE = [
 ];
 
 const CHANGELOG = [
+  { version: "2.0.0", date: "2026-11", changes: [
+    "Eight new countries: New Zealand, India, Japan, Brazil, Ireland, Spain, Italy and Mexico. The game now has 14 countries and 121 elections.",
+    "Canada, Australia, Germany and France go back to the 1980s and 1990s, and the United States goes back to 1932, each year with its own Electoral College.",
+    "Every country has one free election. Each country is a $0.99 pack, and the Complete Collection is $3.99.",
+    "A Store screen shows what you own, what each pack holds and how to buy it.",
+    "Difficulty means the same thing in every country: Normal is a fair fight you can win from either side, Easy gives a head start sized to the race, and Hard makes your campaigning land a little lighter.",
+    "Every election has its own issues, and scheduled events land in the weeks they really happened.",
+    "Regional parties, such as the Bloc Québécois and Spain's Catalan and Basque parties, play by their own rules and are scored against their real seats.",
+    "A new look on the web, desktop, iPhone and Android, and a faster first page load on the web.",
+  ] },
   { version: "0.2.0", date: "2026-06", changes: [
     "Debates are now scored head-to-head: both tickets get a 0-100 showing, a winner is called, and the margin swings national momentum. A blowout is a 'meltdown' that hits momentum hard.",
     "Real debate prep: Debate Prep raises readiness (stagecraft), new Policy Prep raises policy command (substance). Both lift your debate score and decay gently.",
@@ -166,7 +176,7 @@ const CHANGELOG = [
     "Historical events now name the real beats (RBG, the Comey letter, the 47% tape, Springfield, the bin Laden tape, and more).",
     "Setup redesigned as a guided wizard with a randomized seed.",
   ] },
-  { version: "0.1.0", date: "2024-06", changes: ["Initial release. 9 action types, 8 voter blocs, 2020 map.", "Mobile responsive layout.", "Guide page with actions, blocs, turns, scoring docs.", "Candidate profiles with stat bars and running mate tabs.", "Renamed traits: energy, debate prep, intelligence, policy knowledge, debating skill, fundraising prowess."] },
+  { version: "0.1.0", date: "2026-06", changes: ["Initial release. 9 action types, 8 voter blocs, 2020 map.", "Mobile responsive layout.", "Guide page with actions, blocs, turns, scoring docs.", "Candidate profiles with stat bars and running mate tabs.", "Renamed traits: energy, debate prep, intelligence, policy knowledge, debating skill, fundraising prowess."] },
 ];
 
 export function GuidePage({ onClose }: { onClose: () => void }) {

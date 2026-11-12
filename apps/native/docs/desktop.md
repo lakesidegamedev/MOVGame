@@ -71,7 +71,7 @@ Each job uploads its files as an artifact on the run page:
 
 | Artifact | Contents |
 | --- | --- |
-| `mov-windows-<channel>` | `Margin of Victory[ Preview]_0.1.0_x64-setup.exe` (installer) and `margin-of-victory-<channel>-portable.exe` (runs without installing) |
+| `mov-windows-<channel>` | `Margin of Victory[ Preview]_2.0.0_x64-setup.exe` (installer) and `margin-of-victory-<channel>-portable.exe` (runs without installing) |
 | `mov-windows-smoke` | screenshot of the launched app |
 | `mov-linux-<channel>` | `.AppImage` and `.deb` |
 | `mov-linux-smoke` | screenshot under xvfb and the app's console output |
@@ -156,4 +156,4 @@ Tauri-generated sizes for every platform live in `src-tauri/icons/`.
 - Verify install, upgrade, uninstall, save retention and offline startup on
   every supported desktop OS.
 - Implement and test Steam DLC ownership before selling packs on Steam.
-- Set a real app version for desktop releases (the shell is still `0.1.0`).
+- Bump the desktop version (`tauri.conf.json`, `Cargo.toml`, `package.json`) with every release; it is 2.0.0 for the 2.0 release.
