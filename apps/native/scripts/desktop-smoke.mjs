@@ -124,6 +124,15 @@ async function landing() {
   await wait(1500);
 }
 
+// From wherever the page is (the previous step may have left it on the desk),
+// back to the landing page.
+async function toLanding() {
+  if (await page.locator(".landing").first().isVisible().catch(() => false)) return landing();
+  const home = page.locator("button", { hasText: /^\s*Home\s*$/ }).locator("visible=true").first();
+  if (await home.isVisible().catch(() => false)) await home.click();
+  return landing();
+}
+
 async function clearOverlays() {
   for (let i = 0; i < 10; i++) {
     const did = await page.evaluate(() => {
@@ -171,7 +180,7 @@ async function playOneWeek() {
 
 try {
   if (step === "play") {
-    await landing();
+    await toLanding();
     await shot("landing");
     await clickText("button", /^\s*Play free\s*$/);
     await shot("setup");
@@ -187,7 +196,7 @@ try {
     const saved = await page.evaluate(() => localStorage.getItem("campaign-us-session-autosave") !== null);
     check("autosave written", saved);
   } else if (step === "resume") {
-    await landing();
+    await toLanding();
     await shot("landing");
     const body = await text();
     const m = body.match(/Resume US campaign · Week (\d+)/);
@@ -215,7 +224,7 @@ try {
       check("resumed on a later week", week && !/Sept? 1$/.test(week), week);
     }
   } else if (step === "paid") {
-    await landing();
+    await toLanding();
     await clickText("button", /^\s*Play free\s*$/);
     // 2016 is in the paid US pack everywhere but the preview.
     await clickText("button.election-tile", /2016/);
@@ -261,8 +270,11 @@ try {
       localStorage.setItem("campaign_token", "smoke-token");
       localStorage.setItem("campaign_user", JSON.stringify(u));
     }, user);
+    // Reload so the app reads the session, starting from the landing page
+    // rather than whatever screen the last step left in the history entry.
+    await page.evaluate(() => window.history.replaceState({ movView: { kind: "landing" } }, "", "/"));
     await page.reload();
-    await landing();
+    await toLanding();
     // Wrap the bridge so the call and its outcome are recorded, then hand it on.
     // Tauri may define invoke as read-only; then the bridge object is replaced
     // by one that inherits everything else from it.
