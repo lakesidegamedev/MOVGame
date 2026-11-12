@@ -5,13 +5,17 @@ import { PACKS_BY_ID, STORE_PACKS } from "@content/packs";
 import { dailyAssignment, utcDateString } from "@lib/daily";
 import { DISTRIBUTION } from "@lib/distribution";
 import { useStoreNav } from "./storeNav";
+import { takeLauncherCode } from "@lib/launcherHandoff";
 
 // Post-redirect notices (Lakeside sign-in). Checkout results are shown by the
 // Store itself, which opens when the player lands back from checkout.
 export type AuthNotice =
   | { kind: "lakeside-signed-in"; username: string }
   | { kind: "lakeside-failed" }
-  | { kind: "lakeside-link-needs-login" };
+  | { kind: "lakeside-link-needs-login" }
+  // Opened from the Lakeside launcher but its sign in did not go through.
+  | { kind: "launcher-failed" }
+  | { kind: "launcher-link-conflict" };
 
 interface AuthStore {
   user: ApiUser | null;
@@ -167,6 +171,28 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 }));
 
+// Opened from the Lakeside launcher with #launcher_code=: strip the code from
+// the address bar at once, then trade it for a game session. On any failure the
+// player keeps playing as they were (signed out, or their existing session).
+async function consumeLauncherCode(): Promise<void> {
+  if (typeof window === "undefined") return;
+  const taken = takeLauncherCode(window.location.hash);
+  if (!taken.present) return;
+  window.history.replaceState(null, "", window.location.pathname + window.location.search + taken.hash);
+  if (!taken.code) {
+    useAuthStore.setState({ notice: { kind: "launcher-failed" } });
+    return;
+  }
+  try {
+    const { token, user, unlocked } = await api.lakesideLauncherExchange(taken.code);
+    storeSession(token, user);
+    useAuthStore.setState({ user, unlocked, notice: { kind: "lakeside-signed-in", username: user.username } });
+  } catch (e) {
+    const conflict = e instanceof ApiError && e.status === 409;
+    useAuthStore.setState({ notice: { kind: conflict ? "launcher-link-conflict" : "launcher-failed" } });
+  }
+}
+
 // Handle redirect landings once on module load, before the entitlement
 // refresh: ?lakeside_code= (Lakeside sign-in bounce), ?purchase= (checkout
 // success/cancel) and ?store= (a link into the Store). Consumed params are
@@ -222,6 +248,9 @@ async function consumeRedirectParams(): Promise<void> {
   }
 }
 
-// Restore entitlements once on module load (fire-and-forget). The redirect
-// params run first so a fresh Lakeside session or purchase is reflected.
-void consumeRedirectParams().then(() => useAuthStore.getState().refresh());
+// Restore entitlements once on module load (fire-and-forget). The launcher
+// code and redirect params run first so a fresh Lakeside session or purchase is
+// reflected.
+void consumeLauncherCode()
+  .then(consumeRedirectParams)
+  .then(() => useAuthStore.getState().refresh());

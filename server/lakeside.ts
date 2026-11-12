@@ -13,6 +13,11 @@ import { getDb, type UserRow } from "./db.js";
 import { LakesideAuthClient, type LakesideAuthIdentity } from "./lakesideAuthClient.js";
 
 export interface LakesideIdentity {
+  /**
+   * The platform user id. Named for its origin: an A House Divided id from the
+   * broker, or discord:<id> when the launcher signed in with Discord. Stored
+   * in users.ahd_user_id, the key the platform's purchase ledger also uses.
+   */
   ahdUserId: string;
   email: string;
   username: string;
