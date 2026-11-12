@@ -23,6 +23,9 @@ fun queuePlannedAction(
     if (committedCash + newCost > resources.cash) return false
     if (type == ActionType.ADVERTISE && adMode == AdMode.ISSUE && issueId == null) return false
     if (type == ActionType.ISSUE_PIVOT && (issueId == null || newPosition == null || newPosition !in -1.0..1.0)) return false
+    // Issue ads and pivots only on an issue this election has.
+    val usesIssue = type == ActionType.ISSUE_PIVOT || (type == ActionType.ADVERTISE && adMode == AdMode.ISSUE)
+    if (usesIssue && issueId != null && issueId.serial !in game.issues) return false
     game.queuedActions = game.queuedActions + CampaignAction(
         type = type,
         candidate = game.playerCandidate,
@@ -59,7 +62,7 @@ fun plannedActionRows(game: GameState): List<PlannedActionRow> = game.queuedActi
         ActionType.OPPO_RESEARCH -> "Oppo research"
         ActionType.DEBATE_PREP -> "Debate prep"
         ActionType.POLICY_PREP -> "Policy prep"
-        ActionType.ISSUE_PIVOT -> "Pivot ${action.issueId?.serial ?: "issue"}"
+        ActionType.ISSUE_PIVOT -> "Pivot ${action.issueId?.let { game.issues[it.serial]?.name ?: it.serial } ?: "issue"}"
     }
     PlannedActionRow(index, action.day ?: 1, if (state == null) title else "$state · $title")
 }

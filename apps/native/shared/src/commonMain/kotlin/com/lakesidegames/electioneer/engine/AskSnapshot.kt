@@ -1,13 +1,21 @@
 package com.lakesidegames.electioneer.engine
 
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 
 @Serializable
 data class AskCampaignState(val name: String, val ev: Int, val playerMargin: Double)
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
-data class AskCampaignPlan(val move: String, val target: String)
+data class AskCampaignPlan(
+    val move: String,
+    val target: String,
+    // The issue an issue ad or pivot is about, by this election's name for it.
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val issue: String? = null,
+)
 
 @Serializable
 data class AskSeatRegion(val name: String, val totalSeats: Int, val playerSeats: Int)
@@ -79,6 +87,7 @@ fun askCampaignSnapshot(state: GameState, scenario: String): String {
             AskCampaignPlan(
                 move = action.type.serial,
                 target = action.stateId?.let { names[it]?.name ?: it } ?: "National",
+                issue = action.issueId?.let { state.issues[it.serial]?.name ?: it.serial },
             )
         },
     )

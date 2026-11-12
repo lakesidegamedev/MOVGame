@@ -3,7 +3,8 @@ import { partyInk } from "@ui/colors";
 import { useGameStore } from "@store/gameStore";
 import { useUkStore } from "@store/ukStore";
 import { useCountryStore } from "@store/countryStore";
-import { ISSUES } from "@content/issues";
+import { electionIssueList } from "@content/issues";
+import { issueTemplateFor } from "@content/scenarios";
 import { BLOCS } from "@content/blocs";
 import { UK_ELECTIONS } from "@content/uk/elections";
 import { COUNTRIES } from "@content/countries";
@@ -73,12 +74,16 @@ function num(e: React.ChangeEvent<HTMLInputElement>): number {
 function TicketForm({
   side,
   ticket,
+  year,
   onChange,
 }: {
   side: "dem" | "rep";
   ticket: CustomTicketInput;
+  year: number;
   onChange: (t: CustomTicketInput) => void;
 }) {
+  // The race runs on the issues of the built-in election nearest its year.
+  const issues = electionIssueList(issueTemplateFor(year).issues);
   const set = (patch: Partial<CustomTicketInput>) => onChange({ ...ticket, ...patch });
   const setTrait = (k: string, v: number) => set({ traits: { ...ticket.traits, [k]: v } });
   const setIssue = (id: IssueId, v: number) => set({ issuePositions: { ...ticket.issuePositions, [id]: v } });
@@ -130,9 +135,9 @@ function TicketForm({
 
       <div style={{ marginTop: 10 }}>
         <span className="muted small">Issue positions (left -1 to right +1)</span>
-        {(Object.keys(ISSUES) as IssueId[]).map((id) => (
+        {issues.map(({ id, name }) => (
           <div key={id} className="ed-slider">
-            <span className="ed-slider-k">{ISSUES[id].name}</span>
+            <span className="ed-slider-k">{name}</span>
             <input type="range" min={-1} max={1} step={0.05} value={ticket.issuePositions[id]} onChange={(e) => setIssue(id, num(e))} />
             <span className="ed-slider-v">{ticket.issuePositions[id].toFixed(2)}</span>
           </div>
@@ -548,8 +553,8 @@ export function EditorScreen({ onClose, onLaunch }: { onClose: () => void; onLau
           </div>
         </div>
 
-        <TicketForm side="dem" ticket={draft.dem} onChange={(t) => setDraft({ ...draft, dem: t })} />
-        <TicketForm side="rep" ticket={draft.rep} onChange={(t) => setDraft({ ...draft, rep: t })} />
+        <TicketForm side="dem" ticket={draft.dem} year={draft.year} onChange={(t) => setDraft({ ...draft, dem: t })} />
+        <TicketForm side="rep" ticket={draft.rep} year={draft.year} onChange={(t) => setDraft({ ...draft, rep: t })} />
         </>
         ) : (
           <MultipartyForm draft={draft} setDraft={setDraft} canPlay={canPlay} onUnlock={unlock} />

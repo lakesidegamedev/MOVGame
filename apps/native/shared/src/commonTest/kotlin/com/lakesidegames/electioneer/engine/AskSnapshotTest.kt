@@ -24,6 +24,7 @@ class AskSnapshotTest {
             if (vector.planned) {
                 assertTrue(campaign.queue("rally", vector.target, 1, null, null, null, null))
                 assertTrue(campaign.queue("fundraise", null, 2, null, null, null, null))
+                assertTrue(campaign.queue("issue_pivot", null, 3, null, null, campaign.issues()[0].id, null))
             }
             val saved = campaign.saveSnapshot()
             val handoff = campaign.askSnapshot()

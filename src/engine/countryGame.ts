@@ -60,7 +60,11 @@ export interface CountryElectionData {
   year: number;
   label: string;
   tagline: string;
+  // Opening salience (0..1) of each of this election's issues.
   salience: Record<string, number>;
+  // The issues this election ran on, named as voters named them that year.
+  // Its `salience` must cover exactly these ids. Absent ⇒ the country's list.
+  issues?: CountryIssueDef[];
   // Scenario-specific capacity to convert campaigning into voter movement.
   // Applies to the party whether it is controlled by the player or the AI.
   campaignPower?: Record<PartyId, number>;
@@ -405,6 +409,32 @@ export interface CountryGameState {
   result?: CountryResult;
 }
 
+/** The issues an election runs on: its own list, or else the country's. */
+export function countryElectionIssues(country: CountryBundle, electionId: string): CountryIssueDef[] {
+  return country.elections[electionId]?.issues ?? country.issues;
+}
+
+export interface LiveIssue {
+  id: string;
+  name: string;
+  blurb: string;
+  salience: number;
+}
+
+/**
+ * A game's issues for display and the issue pickers, in salience-table order:
+ * every issue the game tracks, named by the election's own list. Saves made
+ * before per-election lists keep their old ids, named from the country's list.
+ */
+export function countryGameIssues(country: CountryBundle, g: Pick<CountryGameState, "electionId" | "salience">): LiveIssue[] {
+  return liveIssuesOf(g.salience, [...country.issues, ...countryElectionIssues(country, g.electionId)]);
+}
+
+export function liveIssuesOf(salience: Record<string, number>, defs: readonly { id: string; name: string; blurb: string }[]): LiveIssue[] {
+  const byId = new Map(defs.map((d) => [d.id, d]));
+  return Object.keys(salience).map((id) => ({ id, name: byId.get(id)?.name ?? id, blurb: byId.get(id)?.blurb ?? "", salience: salience[id] }));
+}
+
 export function majorityFor(g: CountryGameState, country: CountryBundle): MajorityRule {
   const m = g.majority ?? country.elections[g.electionId]?.majority ?? country.system.majority;
   return country.plurality ? { ...m, plurality: true } : m;
@@ -512,6 +542,13 @@ function applyCountryEnvironment(regions: StateContest[], player: PartyId, env: 
   }
 }
 
+// Opening salience: the election's values for its declared issues only (an
+// election without a list keeps its whole salience table).
+function electionSalience(election: CountryElectionData): Record<string, number> {
+  if (!election.issues) return { ...election.salience };
+  return Object.fromEntries(election.issues.map((i) => [i.id, election.salience[i.id] ?? 0]));
+}
+
 export interface NewCountryGameOptions {
   seed?: number | string;
   election?: string;
@@ -569,7 +606,7 @@ export function createCountryGame(country: CountryBundle, opts: NewCountryGameOp
     playerParty,
     parties,
     leaders,
-    salience: { ...election.salience },
+    salience: electionSalience(election),
     campaignPower: election.campaignPower ? { ...election.campaignPower } : undefined,
     regions,
     resources,

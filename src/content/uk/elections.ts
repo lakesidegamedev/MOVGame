@@ -12,6 +12,8 @@
 // largest-remainder on the 2024 regional shares, so historic SCO/WAL/NI counts
 // are exact and English regions track the real English total.
 
+import type { UkElectionIssue } from "./issues";
+
 export interface RegionResult {
   v: Record<string, number>; // vote share per party
   s: Record<string, number>; // seats per party (sums to the region's pool)
@@ -27,8 +29,12 @@ export interface UkElectionData {
   year: number;
   label: string;
   tagline: string;
-  // Issue salience for the year (UkIssueId → 0..1).
+  // Opening issue salience for the year (issue id → 0..1). Covers exactly
+  // the ids in `issues` when the election declares them.
   salience: Record<string, number>;
+  // The issues this election ran on, named as voters named them that year
+  // (see electionIssues.ts). Absent ⇒ the shared UK_ISSUES list.
+  issues?: UkElectionIssue[];
   regions: Record<string, RegionResult>;
   // Chamber size for THIS election's boundary set (defaults to 650/326).
   majority?: UkMajority;

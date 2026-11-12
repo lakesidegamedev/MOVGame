@@ -6,6 +6,7 @@ import com.lakesidegames.electioneer.engine.CandidateId
 import com.lakesidegames.electioneer.engine.EventTrigger
 import com.lakesidegames.electioneer.engine.GameEvent
 import com.lakesidegames.electioneer.engine.Issue
+import com.lakesidegames.electioneer.engine.IssueId
 import com.lakesidegames.electioneer.engine.RunningMate
 import kotlinx.serialization.Serializable
 import com.lakesidegames.electioneer.engine.EngineJson
@@ -112,6 +113,7 @@ private data class SetupFile(
     val seeds: List<StateSeed>,
     val totalEv: Int,
     val issues: List<Issue>,
+    val pandemicIssue: CountryIssueDef,
     val mates: Map<String, List<RunningMate>>,
     val scenarios: List<Scenario>,
     val ids: List<String>,
@@ -126,6 +128,26 @@ val STATE_SEEDS: List<StateSeed> by lazy { setupFile.seeds }
 val TOTAL_EV: Int by lazy { setupFile.totalEv }
 
 val ISSUES: Map<String, Issue> by lazy { setupFile.issues.associateBy { it.id.serial } }
+
+// Pandemic Mode's issue for an election that does not carry the axis itself.
+val PANDEMIC_ISSUE: CountryIssueDef by lazy { setupFile.pandemicIssue }
+
+// The issues an election runs on: its declared list, or every axis under its
+// fallback name. In IssueId order, so both engines build the same record.
+fun electionIssueList(declared: List<CountryIssueDef>?): List<CountryIssueDef> {
+    if (declared.isNullOrEmpty()) return IssueId.entries.map { id ->
+        val issue = ISSUES.getValue(id.serial)
+        CountryIssueDef(id.serial, issue.name, issue.blurb)
+    }
+    return IssueId.entries.flatMap { id -> declared.filter { it.id == id.serial } }
+}
+
+// The built-in election whose issues a custom U.S. race of this year runs on:
+// the latest one held in or before that year, else the earliest.
+fun issueTemplateFor(year: Int): Scenario {
+    val byYear = SCENARIO_IDS.mapNotNull { SCENARIOS[it] }.sortedBy { it.year }
+    return byYear.lastOrNull { it.year <= year } ?: byYear.first()
+}
 
 val RUNNING_MATES: Map<String, List<RunningMate>> by lazy { setupFile.mates }
 

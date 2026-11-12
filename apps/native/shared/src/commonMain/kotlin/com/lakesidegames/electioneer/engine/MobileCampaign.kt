@@ -163,8 +163,10 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
             ?: country!!.let { (it.result ?: projectCountry(it, bundle()!!)).seats }
         val names = (uk?.regions ?: country!!.regions).associate { it.id to it.name }
         fun target(id: String?) = id?.let { names[it] ?: it } ?: "National"
-        val planned = uk?.queuedActions?.map { AskCampaignPlan(it.type.serial, target(it.regionId)) }
-            ?: country!!.queuedActions.map { AskCampaignPlan(it.type.serial, target(it.regionId)) }
+        val issueNames = issues().associate { it.id to it.name }
+        fun issue(id: String?) = id?.let { issueNames[it] ?: it }
+        val planned = uk?.queuedActions?.map { AskCampaignPlan(it.type.serial, target(it.regionId), issue(it.issueId)) }
+            ?: country!!.queuedActions.map { AskCampaignPlan(it.type.serial, target(it.regionId), issue(it.issueId)) }
         return EngineJson.encodeToString(AskSeatCampaignSnapshot(
             scenario = label(), country = bundle()?.label ?: "UK", turn = turn(), totalTurns = totalTurns(),
             player = playerParty(), fundsMillions = funds(), momentum = momentum(), actionsLeft = slotsLeft(),
@@ -250,11 +252,9 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
 
     fun analysis(regionId: String?): NativeAnalysisDocument = NativeAnalysis.world(uk, country, regionId)
 
-    fun issues(): List<NativeIssue> {
-        val salience = uk?.salience ?: country!!.salience
-        return bundle()?.issues?.map { NativeIssue(it.id, it.name, it.blurb, salience[it.id] ?: 0.0) }
-            ?: UK_ISSUES.map { NativeIssue(it.id, it.name, it.blurb, salience[it.id] ?: 0.0) }
-    }
+    // This election's issues, under the names voters used that year.
+    fun issues(): List<NativeIssue> =
+        uk?.let { ukGameIssues(it.electionId, it.salience) } ?: countryGameIssues(bundle()!!, country!!.electionId, country!!.salience)
 
     fun actionTypes(): List<String> = UkActionType.entries.map { it.serial }
     private fun cost(type: String, spend: Double?): Double = when (type) {

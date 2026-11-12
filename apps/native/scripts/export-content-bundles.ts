@@ -27,7 +27,7 @@ async function main() {
   const { CANDIDATES, OPPONENT_OF } = await import(`${WEB_REPO}/src/content/candidates.ts`);
   const { STAFF_POOL } = await import(`${WEB_REPO}/src/content/staff.ts`);
   const { STATE_SEEDS, TOTAL_EV } = await import(`${WEB_REPO}/src/content/states.ts`);
-  const { ISSUES } = await import(`${WEB_REPO}/src/content/issues.ts`);
+  const { ISSUES, PANDEMIC_ISSUE } = await import(`${WEB_REPO}/src/content/issues.ts`);
   const { RUNNING_MATES } = await import(`${WEB_REPO}/src/content/runningMates.ts`);
   const { SCENARIOS, SCENARIO_IDS } = await import(`${WEB_REPO}/src/content/scenarios.ts`);
   const ev = await import(`${WEB_REPO}/src/content/events.ts`);
@@ -113,6 +113,7 @@ async function main() {
       seeds: STATE_SEEDS,
       totalEv: TOTAL_EV,
       issues: Object.values(ISSUES),
+      pandemicIssue: PANDEMIC_ISSUE,
       mates: RUNNING_MATES,
       scenarios: Object.values(SCENARIOS),
       ids: SCENARIO_IDS,

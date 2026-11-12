@@ -62,7 +62,8 @@ class ActionsTest {
         seed = 5, rngState = 5, turn = 0, totalTurns = 10, granularity = "week",
         phase = GamePhase.INTEL, playerCandidate = CandidateId.DEM, playerEdge = 1.0,
         candidates = mapOf("dem" to cand(CandidateId.DEM), "rep" to cand(CandidateId.REP)),
-        issues = emptyMap(),
+        // Issue ads and pivots need the issue to exist in the election.
+        issues = mapOf("economy" to Issue(IssueId.ECONOMY, "economy", 0.5, "")),
         salience = mutableMapOf("economy" to 0.5, "healthcare" to 0.5),
         states = listOf(state("PA", 19, 5.0)),
         resources = mapOf("dem" to res(cash), "rep" to res(10_000_000.0)),

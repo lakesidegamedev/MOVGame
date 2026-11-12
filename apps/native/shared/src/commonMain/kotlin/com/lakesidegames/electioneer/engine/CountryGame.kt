@@ -1,5 +1,6 @@
 package com.lakesidegames.electioneer.engine
 
+import com.lakesidegames.electioneer.content.CountryIssueDef
 import com.lakesidegames.electioneer.content.compatible
 import kotlin.math.abs
 import kotlin.math.max
@@ -108,6 +109,28 @@ data class CountryGameState(
     val customScenario: String? = null,
     var result: CountryResult? = null,
 )
+
+/** The issues an election runs on: its own list, or else the country's. */
+fun countryElectionIssues(country: com.lakesidegames.electioneer.content.CountryBundle, electionId: String): List<CountryIssueDef> =
+    country.elections[electionId]?.issues ?: country.issues
+
+/**
+ * A game's issues for display and the pickers, in salience-table order (TS
+ * countryGameIssues). Saves made before per-election lists keep their old ids,
+ * named from the country's list.
+ */
+fun countryGameIssues(country: com.lakesidegames.electioneer.content.CountryBundle, electionId: String, salience: Map<String, Double>): List<NativeIssue> =
+    liveIssuesOf(salience, country.issues + countryElectionIssues(country, electionId))
+
+internal fun liveIssuesOf(salience: Map<String, Double>, defs: List<CountryIssueDef>): List<NativeIssue> {
+    val byId = defs.associateBy { it.id }
+    return salience.map { (id, value) -> NativeIssue(id, byId[id]?.name ?: id, byId[id]?.blurb ?: "", value) }
+}
+
+// Opening salience: the election's values for its declared issues only (an
+// election without a list keeps its whole salience table).
+internal fun electionSalience(salience: Map<String, Double>, issues: List<CountryIssueDef>?): MutableMap<String, Double> =
+    issues?.associate { it.id to (salience[it.id] ?: 0.0) }?.toMutableMap() ?: salience.toMutableMap()
 
 fun majorityFor(
     g: CountryGameState,
@@ -253,7 +276,7 @@ fun createCountryGame(
         playerParty = playerParty,
         parties = parties,
         leaders = leaders,
-        salience = election.salience.toMutableMap(),
+        salience = electionSalience(election.salience, election.issues),
         campaignPower = election.campaignPower,
         regions = regions,
         resources = resources,

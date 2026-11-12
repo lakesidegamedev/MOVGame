@@ -11,7 +11,9 @@ import { UK_ELECTIONS, type UkElectionData, majorityForElection, type UkMajority
 import { leaderFor, type UkLeader } from "@content/uk/leaders";
 import { UK_EVENTS, UK_EVENT_CHANCE, headlineFor, pickTarget, type UkEvent } from "@content/uk/events";
 import { UK_ELECTION_EVENTS } from "@content/uk/electionEvents";
+import { UK_ISSUES, type UkElectionIssue } from "@content/uk/issues";
 import { buildUkRegions } from "./ukSetup";
+import { liveIssuesOf, type LiveIssue } from "./countryGame";
 import { planMultipartyAi, type MpDifficulty } from "./multipartyAi";
 import {
   buildCauseRecap,
@@ -130,6 +132,16 @@ export interface UkGameState {
   result?: UkResult;
 }
 
+/** The issues a UK election runs on: its own list, or else the shared one. */
+export function ukElectionIssues(electionId: string): UkElectionIssue[] {
+  return UK_ELECTIONS[electionId]?.issues ?? UK_ISSUES;
+}
+
+/** A UK game's issues for display and the pickers (see countryGameIssues). */
+export function ukGameIssues(g: Pick<UkGameState, "electionId" | "salience">): LiveIssue[] {
+  return liveIssuesOf(g.salience, [...UK_ISSUES, ...ukElectionIssues(g.electionId)]);
+}
+
 /** Winning post for this election's boundary set (650/326 default). */
 export function majorityForUk(g: UkGameState): UkMajority {
   return g.majority ?? majorityForElection(g.electionId);
@@ -235,7 +247,9 @@ export function createUkGame(opts: NewUkGameOptions = {}): UkGameState {
     playerParty,
     parties,
     leaders,
-    salience: { ...election.salience },
+    salience: election.issues
+      ? Object.fromEntries(election.issues.map((i) => [i.id, election.salience[i.id] ?? 0]))
+      : { ...election.salience },
     regions,
     resources,
     causes: [],

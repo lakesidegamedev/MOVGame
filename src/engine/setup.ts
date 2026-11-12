@@ -12,7 +12,7 @@ import type {
 } from "./types";
 import { BLOCS, BLOC_IDS, logit } from "@content/blocs";
 import { STATE_SEEDS, type StateSeed } from "@content/states";
-import { ISSUES, ISSUE_IDS } from "@content/issues";
+import { ISSUES, ISSUE_IDS, PANDEMIC_ISSUE, electionIssueList } from "@content/issues";
 import { OPPONENT_OF } from "@content/candidates";
 import { resolveRunningMate, defaultRunningMate } from "@content/runningMates";
 import { getScenario, type Scenario, type ScenarioTicket } from "@content/scenarios";
@@ -238,10 +238,17 @@ export function createGame(opts: NewGameOptions = {}): GameState {
   // the player's chosen pick, the AI's historical default.
   const scenario: Scenario = getScenario(opts.scenario);
 
-  // National issue salience — the scenario's year-specific values where given
-  // (so COVID isn't an issue in 2012), otherwise the issue's base salience.
+  // The election's own issues (its declared list, or every axis under the
+  // fallback names). Pandemic Mode adds the pandemic axis to any year.
+  const pandemicAdded = opts.modifiers?.pandemic && scenario.issues && !scenario.issues.some((i) => i.id === "covid_response");
+  const declared = electionIssueList(pandemicAdded ? [...scenario.issues!, PANDEMIC_ISSUE] : scenario.issues);
+  const live = new Set(declared.map((i) => i.id));
+
+  // National issue salience: the scenario's year-specific values where given,
+  // otherwise the issue's base salience. An axis the election does not have
+  // carries none, so it never moves a bloc.
   const salience = {} as GameState["salience"];
-  for (const id of ISSUE_IDS) salience[id] = scenario.issueSalience?.[id] ?? ISSUES[id].baseSalience;
+  for (const id of ISSUE_IDS) salience[id] = live.has(id) ? (scenario.issueSalience?.[id] ?? ISSUES[id].baseSalience) : 0;
   const player = opts.playerCandidate ?? "dem";
   const baseHandicap = HANDICAP[opts.difficulty ?? "normal"];
   // Mirror Match: the underdog boost — extra war chest + slots regardless of
@@ -308,7 +315,7 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     playerEdge: handicap.persuasion,
     locations: {},
     candidates,
-    issues: structuredClone(ISSUES),
+    issues: Object.fromEntries(declared.map((i) => [i.id, { ...i, baseSalience: salience[i.id] }])),
     salience,
     states: buildStates(priors, scenario.evOverrides, scenario.electoralCollege?.absent),
     resources,

@@ -112,11 +112,11 @@ object NativeAnalysis {
                 NativeAnalysisRow("Momentum", points(resource?.momentum ?: countryResource!!.momentum)),
             ))
         }
-        val issues = countryBundle?.issues?.map { Triple(it.id, it.name, it.blurb) }
-            ?: UK_ISSUES.map { Triple(it.id, it.name, it.blurb) }
-        val salience = uk?.salience ?: country!!.salience
-        sections += NativeAnalysisSection("issues", "Issues", issues.map { (id, title, blurb) ->
-            NativeAnalysisRow("$title · ${percent(salience[id] ?: 0.0)}", blurb)
+        // This election's issues, under the names voters used that year.
+        val issues = uk?.let { ukGameIssues(it.electionId, it.salience) }
+            ?: countryGameIssues(countryBundle!!, country!!.electionId, country.salience)
+        sections += NativeAnalysisSection("issues", "Issues", issues.map {
+            NativeAnalysisRow("${it.name} · ${percent(it.salience)}", it.blurb)
         })
         sections += NativeAnalysisSection("polls", "${region.name} polls", pollRegion(uk?.seed ?: country!!.seed, uk?.turn ?: country!!.turn, region).map {
             NativeAnalysisRow("${it.pollster} · n=${it.sampleSize} · ±${points(it.marginOfError)} points",

@@ -13,6 +13,7 @@ import { Home, MessageCircleQuestion } from "lucide-react";
 import { DeskHeader } from "@ui/DeskHeader";
 import { partyInk } from "@ui/colors";
 import { movAskUrlFromSnapshot, movSeatAskSnapshot } from "@lib/ask";
+import { countryGameIssues } from "@engine/countryGame";
 
 function countryEventView(countryId: string, electionId: string, eventId: string) {
   const country = COUNTRIES[countryId];
@@ -105,7 +106,7 @@ export function CountryApp({ countryId, onExit, initialElection, initialSeed, in
         ) : undefined}
         tools={<>
           <button className="ghost small" onClick={onExit}><Home size={14} aria-hidden="true" />Home</button>
-          {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(activeGame, live, country.label))} target="_blank" rel="noopener noreferrer"><MessageCircleQuestion size={14} aria-hidden="true" />Ask about campaign</a>}
+          {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(activeGame, live, country.label, countryGameIssues(country, activeGame)))} target="_blank" rel="noopener noreferrer"><MessageCircleQuestion size={14} aria-hidden="true" />Ask about campaign</a>}
         </>}
       />
 

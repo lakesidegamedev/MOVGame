@@ -33,7 +33,7 @@ private fun debateWithin(game: GameState, turns: Int): Boolean {
 private fun bestIssueForAi(game: GameState, ai: CandidateId): IssueId? {
     var best: IssueId? = null
     var bestScore = 0.05
-    for (issueId in IssueId.entries) {
+    for (issueId in game.liveIssueIds()) {
         val headroom = 1 - (game.salience[issueId.serial] ?: 0.5)
         if (headroom < 0.12) continue
         var adv = 0.0

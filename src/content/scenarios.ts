@@ -1,6 +1,7 @@
 import type {
   BlocId,
   CandidateTraits,
+  ElectionIssue,
   IssueId,
   Party,
   RunningMate,
@@ -53,6 +54,10 @@ export interface Scenario {
   // Omitted issues fall back to content/issues baseSalience; this is how COVID
   // stays out of 2012 and the Iraq war dominates 2004.
   issueSalience?: Partial<Record<IssueId, number>>;
+  // The issues this election ran on, named as voters named them that year.
+  // Axes left out do not exist in this election (no salience, not offered).
+  // Absent ⇒ all ten axes under their 2020 names (custom races).
+  issues?: ElectionIssue[];
 }
 
 const DEM_BLUE = "#2563eb";
@@ -1636,6 +1641,13 @@ export const SCENARIO_IDS = ["2024", "2020", "2016", "2012", "2008", "2004", "20
 // The electoral college a US scenario plays for (the modern 538 when undeclared).
 export function electoralCollegeOf(id?: string): ElectoralCollege {
   return getScenario(id).electoralCollege ?? { total: STANDARD_EV_TOTAL };
+}
+
+// The built-in election whose issues a custom U.S. race of this year runs on:
+// the latest one held in or before that year, else the earliest.
+export function issueTemplateFor(year: number): Scenario {
+  const byYear = SCENARIO_IDS.map((id) => SCENARIOS[id]).sort((a, b) => a.year - b.year);
+  return [...byYear].reverse().find((s) => s.year <= year) ?? byYear[0];
 }
 
 export function getScenario(id?: string): Scenario {

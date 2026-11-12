@@ -48,8 +48,13 @@ internal class CustomDocument(val raw: JsonObject) {
                 listOf(RunningMate("$side-runningmate", "Running Mate", if (side == "dem") CandidateId.DEM else CandidateId.REP,
                     "Runs alongside ${t.text("shortName")!!}.", historical = true)))
         }
-        return Scenario(id = id, year = raw.number("year")!!.toInt(), label = label,
-            tagline = raw.text("tagline")!!, dem = ticket("dem"), rep = ticket("rep"))
+        // Issues and salience come from the built-in election nearest the
+        // race's year (TS toScenario).
+        val year = raw.number("year")!!.toInt()
+        val template = issueTemplateFor(year)
+        return Scenario(id = id, year = year, label = label,
+            tagline = raw.text("tagline")!!, dem = ticket("dem"), rep = ticket("rep"),
+            issueSalience = template.issueSalience, issues = template.issues)
     }
     fun tilt(regions: List<StateContest>) {
         for (region in regions) {
@@ -211,7 +216,10 @@ class NativeCustomScenario private constructor() {
                     for (key in listOf("name", "shortName", "color")) field(t, key, "$side/", title)
                     field(t, "party", "$side/", title, choices = listOf("Democratic", "Republican"))
                     for (key in customTraits) field(t.getValue("traits").jsonObject, key, "$side/traits/", "$title traits", true)
-                    for (issue in IssueId.entries) field(t.getValue("issuePositions").jsonObject, issue.serial, "$side/issuePositions/", "$title issues (-1 to 1)", true)
+                    // Only the issues of the race's year, under that year's names.
+                    val year = raw.number("year")?.toInt() ?: 2024
+                    for (issue in electionIssueList(issueTemplateFor(year).issues))
+                        field(t.getValue("issuePositions").jsonObject, issue.id, "$side/issuePositions/", "$title issues (-1 to 1)", true, label = issue.name)
                     for (bloc in BLOC_IDS) field(t.getValue("baseFavorability").jsonObject, bloc.serial, "$side/baseFavorability/", "$title voters (-1 to 1)", true)
                 }
             } else for ((index, element) in raw.getValue("mp").jsonObject.getValue("parties").jsonArray.withIndex()) {

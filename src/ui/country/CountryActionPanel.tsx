@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useCountryStore } from "@store/countryStore";
-import type { CountryAction, CountryActionType, CountryAdMode } from "@engine/countryGame";
+import { countryGameIssues, type CountryAction, type CountryActionType, type CountryAdMode } from "@engine/countryGame";
 import type { PartyId } from "@engine/system";
 import { partyShort } from "./helpers";
 import { PlanBonusStrip } from "../PlanBonusStrip";
@@ -62,7 +62,9 @@ export function CountryActionPanel() {
   const [type, setType] = useState<CountryActionType>("broadcast");
   const [regionId, setRegionId] = useState<string>(country.runoff ? "__national" : regions[0]?.id ?? "");
   const [mode, setMode] = useState<CountryAdMode>("positive");
-  const [issueId, setIssueId] = useState<string>(country.issues[0].id);
+  // This election's issues, under the names voters used that year.
+  const issues = countryGameIssues(country, game);
+  const [issueId, setIssueId] = useState<string>(issues[0]?.id ?? "");
   const [spendM, setSpendM] = useState<number>(2);
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export function CountryActionPanel() {
       case "oppo_research": return `Oppo${a.regionId ? where : ""}`;
       case "debate_prep": return "Debate prep";
       case "policy_prep": return "Platform";
-      case "issue_pivot": return `Pitch ${a.issueId ?? ""}`;
+      case "issue_pivot": return `Pitch ${a.issueId ? (issues.find((i) => i.id === a.issueId)?.name ?? a.issueId) : ""}`;
       case "fundraise": return "Fundraise";
       default: return a.type;
     }
@@ -182,7 +184,7 @@ export function CountryActionPanel() {
               <div className="field">
                 <label>Issue</label>
                 <select value={issueId} onChange={(e) => setIssueId(e.target.value)}>
-                  {country.issues.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+                  {issues.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
                 </select>
               </div>
             )}
@@ -197,9 +199,9 @@ export function CountryActionPanel() {
           <div className="field">
             <label>Reframe campaign onto</label>
             <select value={issueId} onChange={(e) => setIssueId(e.target.value)}>
-              {country.issues.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+              {issues.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
-            <p className="muted small" style={{ margin: "4px 0 0" }}>{country.issues.find((i) => i.id === issueId)?.blurb}</p>
+            <p className="muted small" style={{ margin: "4px 0 0" }}>{issues.find((i) => i.id === issueId)?.blurb}</p>
           </div>
         )}
       </div>

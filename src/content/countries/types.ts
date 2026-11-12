@@ -12,7 +12,7 @@
 // vite-only imports anywhere under content/countries.
 // ─────────────────────────────────────────────────────────────────────────
 
-import type { CountryBundle } from "@engine/countryGame";
+import type { CountryBundle, CountryIssueDef } from "@engine/countryGame";
 
 export type EnginePath = "us" | "uk" | "country";
 export type ScenarioDifficulty = "easy" | "medium" | "hard";
@@ -168,4 +168,20 @@ export function oncePerCampaign(bundle: CountryBundle, ids: readonly string[]): 
     elections[id] = { ...election, events: [...(election.events ?? []), ...once] };
   }
   return { ...bundle, events: bundle.events.filter((e) => !ids.includes(e.id)), elections };
+}
+
+/**
+ * Gives each election its own issue list (see countries/issues/*.ts), in place.
+ * Every id must have a salience entry in that election; salience entries for
+ * ids not on the list are ignored by the engine. Throws on an unknown election
+ * id or an issue without salience, so a typo fails at import time.
+ */
+export function attachElectionIssues(bundle: CountryBundle, lists: Record<string, CountryIssueDef[]>): void {
+  for (const [id, issues] of Object.entries(lists)) {
+    const election = bundle.elections[id];
+    if (!election) throw new Error(`${bundle.id}: issues for unknown election ${id}`);
+    const missing = issues.filter((i) => election.salience[i.id] === undefined).map((i) => i.id);
+    if (missing.length) throw new Error(`${bundle.id} ${id}: no salience for ${missing.join(", ")}`);
+    election.issues = issues;
+  }
 }

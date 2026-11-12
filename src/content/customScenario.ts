@@ -15,7 +15,7 @@ import type {
 } from "@engine/types";
 import { ISSUE_IDS } from "@content/issues";
 import { BLOC_IDS } from "@content/blocs";
-import { SCENARIOS, type Scenario, type ScenarioTicket } from "@content/scenarios";
+import { SCENARIOS, issueTemplateFor, type Scenario, type ScenarioTicket } from "@content/scenarios";
 import { blocPartyShares } from "@engine/multiparty";
 import {
   createUkGame,
@@ -586,8 +586,11 @@ function toTicket(side: "dem" | "rep", t: CustomTicketInput): ScenarioTicket {
 
 // Adapt a validated custom scenario to the engine's Scenario record. State
 // priors and EV apportionment are left to the engine defaults (2020 map), so a
-// custom race plays on the standard board without touching election math.
+// custom race plays on the standard board without touching election math. Its
+// issues and their salience are those of the built-in election nearest its year
+// (issueTemplateFor), so a custom 1968 race argues about 1968.
 export function toScenario(cs: CustomScenario): Scenario {
+  const template = issueTemplateFor(cs.year);
   return {
     id: cs.id,
     year: cs.year,
@@ -595,6 +598,8 @@ export function toScenario(cs: CustomScenario): Scenario {
     tagline: cs.tagline,
     dem: toTicket("dem", cs.dem),
     rep: toTicket("rep", cs.rep),
+    ...(template.issueSalience ? { issueSalience: { ...template.issueSalience } } : {}),
+    ...(template.issues ? { issues: template.issues.map((i) => ({ ...i })) } : {}),
   };
 }
 

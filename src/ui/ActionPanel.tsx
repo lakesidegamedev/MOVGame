@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGameStore } from "@store/gameStore";
 import type { ActionType, AdMode, CampaignAction, IssueId } from "@engine/index";
-import { ISSUES, ISSUE_IDS } from "@content/issues";
+import { liveIssueIds } from "@content/issues";
 import { money } from "./format";
 import { PlanBonusStrip } from "./PlanBonusStrip";
 import { actionCashCost, canQueueAction, plannedCashCost } from "@engine/actionBudget";
@@ -53,7 +53,7 @@ const NEEDS_STATE: ActionType[] = ["advertise", "rally", "surrogate", "ground_ga
 const DAYS = [1, 2, 3, 4, 5, 6, 7];
 const MAX_PER_DAY = 3;
 
-function shortDesc(a: CampaignAction): string {
+function shortDesc(a: CampaignAction, issueName: (id: IssueId) => string): string {
   switch (a.type) {
     case "advertise": return `${a.stateId} ads`;
     case "rally": return `${a.stateId} rally`;
@@ -64,7 +64,7 @@ function shortDesc(a: CampaignAction): string {
     case "oppo_research": return "Oppo research";
     case "debate_prep": return "Debate prep";
     case "policy_prep": return "Policy prep";
-    case "issue_pivot": return `Pivot ${a.issueId}`;
+    case "issue_pivot": return `Pivot ${a.issueId ? issueName(a.issueId) : ""}`;
     default: return a.type;
   }
 }
@@ -102,9 +102,12 @@ export function ActionPanel() {
     return () => window.removeEventListener("hotkey-pick-action", onPick);
   }, []);
   const [adMode, setAdMode] = useState<AdMode>("positive");
-  const [issueId, setIssueId] = useState<IssueId>("economy");
+  // Only the issues this election has, under its own names.
+  const liveIssues = liveIssueIds(game);
+  const issueName = (id: IssueId) => game.issues[id]?.name ?? id;
+  const [issueId, setIssueId] = useState<IssueId>(liveIssues[0] ?? "economy");
   const [spendM, setSpendM] = useState<number>(8);
-  const [pivotPos, setPivotPos] = useState<number>(game.candidates[player].issuePositions.economy);
+  const [pivotPos, setPivotPos] = useState<number>(game.candidates[player].issuePositions[liveIssues[0] ?? "economy"]);
 
   const plan = game.queuedActions;
   const committedCash = plannedCashCost(game);
@@ -195,7 +198,7 @@ export function ActionPanel() {
               <div className="field">
                 <label>Issue</label>
                 <select value={issueId} onChange={(e) => setIssueId(e.target.value as IssueId)}>
-                  {ISSUE_IDS.map((id) => <option key={id} value={id}>{ISSUES[id].name}</option>)}
+                  {liveIssues.map((id) => <option key={id} value={id}>{issueName(id)}</option>)}
                 </select>
               </div>
             )}
@@ -211,7 +214,7 @@ export function ActionPanel() {
             <div className="field">
               <label>Issue</label>
               <select value={issueId} onChange={(e) => { setIssueId(e.target.value as IssueId); setPivotPos(game.candidates[player].issuePositions[e.target.value as IssueId]); }}>
-                {ISSUE_IDS.map((id) => <option key={id} value={id}>{ISSUES[id].name}</option>)}
+                {liveIssues.map((id) => <option key={id} value={id}>{issueName(id)}</option>)}
               </select>
             </div>
             <div className="field">
@@ -256,8 +259,8 @@ export function ActionPanel() {
                   return (
                     <span className="plan-chip" key={i} title={a.type === "advertise" ? `${a.adMode} ads · ${money(a.spend ?? 0)}` : a.type}>
                       <Ico size={12} />
-                      {shortDesc(a)}
-                      <button type="button" className="x" onClick={() => removeQueued(i)} aria-label={`Remove ${shortDesc(a)}`}><X size={11} /></button>
+                      {shortDesc(a, issueName)}
+                      <button type="button" className="x" onClick={() => removeQueued(i)} aria-label={`Remove ${shortDesc(a, issueName)}`}><X size={11} /></button>
                     </span>
                   );
                 })}

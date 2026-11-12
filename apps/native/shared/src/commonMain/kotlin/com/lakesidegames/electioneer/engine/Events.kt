@@ -149,6 +149,8 @@ fun applyEventEffect(
 
     if (effect.salienceDeltas != null) {
         for ((issueId, delta) in effect.salienceDeltas) {
+            // An issue this election does not have stays out of it.
+            if (issueId !in game.issues) continue
             game.salience[issueId] = clamp((game.salience[issueId] ?: 0.5) + (delta ?: 0.0), 0.0, 1.0)
         }
     }

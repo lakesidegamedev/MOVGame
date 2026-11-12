@@ -571,3 +571,6 @@ data class PoliticalSystem(
     val allocation: AllocationStrategy,
     val majority: MajorityRule,
 )
+
+// The issue axes live in this game, in IssueId order (TS liveIssueIds).
+fun GameState.liveIssueIds(): List<IssueId> = IssueId.entries.filter { it.serial in issues }

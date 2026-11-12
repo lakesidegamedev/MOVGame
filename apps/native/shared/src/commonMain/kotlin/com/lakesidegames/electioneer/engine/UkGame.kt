@@ -6,6 +6,8 @@ import com.lakesidegames.electioneer.content.UK_ELECTIONS
 import com.lakesidegames.electioneer.content.UK_ELECTION_EVENTS
 import com.lakesidegames.electioneer.content.UK_EVENTS
 import com.lakesidegames.electioneer.content.UK_EVENT_CHANCE
+import com.lakesidegames.electioneer.content.UK_ISSUES
+import com.lakesidegames.electioneer.content.CountryIssueDef
 import com.lakesidegames.electioneer.content.UK_PLAYABLE
 import com.lakesidegames.electioneer.content.UkElectionData
 import com.lakesidegames.electioneer.content.UkEvent
@@ -138,6 +140,14 @@ data class UkGameState(
 )
 
 // Winning post for this election's boundary set (650/326 default).
+/** The issues a UK election runs on: its own list, or else the shared one. */
+fun ukElectionIssues(electionId: String): List<CountryIssueDef> =
+    UK_ELECTIONS[electionId]?.issues ?: UK_ISSUES.map { CountryIssueDef(it.id, it.name, it.blurb) }
+
+/** A UK game's issues for display and the pickers (see countryGameIssues). */
+fun ukGameIssues(electionId: String, salience: Map<String, Double>): List<NativeIssue> =
+    liveIssuesOf(salience, UK_ISSUES.map { CountryIssueDef(it.id, it.name, it.blurb) } + ukElectionIssues(electionId))
+
 fun majorityForUk(g: UkGameState): MajorityRule {
     val m = g.majority ?: majorityForElection(g.electionId).let {
         MajorityRule(total = it.total, threshold = it.threshold)
@@ -252,7 +262,7 @@ fun createUkGame(opts: NewUkGameOptions = NewUkGameOptions()): UkGameState {
         playerParty = playerParty,
         parties = parties,
         leaders = leaders,
-        salience = election.salience.toMutableMap(),
+        salience = electionSalience(election.salience, election.issues),
         regions = regions,
         resources = resources,
         causes = mutableListOf(),

@@ -3,6 +3,8 @@ package com.lakesidegames.electioneer.engine
 import com.lakesidegames.electioneer.content.BLOCS
 import com.lakesidegames.electioneer.content.BLOC_IDS
 import com.lakesidegames.electioneer.content.ISSUES
+import com.lakesidegames.electioneer.content.PANDEMIC_ISSUE
+import com.lakesidegames.electioneer.content.electionIssueList
 import com.lakesidegames.electioneer.content.OPPONENT_OF
 import com.lakesidegames.electioneer.content.STAFF_BY_ID
 import com.lakesidegames.electioneer.content.STATE_SEEDS
@@ -226,10 +228,19 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
 
     val scenario = opts.scenarioOverride ?: getScenario(opts.scenario)
 
-    // National issue salience: scenario values where given, else base.
+    // The election's own issues (its declared list, or every axis under the
+    // fallback names). Pandemic Mode adds the pandemic axis to any year.
+    val declaredIssues = scenario.issues
+    val pandemicAdded = opts.modifiers?.pandemic == true && declaredIssues != null &&
+        declaredIssues.none { it.id == IssueId.COVID_RESPONSE.serial }
+    val electionIssues = electionIssueList(if (pandemicAdded) declaredIssues!! + PANDEMIC_ISSUE else declaredIssues)
+    val live = electionIssues.map { it.id }.toSet()
+
+    // National issue salience: scenario values where given, else base. An axis
+    // the election does not have carries none, so it never moves a bloc.
     val salience = mutableMapOf<String, Double>()
     for (id in IssueId.entries) {
-        salience[id.serial] = scenario.issueSalience?.get(id.serial)
+        salience[id.serial] = if (id.serial !in live) 0.0 else scenario.issueSalience?.get(id.serial)
             ?: ISSUES.getValue(id.serial).baseSalience
     }
     val player = opts.playerCandidate
@@ -313,7 +324,9 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
         playerEdge = handicap.persuasion,
         locations = mutableMapOf(),
         candidates = candidates,
-        issues = ISSUES.toMap(),
+        issues = electionIssues.associate { issue ->
+            issue.id to Issue(IssueId.entries.first { it.serial == issue.id }, issue.name, salience.getValue(issue.id), issue.blurb)
+        },
         salience = salience,
         states = buildStates(priors, scenario.evOverrides, scenario.electoralCollege?.absent),
         resources = resources,

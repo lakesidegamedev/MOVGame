@@ -40,6 +40,11 @@ function saturate(bloc: StateBloc, raw: number): number {
   return raw * room * leanResist;
 }
 
+// An issue's name in this election, for the cause log.
+function issueLabel(game: GameState, id: IssueId): string {
+  return game.issues[id]?.name ?? id;
+}
+
 // How well an action lands on a bloc, based on issue alignment & salience.
 // Used to target the right voters with the right message.
 export function issueAlignment(
@@ -98,6 +103,8 @@ function applyAdvertise(
 ) {
   const state = findState(game, action.stateId);
   if (!state) return;
+  // An issue ad needs an issue this election actually has.
+  if ((action.adMode ?? "positive") === "issue" && action.issueId && !game.issues[action.issueId]) return;
   const c = action.candidate;
   const spend = Math.max(0, action.spend ?? 0);
   const res = game.resources[c];
@@ -126,7 +133,7 @@ function applyAdvertise(
     game.causes.push({
       turn: game.turn,
       stateId: state.id,
-      cause: `Issue ads raised salience of ${action.issueId}`,
+      cause: `Issue ads raised salience of ${issueLabel(game, action.issueId)}`,
       marginDelta: 0,
     });
     return;
@@ -370,6 +377,8 @@ function applyPolicyPrep(game: GameState, action: CampaignAction) {
 function applyIssuePivot(game: GameState, action: CampaignAction, mult = 1) {
   const c = action.candidate;
   if (!action.issueId || action.newPosition === undefined) return;
+  // Only an issue this election has can be pivoted on.
+  if (!game.issues[action.issueId]) return;
   const cand = game.candidates[c];
   const old = cand.issuePositions[action.issueId];
   const next = clamp(action.newPosition, -1, 1);
@@ -388,7 +397,7 @@ function applyIssuePivot(game: GameState, action: CampaignAction, mult = 1) {
       const before = 1 - Math.abs(old - ideal) / 2;
       const after = 1 - Math.abs(next - ideal) / 2;
       const delta = (after - before) * weight * 0.5 * mult;
-      addCause(game, bloc, st, `Pivot on ${action.issueId}`, favorSign(c) * delta);
+      addCause(game, bloc, st, `Pivot on ${issueLabel(game, action.issueId)}`, favorSign(c) * delta);
     }
   }
   // Flip-flopper tax with suburban / college voters who prize authenticity.
@@ -397,7 +406,7 @@ function applyIssuePivot(game: GameState, action: CampaignAction, mult = 1) {
     if (st.blocs.length === 0) continue;
     for (const bloc of st.blocs) {
       if (bloc.blocId === "college_white" || bloc.blocId === "suburban_women") {
-        addCause(game, bloc, st, `"Flip-flopper" cost on ${action.issueId}`, -favorSign(c) * tax * 0.3);
+        addCause(game, bloc, st, `"Flip-flopper" cost on ${issueLabel(game, action.issueId)}`, -favorSign(c) * tax * 0.3);
       }
     }
   }

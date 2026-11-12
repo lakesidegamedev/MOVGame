@@ -36,6 +36,8 @@ export function movAskSnapshot(game: GameState, projection: Projection) {
     planned: game.queuedActions.map((action) => ({
       move: action.type,
       target: action.stateId ? (names.get(action.stateId) ?? action.stateId) : "National",
+      // The issue an issue ad or pivot is about, by this election's name for it.
+      ...(action.issueId ? { issue: game.issues[action.issueId]?.name ?? action.issueId } : {}),
     })),
   };
 }
@@ -44,7 +46,14 @@ export function movAskUrl(game: GameState, projection: Projection): string {
   return movAskUrlFromSnapshot(movAskSnapshot(game, projection));
 }
 
-export function movSeatAskSnapshot(game: UkGameState | CountryGameState, projection: UkResult | CountryResult, country: string) {
+// `issues` names the election's issues (countryGameIssues / ukGameIssues).
+export function movSeatAskSnapshot(
+  game: UkGameState | CountryGameState,
+  projection: UkResult | CountryResult,
+  country: string,
+  issues: readonly { id: string; name: string }[],
+) {
+  const issueNames = new Map(issues.map((i) => [i.id, i.name]));
   const player = game.playerParty;
   const resources = game.resources[player];
   const names = new Map(game.regions.map((region) => [region.id, region.name]));
@@ -69,6 +78,7 @@ export function movSeatAskSnapshot(game: UkGameState | CountryGameState, project
     planned: game.queuedActions.map((action) => ({
       move: action.type,
       target: action.regionId ? (names.get(action.regionId) ?? action.regionId) : "National",
+      ...(action.issueId ? { issue: issueNames.get(action.issueId) ?? action.issueId } : {}),
     })),
   };
 }

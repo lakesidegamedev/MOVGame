@@ -6,7 +6,7 @@ import { partyFill, partyInk, textOn } from "@ui/colors";
 import { useCountryStore } from "@store/countryStore";
 import { tallyRegion, allocateRegionSeats } from "@engine/multiparty";
 import type { StateContest } from "@engine/types";
-import { majorityFor, type CountryBundle, type CountryResult } from "@engine/countryGame";
+import { countryGameIssues, majorityFor, type CountryBundle, type CountryResult } from "@engine/countryGame";
 import { partyColor, partyShort, partyName, sortBySeats, byDisplayOrder } from "./helpers";
 import { MpPollBlock } from "@ui/MpPollBlock";
 import { MapPin } from "lucide-react";
@@ -189,8 +189,9 @@ export function CountryStandings() {
   if (!live) return null;
   const order = sortBySeats(country, live.seats);
   const total = majorityFor(game, country).total;
-  const issues = Object.keys(game.salience).filter((id) => game.salience[id] >= 0.1).sort((a, b) => game.salience[b] - game.salience[a]);
-  const issueName = (id: string) => country.issues.find((i) => i.id === id)?.name ?? id;
+  const liveIssues = countryGameIssues(country, game);
+  const issues = liveIssues.filter((i) => i.salience >= 0.1).sort((a, b) => b.salience - a.salience).map((i) => i.id);
+  const issueName = (id: string) => liveIssues.find((i) => i.id === id)?.name ?? id;
   const openingShare = replay?.snapshots[0]?.standings.find((standing) => standing.id === game.playerParty)?.poll;
   const voteShift = openingShare === undefined ? null : ((live.voteShare[game.playerParty] ?? 0) - openingShare) * 100;
 

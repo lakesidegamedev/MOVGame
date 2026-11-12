@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useUkStore } from "@store/ukStore";
-import { majorityForUk } from "@engine/ukGame";
+import { majorityForUk, ukGameIssues } from "@engine/ukGame";
 import { UkSetup } from "./UkSetup";
 import { UkMap } from "./UkMap";
 import { UkSeatBar } from "./UkSeatBar";
@@ -90,7 +90,7 @@ export function UkApp({ onExit, initialElection, initialSeed, initialParty }: { 
         ) : undefined}
         tools={<>
           <button className="ghost small" onClick={onExit}><Home size={14} aria-hidden="true" />Home</button>
-          {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(game, live, "UK"))} target="_blank" rel="noopener noreferrer"><MessageCircleQuestion size={14} aria-hidden="true" />Ask about campaign</a>}
+          {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(game, live, "UK", ukGameIssues(game)))} target="_blank" rel="noopener noreferrer"><MessageCircleQuestion size={14} aria-hidden="true" />Ask about campaign</a>}
         </>}
       />
 

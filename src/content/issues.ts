@@ -1,7 +1,11 @@
-import type { Issue, IssueId } from "@engine/types";
+import type { ElectionIssue, GameState, Issue, IssueId } from "@engine/types";
 
-// ~10 issues. baseSalience 0..1 reflects roughly how dominant each issue was in
-// the autumn 2020 discourse. Salience shifts during play via events.
+// The ten issue axes the U.S. model knows: blocs weigh them and candidates take
+// positions on them. These are the fallback names and blurbs (autumn 2020),
+// used by an election that declares no list of its own, such as a custom race.
+// Built-in elections name the axes for their year (see usElectionIssues.ts).
+// baseSalience 0..1 reflects roughly how dominant each issue was in the autumn
+// 2020 discourse. Salience shifts during play via events.
 export const ISSUES: Record<IssueId, Issue> = {
   economy: {
     id: "economy",
@@ -66,3 +70,25 @@ export const ISSUES: Record<IssueId, Issue> = {
 };
 
 export const ISSUE_IDS = Object.keys(ISSUES) as IssueId[];
+
+// Pandemic Mode puts a pandemic on the ballot in any year. Elections that do
+// not carry the axis themselves get it under this year-neutral name.
+export const PANDEMIC_ISSUE: ElectionIssue = {
+  id: "covid_response",
+  name: "Pandemic Response",
+  blurb: "A deadly epidemic, closed schools and businesses, and who handles it better.",
+};
+
+// The issues an election runs on: its declared list, or every axis under its
+// fallback name. In ISSUE_IDS order, so both engines build the same record.
+export function electionIssueList(declared?: readonly ElectionIssue[]): ElectionIssue[] {
+  if (!declared || declared.length === 0) {
+    return ISSUE_IDS.map((id) => ({ id, name: ISSUES[id].name, blurb: ISSUES[id].blurb }));
+  }
+  return ISSUE_IDS.flatMap((id) => declared.filter((i) => i.id === id));
+}
+
+// The issue axes live in a game, in ISSUE_IDS order.
+export function liveIssueIds(game: Pick<GameState, "issues">): IssueId[] {
+  return ISSUE_IDS.filter((id) => game.issues[id] !== undefined);
+}

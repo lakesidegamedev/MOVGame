@@ -5,7 +5,7 @@ import { issueAlignment } from "./actions";
 import { OPPONENT_OF } from "@content/candidates";
 import { HISTORICAL_EVENTS, GENERIC_DEBATES } from "@content/events";
 import { BLOCS } from "@content/blocs";
-import { ISSUE_IDS } from "@content/issues";
+import { liveIssueIds } from "@content/issues";
 
 // Is a scheduled debate coming within the next `turns` weeks? Lets the AI prep
 // ahead of showtime instead of being caught flat-footed on the big stage.
@@ -24,7 +24,7 @@ function debateWithin(game: GameState, turns: number): boolean {
 function bestIssueForAi(game: GameState, ai: CandidateId): IssueId | null {
   let best: IssueId | null = null;
   let bestScore = 0.05;
-  for (const issueId of ISSUE_IDS) {
+  for (const issueId of liveIssueIds(game)) {
     const headroom = 1 - (game.salience[issueId] ?? 0.5);
     if (headroom < 0.12) continue;
     let adv = 0;

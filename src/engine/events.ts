@@ -161,6 +161,8 @@ export function applyEventEffect(
   if (effect.salienceDeltas) {
     for (const [issueId, delta] of Object.entries(effect.salienceDeltas)) {
       const key = issueId as keyof typeof game.salience;
+      // An issue this election does not have stays out of it.
+      if (!game.issues[key]) continue;
       game.salience[key] = clamp((game.salience[key] ?? 0.5) + (delta ?? 0), 0, 1);
     }
   }

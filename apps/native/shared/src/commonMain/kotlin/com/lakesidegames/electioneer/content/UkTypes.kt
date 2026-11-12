@@ -68,6 +68,8 @@ data class UkElectionData(
     val label: String,
     val tagline: String,
     val salience: Map<String, Double>,
+    // The issues this election ran on; null means the shared UK list.
+    val issues: List<CountryIssueDef>? = null,
     val regions: Map<String, RegionResult>,
     val majority: UkMajority? = null,
     val goalText: String? = null,
@@ -143,6 +145,8 @@ data class CountryElectionData(
     val label: String,
     val tagline: String,
     val salience: Map<String, Double>,
+    // The issues this election ran on; null means the country's list.
+    val issues: List<CountryIssueDef>? = null,
     val campaignPower: Map<PartyId, Double>? = null,
     val regions: Map<String, RegionResult>,
     val majority: UkMajority? = null,

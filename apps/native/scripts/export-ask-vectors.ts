@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { createUkGame, projectUk, playablePartiesIn as ukParties } from "../../../src/engine/ukGame";
-import { createCountryGame, projectCountry, playablePartiesIn } from "../../../src/engine/countryGame";
+import { createUkGame, projectUk, playablePartiesIn as ukParties, ukGameIssues } from "../../../src/engine/ukGame";
+import { createCountryGame, projectCountry, playablePartiesIn, countryGameIssues } from "../../../src/engine/countryGame";
 import { COUNTRIES } from "../../../src/content/countries";
 import { movSeatAskSnapshot } from "../../../src/lib/ask";
 import { seatFixtureElections } from "./fixtureCountries";
@@ -16,11 +16,12 @@ for (const [id, election] of seatFixtureElections()) {
       : createCountryGame(country, { seed, election, playerParty: player });
     const target = game.regions.find(region => (region.baselineSeats?.[player] ?? 0) > 0) ?? game.regions[0];
     for (const planned of [false, true]) {
+      const issues = id === "UK" ? ukGameIssues(game) : countryGameIssues(country, game);
       if (planned) game.queuedActions = [{ type: "rally", party: player, regionId: target.id, day: 1 },
-        { type: "fundraise", party: player, day: 2 }];
+        { type: "fundraise", party: player, day: 2 }, { type: "issue_pivot", party: player, issueId: issues[0].id, day: 3 }];
       const projection = id === "UK" ? projectUk(game) : projectCountry(game, country);
       vectors.push({ country: id, election, player, seed, target: target.id, planned,
-        snapshot: movSeatAskSnapshot(game, projection, id === "UK" ? "UK" : country.label) });
+        snapshot: movSeatAskSnapshot(game, projection, id === "UK" ? "UK" : country.label, issues) });
     }
   }
 }

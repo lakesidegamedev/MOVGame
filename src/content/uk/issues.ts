@@ -41,3 +41,11 @@ export const UK_ISSUES_BY_ID: Record<UkIssueId, UkIssue> = Object.fromEntries(
 ) as Record<UkIssueId, UkIssue>;
 
 export const UK_ISSUE_IDS = UK_ISSUES.map((i) => i.id);
+
+// One issue as a single election declares it. Ids are free text: UK issues
+// carry salience only, so an election can name an issue no other year has.
+export interface UkElectionIssue {
+  id: string;
+  name: string;
+  blurb: string;
+}

@@ -1,9 +1,8 @@
 import { useUkStore } from "@store/ukStore";
 import { partyInk, partyFill } from "@ui/colors";
-import { majorityForUk } from "@engine/ukGame";
+import { majorityForUk, ukGameIssues } from "@engine/ukGame";
 import { partyColor, partyShort, sortBySeats } from "./parties";
 import { partyName } from "./parties";
-import { UK_ISSUES_BY_ID } from "@content/uk/issues";
 import { MpPollBlock } from "@ui/MpPollBlock";
 
 const GOV_LABEL: Record<string, string> = {
@@ -22,7 +21,9 @@ export function UkStandings() {
   if (!live) return null;
   const order = sortBySeats(live.seats);
   const maj = majorityForUk(game);
-  const issues = Object.keys(game.salience).filter((id) => game.salience[id] >= 0.1).sort((a, b) => game.salience[b] - game.salience[a]);
+  const liveIssues = ukGameIssues(game);
+  const issues = liveIssues.filter((i) => i.salience >= 0.1).sort((a, b) => b.salience - a.salience).map((i) => i.id);
+  const issueName = (id: string) => liveIssues.find((i) => i.id === id)?.name ?? id;
 
   return (
     <div className="card scroll">
@@ -55,8 +56,8 @@ export function UkStandings() {
 
       <h3 className="section-gap">Issue Salience</h3>
       {issues.map((id) => (
-        <div className="bloc issue-row" key={id} aria-label={`${UK_ISSUES_BY_ID[id as keyof typeof UK_ISSUES_BY_ID]?.name ?? id} salience ${(game.salience[id] * 100).toFixed(0)}%`}>
-          <span className="name">{UK_ISSUES_BY_ID[id as keyof typeof UK_ISSUES_BY_ID]?.name ?? id}</span>
+        <div className="bloc issue-row" key={id} aria-label={`${issueName(id)} salience ${(game.salience[id] * 100).toFixed(0)}%`}>
+          <span className="name">{issueName(id)}</span>
           <span className="meta">{(game.salience[id] * 100).toFixed(0)}%</span>
           <div className="suppbar"><div style={{ width: `${game.salience[id] * 100}%`, background: "var(--gold)" }} /></div>
         </div>

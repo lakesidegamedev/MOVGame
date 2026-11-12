@@ -42,6 +42,7 @@ import com.lakesidegames.electioneer.engine.ActionType
 import com.lakesidegames.electioneer.engine.AdMode
 import com.lakesidegames.electioneer.engine.GameState
 import com.lakesidegames.electioneer.engine.IssueId
+import com.lakesidegames.electioneer.engine.liveIssueIds
 import com.lakesidegames.electioneer.engine.plannedActionRows
 import com.lakesidegames.electioneer.engine.plannedBonuses
 import com.lakesidegames.electioneer.engine.PlanBonus
@@ -63,9 +64,11 @@ fun ActionPlanner(session: GameSession, game: GameState, selectedId: String?) {
     var day by remember { mutableIntStateOf(1) }
     var adMode by remember { mutableStateOf(AdMode.POSITIVE) }
     var spend by remember { mutableFloatStateOf(8f) }
-    var issue by remember { mutableStateOf(IssueId.ECONOMY) }
+    // Only the issues this election has, under its own names.
+    val liveIssues = remember(game.scenarioId, game.issues.keys) { game.liveIssueIds() }
+    var issue by remember(game.scenarioId) { mutableStateOf(liveIssues.firstOrNull() ?: IssueId.ECONOMY) }
     var position by remember(game.scenarioId) {
-        mutableFloatStateOf((game.candidates[game.playerCandidate.serial]?.issuePositions?.get(IssueId.ECONOMY.serial) ?: 0.0).toFloat())
+        mutableFloatStateOf((game.candidates[game.playerCandidate.serial]?.issuePositions?.get(issue.serial) ?: 0.0).toFloat())
     }
     var notice by remember { mutableStateOf<String?>(null) }
     val states = remember(game.scenarioId) { game.states.filter { it.blocs.isNotEmpty() } }
@@ -104,7 +107,7 @@ fun ActionPlanner(session: GameSession, game: GameState, selectedId: String?) {
                 colors = SliderDefaults.colors(thumbColor = Mov.Accent, activeTrackColor = Mov.Accent, inactiveTrackColor = Mov.Sunken))
         }
         if (type == ActionType.ISSUE_PIVOT || (type == ActionType.ADVERTISE && adMode == AdMode.ISSUE)) {
-            ChoicePicker("Issue", issue.serial, IssueId.entries.map { it.serial to (game.issues[it.serial]?.name ?: it.serial) }) { id ->
+            ChoicePicker("Issue", issue.serial, liveIssues.map { it.serial to (game.issues[it.serial]?.name ?: it.serial) }) { id ->
                 issue = IssueId.entries.first { it.serial == id }
                 position = (game.candidates[game.playerCandidate.serial]?.issuePositions?.get(id) ?: 0.0).toFloat()
             }

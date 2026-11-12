@@ -58,6 +58,16 @@ export interface Issue {
   blurb: string;
 }
 
+// One issue as a single election declares it: one of the engine's issue axes,
+// under the name and blurb voters used that year ("The Depression" in 1932 is
+// the economy axis). An election that declares a list has only those issues;
+// every other axis is absent and carries no salience.
+export interface ElectionIssue {
+  id: IssueId;
+  name: string;
+  blurb: string;
+}
+
 export interface CandidateTraits {
   charisma: number; // 0..100
   energy: number; // was stamina
@@ -359,7 +369,10 @@ export interface GameState {
   // the map markers. Absent until a candidate has rallied somewhere.
   locations?: Partial<Record<CandidateId, string>>;
   candidates: Record<CandidateId, Candidate>;
-  issues: Record<IssueId, Issue>;
+  // The issues live in this election, keyed by axis, with the election's own
+  // names and blurbs. Axes the election does not declare are absent. Saves
+  // made before per-election issues carry all ten under their 2020 names.
+  issues: Partial<Record<IssueId, Issue>>;
   // Live national salience, starts from issue.baseSalience, shifts via events.
   salience: Record<IssueId, number>;
   states: StateContest[];
