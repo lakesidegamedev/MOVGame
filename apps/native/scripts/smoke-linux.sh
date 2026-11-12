@@ -76,13 +76,23 @@ if [ -n "$win" ]; then
   # No window manager under xvfb: put the window at the origin at its configured size.
   xdotool windowmove "$win" 0 0 windowsize "$win" 1280 800 2>/dev/null
   sleep 2
+  xdotool mousemove 1279 799   # park the cursor so it is not the only difference
+  sleep 1
   import -window root "$out/appimage-landing.png"
-  # "Play free" on the landing page (measured at 1280x800).
-  xdotool mousemove 117 363 click 1
+  # "Play free" on the landing page, measured at 1280x800. The preview build's
+  # banner pushes it down.
+  case $(xdotool getwindowname "$win") in *PREVIEW*) y=417 ;; *) y=363 ;; esac
+  xdotool mousemove 117 "$y" click 1
+  sleep 1
+  xdotool mousemove 1279 799
   sleep 4
   import -window root "$out/appimage-after-click.png"
-  before=$(md5sum < "$out/appimage-landing.png"); after=$(md5sum < "$out/appimage-after-click.png")
-  check "appimage takes a click" "$([ "$before" != "$after" ] && echo 1 || echo 0)" "landing then Play free: screenshots differ=$([ "$before" != "$after" ] && echo yes || echo no)"
+  # The setup screen has no hero photo: the right half of the landing page is
+  # the Capitol image, so the mean colour of that box moves a lot.
+  m1=$(convert "$out/appimage-landing.png" -crop 300x300+720+170 -format "%[fx:mean]" info:)
+  m2=$(convert "$out/appimage-after-click.png" -crop 300x300+720+170 -format "%[fx:mean]" info:)
+  changed=$(awk -v a="$m1" -v b="$m2" 'BEGIN { d = a - b; if (d < 0) d = -d; print (d > 0.03) ? 1 : 0 }')
+  check "appimage takes a click" "$changed" "Play free at 117,$y; hero box mean colour $m1 -> $m2"
 fi
 stop_app
 
