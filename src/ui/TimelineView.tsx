@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReplayLog, ReplaySnapshot } from "@lib/replay";
 import { Sparkline } from "./Sparkline";
-import { money } from "./format";
+import { replayMoney } from "./replayMoney";
 import { History, X } from "lucide-react";
 
 // Read-only campaign timeline. Scrub across recorded turns and see the polling
@@ -111,7 +111,7 @@ export function TimelineView({ log, onClose }: { log: ReplayLog; onClose: () => 
             <div className="row" style={{ gap: 18, flexWrap: "wrap" }}>
               <span>Your margin: <strong>{pts(marginNow)} pts</strong></span>
               {prev && <span className="muted">This week: <strong className={unitDelta >= 0 ? "up" : "down"}>{unitDelta >= 0 ? "+" : ""}{unitDelta} {log.unitLabel}</strong></span>}
-              {snap.playerCash !== undefined && <span className="muted">Cash: {money(snap.playerCash)}</span>}
+              {snap.playerCash !== undefined && <span className="muted">Cash: {replayMoney(log, snap.playerCash)}</span>}
               {snap.playerMomentum !== undefined && <span className="muted">Momentum: {snap.playerMomentum.toFixed(0)}</span>}
             </div>
             {marginSeries.length >= 2 && (

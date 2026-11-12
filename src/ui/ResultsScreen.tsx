@@ -20,7 +20,7 @@ import { TimelineView } from "./TimelineView";
 import { pct, votes } from "./format";
 import { Trophy, Lock, Award, BarChart3 } from "lucide-react";
 import { ElectionNight, hasSeenReveal, revealSupported } from "./electionNight/ElectionNight";
-import { ElectionNightShell } from "./electionNight/ElectionNightShell";
+import { ElectionNightShell, freeChoice } from "./electionNight/ElectionNightShell";
 import { StateCallGrid } from "./electionNight/StateCallGrid";
 import { usReveal } from "./electionNight/usReveal";
 import { DailyResultPanel } from "./DailyResultPanel";
@@ -193,6 +193,7 @@ export function ResultsScreen() {
                     }),
                   onUnlock: () => openStoreForScenario(`us-${next.id}`),
                   mapPreview: <UsMiniMapPreview byState={byState} cands={cands} />,
+                  freeAlternative: freeChoice(unlocked, "US", `us-${game.scenarioId ?? "2020"}`),
                 }
               : null
           }
