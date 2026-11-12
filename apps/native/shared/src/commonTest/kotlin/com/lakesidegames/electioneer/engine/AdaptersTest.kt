@@ -104,7 +104,8 @@ class AdaptersTest {
             mapOf("cdu" to 209, "spd" to 121, "afd" to 152, "grn" to 83, "lnk" to 64, "oth" to 1),
             neutral("DE", "2025"),
         )
-        assertEquals(mapOf("ens" to 53, "rn" to 47), neutral("FR", "2027"))
+        // Presidential points are the national vote split (52.2% to 47.8%).
+        assertEquals(mapOf("ens" to 52, "rn" to 48), neutral("FR", "2027"))
         assertEquals(
             mapOf("alp" to 94, "lnp" to 43, "ind" to 12, "grn" to 1, "onp" to 0, "oth" to 0),
             neutral("AU", "2025"),
@@ -161,7 +162,7 @@ class AdaptersTest {
         assertEquals("result", g.phase)
         assertEquals("lpc", g.result!!.largestParty)
         assertEquals(
-            mapOf("lpc" to 176, "cpc" to 122, "ndp" to 6, "gpc" to 1, "oth" to 0, "bq" to 38),
+            mapOf("lpc" to 171, "cpc" to 126, "ndp" to 7, "gpc" to 1, "oth" to 0, "bq" to 38),
             g.result!!.seats,
         )
         val facts = multipartyScoreFacts(
