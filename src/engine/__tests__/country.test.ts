@@ -62,8 +62,13 @@ describe("country bundles", () => {
     expect(openingResult.seats.rn).toBeLessThan(51);
     expect(openingResult.voteShare.rn).toBeCloseTo(0.4145, 1);
 
+    // A week of national contrast broadcasts and platform prep, every week.
+    // It moves real votes, but repeated prep in one week lands weaker
+    // (nationalPrepFactor), so it cannot flip a 17-point landslide on normal.
     let passiveWins = 0;
     let preparedWins = 0;
+    let passiveShare = 0;
+    let preparedShare = 0;
     for (let seed = 0; seed < 12; seed++) {
       for (const prepared of [false, true]) {
         let game = createCountryGame(country, {
@@ -80,13 +85,14 @@ describe("country bundles", () => {
           game = countryAdvanceTurn(game, country, { autoResolvePlayerEvents: true });
         }
         const won = (game.result?.seats.rn ?? 0) >= 51;
-        if (prepared && won) preparedWins++;
-        if (!prepared && won) passiveWins++;
+        const share = (game.result?.voteShare.rn ?? 0) / 12;
+        if (prepared) { preparedShare += share; if (won) preparedWins++; }
+        else { passiveShare += share; if (won) passiveWins++; }
       }
     }
     expect(passiveWins).toBe(0);
-    expect(preparedWins).toBeGreaterThanOrEqual(2);
-    expect(preparedWins).toBeLessThanOrEqual(8);
+    expect(preparedShare - passiveShare).toBeGreaterThan(0.03);
+    expect(preparedWins).toBeLessThanOrEqual(2);
   });
 });
 

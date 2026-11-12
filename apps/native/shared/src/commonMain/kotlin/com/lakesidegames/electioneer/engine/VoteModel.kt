@@ -166,3 +166,25 @@ fun projectElection(game: GameState, tossupBand: Int = 3): Projection {
     }
     return Projection(ev = ev, tossupEv = tossupEv, contests = contests)
 }
+
+// The climate tilt that would hand the player the electoral-vote majority
+// (web usLevelingTilt): bisection with a fixed step count.
+const val MAX_US_LEVELING_TILT = 1.5
+fun usLevelingTilt(game: GameState, player: CandidateId): Double {
+    val sign = if (player == CandidateId.DEM) 1.0 else -1.0
+    fun wins(tilt: Double): Boolean {
+        val states = game.states.map { st ->
+            st.copy(blocs = st.blocs.map { b -> b.copy(baselineMargin = b.baselineMargin + sign * tilt) })
+        }
+        return computeResult(game.copy(states = states)).winner == player.serial
+    }
+    if (wins(0.0)) return 0.0
+    if (!wins(MAX_US_LEVELING_TILT)) return MAX_US_LEVELING_TILT
+    var lo = 0.0
+    var hi = MAX_US_LEVELING_TILT
+    repeat(20) {
+        val mid = (lo + hi) / 2
+        if (wins(mid)) hi = mid else lo = mid
+    }
+    return hi
+}

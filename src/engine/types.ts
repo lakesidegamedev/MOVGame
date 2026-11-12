@@ -180,6 +180,10 @@ export interface StateContest {
   // How hard seats swing per point of vote-share change (FPTP amplification,
   // ~2.5). Higher = more disproportional. Omitted ⇒ system default.
   seatElasticity?: number;
+  // Presidential units (a runoff's or a plurality presidency's points): the
+  // pool is split in proportion to the region's live vote, so points track
+  // votes. Seat pools in parliaments use the baseline swing curve instead.
+  proportional?: boolean;
 }
 
 // ── Resources (player + AI each hold one) ────────────────────────────────

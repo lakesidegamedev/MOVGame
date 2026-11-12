@@ -160,3 +160,31 @@ export function projectElection(game: GameState, tossupBand = 3): Projection {
   });
   return { ev, tossupEv, contests };
 }
+
+// The climate tilt that would hand the player the electoral-vote majority: the
+// smallest uniform shift (logits on every bloc's baseline, toward the player)
+// after which computeResult names the player the winner. Zero when the player
+// already wins; MAX_US_LEVELING_TILT when even that would not do it.
+// Bisection with a fixed step count, mirrored step for step by the native
+// engine. Easy difficulty grants a share of it (setup.ts HANDICAP.gapShare).
+export const MAX_US_LEVELING_TILT = 1.5;
+export function usLevelingTilt(game: GameState, player: CandidateId): number {
+  const sign = player === "dem" ? 1 : -1;
+  const wins = (tilt: number) => {
+    const states = game.states.map((st) => ({
+      ...st,
+      blocs: st.blocs.map((b) => ({ ...b, baselineMargin: b.baselineMargin + sign * tilt })),
+    }));
+    return computeResult({ ...game, states }).winner === player;
+  };
+  if (wins(0)) return 0;
+  if (!wins(MAX_US_LEVELING_TILT)) return MAX_US_LEVELING_TILT;
+  let lo = 0;
+  let hi = MAX_US_LEVELING_TILT;
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+    if (wins(mid)) hi = mid;
+    else lo = mid;
+  }
+  return hi;
+}

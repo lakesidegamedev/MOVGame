@@ -1,5 +1,7 @@
 package com.lakesidegames.electioneer.engine
 
+import kotlin.math.pow
+
 import kotlin.math.roundToInt
 
 data class PlanBonus(val id: String, val name: String, val multiplier: Double,
@@ -64,13 +66,27 @@ fun projectPlannedElection(game: GameState): Projection {
 // Only successfully executed setup moves unlock a payoff. Stable day ordering
 // is shared by committed turns and throwaway previews in every engine.
 internal fun <T> resolvePlan(actions: List<T>, describe: (T) -> PlanMove,
-                             causeCount: () -> Int, apply: (T, Double, List<PlanBonus>) -> Unit) {
+                             causeCount: () -> Int, apply: (T, Double, List<PlanBonus>) -> Unit) =
+    resolveMpPlan(actions, describe, causeCount) { action, mult, bonuses, _ -> apply(action, mult, bonuses) }
+
+// National prep actions in the multiparty engines (web NATIONAL_PREP_TYPES):
+// each one after the first in a week lands at half the strength of the one before.
+internal val NATIONAL_PREP_TYPES = setOf("debate_prep", "policy_prep", "issue_pivot")
+internal fun nationalPrepFactor(action: PlanMove, completed: List<PlanMove>): Double {
+    if (action.type !in NATIONAL_PREP_TYPES) return 1.0
+    val earlier = completed.count { it.type in NATIONAL_PREP_TYPES }
+    return 0.5.pow(earlier)
+}
+
+// resolvePlan plus the week's national-prep factor for each action.
+internal fun <T> resolveMpPlan(actions: List<T>, describe: (T) -> PlanMove,
+                               causeCount: () -> Int, apply: (T, Double, List<PlanBonus>, Double) -> Unit) {
     val completed = mutableListOf<PlanMove>()
     for (action in actions.sortedBy { describe(it).day ?: 1 }) {
         val move = describe(action)
         val bonuses = planBonusesForAction(move, completed)
         val before = causeCount()
-        apply(action, bonuses.fold(1.0) { mult, bonus -> mult * bonus.multiplier }, bonuses)
+        apply(action, bonuses.fold(1.0) { mult, bonus -> mult * bonus.multiplier }, bonuses, nationalPrepFactor(move, completed))
         if (causeCount() > before) completed.add(move)
     }
 }

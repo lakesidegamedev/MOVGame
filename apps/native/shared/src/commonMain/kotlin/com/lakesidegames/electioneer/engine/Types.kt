@@ -255,6 +255,9 @@ data class StateContest(
     val baselineSeats: Map<String, Int>? = null,
     val baselineShare: Map<String, Double>? = null,
     val seatElasticity: Double? = null,
+    // Presidential units (runoff or plurality presidency): the pool splits in
+    // proportion to the region's live vote (web StateContest.proportional).
+    val proportional: Boolean? = null,
 )
 
 @Serializable

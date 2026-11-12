@@ -136,6 +136,18 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   parties: the setup shows where they stand and why they cannot win a majority, the results
   score them against their real seat count, and generic campaign events no longer target them
   with headlines written for national parties.
+- Difficulty now means the same thing in every country. Normal gives you a stronger campaign
+  than your rivals (your campaigning lands harder, plus one extra action and a little more money
+  each week), so a well-run campaign can win a close election from either side, while a
+  historical landslide stays out of reach. Easy now gives a head start sized to the race: almost
+  nothing in a near-tie, a big lift in a landslide, always leaving the last stretch for your
+  campaign to win. Hard makes your campaigning land a little lighter, and outside the United
+  States only your main rival campaigns harder, so smaller parties no longer split your rival's
+  vote for you and make Hard easier than Normal. Every election's difficulty rating was measured
+  again and updated.
+- Platform, Debate Prep and Issue Pivot reach the whole country for free, so repeating them all
+  week was stronger than any other plan. The second one in a week now has half the effect, the
+  third a quarter, and so on.
 - Spain: the Catalan and Basque parties are now playable as regional parties in every election
   they stood in: ERC, CiU and its successors Democràcia i Llibertat and Junts, the PNV, and
   Amaiur and EH Bildu, each with its real lead candidate. They stand only in Catalonia or in the
@@ -235,6 +247,11 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   seat count, so a seat count never hides a name. Japan's blocks use short labels ("Hok",
   "N Kan", "Kinki"), as do Ireland's commuter belt and Dublin regions, Abruzzo-Molise and
   Mexico's Yucatán; the full name is still on hover and in the region panel.
+- France, Brazil and Mexico: presidency points now follow the vote. Before, points barely moved
+  until a region swung hard, so a candidate could win the runoff vote 53 to 47 and still lose
+  on points. Points are now the national vote split, and the map shows each region's share.
+- A rival's contrast broadcast or dossier against you was strengthened by your own difficulty
+  bonus, and yours against them weakened by theirs. Attacks now use the attacker's setting.
 - On Easy, a party that stands in only part of a country (the Bloc Québécois, India's regional
   parties, Spain's Catalan and Basque parties) no longer appears on the ballot in regions where it
   never stood. The Easy head start now applies only where your party is actually running.

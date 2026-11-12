@@ -25,8 +25,10 @@ class NativeSaveTransfer private constructor() {
                 val seed = metadata?.get("seed")?.jsonPrimitive?.contentOrNull ?: state.seed.toString()
                 val difficulty = if (metadata?.containsKey("difficulty") == true)
                     metadata["difficulty"]?.jsonPrimitive?.contentOrNull?.takeUnless { it == "unknown" }
+                // playerEdge is the difficulty's persuasion (setup HANDICAP). Hard
+                // was 1.0 before the 2.0 balance pass; saves from then stay hard.
                 else when (state.playerEdge) {
-                    1.55 -> "easy"; 1.15 -> "normal"; 1.0 -> "hard"; else -> null
+                    1.55 -> "easy"; 1.15 -> "normal"; 0.9, 1.0 -> "hard"; else -> null
                 }
                 SavedGame(seed = seed, state = state, difficulty = difficulty)
             }

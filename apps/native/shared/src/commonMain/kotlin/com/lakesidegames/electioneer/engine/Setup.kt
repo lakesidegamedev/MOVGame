@@ -110,19 +110,22 @@ fun buildStates(
     }
 }
 
-// Player-side handicap by difficulty.
+// Player-side handicap by difficulty (web setup.ts HANDICAP). gapShare and
+// gapResidual size easy's climate tilt from usLevelingTilt (climateTilt);
+// zero on normal and hard. Hard's campaigning lands at 90%.
 @Serializable
 data class PlayerHandicap(
     val actions: Int,
     val cash: Double,
     val persuasion: Double,
-    val environment: Double,
+    val gapShare: Double,
+    val gapResidual: Double,
 )
 
-private val HANDICAP: Map<String, PlayerHandicap> = mapOf(
-    "easy" to PlayerHandicap(actions = 5, cash = 110_000_000.0, persuasion = 1.55, environment = 0.55),
-    "normal" to PlayerHandicap(actions = 1, cash = 25_000_000.0, persuasion = 1.15, environment = 0.0),
-    "hard" to PlayerHandicap(actions = 0, cash = 0.0, persuasion = 1.0, environment = 0.0),
+internal val HANDICAP: Map<String, PlayerHandicap> = mapOf(
+    "easy" to PlayerHandicap(actions = 5, cash = 110_000_000.0, persuasion = 1.55, gapShare = 0.6, gapResidual = 0.15),
+    "normal" to PlayerHandicap(actions = 1, cash = 25_000_000.0, persuasion = 1.15, gapShare = 0.0, gapResidual = 0.0),
+    "hard" to PlayerHandicap(actions = 0, cash = 0.0, persuasion = 0.9, gapShare = 0.0, gapResidual = 0.0),
 )
 
 // Tilts every bloc's baseline toward the player by env logits. No-op at 0.
@@ -141,7 +144,7 @@ private fun startingResources(
     candidate: CandidateId,
     vp: RunningMate,
     baseEnergy: Double,
-    handicap: PlayerHandicap = PlayerHandicap(actions = 0, cash = 0.0, persuasion = 1.0, environment = 0.0),
+    handicap: PlayerHandicap = PlayerHandicap(actions = 0, cash = 0.0, persuasion = 1.0, gapShare = 0.0, gapResidual = 0.0),
 ): Resources {
     // Base 7 plus half the candidate's energy (0-10 scale, rounded up), plus
     // any energetic-VP bonus, plus the player handicap.
@@ -282,11 +285,11 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
     val repVp = if (player == CandidateId.REP) playerVp else oppVp
     val demRes = startingResources(
         CandidateId.DEM, demVp, scenario.dem.traits.energy,
-        if (player == CandidateId.DEM) handicap else PlayerHandicap(0, 0.0, 1.0, 0.0),
+        if (player == CandidateId.DEM) handicap else PlayerHandicap(0, 0.0, 1.0, 0.0, 0.0),
     )
     val repRes = startingResources(
         CandidateId.REP, repVp, scenario.rep.traits.energy,
-        if (player == CandidateId.REP) handicap else PlayerHandicap(0, 0.0, 1.0, 0.0),
+        if (player == CandidateId.REP) handicap else PlayerHandicap(0, 0.0, 1.0, 0.0, 0.0),
     )
     val resources = mutableMapOf(CandidateId.DEM.serial to demRes, CandidateId.REP.serial to repRes)
     val playerRes = resources.getValue(player.serial)
@@ -296,7 +299,7 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
         actions = playerRes.actions + staffActionBonus,
     )
 
-    return GameState(
+    val game = GameState(
         seed = seed,
         rngState = seed,
         turn = 0,
@@ -312,7 +315,7 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
         candidates = candidates,
         issues = ISSUES.toMap(),
         salience = salience,
-        states = withEnvironment(buildStates(priors, scenario.evOverrides, scenario.electoralCollege?.absent), player, handicap.environment),
+        states = buildStates(priors, scenario.evOverrides, scenario.electoralCollege?.absent),
         resources = resources,
         pendingEvents = mutableListOf(),
         firedEventIds = mutableListOf(),
@@ -328,6 +331,10 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
         debateHistory = mutableListOf(),
         modifiers = opts.modifiers,
     )
+    if (handicap.gapShare > 0) {
+        withEnvironment(game.states, player, climateTilt(handicap.gapShare, handicap.gapResidual, usLevelingTilt(game, player)))
+    }
+    return game
 }
 
 // FNV-1a string seed (same algorithm as Rng.hashSeed; exported separately in
