@@ -53,6 +53,9 @@ Run `npm ci` once in your worktree first.
    **end** of `COUNTRY_MODULES`. Never reorder or remove existing entries (section 11).
 5. **Add a cover photo** at `public/images/covers/country-<code>.jpg` with an entry in
    `public/images/covers/ATTRIBUTION.json` (section 2, "Cover").
+   Add the country's flag to `src/ui/fonts/mov-flags.txt` and rebuild `src/ui/fonts/mov-flags.woff2`
+   with `scripts/subset-flag-font.py` (usage in its header). Windows has no flag emoji, so the game
+   draws flags from that small font; `src/content/__tests__/flag-font.test.ts` fails until it is done.
 6. **Run the completeness suite** until it is green:
    `npx vitest run src/content/__tests__/country-completeness.test.ts`
 7. **Rate difficulty** with the balance gauntlet (section 6).
