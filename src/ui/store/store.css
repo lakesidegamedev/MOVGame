@@ -125,10 +125,17 @@
 .store-free-head h2, .store-packs-head h2 { font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
 .store-free-sub { margin: -6px 0 12px; font-size: 13px; color: var(--text-body); }
 .store-free-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
-.store-free-country { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: var(--radius-md); background: var(--well); border: 1px solid var(--border); }
-.store-free-country-name { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
-.store-free-row { display: flex; align-items: center; gap: 8px; min-height: 30px; }
-.store-free-name { flex: 1; min-width: 0; font-size: 13px; line-height: 1.35; color: var(--text-body); }
+/* Two lines per cell: country and difficulty, then the election and Play. */
+.store-free-country {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 8px;
+  padding: 8px 10px; border-radius: var(--radius-md); background: var(--well); border: 1px solid var(--border);
+}
+.store-free-country-name { min-width: 0; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.store-free-country > .store-chip { justify-self: end; }
+.store-free-country > button { justify-self: end; }
+.store-free-daily .store-free-name { grid-column: 1 / -1; }
+.store-free-flag { display: none; }
+.store-free-name { min-width: 0; font-size: 13px; line-height: 1.35; color: var(--text-body); }
 .store-free-name b { color: var(--text); margin-right: 4px; }
 
 /* ── Pack shelf ──────────────────────────────────────────────────────── */
@@ -150,7 +157,8 @@
 .pack-tile.owned { border-color: rgba(52, 211, 153, 0.38); }
 .pack-tile.soon .store-cover { filter: grayscale(0.7) brightness(0.8); }
 .pack-tile-main {
-  display: flex; flex-direction: column; flex: 1; width: 100%; padding: 0; margin: 0; text-align: left; border: 0; border-radius: 0;
+  /* stretch: the global button style centers flex items, which collapsed the cover to zero width */
+  display: flex; flex-direction: column; align-items: stretch; flex: 1; width: 100%; padding: 0; margin: 0; text-align: left; border: 0; border-radius: 0;
   background: transparent; color: inherit; cursor: pointer; font: inherit;
 }
 .pack-tile-main:hover:not(:disabled) { background: transparent; border-color: transparent; }
@@ -247,12 +255,21 @@
   .pack-tile-desc { padding: 4px 12px 0; -webkit-line-clamp: 2; max-height: calc(3em + 4px); box-sizing: content-box; line-height: 1.5; }
   .pack-tile-more { padding: 6px 12px 10px; }
   .pack-tile-foot { min-height: 50px; padding: 8px 12px; }
+  .store-stats { display: grid; grid-template-columns: repeat(3, minmax(0, max-content)); gap: 8px 20px; }
+  .store-stats span { line-height: 1.3; }
   .store-stats b { font-size: 26px; }
   .store-price.big { font-size: 38px; }
   .store-election { grid-template-columns: 58px minmax(0, 1fr); }
   .store-election-act { grid-column: 2; justify-self: start; margin-top: 4px; }
   .store-election-year { font-size: 17px; }
-  .store-free-list { grid-template-columns: 1fr; }
+  .store-free-list { grid-template-columns: 1fr; gap: 6px; }
+  /* Phone: one line per free election (flag, year, name, difficulty, Play). */
+  .store-free-country { grid-template-columns: minmax(0, 1fr) auto auto; padding: 6px 8px 6px 10px; }
+  .store-free-country:not(.store-free-daily) > .store-free-country-name { display: none; }
+  .store-free-country > .store-free-name { grid-row: 1; grid-column: 1; }
+  .store-free-flag { display: inline; margin-right: 6px; }
+  .store-free-daily { display: block; }
+  .store-free-daily > span { display: block; }
 }
 @media (prefers-reduced-motion: reduce) {
   .store-overlay { animation: none; }
