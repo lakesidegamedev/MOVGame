@@ -6,7 +6,7 @@ import { GENERIC_EVENTS } from "@content/events";
 import { unfiredGenericEvents } from "@engine/mpTurnHelpers";
 import { countryAdvanceTurn, createCountryGame, playablePartiesIn, type CountryEventDef } from "@engine/countryGame";
 import { ukAdvanceTurn, createUkGame } from "@engine/ukGame";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 import { UK_EVENTS } from "@content/uk/events";
 import { UK_ELECTION_IDS } from "@content/uk/elections";
 

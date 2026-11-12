@@ -5,7 +5,7 @@ import { beginGame } from "../../../src/engine/turn";
 import { advanceCampaignWeek } from "../../../src/engine/campaignWeek";
 import { createUkGame, ukAdvanceTurn } from "../../../src/engine/ukGame";
 import { createCountryGame, countryAdvanceTurn } from "../../../src/engine/countryGame";
-import { COUNTRIES } from "../../../src/content/countries";
+import { COUNTRIES } from "../../../src/content/countries/all";
 import { usReveal, ukReveal, countryReveal } from "../../../src/ui/electionNight/adapters";
 import { SCENARIOS } from "../../../src/content/scenarios";
 import { SCENARIO_REGISTRY } from "../../../src/content/scenarioRegistry";

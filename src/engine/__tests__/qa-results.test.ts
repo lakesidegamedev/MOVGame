@@ -7,7 +7,7 @@ import { initUsReplayLog, syncUsReplayLog } from "@store/usReplay";
 import { createReplayLog, deriveReport } from "@lib/replay";
 import { createUkGame, majorityForUk, projectUk, computeUkResult, ukCompatible } from "../ukGame";
 import { createCountryGame, majorityFor, projectCountry, countryAdvanceTurn, computeCountryResult } from "../countryGame";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 import { advanceTurn, beginGame } from "../turn";
 import { usOpponentEvMargin } from "../scoring";
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
-import { COUNTRY_MODULES, COUNTRIES } from "@content/countries";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join, relative, resolve, sep } from "node:path";
+import { COUNTRY_MODULES, COUNTRIES } from "@content/countries/all";
 import type { CountryModule } from "@content/countries/types";
 import type { MajorityRule } from "@engine/system";
 import { SCENARIO_REGISTRY, SCENARIOS_BY_ID } from "@content/scenarioRegistry";
@@ -38,13 +38,13 @@ const multiparty = COUNTRY_MODULES.filter((m) => m.engine === "country");
 function electionIds(m: CountryModule): string[] {
   if (m.engine === "us") return Object.keys(SCENARIOS);
   if (m.engine === "uk") return Object.keys(UK_ELECTIONS);
-  return Object.keys(m.bundle!.elections);
+  return Object.keys(COUNTRIES[m.code]!.elections);
 }
 
 function playableFor(m: CountryModule, electionId: string): string[] {
   if (m.engine === "us") return ["dem", "rep"];
   if (m.engine === "uk") return ukPlayable(electionId);
-  return playablePartiesIn(m.bundle!, electionId);
+  return playablePartiesIn(COUNTRIES[m.code]!, electionId);
 }
 
 describe("country modules", () => {
@@ -61,13 +61,50 @@ describe("country modules", () => {
       expect(m.name.length, `${m.code} name`).toBeGreaterThan(0);
       expect(m.flag.length, `${m.code} flag`).toBeGreaterThan(0);
       if (m.engine === "country") {
-        expect(m.bundle, `${m.code} bundle`).toBeDefined();
-        expect(m.bundle!.id, `${m.code} bundle id`).toBe(m.code);
-        expect(COUNTRIES[m.code], m.code).toBe(m.bundle);
+        expect(m.load, `${m.code} bundle loader`).toBeDefined();
+        expect(COUNTRIES[m.code], `${m.code} bundle`).toBeDefined();
       } else {
-        expect(m.bundle, `${m.code} has its own engine path`).toBeUndefined();
+        expect(m.load, `${m.code} has its own engine path`).toBeUndefined();
       }
     }
+  });
+
+  // A module is metadata the landing page reads without loading the bundle, so
+  // every fact it repeats from the bundle has to agree with it.
+  it("module metadata agrees with its bundle", () => {
+    for (const m of multiparty) {
+      const bundle = COUNTRIES[m.code]!;
+      expect(bundle.id, `${m.code} bundle id`).toBe(m.code);
+      expect(bundle.label, `${m.code} name`).toBe(m.name);
+      expect(bundle.flag, `${m.code} flag`).toBe(m.flag);
+      for (const row of m.scenarios) {
+        const election = bundle.elections[row.electionId];
+        expect(election, `${m.code} ${row.electionId} is in the bundle`).toBeDefined();
+        expect(row.year, `${m.code} ${row.electionId} year`).toBe(election!.year);
+      }
+      const regional = (bundle.regional ?? []).map((id) => bundle.system.parties.find((p) => p.id === id)?.shortName ?? id);
+      expect(m.regionalParties ?? [], `${m.code} regionalParties`).toEqual(regional);
+    }
+  });
+
+  // The web client loads bundles on demand; ./all loads every one of them.
+  it("client code never imports the eager bundle list", () => {
+    const SRC = resolve(__dirname, "../..");
+    const allowed = new Set(["engine/balance/harness.ts", "content/countries/all.ts"]);
+    const offenders: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, entry.name);
+        if (entry.isDirectory()) { if (entry.name !== "__tests__") walk(full); continue; }
+        if (!/\.(ts|tsx)$/.test(entry.name)) continue;
+        const rel = relative(SRC, full).split(sep).join("/");
+        if (allowed.has(rel)) continue;
+        const text = readFileSync(full, "utf8");
+        if (/from\s+["'][^"']*countries\/all(\.js|\.ts)?["']/.test(text) || /\.bundle(\.js|\.ts)?["']/.test(text) && !rel.startsWith("content/countries/")) offenders.push(rel);
+      }
+    };
+    walk(SRC);
+    expect(offenders).toEqual([]);
   });
 
   it("player copy is plain: no em or en dashes in labels, descriptions, blurbs or pack copy", () => {
@@ -146,7 +183,7 @@ describe("registry rows", () => {
       for (const row of m.scenarios) {
         const next = nextScenarioFor(m.code, row.electionId);
         expect(next, `${m.code} ${row.electionId}`).toBeTruthy();
-        expect(m.bundle!.elections[next!.id], `${m.code} -> ${next!.id}`).toBeDefined();
+        expect(COUNTRIES[m.code]!.elections[next!.id], `${m.code} -> ${next!.id}`).toBeDefined();
         expect(SCENARIOS_BY_ID[`${m.code.toLowerCase()}-${next!.id}`], `${m.code} -> ${next!.id} registry`).toBeDefined();
       }
     }
@@ -179,7 +216,7 @@ function partyIds(c: CountryBundle): Set<string> {
   return new Set(c.system.parties.map((p) => p.id));
 }
 
-describe.each(multiparty.map((m) => [m.code, m.bundle!] as const))("%s content", (code, country) => {
+describe.each(multiparty.map((m) => [m.code, COUNTRIES[m.code]!] as const))("%s content", (code, country) => {
   const parties = partyIds(country);
   const blocIds = new Set(country.blocs.map((b) => b.id));
   const issueIds = new Set(country.issues.map((i) => i.id));

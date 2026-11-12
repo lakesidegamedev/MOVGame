@@ -9,7 +9,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { runGauntlet, scenarioBaseline, type GauntletRow } from "../balance/harness";
 import { SCENARIOS_BY_ID } from "@content/scenarioRegistry";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 import {
   applyCountryAction,
   computeCountryResult,

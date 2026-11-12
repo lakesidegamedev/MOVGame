@@ -41,21 +41,12 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Long-cache chunks: React and the content tables change far less often
-        // than app code, so a deploy that only touches the interface keeps them
-        // cached. Content is grouped by engine path; every chunk stays under
-        // Vite's 500 kB warning and downloads in parallel.
-        manualChunks: (id) => {
-          if (id.includes("node_modules")) return "vendor";
-          if (/\/src\/content\/countries\/paths\//.test(id)) return "country-maps";
-          // Each election's issue list: text that keeps the countries chunk under 500 kB.
-          if (/\/src\/content\/countries\/issues\//.test(id)) return "country-issues";
-          if (/\/src\/content\/countries\//.test(id)) return "countries";
-          if (/\/src\/content\/(historicalEvents|scenarios|statePaths|events|endorsements|states|usElectionIssues)\.ts$/.test(id)) return "us-content";
-          // UK region paths stay with the lazy screens that draw them.
-          if (/\/src\/content\/uk\/(?!regionPaths)/.test(id)) return "uk-content";
-          return undefined;
-        },
+        // React and the other libraries change far less often than app code,
+        // so they get their own long-cached chunk. Content is not grouped by
+        // hand: each game shell and each country bundle is a dynamic import,
+        // so Rollup gives it its own chunk that loads only when needed, and
+        // the landing page downloads metadata only.
+        manualChunks: (id) => (id.includes("node_modules") ? "vendor" : undefined),
       },
     },
   },

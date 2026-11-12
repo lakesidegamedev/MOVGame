@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createUkGame, projectUk, playablePartiesIn as ukParties, ukGameIssues } from "../../../src/engine/ukGame";
 import { createCountryGame, projectCountry, playablePartiesIn, countryGameIssues } from "../../../src/engine/countryGame";
-import { COUNTRIES } from "../../../src/content/countries";
+import { COUNTRIES } from "../../../src/content/countries/all";
 import { movSeatAskSnapshot } from "../../../src/lib/ask";
 import { seatFixtureElections } from "./fixtureCountries";
 

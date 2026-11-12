@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCountryStore } from "@store/countryStore";
-import { COUNTRIES } from "@content/countries";
+import { loadCountry, loadedCountry } from "@content/countries";
+import type { CountryBundle } from "@engine/countryGame";
+import { LazyFallback, LoadFailed } from "@ui/Fallbacks";
 import { CountrySetup } from "./CountrySetup";
 import { CountryMap, CountrySeatBar, CountryStandings, CountryRegionPanel } from "./CountryPanels";
 import { CountryActionPanel } from "./CountryActionPanel";
@@ -15,9 +17,7 @@ import { partyInk } from "@ui/colors";
 import { movAskUrlFromSnapshot, movSeatAskSnapshot } from "@lib/ask";
 import { countryGameIssues } from "@engine/countryGame";
 
-function countryEventView(countryId: string, electionId: string, eventId: string) {
-  const country = COUNTRIES[countryId];
-  if (!country) return null;
+function countryEventView(country: CountryBundle, electionId: string, eventId: string) {
   const deck = country.elections[electionId]?.events ?? [];
   const ev = deck.find((e) => e.id === eventId) ?? country.events.find((e) => e.id === eventId);
   if (!ev?.choices) return null;
@@ -28,13 +28,69 @@ function countryEventView(countryId: string, electionId: string, eventId: string
   };
 }
 
-// The generic country shell — the UkApp pattern, parameterized by bundle.
-// Takes the country ID (not the bundle) so the bundles + map data stay inside
-// this lazy chunk instead of the main bundle.
-export function CountryApp({ countryId, onExit, initialElection, initialSeed, initialParty }: { countryId: string; onExit: () => void; initialElection?: string; initialSeed?: string; initialParty?: string }) {
-  const country = COUNTRIES[countryId];
+interface CountryAppProps {
+  countryId: string;
+  onExit: () => void;
+  initialElection?: string;
+  initialSeed?: string;
+  initialParty?: string;
+  /** A fresh setup screen: do not restore the autosave. */
+  setup?: boolean;
+  /** The setup screen started a game. */
+  onStarted?: () => void;
+}
+
+type BundleState = { status: "loading" } | { status: "ready"; country: CountryBundle | undefined } | { status: "failed" };
+
+// The generic country shell: the UkApp pattern, parameterized by bundle.
+// Takes the country ID, not the bundle: it loads that one country's bundle
+// (map, parties, elections, events) on demand, so no country's content is in
+// the landing page download, and opening one country loads only that one.
+export function CountryApp(props: CountryAppProps) {
+  const { countryId, setup } = props;
+  const [state, setState] = useState<BundleState>(() => {
+    const ready = loadedCountry(countryId);
+    if (ready) restoreAutosave(countryId, setup);
+    return ready ? { status: "ready", country: ready } : { status: "loading" };
+  });
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    if (state.status === "ready") return;
+    let live = true;
+    loadCountry(countryId).then(
+      (country) => {
+        if (!live) return;
+        if (country) restoreAutosave(countryId, setup);
+        setState({ status: "ready", country });
+      },
+      () => { if (live) setState({ status: "failed" }); },
+    );
+    return () => { live = false; };
+    // Reload only on a new country or a retry.
+  }, [countryId, attempt]);
+
+  if (state.status === "loading") return <LazyFallback />;
+  if (state.status === "failed") {
+    return <LoadFailed onExit={props.onExit} onRetry={() => { setState({ status: "loading" }); setAttempt((n) => n + 1); }} />;
+  }
+  return <CountryShell {...props} country={state.country} />;
+}
+
+// Opened without a game in memory (a reload, the back button): bring this
+// country's autosave back once its bundle is in.
+function restoreAutosave(countryId: string, setup: boolean | undefined) {
+  if (!setup && !useCountryStore.getState().game) useCountryStore.getState().tryResumeAutosave(countryId);
+}
+
+function CountryShell({ country: baseCountry, onExit, initialElection, initialSeed, initialParty, setup, onStarted }: CountryAppProps & { country: CountryBundle | undefined }) {
   const storeCountry = useCountryStore((s) => s.country);
   const game = useCountryStore((s) => s.game);
+  // A campaign editor race runs on a clone of this country's bundle with its
+  // own id (customScenario.buildCountryCustomGame); the clone shares the base
+  // bundle's elections. Run it on the clone.
+  const customHere = !!game?.custom && !!storeCountry && !!baseCountry && storeCountry.id !== baseCountry.id
+    && storeCountry.elections === baseCountry.elections;
+  const country = customHere ? storeCountry : baseCountry;
   const endTurn = useCountryStore((s) => s.endTurn);
   const undo = useCountryStore((s) => s.undo);
   const canUndo = useCountryStore((s) => s.history.length > 0);
@@ -42,6 +98,10 @@ export function CountryApp({ countryId, onExit, initialElection, initialSeed, in
   const resolvePlayerEvent = useCountryStore((s) => s.resolvePlayerEvent);
   const selectedRegionId = useCountryStore((s) => s.selectedRegionId);
   const [recapOpen, setRecapOpen] = useState(false);
+  const started = !!game;
+  useEffect(() => {
+    if (setup && started) onStarted?.();
+  }, [setup, started, onStarted]);
 
   // A game from a different country in the store doesn't belong to this shell.
   if (!country) {
@@ -65,7 +125,7 @@ export function CountryApp({ countryId, onExit, initialElection, initialSeed, in
   const playerSeats = live ? live.seats[activeGame.playerParty] ?? 0 : 0;
   const hasPending = !!activeGame.pendingEvent;
   const pendingView = hasPending && activeGame.pendingEvent
-    ? countryEventView(country.id, activeGame.electionId, activeGame.pendingEvent.eventId)
+    ? countryEventView(country, activeGame.electionId, activeGame.pendingEvent.eventId)
     : null;
   const maj = activeGame.majority ?? country.system.majority;
 

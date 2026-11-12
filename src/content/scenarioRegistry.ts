@@ -11,7 +11,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { COUNTRY_MODULES } from "./countries/index";
-import { freeElectionIds, rowYear, type EnginePath, type ScenarioDifficulty, type ScenarioTag } from "./countries/types";
+import { freeElectionIds, type EnginePath, type ScenarioDifficulty, type ScenarioTag } from "./countries/types";
 
 /** Country code ("US", "UK", "CA", …). Any registered module's code. */
 export type CountryCode = string;
@@ -87,18 +87,17 @@ export const SCENARIO_REGISTRY: ScenarioMeta[] = [
   ...REGISTRY_ROWS.filter(({ row }) => !row.addedLater),
   ...REGISTRY_ROWS.filter(({ row }) => row.addedLater),
 ].map(({ m, row }): ScenarioMeta => {
-  const election = m.bundle?.elections[row.electionId];
   const free = FREE_IDS.get(m.code)!.has(row.electionId);
   const meta: ScenarioMeta = {
     scenarioId: row.scenarioId ?? `${m.code.toLowerCase()}-${row.electionId}`,
     country: m.code,
     engine: m.engine,
     nativeId: row.electionId,
-    year: rowYear(m, row),
+    year: row.year,
     free,
     packId: free ? undefined : m.pack.id,
     difficulty: row.difficulty,
-    label: row.label ?? election?.label ?? row.electionId,
+    label: row.label,
     description: row.description,
     flag: m.flag,
   };

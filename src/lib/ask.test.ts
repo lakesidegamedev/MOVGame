@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { createGame } from "@engine/setup";
 import { projectElection } from "@engine/voteModel";
 import { createUkGame, projectUk, ukGameIssues } from "@engine/ukGame";
-import { movAskSnapshot, movAskUrl, movSeatAskSnapshot } from "./ask";
+import { movSeatAskSnapshot } from "./ask";
+import { movAskSnapshot, movAskUrl } from "./askUs";
 
 describe("Ask campaign handoff", () => {
   it("includes the current player-side map and omits the full save", () => {

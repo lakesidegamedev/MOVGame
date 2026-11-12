@@ -9,7 +9,7 @@
 // Regenerate with: npx tsx apps/native/scripts/export-plurality-vectors.ts
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { COUNTRIES } from "../../../src/content/countries/index";
+import { COUNTRIES } from "../../../src/content/countries/all";
 import { computeSeatsResult, tallyRegion } from "../../../src/engine/multiparty";
 import { createCountryGame, countryAdvanceTurn, majorityFor, playablePartiesIn, type CountryBundle } from "../../../src/engine/countryGame";
 import { multipartyScoreFacts } from "../../../src/engine/scoring";

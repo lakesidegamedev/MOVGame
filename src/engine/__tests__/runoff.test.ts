@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { advanceToRunoff, topTwo, regionalRunoff } from "../runoff";
-import { FR_FIRST_ROUND, FR_TRANSFERS } from "@content/countries/france";
+import { FR_FIRST_ROUND, FR_TRANSFERS } from "@content/countries/france.runoff";
 
 describe("two-round runoff", () => {
   it("picks the top two from a crowded first round", () => {

@@ -1,5 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+// Country custom scenarios build on country bundles; load them all up front.
+import "../../../src/content/countries/all";
 import { validateCustomScenario, makeDefaultCustomScenario, makeDefaultMultiparty, registerCustomScenario, buildUkCustomGame, buildCountryCustomGame, TRAIT_KEYS, MP_TRAIT_KEYS } from "../../../src/content/customScenario";
 import { ISSUE_IDS } from "../../../src/content/issues";
 import { BLOC_IDS } from "../../../src/content/blocs";

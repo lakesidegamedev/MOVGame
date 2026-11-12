@@ -17,7 +17,7 @@ import {
 import { SCENARIOS_BY_ID, type ScenarioMeta } from "../src/content/scenarioRegistry.js";
 import { electoralCollegeOf } from "../src/content/scenarios.js";
 import { evMajority } from "../src/engine/electoralCollege.js";
-import { COUNTRIES } from "../src/content/countries/index.js";
+import { COUNTRIES } from "../src/content/countries/all.js";
 import { UK_SYSTEM } from "../src/content/uk/parties.js";
 
 // The chamber a scenario's game plays for — a submitted chamberSize must

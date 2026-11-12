@@ -11,7 +11,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { SCENARIO_REGISTRY, type ScenarioMeta } from "@content/scenarioRegistry";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 import type { CampaignAction, CandidateId, GameState } from "../types";
 import type { PartyId } from "../system";
 import { createGame } from "../setup";

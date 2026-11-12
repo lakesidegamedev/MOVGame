@@ -5,7 +5,7 @@ import { SCENARIOS } from "@content/scenarios";
 import { HISTORICAL_EVENTS } from "@content/events";
 import { UK_ELECTIONS } from "@content/uk/elections";
 import { UK_ELECTION_EVENTS } from "@content/uk/electionEvents";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 
 // ─────────────────────────────────────────────────────────────────────────
 // CONTENT COMPLETENESS — the sellability bar, as a test.

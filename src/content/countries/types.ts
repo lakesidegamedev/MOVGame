@@ -3,10 +3,13 @@
 //
 // A country module carries its registry rows (labels, difficulty, tags), its
 // store pack, its landing cover and scenario art colours, its daily-challenge
-// pairing, its "play next" chain and, for the shared multiparty engine, its
-// CountryBundle. The shared tables (scenario registry, packs, covers, daily,
-// next scenario, native export) are all derived from the registered list in
-// ./index.ts, so adding a country never edits them.
+// pairing and its "play next" chain. For the shared multiparty engine it also
+// names a loader for its CountryBundle, which lives in its own
+// <name>.bundle.ts file: the module is metadata only and loads with the
+// landing page, the bundle loads when a campaign in that country opens. The
+// shared tables (scenario registry, packs, covers, daily, next scenario,
+// native export) are all derived from the registered list in ./index.ts, so
+// adding a country never edits them.
 //
 // Shared by the client, the Node server and the native export scripts: no
 // vite-only imports anywhere under content/countries.
@@ -24,10 +27,10 @@ export interface CountryElectionEntry {
   electionId: string;
   /** Global id. Defaults to `${code.toLowerCase()}-${electionId}`. Never change a shipped one. */
   scenarioId?: string;
-  /** Defaults to the bundle election's year (country engine only). */
-  year?: number;
-  /** Picker label, "2025 · Name v. Name". Defaults to the bundle election's label. */
-  label?: string;
+  /** Election year. Must match the bundle election's year (a test checks). */
+  year: number;
+  /** Picker label, "2025 · Name v. Name". Usually the bundle election's label. */
+  label: string;
   /** One or two sentences for the picker card. */
   description: string;
   /**
@@ -81,8 +84,12 @@ export interface CountryModule {
   cover: string | null;
   /** Colours for the generated scenario art (ScenarioArt). */
   art: { a: string; b: string; glow: string };
-  /** The multiparty content bundle. Required when engine is "country". */
-  bundle?: CountryBundle;
+  /**
+   * Loads the multiparty content bundle. Required when engine is "country":
+   * `() => import("./<name>.bundle").then((m) => m.BUNDLE)`. A dynamic import,
+   * so the bundle stays out of the landing page download.
+   */
+  load?: () => Promise<CountryBundle>;
   /** Registry rows in display order, newest first. */
   scenarios: CountryElectionEntry[];
   /**
@@ -121,13 +128,14 @@ export interface CountryModule {
    * "Continue the timeline".
    */
   next: { chain?: NextLink[]; map?: Record<string, NextLink> };
+  /**
+   * Short names of the bundle's playable regional parties (`regional`), for the
+   * voting-systems guide, which renders without loading bundles. A test checks
+   * they match the bundle.
+   */
+  regionalParties?: string[];
   /** A "how this system works" entry for the native guide, if the generic ones do not cover it. */
   guide?: { title: string; body: string };
-}
-
-/** The year of a registry row: its own, or its bundle election's. */
-export function rowYear(m: CountryModule, row: CountryElectionEntry): number {
-  return row.year ?? m.bundle?.elections[row.electionId]?.year ?? 0;
 }
 
 /**
@@ -137,19 +145,8 @@ export function rowYear(m: CountryModule, row: CountryElectionEntry): number {
 export function freeElectionIds(m: CountryModule): string[] {
   if (m.freeElections) return [...m.freeElections];
   let newest: CountryElectionEntry | undefined;
-  for (const row of m.scenarios) if (!newest || rowYear(m, row) > rowYear(m, newest)) newest = row;
+  for (const row of m.scenarios) if (!newest || row.year > newest.year) newest = row;
   return newest ? [newest.electionId] : [];
-}
-
-/**
- * Build the module for a country on the shared multiparty engine. Code, name
- * and flag come from the bundle so they cannot drift apart.
- */
-export function countryModule(
-  bundle: CountryBundle,
-  rest: Omit<CountryModule, "code" | "name" | "flag" | "engine" | "bundle">,
-): CountryModule {
-  return { code: bundle.id, name: bundle.label, flag: bundle.flag, engine: "country", bundle, ...rest };
 }
 
 /**

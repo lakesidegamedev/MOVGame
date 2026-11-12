@@ -14,7 +14,7 @@ import { partyName, partyShort, sortBySeats, partyColor } from "./parties";
 import { ElectionNight, hasSeenReveal, revealSupported } from "../electionNight/ElectionNight";
 import { ElectionNightShell } from "../electionNight/ElectionNightShell";
 import { MultipartySeatPanel } from "../electionNight/MultipartySeatPanel";
-import { ukReveal } from "../electionNight/adapters";
+import { ukReveal } from "../electionNight/ukReveal";
 import { DailyResultPanel } from "../DailyResultPanel";
 import { WhyReport } from "../WhyReport";
 import { TimelineView } from "../TimelineView";

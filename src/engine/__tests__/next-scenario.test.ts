@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { US_NEXT_SCENARIO, UK_NEXT_SCENARIO, countryNextScenario, nextScenarioFor, chronologicalElections } from "@content/nextScenario";
 import { UK_ELECTION_IDS, UK_ELECTIONS } from "@content/uk/elections";
 import { SCENARIOS } from "@content/scenarios";
-import { COUNTRIES, COUNTRY_MODULES } from "@content/countries";
+import { COUNTRIES, COUNTRY_MODULES } from "@content/countries/all";
 import { SCENARIO_REGISTRY } from "@content/scenarioRegistry";
 
 describe("next-scenario retention chains", () => {

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { countryAdvanceTurn, createCountryGame, type CountryBundle } from "@engine/countryGame";
-import { COUNTRY_MODULES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 
 // A general event runs at most once a campaign (engine rule, see
 // unfiredGenericEvents), so a one-off beat such as a debate win can sit in a
 // country's generic pool without ever repeating.
 
-const bundles = COUNTRY_MODULES.flatMap((m) => (m.bundle ? [m.bundle] : []));
+const bundles = Object.values(COUNTRIES);
 
 /** Every headline that reached the news in one campaign, in order. */
 function headlines(country: CountryBundle, election: string, seed: string): string[] {

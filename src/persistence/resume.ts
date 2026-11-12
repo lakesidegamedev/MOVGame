@@ -1,5 +1,5 @@
 import type { SaveMeta, SaveRecord } from "./types";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRY_MODULES } from "@content/countries";
 
 const US_SESSION_SAVE_KEY = "campaign-us-session-autosave";
 
@@ -35,7 +35,7 @@ export interface ResumeOption {
 
 // Every country on the shared multiparty engine keeps its own autosave slot.
 const COUNTRY_NAMES: Record<string, string> = Object.fromEntries(
-  Object.values(COUNTRIES).map((c) => [c.id, c.label]),
+  COUNTRY_MODULES.filter((m) => m.engine === "country").map((m) => [m.code, m.name]),
 );
 
 export function listResumableCampaigns(usSaves: SaveMeta[]): ResumeOption[] {

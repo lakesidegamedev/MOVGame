@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { SCENARIO_REGISTRY, SCENARIOS_BY_ID } from "@content/scenarioRegistry";
 import { ALL_PAID, GLOBAL_ALL, PACKS, PACKS_BY_ID, STORE_PACKS, packCovered } from "@content/packs";
-import { COUNTRY_MODULES } from "@content/countries";
+import { COUNTRY_MODULES } from "@content/countries/all";
 import { coalitionAllowed, countryGovernmentText } from "@engine/countryGame";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 import type { Government } from "@engine/types";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -210,9 +210,10 @@ describe("declarative country rules match the retired functions", () => {
       { kind: "hung", largest: "a" },
     ];
     for (const m of COUNTRY_MODULES) {
-      if (!m.bundle || !["CA", "DE", "FR", "AU"].includes(m.code)) continue;
+      const bundle = COUNTRIES[m.code];
+      if (!bundle || !["CA", "DE", "FR", "AU"].includes(m.code)) continue;
       for (const g of kinds) {
-        expect(countryGovernmentText(m.bundle, g, name), `${m.code} ${g.kind}`).toBe(LEGACY_GOV_TEXT[m.code]?.(g, name));
+        expect(countryGovernmentText(bundle, g, name), `${m.code} ${g.kind}`).toBe(LEGACY_GOV_TEXT[m.code]?.(g, name));
       }
     }
   });

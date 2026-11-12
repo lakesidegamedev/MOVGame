@@ -53,13 +53,57 @@ export function countryModuleFor(code: string): CountryModule | undefined {
   return COUNTRY_MODULES_BY_CODE[code];
 }
 
-/** Bundles for the shared multiparty engine, keyed by country code. */
-export const COUNTRIES: Record<string, CountryBundle> = Object.fromEntries(
-  COUNTRY_MODULES.filter((m) => m.engine === "country" && m.bundle).map((m) => [m.code, m.bundle!]),
-);
+// Bundles loaded so far, by country code. Shared by every caller, so each
+// bundle is imported once.
+const loaded = new Map<string, CountryBundle>();
+const loading = new Map<string, Promise<CountryBundle | undefined>>();
 
-export function getCountry(id: string): CountryBundle | undefined {
-  return COUNTRIES[id];
+/**
+ * Load a multiparty country's bundle (cached). Resolves undefined for an
+ * unknown code or a country on another engine path.
+ */
+export function loadCountry(code: string): Promise<CountryBundle | undefined> {
+  const done = loaded.get(code);
+  if (done) return Promise.resolve(done);
+  let pending = loading.get(code);
+  if (!pending) {
+    const load = COUNTRY_MODULES_BY_CODE[code]?.load;
+    pending = load
+      ? load().then((bundle) => {
+          loaded.set(code, bundle);
+          return bundle;
+        }, (error: unknown) => {
+          loading.delete(code); // a failed chunk download can be retried
+          throw error;
+        })
+      : Promise.resolve(undefined);
+    loading.set(code, pending);
+  }
+  return pending;
+}
+
+/**
+ * Hand over bundles already in memory (countries/all imports them all), so
+ * loadCountry and loadedCountry answer synchronously from the cache.
+ */
+export function provideCountries(bundles: CountryBundle[]): void {
+  for (const bundle of bundles) loaded.set(bundle.id, bundle);
+}
+
+/** Load every multiparty bundle (the campaign editor offers them all). */
+export async function loadAllCountries(): Promise<CountryBundle[]> {
+  const all = await Promise.all(COUNTRY_MODULES.filter((m) => m.load).map((m) => loadCountry(m.code)));
+  return all.filter((b): b is CountryBundle => !!b);
+}
+
+/** A bundle that has already loaded, or undefined. Never starts a download. */
+export function loadedCountry(code: string): CountryBundle | undefined {
+  return loaded.get(code);
+}
+
+/** Every bundle loaded so far, in registration order. */
+export function loadedCountries(): CountryBundle[] {
+  return COUNTRY_MODULES.flatMap((m) => loaded.get(m.code) ?? []);
 }
 
 export type { CountryModule } from "./types";

@@ -55,12 +55,8 @@ export function votingSystemsGuide(): VotingSystemEntry[] {
 
 /** Playable regional parties by country, by short name ("BQ"), for the guide. */
 export function regionalPartiesGuide(): { code: string; name: string; flag: string; parties: string[] }[] {
-  return COUNTRY_MODULES.flatMap((m) => {
-    const b = m.bundle;
-    if (!b?.regional?.length) return [];
-    const parties = b.regional.map((id) => b.system.parties.find((p) => p.id === id)?.shortName ?? id);
-    return [{ code: m.code, name: m.name, flag: m.flag, parties }];
-  });
+  return COUNTRY_MODULES.flatMap((m) =>
+    m.regionalParties?.length ? [{ code: m.code, name: m.name, flag: m.flag, parties: [...m.regionalParties] }] : []);
 }
 
 export const REGIONAL_PARTIES_NOTE =

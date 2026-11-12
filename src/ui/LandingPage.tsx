@@ -22,7 +22,9 @@ import {
   LineChart, Mic2, Globe2,
 } from "lucide-react";
 import { BRAND } from "../brand";
-import { useGameStore } from "@store/gameStore";
+import { useSavesStore } from "@store/savesStore";
+import { sessionGame } from "@store/sessions";
+import type { GameState } from "@engine/types";
 import { listResumableCampaigns, type ResumeTarget } from "@persistence/resume";
 
 // "the UK, Canada, ..., and Japan": every registered country after the US.
@@ -215,8 +217,10 @@ function PreviewBanner() {
 }
 
 export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestination) => void; onResume: (target: ResumeTarget) => void }) {
-  const usSaves = useGameStore((s) => s.saves);
-  const currentUsGame = useGameStore((s) => s.game);
+  const usSaves = useSavesStore((s) => s.saves);
+  // A US game still in memory (the player came back from the desk) is newer
+  // than its autosave. Null when the US shell never loaded.
+  const currentUsGame = sessionGame<GameState>("us");
   const resumable = listResumableCampaigns(usSaves);
   if (currentUsGame) {
     const autosaveIndex = resumable.findIndex((option) => option.target.kind === "us" && option.target.saveId === "autosave");

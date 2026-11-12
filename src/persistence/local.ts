@@ -1,10 +1,21 @@
 import Dexie, { type Table } from "dexie";
 import type { ReplayRecord, SaveMeta, SaveRecord, SyncProvider } from "./types";
-import {
-  registerCustomScenario,
-  validateCustomScenario,
-  type CustomScenario,
-} from "@content/customScenario";
+import type { CustomScenario } from "@content/customScenario";
+import { loadCountry } from "@content/countries";
+
+// The editor's validation knows every engine's content (US scenarios, UK
+// elections, country bundles), so it loads only when custom scenarios are read
+// or written, never with the landing page's save list.
+async function editorContent(rows: unknown[]) {
+  const countries = new Set<string>();
+  for (const row of rows) {
+    const id = (row as { mp?: { countryId?: unknown } } | null)?.mp?.countryId;
+    if (typeof id === "string") countries.add(id);
+  }
+  // Country scenarios validate against their base country's bundle.
+  const [content] = await Promise.all([import("@content/customScenario"), ...[...countries].map((id) => loadCountry(id))]);
+  return content;
+}
 
 // IndexedDB-backed local saves via Dexie. Works as-is inside a Tauri webview.
 class CampaignDb extends Dexie {
@@ -78,6 +89,7 @@ export const localProvider = new LocalSyncProvider();
 // ─────────────────────────────────────────────────────────────────────────
 export const customScenarioStore = {
   async save(scenario: CustomScenario): Promise<void> {
+    const { validateCustomScenario } = await editorContent([scenario]);
     const result = validateCustomScenario(scenario);
     if (!result.ok) throw new Error(result.errors.join("\n"));
     await db.customScenarios.put(result.value);
@@ -86,6 +98,7 @@ export const customScenarioStore = {
   async load(id: string): Promise<CustomScenario | null> {
     const row = await db.customScenarios.get(id);
     if (!row) return null;
+    const { validateCustomScenario } = await editorContent([row]);
     const result = validateCustomScenario(row);
     if (!result.ok) throw new Error(result.errors.join("\n"));
     return result.value;
@@ -93,6 +106,8 @@ export const customScenarioStore = {
 
   async list(): Promise<CustomScenario[]> {
     const all = await db.customScenarios.orderBy("updatedAt").reverse().toArray();
+    if (!all.length) return [];
+    const { validateCustomScenario } = await editorContent(all);
     const valid: CustomScenario[] = [];
     for (const row of all) {
       const result = validateCustomScenario(row);
@@ -113,6 +128,8 @@ export const customScenarioStore = {
 export async function registerSavedCustomScenarios(): Promise<void> {
   try {
     const all = await customScenarioStore.list();
+    if (!all.length) return;
+    const { registerCustomScenario } = await import("@content/customScenario");
     for (const cs of all) registerCustomScenario(cs);
   } catch {
     // ignore — the built-in scenarios still work

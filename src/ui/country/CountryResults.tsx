@@ -15,7 +15,7 @@ import { Trophy, Lock } from "lucide-react";
 import { ElectionNight, hasSeenReveal, revealSupported } from "../electionNight/ElectionNight";
 import { ElectionNightShell } from "../electionNight/ElectionNightShell";
 import { MultipartySeatPanel } from "../electionNight/MultipartySeatPanel";
-import { countryReveal } from "../electionNight/adapters";
+import { countryReveal } from "../electionNight/countryReveal";
 import { DailyResultPanel } from "../DailyResultPanel";
 import { WhyReport } from "../WhyReport";
 import { TimelineView } from "../TimelineView";

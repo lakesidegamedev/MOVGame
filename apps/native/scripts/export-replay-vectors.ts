@@ -5,7 +5,7 @@ import { beginGame } from "../../../src/engine/turn";
 import { advanceCampaignWeek } from "../../../src/engine/campaignWeek";
 import { createUkGame, ukAdvanceTurn, playablePartiesIn as ukParties } from "../../../src/engine/ukGame";
 import { createCountryGame, countryAdvanceTurn, playablePartiesIn } from "../../../src/engine/countryGame";
-import { COUNTRIES } from "../../../src/content/countries";
+import { COUNTRIES } from "../../../src/content/countries/all";
 import { initUsReplayLog, recordUsWeek } from "../../../src/store/usReplay";
 import { initUkReplayLog, recordUkWeek } from "../../../src/store/ukReplay";
 import { initCountryReplayLog, recordCountryWeek } from "../../../src/store/countryReplay";

@@ -131,6 +131,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Changed
 
+- The web game's first page loads about three quarters less code: about 490 kB instead of 1.9 MB
+  (160 kB instead of 590 kB compressed). The landing page, the library and the Store no longer
+  download every country's maps, parties and campaign events up front. Each country's content
+  loads when you open one of its elections, so a New Zealand campaign downloads New Zealand's
+  content and no other country's, and the U.S. and U.K. campaigns load the same way. Opening an
+  election, resuming a save or starting the daily challenge shows a short loading spinner the
+  first time.
 - Android locks paid elections you do not own, like iPhone and the web, but only once Google Play
   can sell that election's pack. A locked election shows a lock and Unlock in the library, the
   briefing and the U.S. setup, and Unlock opens its pack in the Store. Free elections, the daily
@@ -249,6 +256,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- A custom race built on Canada, Germany or any other country in the campaign editor now opens
+  its campaign after Save and play. Before, the game showed that country's setup screen instead.
 - Country flags now show as flags on Windows, in the desktop app and in every browser. Before,
   Windows drew two boxed letters (US, GB, DE) wherever a flag appeared, on the landing page,
   the library, setup, the store and the campaign desk. The game now carries a 4 KB flag font for

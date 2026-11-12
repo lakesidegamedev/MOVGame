@@ -6,7 +6,7 @@ import { computeSeatsResult, formGovernment, tallyRegion } from "@engine/multipa
 import { multipartyScoreFacts, multipartyUnitMargin } from "@engine/scoring";
 import { createCountryGame, countryAdvanceTurn, majorityFor, type CountryBundle } from "@engine/countryGame";
 import { buildSchedule, type RevealUnit } from "@lib/electionReveal";
-import { COUNTRIES, COUNTRY_MODULES } from "@content/countries";
+import { COUNTRIES, COUNTRY_MODULES } from "@content/countries/all";
 import type { StateContest } from "@engine/types";
 
 const PLURAL = { total: 100, threshold: 51, plurality: true };

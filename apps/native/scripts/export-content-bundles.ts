@@ -41,7 +41,7 @@ async function main() {
   const ukEvents = await import(`${WEB_REPO}/src/content/uk/events.ts`);
   const ukElectionEvents = await import(`${WEB_REPO}/src/content/uk/electionEvents.ts`);
   const ukElections = await import(`${WEB_REPO}/src/content/uk/elections.ts`);
-  const { COUNTRY_MODULES } = await import(`${WEB_REPO}/src/content/countries/index.ts`);
+  const { COUNTRY_MODULES, COUNTRIES } = await import(`${WEB_REPO}/src/content/countries/all.ts`);
   const { SCENARIO_REGISTRY } = await import(`${WEB_REPO}/src/content/scenarioRegistry.ts`);
   const { PACKS } = await import(`${WEB_REPO}/src/content/packs.ts`);
   const { nextScenarioFor } = await import(`${WEB_REPO}/src/content/nextScenario.ts`);
@@ -90,7 +90,7 @@ async function main() {
         label: target.label, blurb: next.blurb }]] : [];
     })),
     "maps": { US: usMap, UK: { viewBox: UK_VIEWBOX, shapes: REGION_PATHS },
-      ...Object.fromEntries(multiparty.map((m: any) => [m.code, m.bundle.map])) },
+      ...Object.fromEntries(multiparty.map((m: any) => [m.code, COUNTRIES[m.code].map])) },
     // Everything the native apps list per country, in registration order.
     "catalog": {
       countries: COUNTRY_MODULES.map((m: any) => ({
@@ -133,7 +133,7 @@ async function main() {
       elections: ukElections.UK_ELECTIONS,
       ids: ukElections.UK_ELECTION_IDS,
     },
-    ...Object.fromEntries(multiparty.map((m: any) => [`countries/${m.code.toLowerCase()}`, stripBundle(m.bundle)])),
+    ...Object.fromEntries(multiparty.map((m: any) => [`countries/${m.code.toLowerCase()}`, stripBundle(COUNTRIES[m.code])])),
   };
   // Historical events live in their own module, not the events index.
   (bundles["us-events"] as any).historical = {

@@ -1,27 +1,40 @@
 # Adding a country (or an election)
 
-Every country in Margin of Victory is one module file under `src/content/countries/`. The
-module carries everything specific to that country: its campaign content (the `CountryBundle`),
-map, registry rows, store pack, landing cover, daily challenge pairing, "play next" chain and
-native guide entry. Every shared table derives from the ordered list in
-`src/content/countries/index.ts`:
+Every country in Margin of Victory is two files under `src/content/countries/`:
+
+- **The module**, `<name>.ts`: metadata only. Name, flag, registry rows (with each election's
+  year and label), store pack, landing cover, daily challenge pairing, "play next" chain and
+  native guide entry, plus a `load` function that imports the bundle. It is small because the
+  landing page, the library and the Store load every module on the first visit.
+- **The bundle**, `<name>.bundle.ts`: the campaign content (the `CountryBundle`: map, parties,
+  regions, elections, leaders, events). The web game imports it only when a campaign in that
+  country opens, so one country's content never slows down the first visit or another country.
+
+Every shared table derives from the ordered list of modules in `src/content/countries/index.ts`:
 
 | Derived table | File | What it reads from the module |
 |---|---|---|
-| Scenario registry | `src/content/scenarioRegistry.ts` | `scenarios`, `pack.id`, `flag`, bundle election labels and years |
+| Scenario registry | `src/content/scenarioRegistry.ts` | `scenarios` (labels and years), `pack.id`, `flag` |
 | Store packs | `src/content/packs.ts` | `pack` plus every paid row; Complete gets them all |
 | Landing cards and covers | `src/content/covers.ts`, `src/ui/LandingPage.tsx`, `src/ui/ScenarioArt.tsx` | `name`, `blurb`, `cover`, `art` |
 | Daily challenge | `src/lib/daily.ts` | `daily.pair`, `daily.names` |
 | Play next | `src/content/nextScenario.ts` | `next.chain` / `next.map` |
 | Server entitlements, catalog, score validation | `server/*` | the derived registry and packs |
-| Native apps (Kotlin, Android, iOS) | `apps/native/scripts/export-content-bundles.ts` | the whole module, exported as data |
+| Voting systems guide | `src/content/guide.ts` | `systemLabel`, `regionalParties` |
+| Native apps (Kotlin, Android, iOS) | `apps/native/scripts/export-content-bundles.ts` | the module and its bundle, exported as data |
+
+The web client reaches a bundle only through `loadCountry(code)` (it caches, so each bundle
+downloads once) and `loadedCountry(code)` once it has loaded. Code that needs every bundle
+synchronously (the server, the native export scripts, the balance tools, tests) imports
+`src/content/countries/all.ts`, which imports them all and exposes `COUNTRIES`. Web client code
+must never import `all.ts`; the completeness suite fails if it does.
 
 Adding a country never touches the shared files, the server, Kotlin, Swift or Compose. You write
-one module file, generate its map, add two lines to `index.ts`, add a cover photo, rate its
-difficulty and regenerate the native data.
+the bundle and the module, generate the map, add two lines to `index.ts` and two to `all.ts`, add
+a cover photo, rate its difficulty and regenerate the native data.
 
-New Zealand (`src/content/countries/newZealand.ts`) was built this way and is the reference to
-copy. Germany is the other mixed-member proportional example; Canada and Australia are
+New Zealand (`src/content/countries/newZealand.ts` and `newZealand.bundle.ts`) is the reference
+to copy. Germany is the other mixed-member proportional example; Canada and Australia are
 first past the post and preferential; France is a two-round runoff; Mexico is a single-round
 plurality presidency (`plurality: true`, section 5).
 
@@ -46,11 +59,14 @@ Run `npm ci` once in your worktree first.
 1. **Pick the ids.** A two-letter upper-case country code (`NZ`), a pack id in kebab case
    (`new-zealand`), and short lower-case party ids (`lab`, `nat`). Scenario ids are generated as
    `<code lowercase>-<electionId>` (`nz-2023`). These ids are permanent once shipped.
-2. **Write the module** at `src/content/countries/<camelCaseName>.ts` from the template in
-   section 2. Content must be historically accurate (section 3).
+2. **Write the bundle and the module** at `src/content/countries/<camelCaseName>.bundle.ts` and
+   `src/content/countries/<camelCaseName>.ts` from the templates in section 2. Content must be
+   historically accurate (section 3).
 3. **Generate the map** into `src/content/countries/paths/<code>.ts` (section 4).
 4. **Register it** in `src/content/countries/index.ts`: one import line and one entry at the
-   **end** of `COUNTRY_MODULES`. Never reorder or remove existing entries (section 11).
+   **end** of `COUNTRY_MODULES`. Never reorder or remove existing entries (section 11). Then add
+   the bundle to `src/content/countries/all.ts`: one import line and one entry in `BUNDLES`
+   (importing `all.ts` throws until it matches the registered modules).
 5. **Add a cover photo** at `public/images/covers/country-<code>.jpg` with an entry in
    `public/images/covers/ATTRIBUTION.json` (section 2, "Cover").
    Add the country's flag to `src/ui/fonts/mov-flags.txt` and rebuild `src/ui/fonts/mov-flags.woff2`
@@ -64,7 +80,9 @@ Run `npm ci` once in your worktree first.
    existing style.
 10. **Run the full gate** (section 8) and commit. Stage explicit files only.
 
-## 2. Module template
+## 2. Bundle and module templates
+
+The bundle, `src/content/countries/<camelCaseName>.bundle.ts`:
 
 ```ts
 // <COUNTRY>: <n> <kind of> elections, one bundle.
@@ -74,7 +92,8 @@ Run `npm ci` once in your worktree first.
 // party, chamber size, majority line). Cite how the numbers were derived.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { attachElectionIssues } from "./types";
+import { XX_ELECTION_ISSUES } from "./issues/xx";
 import { XX_MAP } from "./paths/xx";
 
 export const COUNTRY_NAME: CountryBundle = {
@@ -151,8 +170,26 @@ export const COUNTRY_NAME: CountryBundle = {
   // (role "player" with a prompt and choices). Copy New Zealand's or Germany's.
   events: [],
 };
+// Each election's issue list (src/content/countries/issues/xx.ts, copy New Zealand's).
+attachElectionIssues(COUNTRY_NAME, XX_ELECTION_ISSUES);
+```
 
-export const COUNTRY_NAME_MODULE = countryModule(COUNTRY_NAME, {
+The module, `src/content/countries/<camelCaseName>.ts`. It repeats a few facts from the bundle
+(code, name, flag, each election's year and label, regional party names) so the landing page
+never needs the bundle; the completeness suite fails if they disagree.
+
+```ts
+// <COUNTRY>: the registry metadata. The campaign content is in
+// ./<camelCaseName>.bundle.ts and loads only when one of its campaigns opens.
+
+import type { CountryModule } from "./types";
+
+export const COUNTRY_NAME_MODULE: CountryModule = {
+  code: "XX",                   // the bundle's id
+  name: "Country Name",         // the bundle's label
+  flag: "🇽🇽",                  // the bundle's flag
+  engine: "country",
+  load: () => import("./<camelCaseName>.bundle").then((m) => m.COUNTRY_NAME),
   blurb: "One line for the landing page country card.",
   systemLabel: "A few words on the voting system, shown on the store tile",
   cover: "images/covers/country-xx.jpg",
@@ -160,8 +197,9 @@ export const COUNTRY_NAME_MODULE = countryModule(COUNTRY_NAME, {
   freeElections: ["2025"],      // the free taster, set once at ship time and never moved
   scenarios: [
     // Newest first. One row per election in the bundle, no more, no fewer.
-    // label defaults to the election's label; override only when they differ.
-    { electionId: "2025", difficulty: "hard", description: "One or two sentences for the picker." },
+    // year must equal the election's year; label is normally the election's label.
+    { electionId: "2025", year: 2025, label: "2025 · Leader v. Leader", difficulty: "hard",
+      description: "One or two sentences for the picker." },
   ],
   pack: { id: "country-name", name: "Country Name", description: "Plain description of the pack.", price: 99 },
   daily: { pair: ["aaa", "bbb"], names: { aaa: "the Short", bbb: "the Other" } },
@@ -172,8 +210,12 @@ export const COUNTRY_NAME_MODULE = countryModule(COUNTRY_NAME, {
     ],
   },
   guide: { title: "Country Name", body: "How seats are won and who can govern with whom." },  // native guide, optional
-});
+  // regionalParties: ["Short"],  // only with `regional` in the bundle: those parties' short names
+};
 ```
+
+Keep anything heavy out of the module: it is downloaded on every first visit. Do not import the
+bundle, its map or its issue lists from the module (only the `load` function names the bundle).
 
 Field notes:
 
@@ -292,7 +334,8 @@ a bundle are rejected by the native exporter.
   parties, so give each one at least one story beat pinned to it with `party`. The web setup
   tells the player where the party stands, that it cannot win a majority and that success is
   beating its real seat count, and the results screen scores it against that count. Every
-  `regional` party must be in `playable`, and its regions can never add up to a majority.
+  `regional` party must be in `playable`, and its regions can never add up to a majority. List
+  their short names in the module's `regionalParties` too, for the voting-systems guide.
 - **Ids are free-form.** Party, bloc and region ids are plain lowercase strings. A new country
   can bring bloc ids no other country uses (New Zealand has `maori` and `pasifika`), parties that
   stand in only some of its elections, and parties with votes but no seats. Neither engine keeps
@@ -382,7 +425,10 @@ contest and an extra voter bloc.
 The completeness suite (`src/content/__tests__/country-completeness.test.ts`) checks every
 registered country and election for:
 
-- unique, well-formed country code and pack id; the bundle id equals the module code;
+- unique, well-formed country code and pack id; a `load` for every multiparty module;
+- module metadata that agrees with its bundle: code, name and flag, each row's year, and
+  `regionalParties`;
+- no web client file imports `countries/all.ts` or a `.bundle` file directly;
 - plain copy: no em or en dashes in labels, descriptions, blurbs, pack copy, guide text,
   taglines or event headlines;
 - a cover photo that exists and has an attribution entry; valid scenario art colours;
@@ -425,7 +471,7 @@ results and keep a note of your sources in the file header.
    merged or dissolved), give the row a `dailyPair` with the two rivals that do, and name any new
    role in `daily.names` (Japan 2026 pairs the LDP with the CRA).
 3. Add a row to the module's `scenarios` in date order (newest first), after the shipped rows,
-   with `addedLater: true`. The new scenario id is `<code>-<electionId>`; never change an
+   with its `year`, its `label` and `addedLater: true`. The new scenario id is `<code>-<electionId>`; never change an
    existing row's id. `addedLater` makes the registry list the row after every other row, so the
    shipped registry prefix and the daily challenge's frozen classic pool do not move (the pin test
    enforces both).

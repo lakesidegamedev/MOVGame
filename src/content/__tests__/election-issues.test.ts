@@ -3,7 +3,7 @@ import { SCENARIOS, SCENARIO_IDS } from "@content/scenarios";
 import { HISTORICAL_EVENTS } from "@content/events";
 import { ISSUE_IDS } from "@content/issues";
 import { UK_ELECTIONS } from "@content/uk/elections";
-import { COUNTRY_MODULES } from "@content/countries";
+import { COUNTRY_MODULES, COUNTRIES } from "@content/countries/all";
 
 // Every election in the game declares the issues it ran on. This guards the
 // list against anachronism: a term may not appear in an election held before
@@ -44,7 +44,7 @@ const rows: Row[] = [
   ...SCENARIO_IDS.map((id) => ({ label: `US ${id}`, year: SCENARIOS[id].year, issues: SCENARIOS[id].issues })),
   ...Object.values(UK_ELECTIONS).map((e) => ({ label: `UK ${e.id}`, year: e.year, issues: e.issues, salience: e.salience })),
   ...COUNTRY_MODULES.flatMap((m) =>
-    Object.values(m.bundle?.elections ?? {}).map((e) => ({ label: `${m.code} ${e.id}`, year: e.year, issues: e.issues, salience: e.salience })),
+    Object.values(COUNTRIES[m.code]?.elections ?? {}).map((e) => ({ label: `${m.code} ${e.id}`, year: e.year, issues: e.issues, salience: e.salience })),
   ),
 ];
 

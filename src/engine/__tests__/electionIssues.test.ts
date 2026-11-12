@@ -7,7 +7,7 @@ import { SCENARIOS, issueTemplateFor } from "@content/scenarios";
 import { liveIssueIds } from "@content/issues";
 import { toScenario, makeDefaultCustomScenario } from "@content/customScenario";
 import { createCountryGame, countryGameIssues, type CountryBundle } from "@engine/countryGame";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 import { createUkGame, ukGameIssues } from "@engine/ukGame";
 import { UK_ELECTIONS } from "@content/uk/elections";
 

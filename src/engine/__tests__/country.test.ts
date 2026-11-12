@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createCountryGame, countryAdvanceTurn, computeCountryResult, playablePartiesIn, regionalReach } from "../countryGame";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 import { computeScoreFromFacts, multipartyScoreFacts } from "../scoring";
 
 describe("country bundles", () => {

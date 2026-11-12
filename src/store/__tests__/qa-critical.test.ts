@@ -1,5 +1,7 @@
 import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+// Country bundles load on demand in the web client; tests need them all now.
+import "@content/countries/all";
 import { localProvider } from "@persistence/local";
 import { useGameStore } from "../gameStore";
 import { useUkStore } from "../ukStore";

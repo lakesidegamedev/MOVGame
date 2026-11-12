@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUkStore } from "@store/ukStore";
 import { majorityForUk, ukGameIssues } from "@engine/ukGame";
 import { UkSetup } from "./UkSetup";
@@ -30,8 +30,25 @@ function ukEventView(electionId: string, eventId: string) {
   };
 }
 
-export function UkApp({ onExit, initialElection, initialSeed, initialParty }: { onExit: () => void; initialElection?: string; initialSeed?: string; initialParty?: string }) {
+export function UkApp({ onExit, initialElection, initialSeed, initialParty, setup, onStarted }: {
+  onExit: () => void;
+  initialElection?: string;
+  initialSeed?: string;
+  initialParty?: string;
+  /** A fresh setup screen: do not restore the autosave. */
+  setup?: boolean;
+  /** The setup screen started a game. */
+  onStarted?: () => void;
+}) {
+  // Opened without a game in memory (a reload, the back button): restore the
+  // autosave before the first render, so the setup screen never flashes.
+  useState(() => {
+    if (!setup && !useUkStore.getState().game) useUkStore.getState().tryResumeAutosave();
+  });
   const game = useUkStore((s) => s.game);
+  useEffect(() => {
+    if (setup && game) onStarted?.();
+  }, [setup, game, onStarted]);
   const endTurn = useUkStore((s) => s.endTurn);
   const undo = useUkStore((s) => s.undo);
   const canUndo = useUkStore((s) => s.history.length > 0);

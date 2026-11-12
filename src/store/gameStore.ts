@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { registerCampaignCustomScenario } from "@content/customScenario";
+import { isCustomScenarioId } from "@content/customIds";
 import {
   createGame,
   beginGame,
@@ -28,6 +28,8 @@ import { truncateToTurn } from "@lib/replay";
 import { initUsReplayLog, recordUsWeek, syncUsReplayLog } from "./usReplay";
 import { canQueueAction } from "@engine/actionBudget";
 import { loadUsSessionAutosave, removeUsSessionAutosave, saveUsSessionAutosave } from "@persistence/resume";
+import { useSavesStore } from "./savesStore";
+import { registerSession } from "./sessions";
 
 const AUTOSAVE_ID = "autosave";
 const UNDO_DEPTH = 12;
@@ -72,19 +74,21 @@ interface GameStore {
   loadGame: (id: string) => Promise<void>;
   deleteSave: (id: string) => Promise<void>;
   exportSave: () => string | null;
-  importSave: (json: string) => void;
+  // Settles at once for an ordinary save; a custom campaign first loads the editor tables.
+  importSave: (json: string) => Promise<void>;
 }
 
-// Merge local and remote save lists by id, newest updatedAt wins, sorted newest
-// first. Local-only and remote-only ids both survive; a shared id keeps whichever
-// side was touched last. Used by refreshSaves so cross-device saves appear.
-function mergeSaveMetas(local: SaveMeta[], remote: SaveMeta[]): SaveMeta[] {
-  const byId = new Map<string, SaveMeta>();
-  for (const m of [...local, ...remote]) {
-    const prev = byId.get(m.id);
-    if (!prev || m.updatedAt > prev.updatedAt) byId.set(m.id, m);
-  }
-  return [...byId.values()].sort((a, b) => b.updatedAt - a.updatedAt);
+// A custom (Campaign Editor) campaign carries its authoring document. Putting
+// it back in the scenario table needs the editor's content tables (every
+// engine's), which load only for such a save.
+function carriesCustomScenario(state: { scenarioId?: string; customScenario?: string }): boolean {
+  return isCustomScenarioId(state.scenarioId) || state.customScenario !== undefined;
+}
+
+async function restoreCustomScenario(state: { scenarioId?: string; customScenario?: string }): Promise<void> {
+  if (!carriesCustomScenario(state)) return;
+  const { registerCampaignCustomScenario } = await import("@content/customScenario");
+  registerCampaignCustomScenario(state);
 }
 
 let localAutosaveQueue: Promise<void> = Promise.resolve();
@@ -290,12 +294,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   refreshSaves: async () => {
     await localAutosaveQueue;
-    // Local-first: Dexie is the source of truth and always works offline. When
-    // signed in, fold in any cloud saves and let the newest updatedAt win per
-    // id, so a save made on another device shows up here.
-    const local = await localProvider.list();
-    const remote = await remoteProvider.list(); // [] when logged out or offline
-    set({ saves: mergeSaveMetas(local, remote) });
+    // The landing page reads the same list from the light saves store.
+    set({ saves: await useSavesStore.getState().refresh() });
   },
 
   saveGame: async (name) => {
@@ -332,7 +332,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     if (!record) record = await remoteProvider.load(id);
     if (!record) return;
-    registerCampaignCustomScenario(record.state);
+    await restoreCustomScenario(record.state);
     let replayRec = await localProvider.loadReplay(id).catch(() => null);
     if (!replayRec) replayRec = await remoteProvider.loadReplay(id);
     const replay = resumeReplayLog(record.state, replayRec?.log ?? null);
@@ -363,11 +363,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return JSON.stringify(game, null, 2);
   },
 
-  importSave: (json) => {
+  importSave: async (json) => {
     try {
       const state = JSON.parse(json) as GameState;
       if (!state.states || !state.candidates) throw new Error("Invalid save");
-      registerCampaignCustomScenario(state);
+      // Synchronous for an ordinary save: only a custom campaign waits.
+      if (carriesCustomScenario(state)) await restoreCustomScenario(state);
       // Exported saves are just the raw GameState JSON (see exportSave), so an
       // imported save never carries a replay log. Regenerating a fresh log
       // from the current turn is the simpler-and-correct option here (see
@@ -385,3 +386,5 @@ export const useGameStore = create<GameStore>((set, get) => ({
 }));
 
 export type { CandidateId };
+
+registerSession("us", useGameStore);

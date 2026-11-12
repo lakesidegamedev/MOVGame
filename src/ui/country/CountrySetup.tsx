@@ -13,7 +13,7 @@ import { DifficultyPicker, type Difficulty } from "@ui/DifficultyPicker";
 import { TideBanner, ChallengePartyBanner, RegionalPartyBanner } from "@ui/TideBanner";
 import { dailyPairFor } from "@lib/daily";
 import { SCENARIOS_BY_ID } from "@content/scenarioRegistry";
-import { FR_FIRST_ROUND } from "@content/countries/france";
+import { FR_FIRST_ROUND } from "@content/countries/france.runoff";
 import { COUNTRY_MODULES_BY_CODE } from "@content/countries";
 
 function randomSeed(): string {

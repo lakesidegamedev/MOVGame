@@ -10,6 +10,7 @@ import { App } from "../../App";
 import { useGameStore } from "@store/gameStore";
 import { useStoreNav } from "@store/storeNav";
 import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
+import { loadedCountries } from "@content/countries";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -60,7 +61,7 @@ function typeInto(input: HTMLInputElement, value: string) {
 describe("App renders without crashing", () => {
   beforeEach(reset);
 
-  it("shows the landing scenario browser on first load, then the U.S. setup wizard", () => {
+  it("shows the landing scenario browser on first load, then the U.S. setup wizard", async () => {
     const m = mount();
     // The landing page: featured tier up top, full catalog, packs strip.
     expect(m.html()).toContain(PAYWALL_ENABLED ? "Play free" : "Start here");
@@ -70,8 +71,16 @@ describe("App renders without crashing", () => {
     const storeButtons = [...m.container.querySelectorAll<HTMLButtonElement>("button")]
       .filter((button) => button.textContent?.trim() === "Store");
     expect(storeButtons.length).toBeGreaterThan(0);
-    // Entering a free U.S. scenario shows the setup wizard on that year.
+    // The landing page renders from metadata: no country bundle has loaded.
+    expect(loadedCountries()).toEqual([]);
+    // Entering a free U.S. scenario shows the setup wizard on that year. The
+    // US shell is a lazy chunk, so wait for it with a finite deadline.
     clickButton(m.container, "Biden v. Trump");
+    await m.flush();
+    const deadline = Date.now() + 10_000;
+    while (!m.html().includes("The Election") && Date.now() < deadline) {
+      await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+    }
     const html = m.html();
     expect(html).toContain("The Election"); // step 1 of the setup wizard
     expect(html).toContain("The War Room"); // staff-hire step present

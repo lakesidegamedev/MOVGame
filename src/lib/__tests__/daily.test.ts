@@ -12,7 +12,7 @@ import {
   utcDateString,
 } from "../daily";
 import { SCENARIOS_BY_ID, SCENARIO_REGISTRY } from "../../content/scenarioRegistry";
-import { COUNTRIES } from "../../content/countries";
+import { COUNTRIES } from "../../content/countries/all";
 import { playablePartiesIn as countryPlayable } from "../../engine/countryGame";
 import { playablePartiesIn as ukPlayable } from "../../engine/ukGame";
 
