@@ -4,19 +4,20 @@ The Tauri 2 desktop shell lives here. It wraps the web edition from this same ch
 
 ## Status (November 2026)
 
-Verified on GitHub Actions by `.github/workflows/desktop.yml`:
+Verified on GitHub Actions by `.github/workflows/desktop.yml`, preview
+channel, with the committed `Cargo.lock` unchanged (opener plugin included):
 
-- **Windows** (`windows-latest`): the shell compiles with the committed
-  `Cargo.lock` unchanged, including the opener plugin. The NSIS installer and
-  the raw app .exe are produced. A smoke step launches the .exe, finds its
-  window by title, and screenshots the desktop: the landing page renders in
-  WebView2.
-- **Linux** and **macOS**: see the latest run of the workflow. Both jobs are
-  independent of the Windows job.
+- **Windows** (`windows-latest`): NSIS installer and the raw app .exe are
+  built. A smoke step launches the .exe, finds its window by title, and
+  screenshots the desktop: the landing page renders in WebView2.
+- **Linux** (`ubuntu-latest`): AppImage and .deb are built. The same smoke runs
+  under xvfb: the window appears with its title and the landing page renders.
+- **macOS** (`macos-latest`, Apple Silicon): the unsigned .app is built and
+  packaged as a .zip and a .dmg. It is not launched in CI.
 
-Not verified yet: installing, upgrading and uninstalling through the NSIS
-installer, checkout opening in the system browser on a real desktop, and any
-build on macOS hardware or a physical Linux desktop.
+Not verified yet: installing, upgrading and uninstalling through the
+installers, checkout opening in the system browser on a real desktop, starting
+the macOS build at all, and Intel Macs.
 
 ## Channels
 
