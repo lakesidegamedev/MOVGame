@@ -24,6 +24,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   later, or straight away with "I've paid, check now". It does not yet check the moment you come
   back to its window.
 
+- Android: Account now has Delete account, like iPhone. It permanently removes your Margin of
+  Victory account with its cloud saves, scores and achievements, after you confirm.
+
 ### Fixed
 
 - The United States setup screen no longer says "Locked years are part of the United States

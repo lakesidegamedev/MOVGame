@@ -242,6 +242,12 @@ class CampaignAccount(context: Context, private val scope: CoroutineScope) {
         readDetails()
         _notice.value = "Campaign code activated."
     }
+    /** Permanently deletes this game account on the server, then signs out. */
+    fun deleteAccount() = operation {
+        call("/api/auth/account", "DELETE")
+        signOut()
+        _notice.value = "Your account was deleted."
+    }
     fun signOut() {
         _rankings.value = emptyList(); _boardKey.value = ""
         boardGeneration++; _board.value = emptyList(); _dailyRank.value = null; _purchases.value = emptyList(); _purchasesLoaded.value = false

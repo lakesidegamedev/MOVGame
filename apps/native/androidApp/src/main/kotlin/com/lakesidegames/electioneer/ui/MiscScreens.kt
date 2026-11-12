@@ -32,6 +32,7 @@ fun AccountScreen(session: GameSession) {
     var username by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
     var registering by remember { mutableStateOf(false) }
+    var confirmingDelete by remember { mutableStateOf(false) }
     val elections = remember { MobileCampaign.countries().flatMap { MobileCampaign.elections(it.id) } }
     LaunchedEffect(user) { if (user != null) password = "" }
     if (showingLakeside) LakesideLogin(onCode = { code -> showingLakeside = false; account.exchangeLakeside(code) }, onClose = { showingLakeside = false })
@@ -84,6 +85,17 @@ fun AccountScreen(session: GameSession) {
                     colors = movFieldColors(), shape = MovRadius.md, textStyle = MaterialTheme.typography.bodyMedium)
                 SecondaryButton("Activate code", { account.activate(code) }, Modifier.fillMaxWidth(), enabled = !busy && code.isNotBlank())
             }
+            MovCard {
+                CardHead("Delete account")
+                Text("Deleting removes this Margin of Victory account, its cloud saves, scores and achievements. Packs bought on your Lakeside account stay with that account.",
+                    color = Mov.Text3, style = MaterialTheme.typography.bodyMedium)
+                GhostButton("Delete account", { confirmingDelete = true }, enabled = !busy, color = Mov.Negative)
+            }
+            if (confirmingDelete) androidx.compose.material3.AlertDialog(onDismissRequest = { confirmingDelete = false },
+                title = { Text("Delete your Margin of Victory account?") },
+                text = { Text("This permanently removes the account, its cloud saves, scores and achievements. It cannot be undone.") },
+                confirmButton = { androidx.compose.material3.TextButton(onClick = { confirmingDelete = false; account.deleteAccount() }) { Text("Delete account", color = Mov.Negative) } },
+                dismissButton = { androidx.compose.material3.TextButton(onClick = { confirmingDelete = false }) { Text("Cancel") } })
         } else {
             MovCard {
                 PrimaryButton("Sign in with Lakeside Games", { showingLakeside = true }, Modifier.fillMaxWidth(), enabled = !busy)
