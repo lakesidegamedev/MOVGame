@@ -162,7 +162,8 @@ class AdaptersTest {
         assertEquals("result", g.phase)
         assertEquals("lpc", g.result!!.largestParty)
         assertEquals(
-            mapOf("lpc" to 171, "cpc" to 126, "ndp" to 7, "gpc" to 1, "oth" to 0, "bq" to 38),
+            // Matches the web engine for this script (general events no longer repeat).
+            mapOf("lpc" to 171, "cpc" to 125, "ndp" to 8, "gpc" to 1, "oth" to 0, "bq" to 38),
             g.result!!.seats,
         )
         val facts = multipartyScoreFacts(
