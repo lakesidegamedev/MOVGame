@@ -97,8 +97,10 @@
   --space-12: 48px;
 
   /* ── Type ─────────────────────────────────────────────────────────── */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  /* "MOV Flags" only covers regional indicator letters (see base.css), so it is safe at the front of every
+     stack. Windows has no colour flag emoji, and this is what draws them there. */
+  --font-sans: "MOV Flags", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "MOV Flags", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   --fs-2xs: 10px;   /* eyebrow labels, units */
   --fs-xs: 11px;    /* captions, chips, table meta */
   --fs-sm: 12px;    /* dense body, table cells */

@@ -240,6 +240,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- Country flags now show as flags on Windows, in the desktop app and in every browser. Before,
+  Windows drew two boxed letters (US, GB, DE) wherever a flag appeared, on the landing page,
+  the library, setup, the store and the campaign desk. The game now carries a 4 KB flag font for
+  the 14 countries it uses.
 - A general campaign event, such as a gaffe, a newspaper endorsement or a debate win, now runs at
   most once a campaign in every country, so the same headline never comes round twice. Decision
   events such as a debate invitation can still return.
