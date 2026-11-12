@@ -392,7 +392,9 @@ struct ContentView: View {
                 }
             }
             // Presented sheets do not pick up the capture text size from the root.
-            .environment(\.sizeCategory, captureSizeCategory)
+            // Only the store is captured at large text; outside capture runs both
+            // values are the system size.
+            .environment(\.sizeCategory, destination == .store ? captureSizeCategory : systemSizeCategory)
         }
         .fullScreenCover(isPresented: $session.showReveal) {
             if let night = session.electionNight {
