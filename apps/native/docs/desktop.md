@@ -5,25 +5,34 @@ The Tauri 2 desktop shell lives here. It wraps the web edition from this same ch
 ## Status (November 2026)
 
 Checked on GitHub Actions by `.github/workflows/desktop.yml` on every push to
-`build/desktop*`. Runs and evidence are listed under "Smoke tests" below.
+`build/desktop*`. Last full run: 43299800492 on commit 23718c0, Windows, Linux
+and macOS all green. How each test works is under "Smoke tests" below.
 
-**Windows** (`windows-latest`, Windows 11 with WebView2), verified by driving
-the installed game with real clicks:
+**Windows** (`windows-latest` runner, WebView2), verified by driving the
+installed game with real clicks:
 
 - The per-user NSIS installer installs silently (`/S`) with no administrator
   prompt, to `%LOCALAPPDATA%\Margin of Victory`, with a Start menu entry (a
   silent install also adds a desktop shortcut).
 - A 1.9.0 build plays from the landing page through the setup wizard to the
   week two desk. Installing 2.0.0 over it upgrades in place (same folder,
-  version 2.0.0 in Apps & Features) and the landing page offers "Resume US
+  version 2.0.0 and publisher "Lakeside Games" in Apps & Features) and the
+  landing page offers "Resume US
   campaign · Week 2", which opens that week.
 - Buy in a `desktop-direct` build, signed in with a linked account, calls the
   opener plugin with
   `https://lakesidegames.net/account/checkout?game=electioneer&product=us-historical`
-  and the Store says checkout is open in the browser. When the player comes
-  back to the window and the platform reports the pack as owned, the Store
-  shows "United States unlocked". The game server was mocked for this step; no
-  payment is made.
+  and Windows opens that URL in Edge (the default browser on the runner). The
+  Store says checkout is open in the browser. When the platform reports the
+  pack as owned, the Store shows "United States unlocked" (3.3 seconds after
+  the window came back in run 43299800492). The game server was mocked for
+  this step; no payment is made.
+- Known gap: bringing the game window back does not reach the page's `focus`
+  or `visibilitychange` handlers inside WebView2, so the immediate re-check on
+  return does not happen on Windows. The purchase is still picked up by the
+  timed check, which runs every 4 to 12 seconds for ten minutes after Buy
+  (`DESKTOP_WATCH` in `src/store/storeFlow.ts`), and the "I've paid, check now"
+  button works at any time.
 - The opener plugin refuses URLs outside its allow list
   (`https://example.com/` is rejected with "Not allowed to open url").
 - Uninstalling removes the program, the Apps & Features entry and the
@@ -112,8 +121,9 @@ about 8.
 
 - **Windows** (`scripts/smoke-windows-lifecycle.ps1`): installs a 1.9.0
   `desktop-direct` build silently, plays it to week two, upgrades to the
-  current version, resumes the save, presses Buy, checks the checkout URL and
-  the unlock on return, checks the opener's allow list, uninstalls, checks the
+  current version, resumes the save, presses Buy, checks the checkout URL
+  reached the opener and Edge, checks the unlock after a minimise and restore,
+  checks the opener's allow list, uninstalls, checks the
   saves are kept, reinstalls and resumes again, then installs the preview next
   to it and plays a paid election to week two. It also launches the tester
   artifact's portable .exe (`scripts/smoke-windows.ps1`).
@@ -236,8 +246,9 @@ Lakeside checkout and account pages open in the system browser, not in the game
 window. The shell registers the Tauri opener plugin (`src-tauri/src/lib.rs`) and
 `src-tauri/capabilities/default.json` allows it to open only `lakesidegames.net` and
 `sim.ahousedividedgame.com` URLs. The web code calls it through
-`src/lib/externalLink.ts`, and the game picks a purchase up when the window regains
-focus (see `src/store/storeFlow.ts`). Sign in with Lakeside Games is not offered in
+`src/lib/externalLink.ts`. After Buy the game checks for the purchase every 4 to 12
+seconds for ten minutes, and again when the page sees the window come back (see
+`src/store/storeFlow.ts`; on Windows that second trigger does not fire yet, see Status). Sign in with Lakeside Games is not offered in
 the desktop window, because the return trip cannot reach it; an account that needs
 linking is linked once in the browser.
 
@@ -352,10 +363,15 @@ The Mac App Store is a separate route with its own signing and review.
 
 - Windows code signing and macOS notarisation (above). Until then, direct
   downloads are for testers.
+- Forward the native window focus event to the page (Tauri
+  `WindowEvent::Focused(true)` in `src-tauri/src/lib.rs`), so a purchase shows
+  up the moment the player returns on Windows. The Windows smoke test reports
+  `pickedUpByWindowReturn` in `smoke/new/checkout-result.json` and will show
+  whether it works.
 - Lakeside sign-in and account linking from the desktop app, end to end in a
   real browser.
 - A real purchase on a `desktop-direct` build (CI covers everything up to the
-  payment page and the unlock on return).
+  browser opening the payment page, and the unlock afterwards).
 - Offline startup, Intel Macs and Windows on ARM.
 - Implement and test Steam DLC ownership before selling packs on Steam.
 - Bump the desktop version (`tauri.conf.json`, `Cargo.toml`, `package.json`) with every release; it is 2.0.0 for the 2.0 release.
