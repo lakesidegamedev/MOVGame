@@ -6,6 +6,7 @@ import { useStoreNav } from "@store/storeNav";
 import { consumeResume, useStoreFlow } from "@store/storeFlow";
 import { useCatalog } from "@lib/useCatalog";
 import { DISTRIBUTION } from "@lib/distribution";
+import { SHELL_FOCUS_EVENT } from "@lib/desktopShell";
 import { BRAND } from "../../brand";
 import { countryPacks, freeElections, freeElectionsByCountry, offerFor } from "@lib/storeModel";
 import { StoreContext, type StoreCtx } from "./StoreContext";
@@ -71,19 +72,25 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
   }, [phase, user]);
 
   // Coming back to the window (desktop checkout, a browser link step) checks again at once.
+  // The desktop shell also reports window focus itself (SHELL_FOCUS_EVENT), because WebView2
+  // on Windows can restore the window without telling the page; that report is trusted even
+  // when the page still reads as hidden.
   const waiting = phase.kind === "checkout-open" || phase.kind === "link-external" || phase.kind === "slow";
   useEffect(() => {
     if (!waiting) return;
     let last = 0;
-    const onBack = () => {
-      if (document.visibilityState === "hidden" || Date.now() - last < 2_000) return;
+    const onBack = (e: Event) => {
+      if (e.type !== SHELL_FOCUS_EVENT && document.visibilityState === "hidden") return;
+      if (Date.now() - last < 2_000) return;
       last = Date.now();
       void checkNow();
     };
     window.addEventListener("focus", onBack);
+    window.addEventListener(SHELL_FOCUS_EVENT, onBack);
     document.addEventListener("visibilitychange", onBack);
     return () => {
       window.removeEventListener("focus", onBack);
+      window.removeEventListener(SHELL_FOCUS_EVENT, onBack);
       document.removeEventListener("visibilitychange", onBack);
     };
   }, [waiting, checkNow]);

@@ -12,6 +12,12 @@
 #   smoke-windows-lifecycle.ps1 -BlurPid <pid> -Out <dir>
 #   smoke-windows-lifecycle.ps1 -FocusPid <pid> -Out <dir>
 #
+# The launcher stage starts the installed app the way the Lakeside launcher
+# does, with a fake LAKESIDE_HANDOFF_CODE in its environment, and answers the
+# game's redeem call from fake-api.mjs: the API host is pointed at 127.0.0.1 in
+# the hosts file and a throwaway certificate for it is trusted for the length
+# of the stage. Both are removed afterwards.
+#
 # Helpers used by the checkout step. Blur screenshots the desktop (the browser
 # should be in front) and minimises the app; Focus restores it and brings it to
 # the front, so the game sees the player come back to its window.
@@ -68,6 +74,10 @@ if ($FocusPid -ne 0) {
 }
 
 $driver = Join-Path $PSScriptRoot 'desktop-smoke.mjs'
+$fakeApiScript = Join-Path $PSScriptRoot 'fake-api.mjs'
+$apiHost = 'sim.ahousedividedgame.com'
+$hostsFile = Join-Path $env:SystemRoot 'System32\drivers\etc\hosts'
+$hostsMarker = '# mov-launcher-smoke'
 $self = $PSCommandPath
 $cdpPort = 9222
 $results = [ordered]@{}
@@ -163,6 +173,44 @@ function Drive([string]$Step, [string]$Label, [string[]]$Extra = @()) {
   Check "$Label $Step" ($code -eq 0) $detail
 }
 
+# Point the API host at a local fake server with a certificate WebView2 trusts.
+function Start-FakeApi([string]$Code) {
+  $dir = Join-Path $Out 'launcher-api'
+  New-Item -ItemType Directory -Force -Path $dir | Out-Null
+  $cert = New-SelfSignedCertificate -DnsName $apiHost -CertStoreLocation 'Cert:\LocalMachine\My' -NotAfter (Get-Date).AddDays(1) -FriendlyName 'mov-launcher-smoke'
+  $pfx = Join-Path $env:RUNNER_TEMP 'mov-fake-api.pfx'
+  $cer = Join-Path $env:RUNNER_TEMP 'mov-fake-api.cer'
+  $pass = 'mov-smoke'
+  Export-PfxCertificate -Cert $cert -FilePath $pfx -Password (ConvertTo-SecureString -String $pass -Force -AsPlainText) | Out-Null
+  Export-Certificate -Cert $cert -FilePath $cer | Out-Null
+  Import-Certificate -FilePath $cer -CertStoreLocation 'Cert:\LocalMachine\Root' | Out-Null
+  Add-Content -Path $hostsFile -Value "`r`n127.0.0.1 $apiHost $hostsMarker" -Encoding ascii
+  ipconfig /flushdns | Out-Null
+  $log = Join-Path $dir 'requests.jsonl'
+  $proc = Start-Process -FilePath 'node' -ArgumentList @($fakeApiScript, '--pfx', $pfx, '--passphrase', $pass, '--port', '443', '--code', $Code, '--log', $log, '--ttl', '600') `
+    -PassThru -NoNewWindow -RedirectStandardOutput (Join-Path $dir 'server.out.txt') -RedirectStandardError (Join-Path $dir 'server.err.txt')
+  $up = $false
+  $deadline = (Get-Date).AddSeconds(30)
+  while ((Get-Date) -lt $deadline -and -not $up) {
+    Start-Sleep -Milliseconds 500
+    try { Invoke-RestMethod "https://$apiHost/healthz" -TimeoutSec 3 | Out-Null; $up = $true } catch { }
+  }
+  Check 'fake API reachable over trusted https' $up "https://$apiHost/healthz -> 127.0.0.1:443"
+  [pscustomobject]@{ Proc = $proc; Thumbprint = $cert.Thumbprint; Log = $log; Files = @($pfx, $cer) }
+}
+
+function Stop-FakeApi($Fake) {
+  if (-not $Fake) { return }
+  if ($Fake.Proc -and -not $Fake.Proc.HasExited) { Stop-Process -Id $Fake.Proc.Id -Force -ErrorAction SilentlyContinue }
+  $kept = Get-Content $hostsFile | Where-Object { $_ -notmatch [regex]::Escape($hostsMarker) }
+  Set-Content -Path $hostsFile -Value $kept -Encoding ascii
+  ipconfig /flushdns | Out-Null
+  foreach ($store in 'Cert:\LocalMachine\Root', 'Cert:\LocalMachine\My') {
+    Get-ChildItem $store | Where-Object { $_.Thumbprint -eq $Fake.Thumbprint } | Remove-Item -ErrorAction SilentlyContinue
+  }
+  $Fake.Files | Remove-Item -ErrorAction SilentlyContinue
+}
+
 $direct = 'Margin of Victory'
 $directData = Join-Path $env:LOCALAPPDATA 'com.lakesidegames.electioneer'
 $preview = 'Margin of Victory Preview'
@@ -201,6 +249,27 @@ try {
   Save-Desktop 'new-after-checkout-desktop'
   Get-Process -Name msedge -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
   Close-App $p 'new'
+
+  # 3b. Started by the Lakeside launcher: the sign-in code in the environment is
+  # redeemed once, through the game's own redeem call (faked here).
+  $launcherCode = 'smoke' + ([guid]::NewGuid().ToString('N'))
+  $fake = $null
+  try {
+    $fake = Start-FakeApi $launcherCode
+    $env:LAKESIDE_HANDOFF_CODE = $launcherCode
+    try { $p = Launch $new.Exe 'launcher' } finally { Remove-Item Env:LAKESIDE_HANDOFF_CODE -ErrorAction SilentlyContinue }
+    Drive 'launcher' 'launcher' @('--launcher-code', $launcherCode)
+    Save-Desktop 'launcher-signed-in-desktop'
+    Close-App $p 'launcher'
+    $requests = @(Get-Content $fake.Log -ErrorAction SilentlyContinue | Where-Object { $_ } | ForEach-Object { $_ | ConvertFrom-Json })
+    $redeems = @($requests | Where-Object { $_.path -eq '/api/lakeside/launcher-exchange' })
+    Check 'launcher code redeemed once with the right code' ($redeems.Count -eq 1 -and $redeems[0].codeMatches) "$($redeems.Count) redeem call(s), code matched: $(@($redeems | ForEach-Object { $_.codeMatches }) -join ',')"
+    $me = @($requests | Where-Object { $_.path -eq '/api/auth/me' -and $_.authorized })
+    Check 'game session used afterwards' ($me.Count -ge 1) "$($me.Count) signed-in /api/auth/me call(s)"
+    Note 'fake API requests' (($requests | ForEach-Object { "$($_.method) $($_.path)" }) -join '; ')
+  } finally {
+    Stop-FakeApi $fake
+  }
 
   # 4. Uninstall: program gone, saves kept (the silent uninstaller never ticks "Delete the application data").
   Uninstall $direct 'direct'

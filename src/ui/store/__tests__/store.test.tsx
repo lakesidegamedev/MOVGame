@@ -22,6 +22,7 @@ vi.mock("@lib/useCatalog", () => ({
 import { useAuthStore } from "@store/authStore";
 import { useStoreNav } from "@store/storeNav";
 import { useStoreFlow } from "@store/storeFlow";
+import { SHELL_FOCUS_EVENT } from "@lib/desktopShell";
 import StoreScreen from "../StoreScreen";
 
 const readyCatalog = (unlisted: string[] = []): CatalogState =>
@@ -307,6 +308,37 @@ describe("purchase messages", () => {
     expect(banner.textContent).toContain("Checkout is open in your browser");
     expect(banner.textContent).toContain("I've paid, check now");
     expect(banner.textContent).toContain("product=canada");
+  });
+
+  it("checks at once when the desktop shell says the window is back, even while the page reads hidden", () => {
+    // WebView2 on Windows can restore the window without a focus or visibilitychange reaching
+    // the page; the shell's own report must still trigger the check.
+    const realCheckNow = useStoreFlow.getState().checkNow;
+    const checkNow = vi.fn(async () => {});
+    const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+    try {
+      useStoreFlow.setState({ checkNow });
+      Object.assign(hoisted.policy, { channel: "desktop-direct", checkout: "system-browser" });
+      useAuthStore.setState({ user: player });
+      mount();
+      setPhase({ phase: { kind: "checkout-open", packId: "canada", url: "https://lakesidegames.net/account/checkout?game=electioneer&product=canada" } });
+      act(() => { window.dispatchEvent(new Event("focus")); });
+      expect(checkNow).not.toHaveBeenCalled();
+      act(() => { window.dispatchEvent(new Event(SHELL_FOCUS_EVENT)); });
+      expect(checkNow).toHaveBeenCalledTimes(1);
+      // A burst of focus reports is one check.
+      act(() => { window.dispatchEvent(new Event(SHELL_FOCUS_EVENT)); });
+      expect(checkNow).toHaveBeenCalledTimes(1);
+      // Nothing to wait for: no check.
+      setPhase({ phase: { kind: "idle" } });
+      const later = vi.spyOn(Date, "now").mockReturnValue(Date.now() + 10_000);
+      act(() => { window.dispatchEvent(new Event(SHELL_FOCUS_EVENT)); });
+      later.mockRestore();
+      expect(checkNow).toHaveBeenCalledTimes(1);
+    } finally {
+      visibility.mockRestore();
+      act(() => { useStoreFlow.setState({ checkNow: realCheckNow }); });
+    }
   });
 });
 

@@ -5,7 +5,8 @@ import { PACKS_BY_ID, STORE_PACKS } from "@content/packs";
 import { dailyAssignment, utcDateString } from "@lib/daily";
 import { DISTRIBUTION } from "@lib/distribution";
 import { useStoreNav } from "./storeNav";
-import { takeLauncherCode } from "@lib/launcherHandoff";
+import { shellLauncherCode, takeLauncherCode } from "@lib/launcherHandoff";
+import { takeShellLauncherCode } from "@lib/desktopShell";
 
 // Post-redirect notices (Lakeside sign-in). Checkout results are shown by the
 // Store itself, which opens when the player lands back from checkout.
@@ -170,15 +171,21 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 }));
 
-// Opened from the Lakeside launcher with #launcher_code=: strip the code from
-// the address bar at once, then trade it for a game session. On any failure the
-// player keeps playing as they were (signed out, or their existing session).
+// Opened from the Lakeside launcher: the web game with #launcher_code=, or the
+// desktop app with the code in its environment (handed over by the shell).
+// Strip a fragment code from the address bar at once, then trade the code for
+// a game session. On any failure the player keeps playing as they were
+// (signed out, or their existing session).
 async function consumeLauncherCode(): Promise<void> {
   if (typeof window === "undefined") return;
   const hash = window.location?.hash;
-  const taken = takeLauncherCode(typeof hash === "string" ? hash : "");
+  let taken = takeLauncherCode(typeof hash === "string" ? hash : "");
+  if (taken.present) {
+    window.history.replaceState(null, "", window.location.pathname + window.location.search + taken.hash);
+  } else {
+    taken = shellLauncherCode(await takeShellLauncherCode(), taken.hash);
+  }
   if (!taken.present) return;
-  window.history.replaceState(null, "", window.location.pathname + window.location.search + taken.hash);
   if (!taken.code) {
     useAuthStore.setState({ notice: { kind: "launcher-failed" } });
     return;
