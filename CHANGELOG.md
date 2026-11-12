@@ -11,14 +11,6 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ## [Unreleased]
 
-### Fixed
-
-- The iPhone Store now describes the Complete Collection the way Android and the web do: every
-  election in the game, with how many are already free, instead of only the paid ones.
-- iPhone and Android keep everything you own when the Lakeside account holds a pack your version
-  of the app does not know yet, such as a country added in a later update. The unknown pack is
-  ignored until you update.
-- Android now has a launcher icon.
 ### Added
 
 - Opening Margin of Victory from the Lakeside launcher can sign you in with the launcher's
@@ -27,6 +19,15 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   Lakeside account, a new game account is made for it, and it needs no email address. If you are
   already logged in to a game account that is not linked yet, the launcher sign in links that one
   instead.
+
+### Fixed
+
+- The iPhone Store now describes the Complete Collection the way Android and the web do: every
+  election in the game, with how many are already free, instead of only the paid ones.
+- iPhone and Android keep everything you own when the Lakeside account holds a pack your version
+  of the app does not know yet, such as a country added in a later update. The unknown pack is
+  ignored until you update.
+- Android now has a launcher icon.
 
 ## [2.0.0] - 2026-11-12
 
