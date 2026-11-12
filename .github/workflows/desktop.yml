@@ -46,7 +46,7 @@ env:
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -86,7 +86,7 @@ jobs:
         shell: pwsh
         run: ./apps/native/scripts/smoke-windows.ps1 -Exe "out/margin-of-victory-$env:CHANNEL-portable.exe" -Shot windows-smoke.png
       - name: Build lifecycle installers (desktop-direct 1.9.0 and current)
-        if: env.LIFECYCLE == 'true'
+        if: ${{ !cancelled() && env.LIFECYCLE == 'true' }}
         shell: bash
         working-directory: apps/native
         run: |
@@ -99,7 +99,7 @@ jobs:
           cp "src-tauri/target/release/bundle/nsis/Margin of Victory_${version}_x64-setup.exe" ../../lifecycle/new-setup.exe
           ls -la ../../lifecycle
       - name: Install, upgrade, play, buy, uninstall
-        if: env.LIFECYCLE == 'true'
+        if: ${{ !cancelled() && env.LIFECYCLE == 'true' }}
         shell: pwsh
         run: |
           $preview = if ($env:CHANNEL -eq 'desktop-preview') { (Get-ChildItem out/*-setup.exe | Select-Object -First 1).FullName } else { '' }
