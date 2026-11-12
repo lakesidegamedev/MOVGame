@@ -155,13 +155,16 @@ failures = []
 
 def tap_map():
     # Tap inside the map until a region is selected. The middle of a country's
-    # bounding box can be open sea (Japan), so try a few points.
+    # bounding box can be open sea.
     name = 'map-probe'
     semantic_text(name)
     node = next(n for n in ET.fromstring((output / f'{name}.xml').read_text()).iter('node')
                 if n.get('content-desc', '').startswith('Map of'))
     left, top, right, bottom = map(int, re.findall(r'\d+', node.get('bounds', '')))
-    for fx, fy in ((0.5, 0.5), (0.7, 0.4), (0.4, 0.6), (0.6, 0.3), (0.45, 0.75), (0.3, 0.45)):
+    # Japan is a thin diagonal arc, so scan a 7 x 7 grid from the middle outward.
+    grid = sorted((((i + 0.5) / 7, (j + 0.5) / 7) for i in range(7) for j in range(7)),
+                  key=lambda point: (point[0] - 0.5) ** 2 + (point[1] - 0.5) ** 2)
+    for fx, fy in grid:
         adb('shell', 'input', 'tap', str(int(left + (right - left) * fx)), str(int(top + (bottom - top) * fy)))
         time.sleep(1)
         if 'CLEAR REGION SELECTION' in semantic_text(name):
