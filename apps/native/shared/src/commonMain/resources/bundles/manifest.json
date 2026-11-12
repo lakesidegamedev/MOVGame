@@ -1,6 +1,6 @@
 {
-  "webHead": "6ba6909b640d3af275fe18fadd0a086fb3133083",
-  "exportedAt": "2026-11-12T00:25:19.373Z",
+  "webHead": "e1dbfc220f7dd165301a308001ea520e8bd9ab99",
+  "exportedAt": "2026-11-12T00:25:51.539Z",
   "bundles": {
     "editor-defaults": {
       "bytes": 196599
@@ -39,40 +39,40 @@
       "bytes": 70376
     },
     "countries/ca": {
-      "bytes": 56728
+      "bytes": 60017
     },
     "countries/de": {
-      "bytes": 48740
+      "bytes": 49892
     },
     "countries/fr": {
-      "bytes": 37515
+      "bytes": 38675
     },
     "countries/au": {
-      "bytes": 48409
+      "bytes": 49749
     },
     "countries/nz": {
-      "bytes": 23730
+      "bytes": 24054
     },
     "countries/br": {
-      "bytes": 34841
+      "bytes": 35716
     },
     "countries/in": {
       "bytes": 37455
     },
     "countries/es": {
-      "bytes": 38975
+      "bytes": 39449
     },
     "countries/ie": {
-      "bytes": 34569
+      "bytes": 35079
     },
     "countries/jp": {
-      "bytes": 53398
+      "bytes": 54472
     },
     "countries/it": {
       "bytes": 34535
     },
     "countries/mx": {
-      "bytes": 28290
+      "bytes": 29629
     }
   }
 }

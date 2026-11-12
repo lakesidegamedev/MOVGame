@@ -43,7 +43,7 @@
 
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { FR_MAP } from "./paths/fr";
 import type { TransferMatrix, RoundShares } from "@engine/runoff";
 
@@ -160,7 +160,8 @@ export const FR_TRANSFERS: Record<string, TransferMatrix> = {
   },
 };
 
-export const FRANCE: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const FRANCE: CountryBundle = oncePerCampaign({
   id: "FR",
   label: "France",
   flag: "🇫🇷",
@@ -644,7 +645,7 @@ export const FRANCE: CountryBundle = {
       ],
     },
   ],
-};
+}, ["debat_entre_deux"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const FRANCE_MODULE = countryModule(FRANCE, {

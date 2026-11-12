@@ -53,10 +53,11 @@
 // the 735-seat chamber lives beside the 630-seat one.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { DE_MAP } from "./paths/de";
 
-export const GERMANY: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const GERMANY: CountryBundle = oncePerCampaign({
   id: "DE",
   label: "Germany",
   flag: "🇩🇪",
@@ -569,7 +570,7 @@ export const GERMANY: CountryBundle = {
       ],
     },
   ],
-};
+}, ["tv_duell"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const GERMANY_MODULE = countryModule(GERMANY, {

@@ -69,10 +69,11 @@
 // Fine Gael and Labour, the actual coalition, are free to pair.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { IE_MAP } from "./paths/ie";
 
-export const IRELAND: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const IRELAND: CountryBundle = oncePerCampaign({
   id: "IE",
   label: "Ireland",
   flag: "🇮🇪",
@@ -417,7 +418,7 @@ export const IRELAND: CountryBundle = {
       ],
     },
   ],
-};
+}, ["leaders_debate"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const IRELAND_MODULE = countryModule(IRELAND, {

@@ -62,10 +62,11 @@
 //   Points 43, 37, 17, 3. The first defeat of the PRI in 71 years.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { MX_MAP } from "./paths/mx";
 
-export const MEXICO: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const MEXICO: CountryBundle = oncePerCampaign({
   id: "MX",
   label: "Mexico",
   flag: "🇲🇽",
@@ -354,6 +355,10 @@ export const MEXICO: CountryBundle = {
     { id: "spending_mx", headline: "The electoral institute fines {party} for overspending, and the story runs for days", role: "any", weight: 2, appeal: -0.02, momentum: -5 },
     { id: "rally_mx", headline: "A packed rally in a central plaza electrifies {party}", role: "player", weight: 2, appeal: 0.025, momentum: 9 },
     { id: "spots_mx", headline: "{party}'s television spots land, and the jingle is on every radio", role: "player", weight: 2, appeal: 0.02, momentum: 6 },
+    { id: "caravan_mx", headline: "{party}'s caravan fills the plazas of three states in one weekend", role: "any", weight: 2, appeal: 0.02, momentum: 5 },
+    { id: "spot_pulled_mx", headline: "The electoral authorities order one of {party}'s attack spots off the air", role: "any", weight: 2, appeal: -0.015, momentum: -4 },
+    { id: "business_mx", headline: "Business leaders warn about the front-runner's economic plans, and {party} spends the week answering", role: "leader", weight: 2, appeal: -0.015, momentum: -4 },
+    { id: "endorse_mx", headline: "A former rival's local organisers switch to {party} in a televised ceremony", role: "challenger", weight: 2, appeal: 0.015, momentum: 5 },
     {
       id: "debate_call_mx",
       headline: "The electoral institute sets the next debate, and {party} must decide how to play it",
@@ -391,7 +396,7 @@ export const MEXICO: CountryBundle = {
       ],
     },
   ],
-};
+}, ["debate_mx"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const MEXICO_MODULE = countryModule(MEXICO, {

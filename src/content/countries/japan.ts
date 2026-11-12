@@ -96,10 +96,11 @@
 // they are already in the real seat totals.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { JP_MAP } from "./paths/jp";
 
-export const JAPAN: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const JAPAN: CountryBundle = oncePerCampaign({
   id: "JP",
   label: "Japan",
   flag: "🇯🇵",
@@ -603,7 +604,7 @@ export const JAPAN: CountryBundle = {
       ],
     },
   ],
-};
+}, ["press_club_debate"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const JAPAN_MODULE = countryModule(JAPAN, {

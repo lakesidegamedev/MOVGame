@@ -188,6 +188,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   beats that were misdated, misattributed or could not be sourced were corrected or replaced (for
   example the German Greens' 1990 leaders, the 1993 Campbell line in Canada, and the 1944 US
   campaign's Pearl Harbor wording), and unverifiable quotes were removed.
+- A campaign no longer shows the same debate win twice ("X's candidate wins the debate" could
+  fire in week 1 and again in week 2). The leaders' debate win is now a once-per-campaign beat
+  in every country, and Mexico's campaigns draw from four more generic events.
 - The results gauge now says which way a seat or point margin goes ("37 behind", "12 short",
   "5 over") instead of printing the size alone, and "Why you lost" says "5.1 points behind"
   rather than "-5.1 points against".

@@ -27,10 +27,11 @@
 // The 2008 and 2006 independents (Casey, Arthur) and others are `oth`.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { countryModule, oncePerCampaign } from "./types";
 import { CA_MAP } from "./paths/ca";
 
-export const CANADA: CountryBundle = {
+// The debate win is a one-off beat: it fires at most once a campaign.
+export const CANADA: CountryBundle = oncePerCampaign({
   id: "CA",
   label: "Canada",
   flag: "🇨🇦",
@@ -680,7 +681,7 @@ export const CANADA: CountryBundle = {
       ],
     },
   ],
-};
+}, ["debate_en", "debate_fr"]);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const CANADA_MODULE = countryModule(CANADA, {
