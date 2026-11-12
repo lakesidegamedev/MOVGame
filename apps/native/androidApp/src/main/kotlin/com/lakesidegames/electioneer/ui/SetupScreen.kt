@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -70,6 +72,11 @@ fun SetupScreen(session: GameSession) {
     var mirrorMatch by remember { mutableStateOf(false) }
     var pandemic by remember { mutableStateOf(false) }
     val campaign = campaigns.first { it.id == scenarioId }
+    // Recompose when ownership or the lock switch changes.
+    val gate by session.gate.collectAsState()
+    val owned by session.owned.collectAsState()
+    val unlocked by session.account.unlocked.collectAsState()
+    val locked = remember(scenarioId, gate, owned, unlocked) { session.lockedPack("US", scenarioId) }
     val mates = remember(scenarioId, player) { session.mates(scenarioId, player) }
     val selectedMate = mates.firstOrNull { it.id == mateId } ?: mates.firstOrNull { it.historical } ?: mates.first()
 
@@ -98,6 +105,11 @@ fun SetupScreen(session: GameSession) {
                                 Text(c.demName, color = Mov.DemText, style = MaterialTheme.typography.bodySmall)
                                 Text(" v. ", color = Mov.Text4, style = MaterialTheme.typography.bodySmall)
                                 Text(c.repName, color = Mov.GopText, style = MaterialTheme.typography.bodySmall)
+                            }
+                            if (remember(c.id, gate, owned, unlocked) { session.lockedPack("US", c.id) } != null) Row(
+                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
+                                Icon(Icons.Filled.Lock, contentDescription = null, tint = Mov.Text3, modifier = Modifier.size(14.dp))
+                                Tag("Unlock", TagKind.Warning)
                             }
                         }
                     }
@@ -160,7 +172,10 @@ fun SetupScreen(session: GameSession) {
         }
     }
     ActionBar {
-        PrimaryButton("Launch ${campaign.year} campaign", { session.newGame(scenarioId, player, selectedMate.id, staffIds.toList(), difficulty, mode, turns, seed, whatIfState, mirrorMatch, pandemic) }, Modifier.weight(1f))
+        if (locked != null) {
+            Icon(Icons.Filled.Lock, contentDescription = null, tint = Mov.Text2, modifier = Modifier.size(20.dp))
+            PrimaryButton("Unlock the ${com.lakesidegames.electioneer.engine.NativeCatalog.packName(locked)} pack", { session.openStoreFor(locked) }, Modifier.weight(1f))
+        } else PrimaryButton("Launch ${campaign.year} campaign", { session.newGame(scenarioId, player, selectedMate.id, staffIds.toList(), difficulty, mode, turns, seed, whatIfState, mirrorMatch, pandemic) }, Modifier.weight(1f))
     }
     }
 }

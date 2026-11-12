@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -51,9 +52,23 @@ fun StoreScreen(session: GameSession, activity: Activity) {
     val complete = packs.firstOrNull { it.id == "complete" }
     val countryPacks = packs.filter { it.id != "complete" && !it.legacy }
     val legacy = packs.filter { it.legacy && ownershipReason(it, owned) != null }
-    var open by remember { mutableStateOf<String?>(null) }
+    // A locked election sends the player here with its pack open and in view.
+    val focus = remember { session.storeFocus.also { session.storeFocus = null } }
+    var open by remember { mutableStateOf(focus) }
+    val listState = rememberLazyListState()
+    LaunchedEffect(focus) {
+        if (focus == null) return@LaunchedEffect
+        val before = 1 + (if (notice != null) 1 else 0) + (if (!linked) 1 else 0)
+        val index = when {
+            focus == complete?.id -> before
+            countryPacks.any { it.id == focus } -> before + (if (complete != null) 1 else 0) + 1 + countryPacks.indexOfFirst { it.id == focus }
+            else -> null
+        }
+        index?.let { listState.scrollToItem(it) }
+    }
+    val signIn = { session.go(Screen.ACCOUNT) }
 
-    LazyColumn(contentPadding = PaddingValues(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+    LazyColumn(state = listState, contentPadding = PaddingValues(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
         item {
             ScreenHeader("Store", "Election packs",
                 "${countries.size} countries and ${elections.size} elections. ${elections.values.count { it.free }} elections are free for everyone.")
@@ -74,7 +89,8 @@ fun StoreScreen(session: GameSession, activity: Activity) {
                 flag = null, featured = true,
                 owned = owned, product = products.firstOrNull { it.packId == pack.id }, linked = linked, expanded = open == pack.id,
                 elections = all, onToggle = { open = if (open == pack.id) null else pack.id },
-                onBuy = { session.buy(activity, pack.id) }, onPlay = { session.libraryPick = it; session.go(Screen.LIBRARY) })
+                onBuy = { session.buy(activity, pack.id) }, onPlay = { session.libraryPick = it; session.go(Screen.LIBRARY) },
+                focused = focus == pack.id, onSignIn = signIn)
         } }
         item { Eyebrow("Country packs · ${countryPacks.size}") }
         items(countryPacks, key = { it.id }) { pack ->
@@ -92,7 +108,8 @@ fun StoreScreen(session: GameSession, activity: Activity) {
             }
             PackCard(pack, summary, country?.flag, featured = false, owned = owned, product = products.firstOrNull { it.packId == pack.id },
                 linked = linked, expanded = open == pack.id, elections = list, onToggle = { open = if (open == pack.id) null else pack.id },
-                onBuy = { session.buy(activity, pack.id) }, onPlay = { session.libraryPick = it; session.go(Screen.LIBRARY) })
+                onBuy = { session.buy(activity, pack.id) }, onPlay = { session.libraryPick = it; session.go(Screen.LIBRARY) },
+                focused = focus == pack.id, onSignIn = signIn)
         }
         if (legacy.isNotEmpty()) {
             item { Eyebrow("Retired packs you own") }
@@ -110,9 +127,11 @@ fun StoreScreen(session: GameSession, activity: Activity) {
 private fun PackCard(
     pack: CatalogPack, summary: String, flag: String?, featured: Boolean, owned: Set<String>, product: StoreProduct?,
     linked: Boolean, expanded: Boolean, elections: List<NativeElection>, onToggle: () -> Unit, onBuy: () -> Unit, onPlay: (String) -> Unit,
+    focused: Boolean = false, onSignIn: () -> Unit = {},
 ) {
     val reason = ownershipReason(pack, owned)
-    MovCard(accent = featured && reason == null, color = if (featured) Mov.Surface2 else Mov.Surface1) {
+    MovCard(accent = (featured || focused) && reason == null, color = if (featured || focused) Mov.Surface2 else Mov.Surface1) {
+        if (focused && reason == null) Eyebrow("Unlocks the election you picked", color = Mov.AccentText)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
                 if (featured) Eyebrow("Best value", color = Mov.AccentText)
@@ -131,6 +150,7 @@ private fun PackCard(
         }
         if (reason != null) Text(reason, style = MaterialTheme.typography.bodySmall, color = Mov.Positive)
         else if (product != null) PrimaryButton("Buy ${pack.name} · ${product.price}", onBuy, Modifier.fillMaxWidth())
+        else if (focused && !linked) SecondaryButton("Sign in to buy", onSignIn, Modifier.fillMaxWidth())
         GhostButton(if (expanded) "Hide elections" else "Show ${elections.size} elections", onToggle, color = Mov.Text2)
         if (expanded) elections.forEach { e ->
             Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).clickable(onClickLabel = "Open in the library") { onPlay(e.scenarioId) },

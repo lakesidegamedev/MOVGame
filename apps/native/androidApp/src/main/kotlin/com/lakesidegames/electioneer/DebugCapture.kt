@@ -21,6 +21,17 @@ internal fun captureDebugFlow(session: GameSession, flow: String) {
         android.util.Log.i("MOVCapture", "FLOW_READY $flow")
         return
     }
+    if (flow.startsWith("locked")) {
+        // As if Play sales and native gating were live with nothing owned:
+        // the library shows locks, and locked-<country> opens a paid briefing.
+        session.pinGateForCapture(com.lakesidegames.electioneer.billing.PlayGate(true, NativeCatalog.packIds()))
+        val country = flow.substringAfter('-', "")
+        if (country.isNotEmpty()) session.libraryPick = MobileCampaign.elections(country)
+            .filter { !it.free && it.scenarioId != session.dailyAssignment().scenarioId }.maxBy { it.year }.scenarioId
+        session.go(Screen.LIBRARY)
+        android.util.Log.i("MOVCapture", "FLOW_READY $flow")
+        return
+    }
     if (flow.startsWith("ask")) {
         val country = flow.substringAfter('-', "US").takeIf { it in NativeCatalog.countryIds() } ?: "US"
         captureDebugFlow(session, "game-$country")

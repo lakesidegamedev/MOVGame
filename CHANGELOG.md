@@ -131,6 +131,11 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Changed
 
+- Android locks paid elections you do not own, like iPhone and the web, but only once Google Play
+  can sell that election's pack. A locked election shows a lock and Unlock in the library, the
+  briefing and the U.S. setup, and Unlock opens its pack in the Store. Free elections, the daily
+  challenge and anything you own through your Lakeside account, Google Play, the App Store, the
+  Complete Collection, the Global Elections Pack or the Supporter perk always open.
 - Every election now has its own issues, named the way people talked about them that year: the
   Depression and relief in 1932, the war in Europe in 1940, Korea and communism in 1952, the
   miners' strike in February 1974, the cost of unity in Germany in 1990, free trade in Canada in
