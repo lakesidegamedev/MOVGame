@@ -234,6 +234,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   box now have a dashed frame, on the web and on Android, so they read as boxes standing for voters
   rather than places.
 - The campaign timeline's closest contests now read "behind by 3.2" instead of "behind -3.2".
+- Two difficulty labels move after the issue and event changes, measured by a full balance run:
+  US 1996 (Clinton v. Dole) and the UK's October 1974 election go from hard to medium.
 - History check across the new countries and the older Canada, Australia, Germany, France and US
   elections: every national seat total and chamber size was checked against published results and
   held. A few regional vote shares in Canada, Australia and the US were corrected, and France's

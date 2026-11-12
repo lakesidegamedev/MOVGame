@@ -21,7 +21,7 @@ export const US_MODULE: CountryModule = {
     { electionId: "2008", year: 2008, label: "2008 · Obama v. McCain", description: "An open seat, two wars, and a financial system in free fall.", difficulty: "easy" },
     { electionId: "2004", year: 2004, label: "2004 · Bush v. Kerry", description: "A wartime incumbent, a decorated challenger. It runs through Ohio.", difficulty: "easy" },
     { electionId: "2000", year: 2000, label: "2000 · Gore v. Bush", description: "A knife's-edge electorate, and a recount waiting to happen.", difficulty: "easy" },
-    { electionId: "1996", year: 1996, label: "1996 · Clinton v. Dole", description: "A booming economy, a triangulating incumbent, and the last campaign of a war generation.", difficulty: "hard" },
+    { electionId: "1996", year: 1996, label: "1996 · Clinton v. Dole", description: "A booming economy, a triangulating incumbent, and the last campaign of a war generation.", difficulty: "medium" },
     { electionId: "1992", year: 1992, label: "1992 · Clinton v. Bush", description: "It's the economy, stupid. A broken tax pledge, a billionaire wildcard, and the Man from Hope.", difficulty: "hard" },
     { electionId: "1988", year: 1988, label: "1988 · Dukakis v. Bush", description: "A 17-point summer lead, a tank ride, and the meanest ad war of its era.", difficulty: "hard" },
     { electionId: "1984", year: 1984, label: "1984 · Mondale v. Reagan", description: "Morning in America. Fight the tide, or ride the biggest landslide of the age.", difficulty: "hard" },
