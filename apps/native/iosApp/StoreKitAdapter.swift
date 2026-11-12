@@ -185,7 +185,7 @@ final class StoreKitAdapter: ObservableObject {
             // to redeliver. Finish only after the server's durable receipt.
             await transaction.finish()
             notice = result.status != "paid" ? "Purchase is not active." : result.environment == "Sandbox"
-                ? "Test purchase verified. Production ownership is unchanged." : "Purchase delivered to your Lakeside account."
+                ? "Test purchase verified and unlocked in the app. Web ownership is unchanged." : "Purchase delivered to your Lakeside account."
             if refresh { try await refreshOwnership() }
         } catch { notice = error.localizedDescription }
     }
