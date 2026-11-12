@@ -10,8 +10,10 @@
     "build:web:steam": "node scripts/fetch-web.mjs steam",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "desktop:build": "tauri build",
-    "steam:build": "tauri build --config src-tauri/tauri.steam.conf.json"
+    "desktop:build": "node scripts/desktop-build.mjs desktop-direct",
+    "steam:build": "node scripts/desktop-build.mjs steam",
+    "build:web:preview": "node scripts/fetch-web.mjs desktop-preview",
+    "preview:build": "node scripts/desktop-build.mjs desktop-preview"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.9.0"
