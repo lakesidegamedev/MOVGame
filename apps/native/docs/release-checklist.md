@@ -10,9 +10,10 @@ require portal access, device testing, or store configuration.
   queue an issue ad and a pivot on separate days; remove one action; close the
   app, reopen it, and confirm the plan and campaign resume. Finish a turn and
   confirm the same event queue and result flow remain usable.
-- [ ] Play Console: create the app and first non-consumable products, then fill
-  `SkuTable.entries` (`billing/SkuTable.kt`). Supply the license key as
-  `MOV_PLAY_PUBLIC_KEY` through a build environment or Gradle property.
+- [ ] Play Console: create the app, upload the first bundle to an internal testing track
+  (workflow and secrets in `docs/ANDROID-RELEASE.md`), then create the 15 non-consumable
+  products (14 country packs and the Complete Collection). The app reads product ids from
+  the shared account service, so no table in this repo needs filling.
 - [ ] Sandbox: purchase → refund → restore → reinstall → offline refresh,
   per docs/billing.md. Refunds must drop the pack on the next
   `queryPurchases`; a stale cache entry past grace must not re-grant
@@ -66,9 +67,9 @@ Actions is the release runner.
 
 ## Launch-safe posture (from #23)
 
-The current beta is free. Both native SKU tables are empty; Apple has zero
-MOV IAP products as of 2026-10-01, and Play Console inventory is unverified.
-Before paid sales, configure actual products and decide how store purchases
+Paid sales switch on per store once its products exist and the account service
+lists the packs. The apps lock a paid election only when that election's own pack
+can be bought in the device's store. Before paid sales, configure actual products and decide how store purchases
 map to account entitlements. Store-scoped ownership and a validated receipt
 bridge are options in [billing.md](billing.md), rather than a completed release
 decision. `EntitlementCache.receiptFor` preserves the signed receipt payload

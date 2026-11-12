@@ -36,8 +36,21 @@ class NativeStoreWalletTest {
     @Test fun wrongOwnerStaleFutureAndMalformedSnapshotsDoNotReplaceKnownRights() {
         val wallet = NativeStoreWallet.restore(null)
         assertTrue(wallet.accept(snapshot(), "session", "owner", now))
-        for (bad in listOf(snapshot(owner = "other"), snapshot(packs = "\"unknown\""), snapshot(at = now - 300_001), snapshot(at = now + 300_001), "{}", "[]"))
+        for (bad in listOf(snapshot(owner = "other"), snapshot(at = now - 300_001), snapshot(at = now + 300_001), "{}", "[]"))
             assertFalse(wallet.accept(bad, "session", "owner", now))
         assertEquals(listOf("global"), wallet.packs("session", now))
+    }
+    @Test fun everyCurrentPackSurvivesTheWalletAndAPackThisBuildDoesNotShipIsDropped() {
+        val all = NativeCatalog.packIds().sorted()
+        // 14 country packs, the Complete Collection and the retired Global pack.
+        assertEquals(16, all.size)
+        val wallet = NativeStoreWallet.restore(null)
+        val quoted = all.joinToString(",") { "\"$it\"" }
+        assertTrue(wallet.accept(snapshot(packs = "$quoted,\"future-country\""), "session", "owner", now))
+        assertEquals(all, wallet.packs("session", now))
+        assertEquals(all, NativeStoreWallet.restore(wallet.json()).packs("session", now))
+        // A snapshot that holds only an unknown pack is still authoritative: it clears the rest.
+        assertTrue(wallet.accept(snapshot(packs = "\"future-country\"", at = now + 1000), "session", "owner", now + 1000))
+        assertEquals(emptyList(), wallet.packs("session", now + 1000))
     }
 }

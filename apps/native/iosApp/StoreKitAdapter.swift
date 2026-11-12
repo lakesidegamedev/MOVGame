@@ -97,7 +97,7 @@ final class StoreKitAdapter: ObservableObject {
         guard value.owner == owner, account.user?.id == owner, session == account.storeSessionKey(),
               UUID(uuidString: value.appAccountToken) != nil else { throw AccountError("Shared account setup could not be verified.") }
         binding = value; bindingSession = session
-        skuToPack = Dictionary(uniqueKeysWithValues: value.products.compactMap { p in p.appleSku.map { ($0, p.packId) } })
+        skuToPack = Dictionary(value.products.compactMap { p in p.appleSku.map { ($0, p.packId) } }, uniquingKeysWith: { first, _ in first })
     }
     /// Nil opens everything; a pinned simulator capture gate always wins.
     private func setGate(_ value: StoreGate?) {

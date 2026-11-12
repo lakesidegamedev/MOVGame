@@ -104,7 +104,8 @@ finish only after durable delivery; Google acknowledgement runs on the server
 after the grant. Notifications and provider rechecks handle refunds and missed
 notifications. Sandbox receipts never grant production ownership.
 
-The four SKU mappings are read from the platform MOV_STORE_PRODUCTS configuration.
+The SKU mappings (one per country pack plus the Complete Collection, 15 in all) are read from the
+platform MOV_STORE_PRODUCTS configuration.
 Neither native client invents product IDs or derives local rights from a receipt
 before server delivery. Product names and regional prices come from the store.
 Paid offerings stay disabled until both stores are configured and verified.
@@ -125,7 +126,7 @@ configured provider transaction.
 
 ## Remaining configuration
 
-Configure iOS and Android together: create the four canonical pack products,
+Configure iOS and Android together: create the 15 pack products (14 countries and the Complete Collection),
 map their real IDs, set platform validation credentials, then exercise actual
 purchase, restore, refund, reinstall and offline behavior on both stores.
 Existing StoreKit and Play Billing adapters and Actions build pipelines do not
