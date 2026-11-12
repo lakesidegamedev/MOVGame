@@ -185,7 +185,7 @@ export const CANADA: CountryBundle = {
       events: [
         // Scheduled beats — the real five-week arc, in order.
         { id: "snap_call_backlash", headline: "'Why an election, why now?' The pandemic snap call blows back on {party}", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -9, turn: 0 },
-        { id: "kabul_airlift", headline: "Kabul falls in week one, and the airlift scramble follows {party} down the campaign trail", role: "any", party: "lpc", weight: 1, appeal: -0.025, momentum: -6, turn: 1 },
+        { id: "kabul_airlift", headline: "Kabul falls in week one, and the airlift scramble follows {party} down the campaign trail", role: "any", party: "lpc", weight: 1, appeal: -0.025, momentum: -6, turn: 0 },
         { id: "gravel_thrown", headline: "Anti-vax protesters throw gravel at the {party} leader, and the ugliness earns a sympathy backlash", role: "any", party: "lpc", weight: 1, appeal: 0.025, momentum: 6, turn: 2 },
         { id: "gun_ban_reversal", headline: "{party} reverses on the assault-weapons ban mid-campaign, and wears the flip-flop", role: "any", party: "cpc", weight: 1, appeal: -0.03, momentum: -8, turn: 3 },
         { id: "tva_quebec_bashing", headline: "'Quebec bashing': the face-à-face question ignites {party}'s campaign", role: "any", party: "bq", weight: 1, appeal: 0.03, momentum: 9, turn: 4 },
@@ -257,7 +257,7 @@ export const CANADA: CountryBundle = {
         { id: "duffy_trial", headline: "The Duffy trial reconvenes mid-campaign, and Nigel Wright's cheque hangs over {party} for a fortnight", role: "any", party: "cpc", weight: 1, appeal: -0.03, momentum: -8, turn: 0 },
         { id: "just_not_ready", headline: "'He's just not ready': {party}'s attack ads set the bar so low their target keeps clearing it", role: "any", party: "cpc", weight: 1, appeal: -0.02, momentum: -5, turn: 1 },
         { id: "alan_kurdi", headline: "The photograph of a drowned boy on a Turkish beach turns the Syrian refugee file into a moral test, and {party} answers it coldly", role: "any", party: "cpc", weight: 1, appeal: -0.025, momentum: -6, turn: 2 },
-        { id: "niqab_wedge", headline: "The niqab and the 'barbaric cultural practices' hotline split Quebec, and {party}'s surge there melts away", role: "any", party: "ndp", weight: 1, appeal: -0.035, momentum: -11, turn: 3 },
+        { id: "niqab_wedge", headline: "The niqab and the 'barbaric cultural practices' hotline split Quebec, and {party}'s surge there melts away", role: "any", party: "ndp", weight: 1, appeal: -0.035, momentum: -11, turn: 4 },
         { id: "anti_harper_consolidation", headline: "Change consolidates behind one horse: the anti-Harper vote leaves {party} for the front of the line", role: "any", party: "ndp", weight: 1, appeal: -0.035, momentum: -12, turn: 4 },
         { id: "balanced_budget_trap", headline: "{party} promises balanced budgets while the Liberals pledge deficits, and the left flank walks out the open door", role: "any", party: "ndp", weight: 1, appeal: -0.03, momentum: -8, turn: 5 },
         // Unscheduled flavor — joins the weekly draw, fires at most once.
@@ -398,8 +398,8 @@ export const CANADA: CountryBundle = {
         // Scheduled beats, in order.
         { id: "ca04_sponsorship", headline: "The auditor general's report on the sponsorship program follows {party} onto the trail, and the leader insists he knew nothing", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -8, turn: 0 },
         { id: "ca04_merged_party", headline: "A freshly merged Conservative Party runs its first campaign, and {party} has to prove that Alliance and Progressive Conservative candidates can share a platform", role: "any", party: "cpc", weight: 1, appeal: 0.015, momentum: 4, turn: 1 },
-        { id: "ca04_ontario_budget", headline: "The new health premium in Ontario's provincial budget turns voters against Liberals everywhere, and {party} takes the federal heat", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -8, turn: 2 },
-        { id: "ca04_gallant", headline: "A Conservative candidate compares abortion to the beheading of Nick Berg, and {party} spends days putting out the fire", role: "any", party: "cpc", weight: 1, appeal: -0.03, momentum: -8, turn: 3 },
+        { id: "ca04_ontario_budget", headline: "The new health premium in Ontario's provincial budget turns voters against Liberals everywhere, and {party} takes the federal heat", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -8, turn: 0 },
+        { id: "ca04_gallant", headline: "A Conservative MP compares abortion to the beheading of Nick Berg, and {party} spends days putting out the fire", role: "any", party: "cpc", weight: 1, appeal: -0.03, momentum: -8, turn: 3 },
         { id: "ca04_hidden_agenda", headline: "The Liberals warn of a 'hidden agenda' on abortion and same-sex marriage, and {party} gains with voters worried about social conservatives", role: "any", party: "lpc", weight: 1, appeal: 0.03, momentum: 9, turn: 4 },
         { id: "ca04_ndp_squeeze", headline: "A late Liberal plea to progressives to stop Harper bleeds support from {party} at the finish", role: "any", party: "ndp", weight: 1, appeal: -0.025, momentum: -7, turn: 5 },
         // Unscheduled flavor: joins the weekly draw, fires at most once.
@@ -538,7 +538,7 @@ export const CANADA: CountryBundle = {
         // Scheduled beats, in order.
         { id: "ca84_patronage", headline: "The new leader agrees to Trudeau's list of patronage appointments, and the 'new broom' image takes its first hit as {party} is dragged into the old ways", role: "any", party: "lpc", weight: 1, appeal: -0.03, momentum: -9, turn: 0 },
         { id: "ca84_you_had_an_option", headline: "'You had an option, sir': {party}'s leader turns the English debate on patronage into the defining exchange of the campaign", role: "any", party: "cpc", weight: 1, appeal: 0.04, momentum: 12, turn: 1 },
-        { id: "ca84_bum_pat", headline: "The cameras catch the Liberal leader patting the party president on the bottom, and {party} spends a week apologising for a leader who seems out of date", role: "any", party: "lpc", weight: 1, appeal: -0.025, momentum: -7, turn: 2 },
+        { id: "ca84_bum_pat", headline: "The cameras catch the Liberal leader patting the party president on the bottom, and {party} spends a week apologising for a leader who seems out of date", role: "any", party: "lpc", weight: 1, appeal: -0.025, momentum: -7, turn: 1 },
         { id: "ca84_sept_iles", headline: "In Sept-Iles, {party}'s leader promises to bring Quebec into the constitution 'with honour and enthusiasm', and the province swings behind him", role: "any", party: "cpc", weight: 1, appeal: 0.04, momentum: 12, turn: 3 },
         { id: "ca84_unemployment", headline: "With unemployment above 11 percent, {party} promises jobs and a sharp break with the Trudeau years", role: "any", party: "cpc", weight: 1, appeal: 0.025, momentum: 7, turn: 4 },
         { id: "ca84_ndp_squeezed", headline: "The NDP fights to hold its ground as the Liberals and Conservatives battle over the centre, and {party} is squeezed", role: "any", party: "ndp", weight: 1, appeal: -0.025, momentum: -7, turn: 5 },

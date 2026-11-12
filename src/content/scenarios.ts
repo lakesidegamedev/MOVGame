@@ -1516,7 +1516,7 @@ const PRIORS_1932: Record<string, number> = {
 export const SCENARIOS: Record<string, Scenario> = {
   "2024": {
     id: "2024", year: 2024, label: "2024 · Harris v. Trump",
-    tagline: "Labor Day, 2024. A late switch at the top of the ticket, the Sun Belt and the Blue Wall both in play. Ninety days to find 270.",
+    tagline: "Labor Day, 2024. A late switch at the top of the ticket, the Sun Belt and the Blue Wall both in play. Sixty-four days to find 270.",
     dem: HARRIS, rep: TRUMP_2024, statePriors: PRIORS_2024, evOverrides: EV_2024, evNote: "2020-census apportionment", electoralCollege: EC_MODERN, issueSalience: SAL_2024,
   },
   "2020": {

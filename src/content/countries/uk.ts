@@ -23,7 +23,7 @@ export const UK_MODULE: CountryModule = {
     { electionId: "2001", year: 2001, label: "2001 · The quiet landslide", description: "New Labour ascendant; the Tories search for a pulse.", difficulty: "hard" },
     { electionId: "1997", year: 1997, label: "1997 · Things Can Only Get Better", description: "Blair's New Labour against a Major government running on fumes.", difficulty: "hard" },
     { electionId: "1992", year: 1992, label: "1992 · Major's surprise", description: "The polls say Kinnock; the ballot boxes disagree. Defy the polls.", difficulty: "hard" },
-    { electionId: "1987", year: 1987, label: "1987 · Thatcher's third", description: "The Iron Lady seeks a third term against a divided opposition.", difficulty: "hard" },
+    { electionId: "1987", year: 1987, label: "1987 · Thatcher's third", description: "The Iron Lady seeks a third term against a divided opposition.", difficulty: "medium" },
     { electionId: "1983", year: 1983, label: "1983 · The Falklands election", description: "Thatcher rampant, Labour's longest suicide note, the Alliance splitting the left.", difficulty: "hard" },
     { electionId: "1979", year: 1979, label: "1979 · Winter of Discontent", description: "Callaghan limps to the polls; Thatcher offers a revolution.", difficulty: "hard" },
     {

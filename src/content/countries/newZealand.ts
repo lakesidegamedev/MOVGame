@@ -154,9 +154,9 @@ export const NEW_ZEALAND: CountryBundle = {
       // The real story beats of 2023, in campaign order.
       events: [
         { id: "policy_bonfire", headline: "Hipkins burns half of Labour's programme and promises 'bread and butter'. Some voters give {party} a second look", role: "any", party: "lab", weight: 3, appeal: 0.02, momentum: 5, turn: 0 },
-        { id: "kiri_allan", headline: "Justice Minister Kiri Allan resigns after a car crash and an arrest, the latest minister to fall, and {party} looks tired", role: "any", party: "lab", weight: 3, appeal: -0.035, momentum: -8, turn: 1 },
+        { id: "kiri_allan", headline: "Justice Minister Kiri Allan resigns after a car crash and an arrest, the latest minister to fall, and {party} looks tired", role: "any", party: "lab", weight: 3, appeal: -0.035, momentum: -8, turn: 0 },
         { id: "woodhouse_list", headline: "Senior MP Michael Woodhouse says he will stand only in his electorate after a row over his list ranking, and {party} spends the day on an internal dispute", role: "any", party: "nat", weight: 3, appeal: -0.025, momentum: -6, turn: 2 },
-        { id: "gst_fruit_veg", headline: "Labour promises to take GST off fruit and vegetables. Shoppers like it, economists do not, and {party} gets a modest lift", role: "any", party: "lab", weight: 3, appeal: 0.015, momentum: 4, turn: 3 },
+        { id: "gst_fruit_veg", headline: "Labour promises to take GST off fruit and vegetables. Shoppers like it, economists do not, and {party} gets a modest lift", role: "any", party: "lab", weight: 3, appeal: 0.015, momentum: 4, turn: 1 },
         { id: "foreign_buyer_costings", headline: "Economists pick apart the foreign buyer tax that pays for National's tax cuts, and {party} spends a week on the defensive", role: "any", party: "nat", weight: 3, appeal: -0.02, momentum: -5, turn: 4 },
         { id: "ring_winston", headline: "Luxon says he would pick up the phone to Winston Peters if he had to, and {party} surges past 5%", role: "any", party: "nzf", weight: 3, appeal: 0.03, momentum: 8, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
@@ -191,7 +191,7 @@ export const NEW_ZEALAND: CountryBundle = {
       // The real story beats of 2020, in campaign order.
       events: [
         { id: "auckland_outbreak", headline: "COVID returns to Auckland, the city locks down and the election moves to 17 October. The country rallies behind {party}", role: "any", party: "lab", weight: 3, appeal: 0.035, momentum: 9, turn: 0 },
-        { id: "green_school", headline: "The Green School grant blows up in James Shaw's face, and {party} apologises for the week", role: "any", party: "grn", weight: 3, appeal: -0.03, momentum: -8, turn: 1 },
+        { id: "green_school", headline: "The Green School grant blows up in James Shaw's face. He calls approving it an error of judgement, and {party} spends the week on the back foot", role: "any", party: "grn", weight: 3, appeal: -0.03, momentum: -8, turn: 1 },
         { id: "national_costings", headline: "A $4 billion error turns up in National's fiscal plan, and {party} loses the economy argument it needed", role: "any", party: "nat", weight: 3, appeal: -0.03, momentum: -8, turn: 2 },
         { id: "first_debate", headline: "Collins comes out fighting in the first TVNZ debate and claims victory, which steadies {party}", role: "any", party: "nat", weight: 3, appeal: 0.025, momentum: 7, turn: 3 },
         { id: "nzf_foundation", headline: "The Serious Fraud Office charges two people over the NZ First Foundation's donations, and {party} cannot get off the ropes", role: "any", party: "nzf", weight: 3, appeal: -0.03, momentum: -8, turn: 4 },
