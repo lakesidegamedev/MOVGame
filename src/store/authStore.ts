@@ -176,7 +176,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 // player keeps playing as they were (signed out, or their existing session).
 async function consumeLauncherCode(): Promise<void> {
   if (typeof window === "undefined") return;
-  const taken = takeLauncherCode(window.location.hash);
+  const hash = window.location?.hash;
+  const taken = takeLauncherCode(typeof hash === "string" ? hash : "");
   if (!taken.present) return;
   window.history.replaceState(null, "", window.location.pathname + window.location.search + taken.hash);
   if (!taken.code) {
@@ -251,6 +252,9 @@ async function consumeRedirectParams(): Promise<void> {
 // Restore entitlements once on module load (fire-and-forget). The launcher
 // code and redirect params run first so a fresh Lakeside session or purchase is
 // reflected.
+// A failure in either step must never skip the entitlement refresh.
 void consumeLauncherCode()
+  .catch(() => undefined)
   .then(consumeRedirectParams)
+  .catch(() => undefined)
   .then(() => useAuthStore.getState().refresh());
