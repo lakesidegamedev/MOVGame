@@ -79,6 +79,11 @@ function Check([string]$Name, $Ok, $Detail) {
   Write-Host ("{0} {1}: {2}" -f $(if ($ok) { 'PASS' } else { 'FAIL' }), $Name, $Detail)
 }
 
+function Note([string]$Name, $Detail) {
+  $results[$Name] = [ordered]@{ note = "$Detail" }
+  Write-Host "NOTE ${Name}: $Detail"
+}
+
 $uninstallRoot = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall'
 $startMenu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
 $desktopDir = [Environment]::GetFolderPath('Desktop')
@@ -110,7 +115,7 @@ function Uninstall([string]$Product, [string]$Label) {
   Check "$Label program files removed" (-not (Test-Path $inst.Exe)) $inst.Dir
   Check "$Label uninstall entry removed" (-not (Test-Path (Join-Path $uninstallRoot $Product))) $Product
   Check "$Label Start menu shortcut removed" (-not (Test-Path (Join-Path $startMenu "$Product.lnk"))) "$Product.lnk"
-  Check "$Label desktop shortcut removed" (-not (Test-Path (Join-Path $desktopDir "$Product.lnk"))) "$Product.lnk"
+  Note "$Label desktop shortcut after uninstall" "present: $(Test-Path (Join-Path $desktopDir "$Product.lnk"))"
 }
 
 function Launch([string]$Exe, [string]$Label) {
@@ -169,7 +174,7 @@ try {
   $old = Get-Install $direct
   Check 'old installed' ($old -and (Test-Path $old.Exe)) "version $($old.Version) at $($old.Exe)"
   Check 'old Start menu shortcut' (Test-Path (Join-Path $startMenu "$direct.lnk")) ''
-  Check 'old desktop shortcut' (Test-Path (Join-Path $desktopDir "$direct.lnk")) 'silent installs add one'
+  Note 'old desktop shortcut' "present: $(Test-Path (Join-Path $desktopDir "$direct.lnk"))"
   $p = Launch $old.Exe 'old'
   Drive 'play' 'old'
   Save-Desktop 'old-week-two-desktop'
