@@ -391,9 +391,14 @@ struct ContentView: View {
                     }
                 }
             }
+            // Presented sheets do not pick up the capture text size from the root.
+            .environment(\.sizeCategory, captureSizeCategory)
         }
         .fullScreenCover(isPresented: $session.showReveal) {
-            if let night = session.electionNight { NativeElectionNightView(session: session, night: night) }
+            if let night = session.electionNight {
+                NativeElectionNightView(session: session, night: night)
+                    .environment(\.sizeCategory, captureSizeCategory)
+            }
         }
         .sheet(isPresented: $showingAsk) {
             NavigationStack {

@@ -171,6 +171,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   is told where it stands and is measured against its real seat count.
 - iPhone and iPad: election setup describes the new difficulty ladder under the Easy, Normal and
   Hard picker, for the United States and every other country.
+- iPhone: at large text sizes the United States campaign desk no longer cuts off your cash and the
+  election name.
 - Spain: the Catalan and Basque parties are now playable as regional parties in every election
   they stood in: ERC, CiU and its successors Democràcia i Llibertat and Junts, the PNV, and
   Amaiur and EH Bildu, each with its real lead candidate. They stand only in Catalonia or in the

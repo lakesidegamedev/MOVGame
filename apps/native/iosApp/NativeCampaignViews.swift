@@ -227,6 +227,7 @@ struct NativeCampaignLibrary: View {
                     .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Close") { pick = nil } } }
                     .navigationBarTitleDisplayMode(.inline)
             }
+            .dynamicTypeSize(dynamicTypeSize)
         }
         .onChange(of: session.libraryRequest) { request in
             guard let request else { return }
