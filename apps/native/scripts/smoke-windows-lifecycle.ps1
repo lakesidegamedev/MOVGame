@@ -47,6 +47,24 @@ public static class MovWin {
   [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint from, uint to, bool attach);
   [DllImport("user32.dll")] public static extern bool BringWindowToTop(IntPtr h);
   [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
+  public delegate bool EnumProc(IntPtr h, IntPtr l);
+  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc cb, IntPtr l);
+  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
+  [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowText(IntPtr h, System.Text.StringBuilder s, int n);
+  [DllImport("user32.dll", EntryPoint = "GetWindowThreadProcessId")] public static extern uint WindowPid(IntPtr h, out uint pid);
+  public static string Title(IntPtr h) { var sb = new System.Text.StringBuilder(256); GetWindowText(h, sb, 256); return sb.ToString(); }
+  // The visible top-level game window of a process. Process.MainWindowHandle
+  // can name another of its windows, which is why CI runs before 2026-11-13
+  // minimised and restored a window players never see.
+  public static IntPtr GameWindow(uint pid) {
+    IntPtr found = IntPtr.Zero;
+    EnumWindows((h, l) => {
+      uint p; WindowPid(h, out p);
+      if (p == pid && IsWindowVisible(h) && Title(h).Contains("Margin of Victory")) { found = h; return false; }
+      return true;
+    }, IntPtr.Zero);
+    return found;
+  }
 }
 "@
 
@@ -61,10 +79,20 @@ function Save-Desktop([string]$Name) {
   Write-Host "screenshot $path"
 }
 
+function Game-Window([int]$ProcessId) {
+  $h = [MovWin]::GameWindow([uint32]$ProcessId)
+  $main = (Get-Process -Id $ProcessId).MainWindowHandle
+  Write-Host "game window $h '$([MovWin]::Title($h))'; Process.MainWindowHandle $main '$([MovWin]::Title($main))'"
+  if ($h -eq [IntPtr]::Zero) { Write-Host 'WARNING: no visible Margin of Victory window, using MainWindowHandle'; $h = $main }
+  return $h
+}
+
 if ($BlurPid -ne 0) {
   Save-Desktop 'checkout-desktop-browser'
-  [MovWin]::ShowWindow((Get-Process -Id $BlurPid).MainWindowHandle, 6) | Out-Null   # minimise: the page goes hidden
-  Write-Host 'app minimised'
+  $h = Game-Window $BlurPid
+  [MovWin]::ShowWindow($h, 6) | Out-Null   # minimise, as a player leaving for the browser
+  Start-Sleep -Milliseconds 300
+  Write-Host "app minimised: $([MovWin]::IsIconic($h)); foreground now $([MovWin]::GetForegroundWindow()) '$([MovWin]::Title([MovWin]::GetForegroundWindow()))'"
   exit 0
 }
 if ($FocusPid -ne 0) {
@@ -72,7 +100,7 @@ if ($FocusPid -ne 0) {
   # becomes the foreground window, so Windows sends it WM_ACTIVATE. Joining the
   # current foreground thread's input queue lets this script hand over the
   # foreground; the Alt tap covers the case where that is not enough.
-  $h = (Get-Process -Id $FocusPid).MainWindowHandle
+  $h = Game-Window $FocusPid
   $before = [MovWin]::GetForegroundWindow()
   $wasIconic = [MovWin]::IsIconic($h)
   $me = [MovWin]::GetCurrentThreadId()
@@ -87,7 +115,9 @@ if ($FocusPid -ne 0) {
   if ($attached) { [MovWin]::AttachThreadInput($me, $fgThread, $false) | Out-Null }
   [MovWin]::ShowWindow($h, 3) | Out-Null          # maximise again
   $isFg = [MovWin]::GetForegroundWindow() -eq $h
-  Write-Host "app restored; wasMinimised=$wasIconic foregroundBefore=$before attachedInput=$attached setForeground=$fg isForeground=$isFg"
+  Write-Host "app restored; window=$h wasMinimised=$wasIconic foregroundBefore=$before '$([MovWin]::Title($before))' attachedInput=$attached setForeground=$fg isForeground=$isFg"
+  Start-Sleep -Milliseconds 300
+  Save-Desktop 'checkout-desktop-restored'
   if (-not $isFg) { Write-Host 'WARNING: the game window is not the foreground window, so this was not a real activation' }
   exit 0
 }

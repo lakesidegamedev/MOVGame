@@ -15,6 +15,11 @@ report="$out/macos-play.txt"; : > "$report"
 fails=0
 check() { if [ "$2" = 1 ]; then echo "PASS $1: $3" | tee -a "$report"; else echo "FAIL $1: $3" | tee -a "$report"; fails=$((fails + 1)); fi; }
 
+# The Gatekeeper test in smoke-macos.sh can leave its prompts and copies
+# open; clear them so the week two screenshot shows only the game.
+killall CoreServicesUIAgent 2>/dev/null
+pkill -f "/quarantined-" 2>/dev/null
+sleep 2
 node "$here/ci-autoplay.mjs" listen "$port" "$out/play.jsonl" 240 > "$out/listener.log" 2>&1 &
 listener=$!
 sleep 2

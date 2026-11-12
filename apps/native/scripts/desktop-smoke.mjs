@@ -367,6 +367,8 @@ try {
     });
     const listenAt = Date.now();
     const activationsBefore = await page.evaluate(() => window.__movActivations ?? 0);
+    const hookInstalled = await page.evaluate(() => Promise.resolve(window.__TAURI_INTERNALS__?.invoke("activation_hook")).catch((e) => `error: ${e?.message ?? e}`));
+    log("activation hook installed:", JSON.stringify(hookInstalled));
     if (blurCmd) runCmd(blurCmd);
     const seen = state.refreshAt.length;
     const until = Date.now() + 20_000;
@@ -416,6 +418,7 @@ try {
       eventsSinceLeavingMs: allEvents.map((e) => ({ ...e, at: e.at - focusAt })),
       leftAtMs: listenAt - focusAt,
       shellActivationReports: activations,
+      activationHookInstalled: hookInstalled,
       unlockedAfterRestoreMs: unlockedAt ? unlockedAt - restoredAt : null,
       unlockedAfterFocusReportMs: unlockedAt && backAt ? unlockedAt - backAt : null,
       pickedUpByWindowReturn: early,

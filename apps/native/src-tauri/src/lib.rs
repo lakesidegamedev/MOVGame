@@ -28,6 +28,16 @@ fn activated(wparam: usize) -> bool {
 /// tells the page nothing (CI runs 43313314086 and 43316276775). Windows sends
 /// WM_ACTIVATE to the top-level window on every one of those, so the shell
 /// listens for it on the game window and reports focus to the page.
+/// Whether the Windows activation hook is installed, for the CI smoke test.
+static ACTIVATION_HOOKED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// True once the Windows activation hook is on the game window (always false
+/// elsewhere). The CI smoke test records it next to the activation count.
+#[tauri::command]
+fn activation_hook() -> bool {
+    ACTIVATION_HOOKED.load(std::sync::atomic::Ordering::Relaxed)
+}
+
 #[cfg(windows)]
 mod activation {
     use std::sync::OnceLock;
@@ -53,7 +63,9 @@ mod activation {
         if ON_ACTIVATE.set(Box::new(notify)).is_err() {
             return false;
         }
-        unsafe { SetWindowSubclass(hwnd, Some(subclass), SUBCLASS_ID, 0).as_bool() }
+        let installed = unsafe { SetWindowSubclass(hwnd, Some(subclass), SUBCLASS_ID, 0).as_bool() };
+        super::ACTIVATION_HOOKED.store(installed, std::sync::atomic::Ordering::Relaxed);
+        installed
     }
 }
 
@@ -89,7 +101,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(LauncherCode(Mutex::new(launcher_code)))
-        .invoke_handler(tauri::generate_handler![take_launcher_code])
+        .invoke_handler(tauri::generate_handler![take_launcher_code, activation_hook])
         .setup(|app| {
             #[cfg(windows)]
             if let Some(webview) = app.webview_windows().into_values().next() {
