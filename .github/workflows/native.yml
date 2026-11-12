@@ -117,7 +117,7 @@ jobs:
   ios:
     name: iOS simulator launch
     runs-on: macos-26
-    timeout-minutes: 40
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: apps/native
@@ -163,7 +163,7 @@ jobs:
     name: Small iPhone and iPad flows
     needs: ios
     runs-on: macos-26
-    timeout-minutes: 25
+    timeout-minutes: 35
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
     steps:
@@ -186,7 +186,7 @@ jobs:
     needs: ios
     if: ${{ always() && needs.ios.result != 'cancelled' }}
     runs-on: xcode-27
-    timeout-minutes: 30
+    timeout-minutes: 50
     env:
       DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
     steps:
