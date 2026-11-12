@@ -85,7 +85,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential file libxdo-dev libssl-dev \
-            libayatana-appindicator3-dev librsvg2-dev patchelf xvfb imagemagick xdotool
+            libayatana-appindicator3-dev librsvg2-dev patchelf xvfb imagemagick xdotool x11-utils
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -122,19 +122,28 @@ jobs:
       - name: Smoke test (xvfb)
         env:
           WEBKIT_DISABLE_DMABUF_RENDERER: '1'
+          WEBKIT_DISABLE_COMPOSITING_MODE: '1'
           LIBGL_ALWAYS_SOFTWARE: '1'
         run: |
           set +e
           xvfb-run -a -s "-screen 0 1280x800x24" bash -c '
             apps/native/src-tauri/target/release/electioneer > app.log 2>&1 &
             pid=$!
-            sleep 25
+            win=""
+            for i in $(seq 1 30); do
+              win=$(xdotool search --onlyvisible --name "Margin of Victory" 2>/dev/null | head -n1)
+              [ -n "$win" ] && break
+              sleep 2
+            done
+            sleep 12
             import -window root linux-smoke.png
             alive=no; kill -0 $pid 2>/dev/null && alive=yes
-            title=$(xdotool search --pid $pid --name . getwindowname 2>/dev/null | head -n1)
-            echo "alive=$alive title=$title"
+            title=""; [ -n "$win" ] && title=$(xdotool getwindowname "$win")
+            colours=$(identify -format "%k" linux-smoke.png)
+            echo "alive=$alive window=$win title=$title distinctColours=$colours"
+            echo "--- windows"; xwininfo -root -tree | grep -i -E "margin|electioneer" | head -n 20
             kill $pid 2>/dev/null || true
-            [ "$alive" = yes ] && [ -n "$title" ]
+            [ "$alive" = yes ] && [ -n "$win" ] && [ "$colours" -gt 16 ]
           '
           rc=$?
           echo "--- app log"; tail -n 50 app.log || true
