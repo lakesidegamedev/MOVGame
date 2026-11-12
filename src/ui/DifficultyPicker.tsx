@@ -3,13 +3,13 @@ import { Flag, Swords, Crosshair } from "lucide-react";
 export type Difficulty = "easy" | "normal" | "hard";
 
 // Shared easy/normal/hard picker for the UK + country setup screens (the US
-// SetupScreen has its own inline cards). "normal" is the true historical fight;
-// "easy" grants the underdog handicap so any year is winnable; "hard" is the
+// SetupScreen has its own inline cards). "normal" is the historical map with a
+// slightly stronger player campaign; "easy" adds a head start sized to the race; "hard" is the
 // pure-challenge headwind.
 const OPTIONS: { id: Difficulty; name: string; blurb: string; Icon: typeof Flag }[] = [
-  { id: "easy", name: "Easy", blurb: "A favorable climate, a bigger war chest, a sloppier opponent. Flip even a landslide.", Icon: Flag },
-  { id: "normal", name: "Normal", blurb: "The real historical fight, on the calibrated map, against a disciplined campaign.", Icon: Swords },
-  { id: "hard", name: "Hard", blurb: "No help, a relentless opponent. Only the tightest races are yours to steal.", Icon: Crosshair },
+  { id: "easy", name: "Easy", blurb: "A head start sized to the race, a bigger war chest, a sloppier opponent. Landslides are still a fight.", Icon: Flag },
+  { id: "normal", name: "Normal", blurb: "The real historical map and a slightly stronger campaign than your rivals'. Skill decides close races.", Icon: Swords },
+  { id: "hard", name: "Hard", blurb: "A lighter campaign against a relentless main rival. Only the tightest races are yours to steal.", Icon: Crosshair },
 ];
 
 export function DifficultyPicker({ value, onChange }: { value: Difficulty; onChange: (d: Difficulty) => void }) {

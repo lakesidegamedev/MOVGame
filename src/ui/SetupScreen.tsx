@@ -61,9 +61,9 @@ const DIFFICULTIES: {
   blurb: string;
   Icon: typeof Flag;
 }[] = [
-  { id: "easy", name: "Easy", blurb: "Favorable climate, a bigger war chest, and a sloppy opponent. You can win any year.", Icon: Flag },
-  { id: "normal", name: "Normal", blurb: "A fair fight on the real map, against a disciplined campaign.", Icon: Swords },
-  { id: "hard", name: "Hard", blurb: "The historical map, no help, a ruthless opponent. History is brutal.", Icon: Crosshair },
+  { id: "easy", name: "Easy", blurb: "A head start sized to the race, a bigger war chest, and a sloppy opponent. Landslides are still a fight.", Icon: Flag },
+  { id: "normal", name: "Normal", blurb: "The real map and a slightly stronger campaign than your rival's. Skill decides close races.", Icon: Swords },
+  { id: "hard", name: "Hard", blurb: "The real map, a lighter campaign, a ruthless opponent. Close races need a near-perfect run.", Icon: Crosshair },
 ];
 
 // Campaign length: how many weekly turns the race runs before Election Day.
