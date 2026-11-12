@@ -192,6 +192,12 @@ export const api = {
       "/api/lakeside/exchange", { method: "POST", body: JSON.stringify({ code }) })
     .then((r) => ({ ...r, unlocked: normalizeUnlocked(r.unlocked) })),
 
+  // The launcher's single-use code (from #launcher_code=), redeemed server side.
+  lakesideLauncherExchange: (code: string) =>
+    call<{ token: string; user: ApiUser; unlocked: Unlocked }>(
+      "/api/lakeside/launcher-exchange", { method: "POST", body: JSON.stringify({ code }) })
+    .then((r) => ({ ...r, unlocked: normalizeUnlocked(r.unlocked) })),
+
   leaderboard: (scenarioId: string, difficulty?: string, limit = 20) =>
     call<{ entries: LeaderboardEntry[] }>(
       `/api/leaderboard?scenario=${encodeURIComponent(scenarioId)}${difficulty ? `&difficulty=${difficulty}` : ""}&limit=${limit}`),

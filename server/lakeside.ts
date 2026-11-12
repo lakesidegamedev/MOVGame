@@ -11,9 +11,16 @@ import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { getDb, type UserRow } from "./db.js";
 import { LakesideAuthClient, type LakesideAuthIdentity } from "./lakesideAuthClient.js";
+import { isPlaceholderEmail, placeholderEmail } from "./placeholderEmail.js";
 
 export interface LakesideIdentity {
+  /**
+   * The platform user id. Named for its origin: an A House Divided id from the
+   * broker, or discord:<id> when the launcher signed in with Discord. Stored
+   * in users.ahd_user_id, the key the platform's purchase ledger also uses.
+   */
   ahdUserId: string;
+  /** "" when the platform gave none (a launcher sign in). See placeholderEmail.ts. */
   email: string;
   username: string;
 }
@@ -77,13 +84,25 @@ export class AccountLinkConflictError extends Error {
  * account whose session made the request: holding that session and the fresh
  * Lakeside identity together proves ownership of both, so an unlinked local
  * account is linked in place instead of tripping the email-collision guard.
+ *
+ * An identity with no email (a launcher sign in) is found only by its platform
+ * id, never by name or email. A new account for it gets a placeholder email.
  */
 export function linkOrCreateUser(identity: LakesideIdentity, signedInUserId?: string | null): UserRow {
   const db = getDb();
-  const email = identity.email.toLowerCase();
+  const email = identity.email.trim().toLowerCase();
 
   const byAhd = db.prepare("SELECT * FROM users WHERE ahd_user_id = ?").get(identity.ahdUserId) as UserRow | undefined;
-  if (byAhd) return byAhd;
+  if (byAhd) {
+    // First sign in that brings a real address to a placeholder account: keep
+    // it, unless another account already uses that address.
+    if (email && isPlaceholderEmail(byAhd.email)
+        && !db.prepare("SELECT 1 FROM users WHERE email = ?").get(email)) {
+      db.prepare("UPDATE users SET email = ? WHERE id = ?").run(email, byAhd.id);
+      return db.prepare("SELECT * FROM users WHERE id = ?").get(byAhd.id) as UserRow;
+    }
+    return byAhd;
+  }
 
   if (signedInUserId) {
     const linked = db.prepare("UPDATE users SET ahd_user_id = ? WHERE id = ? AND ahd_user_id IS NULL")
@@ -95,14 +114,13 @@ export function linkOrCreateUser(identity: LakesideIdentity, signedInUserId?: st
   // local password door is closed until the player deliberately sets one.
   const unusablePassword = () => bcrypt.hashSync(randomBytes(32).toString("hex"), 10);
 
-  const byEmail = db.prepare("SELECT id FROM users WHERE email = ?").get(email);
-  if (byEmail) throw new AccountLinkConflictError();
+  if (email && db.prepare("SELECT id FROM users WHERE email = ?").get(email)) throw new AccountLinkConflictError();
 
   const id = randomUUID();
   const username = availableUsername(db, identity.username);
   db.prepare(
     "INSERT INTO users (id, username, email, password_hash, created_at, ahd_user_id) VALUES (?, ?, ?, ?, ?, ?)",
-  ).run(id, username, email, unusablePassword(), Date.now(), identity.ahdUserId);
+  ).run(id, username, email || placeholderEmail(identity.ahdUserId), unusablePassword(), Date.now(), identity.ahdUserId);
   return db.prepare("SELECT * FROM users WHERE id = ?").get(id) as UserRow;
 }
 

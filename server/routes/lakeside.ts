@@ -11,6 +11,14 @@
 //                                     same broker bounce, then 302 to
 //                                     return?code=<60s local single-use>
 //
+// Launcher-facing (public; see launcherHandoff.ts):
+//   POST /api/lakeside/launcher-exchange { code } -> { token, user, unlocked },
+//                                     where code is the platform's single-use
+//                                     launcher code, redeemed server to server
+//                                     (no email: see placeholderEmail.ts)
+//   GET /api/lakeside/launcher-packs?owned=a,b  pack names and election counts
+//                                     for the product ids the launcher owns
+//
 // Portal-facing (Authorization: Bearer INTERNAL_TOKEN):
 //   POST /api/internal/redeem-handoff  { code } -> identity, once
 //   GET  /api/internal/entitlements?ahdUserId=&email=
@@ -22,14 +30,17 @@
 // caller's own origin with a short-lived code lets the SPA store the token in
 // the right origin, and the same flow works on both hosts.
 
-import { Router } from "express";
+import { Router, type Response } from "express";
 import { signToken, verifyToken } from "../auth.js";
-import { unlockedForUserWithPlatform } from "../activation.js";
+import { unlockedForUserWithOwned, unlockedForUserWithPlatform } from "../activation.js";
+import { clearEntitlementsCacheFor, identityForUser } from "../entitlements.js";
+import { publicEmail } from "../placeholderEmail.js";
 import {
   checkInternalToken, configuredBaseUrl, getLakesideAuthClient, identityFromAuth,
   lakesideAuthAhdOrigin, linkOrCreateUser, mintHandoffCode, redeemHandoffCode,
   resolveReturnUrl, AccountLinkConflictError, type LakesideIdentity,
 } from "../lakeside.js";
+import { launcherPackSummary, parseOwnedQuery, redeemLauncherCode, isLauncherCodeShape } from "../launcherHandoff.js";
 
 const AHD_LOGIN_URL = "https://www.ahousedividedgame.com/login";
 
@@ -68,6 +79,42 @@ function signedInUserId(header: string | undefined): string | null {
   return verifyToken(header.slice(7))?.userId ?? null;
 }
 
+/**
+ * Link or create the local account for a verified Lakeside identity and answer
+ * with the game's own session. A valid Bearer on the request is the account
+ * the player already holds here, linked in place when it has no Lakeside link.
+ * ownedPackIds, when the caller already has the platform's current answer,
+ * replaces the platform entitlement read for this response.
+ */
+async function signInAs(
+  identity: LakesideIdentity, authorization: string | undefined, res: Response, ownedPackIds: string[] | null = null,
+): Promise<void> {
+  let user;
+  try {
+    user = linkOrCreateUser(identity, signedInUserId(authorization));
+  } catch (error) {
+    if (error instanceof AccountLinkConflictError) {
+      res.status(409).json({ error: error.message, code: "ACCOUNT_LINK_REQUIRES_PROOF" });
+      return;
+    }
+    throw error;
+  }
+  let unlocked;
+  if (ownedPackIds) {
+    // Fresher than anything cached: drop the cache so the next read agrees.
+    const cached = identityForUser(user.id);
+    if (cached) clearEntitlementsCacheFor(cached);
+    unlocked = unlockedForUserWithOwned(user.id, ownedPackIds);
+  } else {
+    unlocked = await unlockedForUserWithPlatform(user.id);
+  }
+  res.json({
+    token: signToken({ userId: user.id, username: user.username }),
+    user: { id: user.id, username: user.username, email: publicEmail(user.email), ahdLinked: true },
+    unlocked,
+  });
+}
+
 export const lakesideRouter = Router();
 
 lakesideRouter.get("/api/lakeside/login", async (req, res) => {
@@ -94,18 +141,27 @@ lakesideRouter.post("/api/lakeside/exchange", async (req, res) => {
   if (typeof code !== "string" || !code) return res.status(400).json({ error: "Code required" });
   const identity = redeemHandoffCode(code);
   if (!identity) return res.status(401).json({ error: "Sign in link expired, try again" });
-  let user;
-  try {
-    user = linkOrCreateUser(identity, signedInUserId(req.headers.authorization));
-  } catch (error) {
-    if (error instanceof AccountLinkConflictError) return res.status(409).json({ error: error.message, code: "ACCOUNT_LINK_REQUIRES_PROOF" });
-    throw error;
+  await signInAs(identity, req.headers.authorization, res);
+});
+
+lakesideRouter.post("/api/lakeside/launcher-exchange", async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const { code } = req.body ?? {};
+  if (!isLauncherCodeShape(code)) return res.status(400).json({ error: "Code required" });
+  const result = await redeemLauncherCode(code);
+  if (!result.ok) {
+    if (result.reason === "invalid") {
+      return res.status(401).json({ error: "The launcher sign in expired. Open the game from the launcher again." });
+    }
+    return res.status(503).json({ error: "Lakeside sign in is unavailable right now. Try again shortly." });
   }
-  res.json({
-    token: signToken({ userId: user.id, username: user.username }),
-    user: { id: user.id, username: user.username, email: user.email, ahdLinked: true },
-    unlocked: await unlockedForUserWithPlatform(user.id),
-  });
+  await signInAs(result.identity, req.headers.authorization, res, result.ownedPackIds);
+});
+
+lakesideRouter.get("/api/lakeside/launcher-packs", (req, res) => {
+  // Same answer for everyone who sends the same ids: no account data involved.
+  res.set("Cache-Control", "public, max-age=300");
+  res.json(launcherPackSummary(parseOwnedQuery(req.query.owned)));
 });
 
 lakesideRouter.get("/api/lakeside/handoff", async (req, res) => {

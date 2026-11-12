@@ -90,10 +90,13 @@ export function AccountModal() {
               <span className="k">Username</span>
               <span>{user.username}</span>
             </div>
-            <div className="account-row">
-              <span className="k">Email</span>
-              <span>{user.email}</span>
-            </div>
+            {/* Accounts made by a launcher sign in have no email. */}
+            {user.email && (
+              <div className="account-row">
+                <span className="k">Email</span>
+                <span>{user.email}</span>
+              </div>
+            )}
             <div className="account-row">
               <span className="k"><Link2 size={12} style={{ verticalAlign: "-2px", marginRight: 4 }} />Lakeside Games account</span>
               {user.ahdLinked ? (
