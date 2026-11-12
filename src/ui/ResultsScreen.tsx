@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "@lib/distribution";
 import { useGameStore } from "@store/gameStore";
 import { useAuthStore } from "@store/authStore";
 import { openStoreForScenario } from "@store/storeNav";
@@ -441,6 +442,8 @@ function ScoreAndAchievements() {
           <div style={{ textAlign: "right" }}>
             {!standardLength ? (
               <span className="muted small">{custom ? "Custom scenarios are casual only and do not post scores or earn ranked achievements" : "Short and Long games are casual only and do not post to the leaderboard"}</span>
+            ) : DISTRIBUTION.preview ? (
+              <span className="muted small">{PREVIEW_SCORE_NOTE}</span>
             ) : user ? (
               <button className="primary" disabled={postState === "busy" || postState === "done" || serverDown} onClick={post}>
                 {postState === "done" ? "Posted ✓" : postState === "busy" ? "Posting…" : serverDown ? "Offline" : "Post to Leaderboard"}

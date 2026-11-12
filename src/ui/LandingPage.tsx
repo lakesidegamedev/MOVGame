@@ -11,7 +11,7 @@ import { useAuthStore } from "@store/authStore";
 import { useStoreNav } from "@store/storeNav";
 import { usePackPrices } from "@lib/usePackPrices";
 import { packFacts, COMPLETE_ID } from "@lib/storeModel";
-import { DISTRIBUTION } from "@lib/distribution";
+import { BUILD_COMMIT, DISTRIBUTION } from "@lib/distribution";
 import { UserMenu } from "@ui/auth/UserMenu";
 import { DailyCard } from "@ui/DailyCard";
 import { ElectionLibrary, LibraryCard } from "@ui/library/ElectionLibrary";
@@ -204,6 +204,16 @@ function NoticeBanner() {
   );
 }
 
+/** Marks an internal preview build so a screenshot can never pass for a release. */
+function PreviewBanner() {
+  return (
+    <div className="preview-banner" role="note" data-testid="preview-banner">
+      <strong>Preview build, not for distribution</strong>
+      <span>Commit {BUILD_COMMIT}. Every election is unlocked for testing. Nothing can be bought, and scores are not posted.</span>
+    </div>
+  );
+}
+
 export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestination) => void; onResume: (target: ResumeTarget) => void }) {
   const usSaves = useGameStore((s) => s.saves);
   const currentUsGame = useGameStore((s) => s.game);
@@ -251,6 +261,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
       </div>
 
       <div className="landing-body">
+        {DISTRIBUTION.preview && <PreviewBanner />}
         <NoticeBanner />
         <header className="landing-hero">
           <div className="landing-hero-copy">

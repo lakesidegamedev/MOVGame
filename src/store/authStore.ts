@@ -3,6 +3,7 @@ import { api, ApiError, clearSession, getStoredUser, getToken, storeSession, typ
 import { isFreeScenario } from "@content/scenarioRegistry";
 import { PACKS_BY_ID, STORE_PACKS } from "@content/packs";
 import { dailyAssignment, utcDateString } from "@lib/daily";
+import { DISTRIBUTION } from "@lib/distribution";
 import { useStoreNav } from "./storeNav";
 
 // Post-redirect notices (Lakeside sign-in). Checkout results are shown by the
@@ -153,6 +154,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   canPlay: (scenarioId) => {
+    // The internal preview build plays every election, including packs that
+    // are not on sale yet. DISTRIBUTION.preview is false on every other build.
+    if (DISTRIBUTION.preview) return true;
     if (isFreeScenario(scenarioId)) return true;
     // The Daily Challenge is free for everyone, every day, whatever the
     // paywall says: it lands on a rotating scenario (often a paid one) and the

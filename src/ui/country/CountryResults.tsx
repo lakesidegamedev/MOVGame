@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "@lib/distribution";
 import { partyFill, partyInk } from "@ui/colors";
 import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
@@ -238,6 +239,8 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
                 <div style={{ textAlign: "right" }}>
                   {game.custom ? (
                     <span className="muted small">Custom campaigns are casual only and don't post to the leaderboard</span>
+                  ) : DISTRIBUTION.preview ? (
+                    <span className="muted small">{PREVIEW_SCORE_NOTE}</span>
                   ) : user ? (
                     <button className="primary" disabled={postState === "busy" || postState === "done" || serverDown} onClick={postScore}>
                       {postState === "done" ? "Posted ✓" : postState === "busy" ? "Posting…" : serverDown ? "Offline" : "Post to Leaderboard"}

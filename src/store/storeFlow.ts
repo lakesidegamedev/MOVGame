@@ -177,6 +177,7 @@ export const useStoreFlow = create<StoreFlow>((set, get) => {
       const sale = STORE_PACKS.some((p) => p.id === packId);
       const fail = (message: string) => set({ phase: { kind: "error", packId, message } });
       if (!sale) return fail("That pack is not on sale.");
+      if (DISTRIBUTION.preview) return fail("Not available in the preview.");
       if (DISTRIBUTION.checkout === null) return fail(`Packs are sold through ${DISTRIBUTION.nativeStoreName ?? "your platform's store"} in this version.`);
       const offer = offerFor(packId, {
         ownedPackIds: auth.unlocked.packIds, purchases: auth.purchases, catalog, policy: DISTRIBUTION,

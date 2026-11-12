@@ -7,6 +7,8 @@
 // server host explicitly. They stay best-effort: the game itself never depends
 // on the network.
 
+import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "./distribution";
+
 const TOKEN_KEY = "campaign_token";
 const USER_KEY = "campaign_user";
 const GUEST_KEY = "campaign_guest_id";
@@ -25,6 +27,12 @@ export function apiBase(): string {
     hostname === "localhost" ||
     hostname === "127.0.0.1");
   return sameOriginApi ? "" : "https://sim.ahousedividedgame.com";
+}
+
+// The preview build runs unreleased balance: its scores and achievements never
+// reach the public boards, whatever the interface does.
+function previewGuard(): Promise<never> | null {
+  return DISTRIBUTION.preview ? Promise.reject(new Error(PREVIEW_SCORE_NOTE)) : null;
 }
 
 export interface ApiUser {
@@ -189,19 +197,19 @@ export const api = {
       `/api/leaderboard?scenario=${encodeURIComponent(scenarioId)}${difficulty ? `&difficulty=${difficulty}` : ""}&limit=${limit}`),
 
   postScore: (submission: unknown) =>
-    call<{ posted: boolean; personalBest: number; rank: number }>(
+    previewGuard() ?? call<{ posted: boolean; personalBest: number; rank: number }>(
       "/api/leaderboard", { method: "POST", body: JSON.stringify(submission) }),
 
   myRankings: () => call<{ rankings: MyRanking[] }>("/api/leaderboard/me"),
 
   syncAchievements: (scenarioId: string, achievementIds: string[]) =>
-    call<{ added: number }>("/api/achievements", { method: "POST", body: JSON.stringify({ scenarioId, achievementIds }) }),
+    previewGuard() ?? call<{ added: number }>("/api/achievements", { method: "POST", body: JSON.stringify({ scenarioId, achievementIds }) }),
 
   // ── Daily Challenge ──
   daily: () => call<DailyInfo>("/api/daily"),
 
   postDaily: (submission: unknown) =>
-    call<{ posted: boolean; personalBest: number; rank: number; date: string }>(
+    previewGuard() ?? call<{ posted: boolean; personalBest: number; rank: number; date: string }>(
       "/api/daily", { method: "POST", body: JSON.stringify(submission) }),
 
   dailyBoard: (date: string) =>

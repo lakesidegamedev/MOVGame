@@ -49,6 +49,16 @@ export function OfferAction({ packId, label, accessibleName, primary = true, com
   if (offer.kind === "native-store") {
     return <span className="store-soon"><Lock size={13} aria-hidden="true" /> Sold through {offer.storeName}</span>;
   }
+  if (offer.kind === "preview") {
+    return (
+      <span className={`store-action${compact ? " compact" : ""}`}>
+        <button type="button" className={`${primary ? "primary" : "ghost"}${compact ? " small" : ""}`} disabled aria-describedby={noteId}>
+          {label ?? "Buy"}
+        </button>
+        <span id={noteId} className="store-action-note">Not available in the preview</span>
+      </span>
+    );
+  }
   if (offer.kind === "coming-soon") {
     return <span className="store-soon"><Clock size={13} aria-hidden="true" /> Coming soon</span>;
   }

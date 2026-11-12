@@ -65,6 +65,15 @@
 }
 .account-chip.linked { color: var(--green); border-color: var(--edge-up); }
 
+/* Internal preview build marker on the landing page. */
+.preview-banner {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px;
+  margin: 16px 0 0; padding: 10px 14px; border-radius: var(--radius-md);
+  background: var(--warning-soft); border: 1px solid var(--warning);
+  font-size: var(--fs-md); color: var(--ink-100);
+}
+.preview-banner strong { color: var(--warning); text-transform: uppercase; letter-spacing: 0.04em; font-size: var(--fs-sm); }
+
 /* Post-redirect notice (Stripe result, Lakeside sign-in). */
 .notice-banner {
   display: flex; align-items: center; gap: 8px;

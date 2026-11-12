@@ -153,6 +153,12 @@ describe("offers", () => {
   it("never shows Lakeside checkout on a channel that sells elsewhere", () => {
     expect(offerFor("canada", ctx({ policy: STEAM }))).toEqual({ kind: "native-store", storeName: "Steam" });
   });
+
+  it("offers nothing to buy in the preview build, even when the catalog is unreachable", () => {
+    const PREVIEW = { ...WEB, preview: true };
+    expect(offerFor("canada", ctx({ policy: PREVIEW }))).toEqual({ kind: "preview" });
+    expect(offerFor("canada", ctx({ policy: PREVIEW, catalog: LOADING_CATALOG }))).toEqual({ kind: "preview" });
+  });
 });
 
 describe("Complete Collection summary", () => {

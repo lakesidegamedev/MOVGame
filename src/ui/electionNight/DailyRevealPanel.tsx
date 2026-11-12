@@ -1,6 +1,7 @@
 // Daily Challenge compact result — score, percentile vs today's board,
 // one-click replay. Shown only when the finished game is today's daily.
 import { useEffect, useMemo, useState } from "react";
+import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "@lib/distribution";
 import {
   dailyAssignment,
   utcDateString,
@@ -156,7 +157,9 @@ export function DailyRevealPanel({
           <Share2 size={14} style={{ verticalAlign: "-2px", marginRight: 5 }} />
           {copied ? "Copied ✓" : "Share"}
         </button>
-        {user ? (
+        {DISTRIBUTION.preview ? (
+          <span className="muted small">{PREVIEW_SCORE_NOTE}</span>
+        ) : user ? (
           <button
             className="primary"
             disabled={postState === "busy" || postState === "done" || serverDown}

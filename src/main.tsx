@@ -3,6 +3,9 @@ import ReactDOM from "react-dom/client";
 import * as Sentry from "@sentry/browser";
 import { App } from "./App";
 import "./ui/styles.css";
+import { BUILD_COMMIT, DISTRIBUTION } from "@lib/distribution";
+
+if (DISTRIBUTION.preview) document.title = `Margin of Victory PREVIEW ${BUILD_COMMIT}, not for distribution`;
 
 // Error tracking (GlitchTip). Errors only — no performance spans, no replays;
 // release is the build SHA so stacks map to a commit. No DSN ⇒ fully inert

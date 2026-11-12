@@ -246,7 +246,9 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
                 <ul>
                   <li>One-time purchases, no subscription. Prices are in US dollars.</li>
                   <li>
-                    {DISTRIBUTION.checkout === null
+                    {DISTRIBUTION.preview
+                      ? "This is a preview build: every election is unlocked for testing, and nothing can be bought here."
+                      : DISTRIBUTION.checkout === null
                       ? `Packs are sold and restored through ${DISTRIBUTION.nativeStoreName ?? "your platform's store"} in this version.`
                       : "Purchases belong to your Lakeside Games account, so they unlock wherever you sign in. A refund removes the pack everywhere."}
                   </li>

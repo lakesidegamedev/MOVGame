@@ -147,6 +147,8 @@ export type Offer =
   | { kind: "owned"; reason: OwnedReason }
   /** Sold elsewhere (Steam, App Store, Google Play); this build never shows Lakeside checkout. */
   | { kind: "native-store"; storeName: string }
+  /** Internal preview build: everything already plays, and nothing can be bought. */
+  | { kind: "preview" }
   | { kind: "buy"; priceCents: number }
   /** The game ships this pack but the platform does not sell it yet. */
   | { kind: "coming-soon" }
@@ -157,7 +159,7 @@ export interface OfferContext {
   ownedPackIds: readonly string[];
   purchases: readonly Purchase[];
   catalog: CatalogState;
-  policy: Pick<DistributionPolicy, "externalStore" | "nativeStoreName">;
+  policy: Pick<DistributionPolicy, "externalStore" | "nativeStoreName"> & { preview?: boolean };
 }
 
 /**
@@ -168,6 +170,7 @@ export interface OfferContext {
 export function offerFor(packId: string, ctx: OfferContext): Offer {
   const reason = ownedReason(packId, ctx.ownedPackIds, ctx.purchases);
   if (reason) return { kind: "owned", reason };
+  if (ctx.policy.preview) return { kind: "preview" };
   if (!ctx.policy.externalStore) return { kind: "native-store", storeName: ctx.policy.nativeStoreName ?? "your platform store" };
   const { catalog } = ctx;
   if (catalog.status === "loading") return { kind: "unavailable", priceCents: priceCents(packId, catalog), reason: "loading" };
