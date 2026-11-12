@@ -186,6 +186,7 @@ try {
   $new = Get-Install $direct
   $fileVersion = (Get-Item $new.Exe).VersionInfo.ProductVersion
   Check 'upgraded' ($new.Version -ne $old.Version -and $new.Dir -eq $old.Dir) "uninstall entry $($old.Version) -> $($new.Version), exe ProductVersion $fileVersion, same folder $($new.Dir), publisher '$($new.Publisher)'"
+  Check 'publisher shown in Apps & Features' ($new.Publisher -eq 'Lakeside Games') "'$($new.Publisher)'"
 
   # 3. New version: the save from before the upgrade, then checkout.
   $p = Launch $new.Exe 'new'
