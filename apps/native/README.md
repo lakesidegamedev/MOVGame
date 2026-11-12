@@ -27,7 +27,7 @@ This runs shared JVM tests and builds the Compose debug APK at `androidApp/build
 
 The iOS app requires Xcode on macOS. Build the `MOVGameiOS` scheme in `iosApp/MOVGameiOS.xcodeproj`. GitHub Actions compiles the simulator app without signing. The manual iOS TestFlight workflow signs and uploads an exact reviewed main commit using Actions secrets.
 
-Desktop builds use `npm run desktop:build`, `npm run steam:build` or `npm run preview:build` (internal test build with every election unlocked). The desktop scripts build the web source from this same checkout. Install dependencies at both the repository root and `apps/native`. The Desktop builds workflow builds Windows, Linux and macOS packages; see `docs/desktop.md`.
+Desktop builds use `npm run desktop:build`, `npm run steam:build` or `npm run preview:build` (internal test build with every election unlocked). The desktop scripts build the web source from this same checkout. Install dependencies at both the repository root and `apps/native`. The Desktop builds workflow builds Windows, Linux and macOS packages and smoke-tests them (Windows: install, upgrade, play, checkout and uninstall); see `docs/desktop.md`, which also lists what code signing would unblock.
 
 ## Release status
 

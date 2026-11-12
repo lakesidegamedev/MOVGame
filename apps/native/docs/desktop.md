@@ -4,20 +4,45 @@ The Tauri 2 desktop shell lives here. It wraps the web edition from this same ch
 
 ## Status (November 2026)
 
-Verified on GitHub Actions by `.github/workflows/desktop.yml`, preview
-channel, with the committed `Cargo.lock` unchanged (opener plugin included):
+Checked on GitHub Actions by `.github/workflows/desktop.yml` on every push to
+`build/desktop*`. Runs and evidence are listed under "Smoke tests" below.
 
-- **Windows** (`windows-latest`): NSIS installer and the raw app .exe are
-  built. A smoke step launches the .exe, finds its window by title, and
-  screenshots the desktop: the landing page renders in WebView2.
-- **Linux** (`ubuntu-latest`): AppImage and .deb are built. The same smoke runs
-  under xvfb: the window appears with its title and the landing page renders.
-- **macOS** (`macos-latest`, Apple Silicon): the unsigned .app is built and
-  packaged as a .zip and a .dmg. It is not launched in CI.
+**Windows** (`windows-latest`, Windows 11 with WebView2), verified by driving
+the installed game with real clicks:
 
-Not verified yet: installing, upgrading and uninstalling through the
-installers, checkout opening in the system browser on a real desktop, starting
-the macOS build at all, and Intel Macs.
+- The per-user NSIS installer installs silently (`/S`) with no administrator
+  prompt, to `%LOCALAPPDATA%\Margin of Victory`, with a Start menu entry (a
+  silent install also adds a desktop shortcut).
+- A 1.9.0 build plays from the landing page through the setup wizard to the
+  week two desk. Installing 2.0.0 over it upgrades in place (same folder,
+  version 2.0.0 in Apps & Features) and the landing page offers "Resume US
+  campaign · Week 2", which opens that week.
+- Buy in a `desktop-direct` build, signed in with a linked account, calls the
+  opener plugin with
+  `https://lakesidegames.net/account/checkout?game=electioneer&product=us-historical`
+  and the Store says checkout is open in the browser. When the player comes
+  back to the window and the platform reports the pack as owned, the Store
+  shows "United States unlocked". The game server was mocked for this step; no
+  payment is made.
+- The opener plugin refuses URLs outside its allow list
+  (`https://example.com/` is rejected with "Not allowed to open url").
+- Uninstalling removes the program, the Apps & Features entry and the
+  shortcuts, and keeps the saves (see "Where saves live"). Reinstalling brings
+  the same campaign back.
+- The preview installs next to the real game in its own folder, plays a paid
+  election (2016) to week two, and keeps its own saves.
+
+**Linux** (`ubuntu-latest`, under xvfb): the AppImage starts directly (FUSE is
+present on the runner), shows the landing page, and a click on Play free opens
+the setup wizard. The .deb installs with apt, puts `electioneer` on the PATH
+and a "Margin of Victory" menu entry in place, runs, and removes cleanly.
+
+**macOS** (`macos-latest`, Apple Silicon, macOS 26): the .app opens with its
+window (1024 by 674 on the runner) and the landing page. See "Installing an
+unsigned macOS build" for what a downloaded copy does.
+
+Not covered: Intel Macs, Windows on ARM, a real payment, Lakeside sign-in and
+account linking in the browser, offline startup, and Steam.
 
 ## Channels
 
@@ -63,21 +88,71 @@ that only `tauri.preview.conf.json` builds it.
 Workflow: **Desktop builds** (`.github/workflows/desktop.yml`).
 
 - Push any commit to a branch named `build/desktop` (or `build/desktop-...`).
-  That builds the preview channel on Windows, Linux and macOS.
+  That builds the preview channel on Windows, Linux and macOS and runs every
+  smoke test.
 - Or run it by hand from the Actions tab ("Run workflow") and pick the channel:
-  `desktop-preview` (default), `desktop-direct` or `steam`.
+  `desktop-preview` (default), `desktop-direct` or `steam`. Untick "lifecycle"
+  to skip the Windows install test.
 
 Each job uploads its files as an artifact on the run page:
 
 | Artifact | Contents |
 | --- | --- |
 | `mov-windows-<channel>` | `Margin of Victory[ Preview]_2.0.0_x64-setup.exe` (installer) and `margin-of-victory-<channel>-portable.exe` (runs without installing) |
-| `mov-windows-smoke` | screenshot of the launched app |
+| `mov-windows-smoke` | screenshots and `smoke/lifecycle.json`, one line per check |
 | `mov-linux-<channel>` | `.AppImage` and `.deb` |
-| `mov-linux-smoke` | screenshot under xvfb and the app's console output |
-| `mov-macos-<channel>` | unsigned `.app` in a .zip, and a .dmg |
+| `mov-linux-smoke` | screenshots, app logs and `linux-smoke.txt` |
+| `mov-macos-<channel>` | `.app` (sealed with an ad-hoc signature, not Developer ID) in a .zip, and a .dmg |
+| `mov-macos-smoke` | screenshots and `macos-smoke.txt` |
 
-A Windows build takes about five minutes from a cold cache.
+A Windows job takes about 15 minutes with the install test, macOS and Linux
+about 8.
+
+### Smoke tests
+
+- **Windows** (`scripts/smoke-windows-lifecycle.ps1`): installs a 1.9.0
+  `desktop-direct` build silently, plays it to week two, upgrades to the
+  current version, resumes the save, presses Buy, checks the checkout URL and
+  the unlock on return, checks the opener's allow list, uninstalls, checks the
+  saves are kept, reinstalls and resumes again, then installs the preview next
+  to it and plays a paid election to week two. It also launches the tester
+  artifact's portable .exe (`scripts/smoke-windows.ps1`).
+- The clicks come from `scripts/desktop-smoke.mjs`, which drives the game over
+  WebView2's remote debugging port with Playwright. WebView2 ignores the
+  `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` variable for this app, because wry
+  always passes its own browser arguments, so the install test uses CI test
+  builds of the same commit made with
+  `desktop-build.mjs --ci-debug-port 9222`. Those set `additionalBrowserArgs`
+  (keeping wry's defaults), add "(CI test build)" to the window title and are
+  never uploaded. The checkout step answers the game server's API with a
+  signed-in, linked test account; nothing reaches the real server and nothing
+  is paid.
+- `desktop-smoke.mjs --local <url>` runs the same steps against a built web
+  bundle in Chromium, with a stand-in for the Tauri bridge, for working on the
+  script without Windows.
+- **Linux** (`scripts/smoke-linux.sh`): AppImage start, a click on Play free,
+  .deb install, run and removal.
+- **macOS** (`scripts/smoke-macos.sh`): opens the .app and checks its window,
+  then opens a copy marked as downloaded and records what Gatekeeper does, for
+  the sealed bundle and for the bundle as Tauri leaves it.
+
+### Where saves live
+
+Saves, settings and the signed-in session are web storage inside the app's
+webview data folder, keyed by the app identifier, not by the install folder:
+
+| OS | Real game | Preview |
+| --- | --- | --- |
+| Windows | `%LOCALAPPDATA%\com.lakesidegames.electioneer\EBWebView` | `%LOCALAPPDATA%\com.lakesidegames.electioneer.preview\EBWebView` |
+| Linux | `~/.local/share/com.lakesidegames.electioneer` | `~/.local/share/com.lakesidegames.electioneer.preview` |
+| macOS | `~/Library/WebKit/com.lakesidegames.electioneer` (WKWebView's usual place; not checked in CI) | `~/Library/WebKit/com.lakesidegames.electioneer.preview` |
+
+- Upgrading never touches them. The installer writes the program folder only.
+- Uninstalling on Windows keeps them unless the player ticks "Delete the
+  application data" in the uninstaller (unticked by default; a silent
+  uninstall never deletes them). Removing the .deb keeps them too. So a
+  reinstall picks the campaign back up.
+- To start completely fresh, delete the folder above after uninstalling.
 
 ## Installing an unsigned Windows build
 
@@ -104,9 +179,33 @@ The portable .exe needs no install. It still keeps its saves in the app data
 folder for its identifier, so the portable and installed copies of the same
 channel share saves.
 
-Known on Windows: country flags show as two-letter codes ("US", "GB"),
-because Windows has no colour flag emoji. The web game shows the same in any
-Windows browser.
+Once installed, the game itself should not warn on later launches, because
+the installer writes it locally and it carries no download mark (not checked
+in CI: runners do not run SmartScreen prompts). Each new downloaded installer
+warns again until builds are signed.
+
+## Installing an unsigned macOS build
+
+macOS builds have an ad-hoc signature only (no Apple Developer ID, not
+notarised). Tauri signs just the binary; the workflow seals the whole bundle
+with `codesign --force --deep --sign -` before packaging. That matters: on
+macOS 26, a downloaded copy of the bundle as Tauri leaves it is reported as
+**"is damaged and can't be opened. You should move it to the Trash."**, with
+no way past it. The sealed bundle gets the normal unsigned-app path instead.
+What a tester sees:
+
+1. Open the .dmg and drag the app to Applications (or unzip the .zip).
+2. Double-click it. A dialog says **"Margin of Victory Preview" Not Opened:
+   Apple could not verify it is free of malware**, with **Move to Trash** and
+   **Done**. Click **Done**.
+3. Open **System Settings**, **Privacy & Security**, scroll to Security, and
+   click **Open Anyway** next to the message about the app. Confirm with an
+   administrator password or Touch ID, then click **Open** once more.
+4. From then on it opens normally.
+
+Alternatively, in Terminal: `xattr -dr com.apple.quarantine "/Applications/Margin of Victory Preview.app"`.
+
+The builds are Apple Silicon only. Intel Macs need a universal build.
 
 ## Build locally
 
@@ -145,15 +244,118 @@ linking is linked once in the browser.
 The checked-in master icon is `public/brand/margin-of-victory-icon.png`; the
 Tauri-generated sizes for every platform live in `src-tauri/icons/`.
 
+## Code signing: what it would unblock
+
+Every desktop build is unsigned. This section lists what works today, what a
+Windows code signing certificate and Apple Developer ID notarisation would
+change, and the steps each takes.
+
+### Works today without any certificate
+
+- Windows: install, upgrade in place, uninstall and reinstall through the NSIS
+  installer, per user, with no administrator prompt; saves survive all of them.
+  Checkout opens in the system browser and the purchase is picked up when the
+  player returns. All verified in CI (see Status).
+- Windows: a downloaded setup .exe shows SmartScreen once ("Windows protected
+  your PC", "Publisher: Unknown publisher"). More info, then Run anyway, gets
+  past it. Apps & Features lists the publisher as "Lakeside Games"
+  (`bundle.publisher`), but only as text the installer writes, not a
+  verified name.
+- Linux: AppImage and .deb need no signing.
+- Steam: Steam does not require Authenticode, and games installed by Steam do
+  not get the download warning.
+- macOS: a build made on the Mac itself opens normally. A downloaded copy is
+  blocked by Gatekeeper until the tester allows it in System Settings (see
+  "Installing an unsigned macOS build").
+
+### What a Windows code signing certificate unblocks
+
+1. The SmartScreen and file Properties dialogs name Lakeside Games as the
+   verified publisher instead of "Unknown publisher".
+2. SmartScreen warnings stop once the signed files build reputation from
+   downloads. They do not stop on day one: since 2024 Microsoft treats EV and
+   OV certificates the same for reputation, and a new certificate starts with
+   little. Azure Artifact Signing builds reputation the same way.
+3. Players with Smart App Control on (some fresh Windows 11 installs) can run
+   the game at all. Smart App Control blocks unsigned, unknown apps and has no
+   "Run anyway".
+4. Fewer antivirus and company-policy blocks on an unsigned installer that
+   downloads WebView2.
+5. A public "Download for Windows" button becomes reasonable. Until then,
+   direct Windows downloads are for testers.
+
+It does not unblock the store or checkout (they work now), Steam (works
+unsigned), or automatic updates (Tauri's updater uses its own free signing
+key, separate from code signing, and is not set up yet).
+
+### Steps for Windows signing
+
+Option A, Azure Artifact Signing (formerly Trusted Signing). Recommended if
+Lakeside Games qualifies.
+
+1. An Azure subscription with billing, and an Artifact Signing account. It
+   bills monthly from the moment the account exists; check the current price
+   on Microsoft's pricing page.
+2. Identity validation in the Azure portal. Public-trust certificates are
+   available to organisations in the US, Canada, the EU and the UK, and to
+   individual developers in the US and Canada. Organisation validation needs
+   the business's registration details.
+3. A certificate profile, plus a service principal or GitHub federated
+   identity with the signer role.
+4. GitHub secrets for that identity. In `desktop.yml`, a
+   `bundle.windows.signCommand` overlay that calls Microsoft's signing client,
+   so Tauri signs the game .exe and the installer.
+5. `signtool verify /pa` on both files in the workflow, and one install on a
+   clean PC to see the publisher name.
+
+Option B, an OV certificate from a public CA (DigiCert, Sectigo, SSL.com,
+Certum). Organisation validation takes days to weeks and the fee is yearly.
+Since 2023 the private key must live in hardware or a cloud HSM, so CI needs
+the CA's cloud signing service. Then steps 4 and 5 above. EV certificates cost
+more and no longer skip SmartScreen.
+
+Option C, the Microsoft Store (MSIX). The Store signs the package and shows no
+SmartScreen warning, but it needs an MSIX package, Store review, and its own
+purchase path like iOS and Android. A bigger job than A or B.
+
+### What Apple Developer ID and notarisation unblock
+
+1. A downloaded .dmg opens after the normal "downloaded from the internet"
+   question, instead of being blocked. Without it, a tester has to go to
+   System Settings, Privacy & Security, Open Anyway, and confirm with an
+   administrator password. Recent macOS versions removed the old Control-click
+   bypass.
+2. A public "Download for Mac" button.
+3. Automatic updates on Mac later on.
+
+The Mac App Store is a separate route with its own signing and review.
+
+### Steps for macOS signing and notarisation
+
+1. The existing Apple Developer Program membership covers it; no new fee. The
+   Account Holder creates a "Developer ID Application" certificate (only the
+   Account Holder can).
+2. Export it as a .p12, and create an App Store Connect API key for
+   notarisation.
+3. GitHub secrets: `APPLE_CERTIFICATE` (the .p12, base64),
+   `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_API_ISSUER`,
+   `APPLE_API_KEY` and the key file. With these set, `tauri build` signs,
+   notarises and staples.
+4. In `desktop.yml`, drop the ad-hoc `codesign --sign -` step (the Developer ID
+   signature replaces it) and build the `app` and `dmg` bundles. The macOS
+   smoke test's downloaded-copy check must then say
+   "accepted, source=Notarized Developer ID".
+5. Decide on Intel support at the same time: `--target universal-apple-darwin`
+   builds one app for both.
+
 ## Remaining release work
 
-- Code signing for Windows (an EV or OV certificate, or Azure Trusted Signing)
-  so SmartScreen stops warning. Until then, direct downloads are for testers.
-- Sign and notarize macOS builds (Developer ID certificate and an Apple
-  notarization step in the workflow).
-- Test a `desktop-direct` build end to end: Buy opens the browser, the purchase
-  shows up when the window regains focus, and sign in works.
-- Verify install, upgrade, uninstall, save retention and offline startup on
-  every supported desktop OS.
+- Windows code signing and macOS notarisation (above). Until then, direct
+  downloads are for testers.
+- Lakeside sign-in and account linking from the desktop app, end to end in a
+  real browser.
+- A real purchase on a `desktop-direct` build (CI covers everything up to the
+  payment page and the unlock on return).
+- Offline startup, Intel Macs and Windows on ARM.
 - Implement and test Steam DLC ownership before selling packs on Steam.
 - Bump the desktop version (`tauri.conf.json`, `Cargo.toml`, `package.json`) with every release; it is 2.0.0 for the 2.0 release.
