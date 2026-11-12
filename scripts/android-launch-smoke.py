@@ -198,7 +198,16 @@ def route_flows():
         shot(f'library-{country}', 'Choose your presidential ticket' if country == 'US' else 'Launch campaign', 'ask')
     # With Play sales and native gating pinned on, an unowned paid election
     # shows a lock and Unlock, and Unlock opens its pack in the store.
-    shot('locked-library', 'Unlock', 'ask')
+    try:
+        # The free U.S. elections come first; scroll to the paid ones.
+        launch('locked-library')
+        capture('locked-library-top', 'Choose your election', 'ask')
+        width, height = map(int, adb('shell', 'wm', 'size').strip().split()[-1].split('x'))
+        adb('shell', 'input', 'swipe', str(width // 2), str(height * 3 // 4), str(width // 2), str(height // 4), '600')
+        capture('locked-library', 'Unlock', 'ask')
+    except Exception as error:  # noqa: BLE001
+        print(f'FAIL locked-library: {error}', flush=True)
+        failures.append(f'locked-library: {error}')
     shot('locked-UK', 'Unlock the United Kingdom pack', 'ask')
     try:
         tap_label('Unlock the United Kingdom pack', pinned=True)

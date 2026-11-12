@@ -143,7 +143,8 @@ private fun PackCard(
                 when {
                     reason != null -> Tag("Owned", TagKind.Positive)
                     product != null -> Text(product.price, style = MaterialTheme.typography.titleMedium.num, color = Mov.Text1, fontWeight = FontWeight.Bold)
-                    !linked -> Tag("Sign in to buy", TagKind.Outline)
+                    !linked && !focused -> Tag("Sign in to buy", TagKind.Outline)
+                    !linked -> {}
                     else -> Tag("Coming soon", TagKind.Warning)
                 }
             }
