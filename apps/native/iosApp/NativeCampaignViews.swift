@@ -181,7 +181,9 @@ struct NativeCampaignLibrary: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 12) {
                 Text("CAMPAIGN LIBRARY").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
-                Text("Choose your election").font(dynamicTypeSize.isAccessibilitySize ? .title2.bold() : .largeTitle.bold())
+                if !dynamicTypeSize.isAccessibilitySize {
+                    Text("Choose your election").font(.largeTitle.bold())
+                }
                 Text("\(catalog.count) countries · \(total) elections · \(freeCount) free")
                     .font(.subheadline).foregroundStyle(CampaignStyle.muted)
                 filters
@@ -332,18 +334,33 @@ struct NativeCampaignLibrary: View {
             Button {
                 if expanded.contains(country.id) { expanded.remove(country.id) } else { expanded.insert(country.id) }
             } label: {
-                HStack(alignment: .center, spacing: 12) {
-                    Text(country.flag).font(.title2).accessibilityHidden(true)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(country.name).font(.headline).foregroundStyle(.white)
-                        Text("\(all.count) elections · \(String(years.min() ?? 0)) to \(String(years.max() ?? 0))")
-                            .font(.caption).foregroundStyle(CampaignStyle.muted)
-                    }
-                    Spacer(minLength: 6)
+                let badge = Group {
                     if owned { NativeBadge(text: "Owned", color: Color(red: 0.37, green: 0.80, blue: 0.55)) }
                     else if all.contains(where: { $0.free }) { NativeBadge(text: "\(all.filter { $0.free }.count) free", color: CampaignStyle.gold) }
-                    if !filtering {
-                        Image(systemName: open ? "chevron.up" : "chevron.down").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
+                }
+                let chevron = Image(systemName: open ? "chevron.up" : "chevron.down").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
+                    .opacity(filtering ? 0 : 1)
+                Group {
+                    if dynamicTypeSize.isAccessibilitySize {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(spacing: 8) { badge; Spacer(minLength: 4); chevron }
+                            Text("\(country.flag) \(country.name)").font(.headline).foregroundStyle(.white)
+                            Text("\(all.count) elections · \(String(years.min() ?? 0)) to \(String(years.max() ?? 0))")
+                                .font(.caption).foregroundStyle(CampaignStyle.muted)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        HStack(alignment: .center, spacing: 12) {
+                            Text(country.flag).font(.title2).accessibilityHidden(true)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(country.name).font(.headline).foregroundStyle(.white)
+                                Text("\(all.count) elections · \(String(years.min() ?? 0)) to \(String(years.max() ?? 0))")
+                                    .font(.caption).foregroundStyle(CampaignStyle.muted)
+                            }
+                            Spacer(minLength: 6)
+                            badge
+                            chevron
+                        }
                     }
                 }
                 .padding(14)
