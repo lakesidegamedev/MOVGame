@@ -65,22 +65,30 @@ fun StoreScreen(session: GameSession, activity: Activity) {
             }
         }
         complete?.let { pack -> item {
-            val paidCountries = pack.scenarios.mapNotNull { elections[it]?.country }.distinct().size
-            PackCard(pack, "Every paid election: ${pack.scenarios.size} elections across $paidCountries countries.", flag = null, featured = true,
+            // The collection opens every election of every country it covers,
+            // the free ones included (web packFacts): say the total and how many
+            // of those are already free.
+            val covered = pack.scenarios.mapNotNull { elections[it]?.country }.toSet()
+            val all = elections.values.filter { it.country in covered }.sortedWith(compareByDescending<NativeElection> { it.year })
+            PackCard(pack, "Every election in the game: ${all.size} elections across ${covered.size} countries, ${all.count { it.free }} of them already free.",
+                flag = null, featured = true,
                 owned = owned, product = products.firstOrNull { it.packId == pack.id }, linked = linked, expanded = open == pack.id,
-                elections = pack.scenarios.mapNotNull { elections[it] }, onToggle = { open = if (open == pack.id) null else pack.id },
+                elections = all, onToggle = { open = if (open == pack.id) null else pack.id },
                 onBuy = { session.buy(activity, pack.id) }, onPlay = { session.libraryPick = it; session.go(Screen.LIBRARY) })
         } }
         item { Eyebrow("Country packs · ${countryPacks.size}") }
         items(countryPacks, key = { it.id }) { pack ->
-            val list = pack.scenarios.mapNotNull { elections[it] }
             val country = countries.firstOrNull { c -> NativeCatalog.country(c.id)?.packId == pack.id }
+            // A country pack opens its country's free elections too (web packFacts).
+            val list = (pack.scenarios.mapNotNull { elections[it] } +
+                elections.values.filter { it.free && it.country == country?.id })
+                .distinctBy { it.scenarioId }.sortedWith(compareByDescending<NativeElection> { it.year })
             val years = list.map { it.year }
             val free = list.count { it.free }
             val summary = buildString {
                 append("${list.size} elections")
-                if (years.isNotEmpty()) append(", ${years.min()} to ${years.max()}")
-                if (free > 0) append(". $free also free without the pack")
+                if (free > 0) append(", $free free")
+                if (years.isNotEmpty()) append(" · ${years.min()} to ${years.max()}")
             }
             PackCard(pack, summary, country?.flag, featured = false, owned = owned, product = products.firstOrNull { it.packId == pack.id },
                 linked = linked, expanded = open == pack.id, elections = list, onToggle = { open = if (open == pack.id) null else pack.id },

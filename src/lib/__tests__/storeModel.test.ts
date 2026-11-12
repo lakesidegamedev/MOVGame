@@ -221,9 +221,16 @@ describe("pack facts", () => {
     expect(f.yearRange).not.toMatch(/[\u2013\u2014]/);
     expect(f.elections[0].year).toBeGreaterThanOrEqual(f.elections[f.elections.length - 1].year);
   });
-  it("Complete and Global list only their own scenarios, with no free count", () => {
-    expect(packFacts(PACKS_BY_ID.complete).freeCount).toBe(0);
-    expect(packFacts(PACKS_BY_ID.complete).elections).toHaveLength(PACKS_BY_ID.complete.scenarios.length);
+  it("Complete counts every election in the game and says how many are free", () => {
+    const f = packFacts(PACKS_BY_ID.complete);
+    const sum = summarizeComplete([], LOADING_CATALOG)!;
+    expect(f.elections).toHaveLength(SCENARIO_REGISTRY.length);
+    expect(f.elections).toHaveLength(sum.elections);
+    expect(f.freeCount).toBe(SCENARIO_REGISTRY.filter((s) => s.free).length);
+    expect(f.freeCount).toBe(sum.freeElections);
+    expect(f.countLabel).toBe(`${SCENARIO_REGISTRY.length} elections, ${f.freeCount} free`);
+  });
+  it("Global lists only its own scenarios", () => {
     expect(packFacts(PACKS_BY_ID.global).elections).toHaveLength(PACKS_BY_ID.global.scenarios.length);
   });
   it("groups the free elections by country, one group per country", () => {

@@ -275,7 +275,13 @@ export function electionCountLabel(total: number, free: number): string {
 
 export function packFacts(pack: ScenarioPack): PackFacts {
   const home = COUNTRY_MODULES.find((m) => m.pack.id === pack.id);
-  const free = home ? SCENARIO_REGISTRY.filter((s) => s.country === home.code && s.free) : [];
+  // A country pack opens its country's free elections too; the Complete
+  // Collection opens every election of every country it covers, so its count
+  // is the whole game and matches the Store's hero (summarizeComplete).
+  const countries = home
+    ? new Set<string>([home.code])
+    : pack.id === COMPLETE_ID ? new Set(pack.scenarios.map(countryOfScenario).filter(Boolean)) : new Set<string>();
+  const free = SCENARIO_REGISTRY.filter((s) => countries.has(s.country) && s.free);
   const elections = [...pack.scenarios.map((id) => SCENARIOS_BY_ID[id]), ...free]
     .filter((m): m is ScenarioMeta => !!m)
     .filter((m, i, all) => all.findIndex((x) => x.scenarioId === m.scenarioId) === i)

@@ -225,6 +225,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - A general campaign event, such as a gaffe, a newspaper endorsement or a debate win, now runs at
   most once a campaign in every country, so the same headline never comes round twice. Decision
   events such as a debate invitation can still return.
+- The Complete Collection's own page and card, on the web and on Android, now count every election
+  in the game and say how many of those are already free, matching the Store banner, instead of
+  counting only the paid ones. Android's country packs also count their free election, as the web
+  does.
 - History check across the new countries and the older Canada, Australia, Germany, France and US
   elections: every national seat total and chamber size was checked against published results and
   held. A few regional vote shares in Canada, Australia and the US were corrected, and France's
