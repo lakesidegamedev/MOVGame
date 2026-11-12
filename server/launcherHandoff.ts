@@ -2,11 +2,17 @@
 //
 // The desktop launcher holds a Lakeside platform session. To open this game
 // already signed in, it asks the platform for a short-lived, single-use code
-// bound to this game and opens the game with it in the URL fragment
-// (#launcher_code=). The fragment never reaches a server log or a Referer
-// header. The SPA posts the code to /api/lakeside/launcher-exchange, and this
-// module redeems it with the platform server to server. The game then issues
-// its own session as it does for any Lakeside sign-in.
+// bound to this game's client id and opens the game with it in the URL
+// fragment (#launcher_code=). The fragment never reaches a server log or a
+// Referer header. The SPA posts the code to /api/lakeside/launcher-exchange,
+// and this module redeems it with the platform server to server. The game then
+// issues its own session as it does for any Lakeside sign-in.
+//
+// Redeem contract (shared with every launcher game):
+//   POST <platform>/account/launcher/handoff/redeem { code, clientId }
+//   200 { accountId, displayName, entitlements }   400 invalid_request   429
+// The call is public: the single-use code is the only credential, so no game
+// secret is sent. The answer carries no email.
 //
 // The launcher's platform token never reaches the game, and the code is
 // useless after one use or once it expires (the platform's job: 60 seconds).
@@ -20,17 +26,26 @@ import { SCENARIO_REGISTRY } from "../src/content/scenarioRegistry.js";
 import type { LakesideIdentity } from "./lakeside.js";
 
 const GAME = "electioneer";
+/** This game's launcher client id on the platform. */
+export const LAUNCHER_CLIENT_ID = "margin-of-victory";
 const TIMEOUT_MS = 5_000;
 
 /** Shape of a launcher code: opaque base64url, bounded so junk never goes upstream. */
 const CODE_RE = /^[A-Za-z0-9_-]{16,128}$/;
 
 /**
- * Platform user ids: a 24-hex A House Divided id, or a Discord id namespaced
- * as discord:<snowflake>. The game stores either in users.ahd_user_id, the same
- * key the platform uses for its purchase ledger, so entitlement reads line up.
+ * Platform account ids the redeem call can return: a 24-hex A House Divided
+ * id, or a Discord id namespaced as discord:<snowflake>. Exactly the two shapes
+ * the platform session accepts, nothing broader. The game stores the id in
+ * users.ahd_user_id, the same key the platform uses for its purchase ledger, so
+ * entitlement reads line up.
  */
-const PLATFORM_USER_ID_RE = /^(?:[a-f0-9]{24}|discord:[0-9]{1,30})$/i;
+const PLATFORM_ACCOUNT_ID_RE = /^(?:[a-f0-9]{24}|discord:[0-9]{1,30})$/i;
+
+/** After a 429, stop asking the platform for this long (or its Retry-After, capped). */
+const RATE_LIMIT_PAUSE_MS = 10_000;
+const RATE_LIMIT_PAUSE_MAX_MS = 60_000;
+let pausedUntil = 0;
 
 export function isLauncherCodeShape(code: unknown): code is string {
   return typeof code === "string" && CODE_RE.test(code);
@@ -38,49 +53,89 @@ export function isLauncherCodeShape(code: unknown): code is string {
 
 function redeemUrl(): string {
   const base = (process.env.LAKESIDE_BASE || "https://lakesidegames.net").replace(/\/+$/, "");
-  return process.env.LAKESIDE_LAUNCHER_REDEEM_URL || `${base}/account/api/launcher/redeem-game-code`;
+  return process.env.LAKESIDE_LAUNCHER_REDEEM_URL || `${base}/account/launcher/handoff/redeem`;
+}
+
+function pauseFor(retryAfter: string | null, now: number): void {
+  const seconds = Number(retryAfter);
+  const ms = Number.isFinite(seconds) && seconds > 0
+    ? Math.min(seconds * 1000, RATE_LIMIT_PAUSE_MAX_MS)
+    : RATE_LIMIT_PAUSE_MS;
+  pausedUntil = Math.max(pausedUntil, now + ms);
+}
+
+/** Test-only: forget a rate-limit pause. */
+export function resetLauncherRedeemPause(): void {
+  pausedUntil = 0;
+}
+
+/**
+ * Margin of Victory pack ids from the redeem answer's entitlements, or null
+ * when the answer did not carry a usable list (the caller then reads ownership
+ * the normal way). Items are { productId, game, source, until? }.
+ */
+export function ownedPacksFromEntitlements(raw: unknown, now = Date.now()): string[] | null {
+  if (!Array.isArray(raw)) return null;
+  const ids: string[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const { productId, game, until } = item as Record<string, unknown>;
+    if (game !== GAME || typeof productId !== "string") continue;
+    if (until != null) {
+      const end = typeof until === "string" ? Date.parse(until) : NaN;
+      if (!(end > now)) continue;
+    }
+    ids.push(productId);
+  }
+  return knownPackIds(ids);
 }
 
 export type LauncherRedeemResult =
-  | { ok: true; identity: LakesideIdentity }
-  /** The code is unknown, used, expired or for another game. */
+  /**
+   * identity.email is always "": the redeem answer has none. ownedPackIds is
+   * what the platform says the account owns right now, or null when unknown.
+   */
+  | { ok: true; identity: LakesideIdentity; ownedPackIds: string[] | null }
+  /** The code is unknown, used, expired or for another client. */
   | { ok: false; reason: "invalid" }
-  /** The platform could not be asked, or answered with something unusable. */
-  | { ok: false; reason: "unavailable" }
-  /** The identity has no email, which every game account needs. */
-  | { ok: false; reason: "email-required" };
+  /** The platform could not be asked, is rate limiting us, or answered with something unusable. */
+  | { ok: false; reason: "unavailable" };
 
-/** Redeem a launcher code with the platform. Never throws. */
-export async function redeemLauncherCode(code: string): Promise<LauncherRedeemResult> {
+/** Redeem a launcher code with the platform, once. Never retries, never throws. */
+export async function redeemLauncherCode(code: string, now = Date.now()): Promise<LauncherRedeemResult> {
   if (!isLauncherCodeShape(code)) return { ok: false, reason: "invalid" };
-  const token = process.env.INTERNAL_TOKEN;
-  if (!token) return { ok: false, reason: "unavailable" };
+  // Rate limited a moment ago: answer at once instead of adding to the pile.
+  if (now < pausedUntil) return { ok: false, reason: "unavailable" };
 
   let res: Response;
   try {
     res = await fetch(redeemUrl(), {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ code, game: GAME }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, clientId: LAUNCHER_CLIENT_ID }),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
   } catch {
     return { ok: false, reason: "unavailable" };
   }
-  // 400/404/410: the platform does not honour this code. 401/403 mean it
-  // rejected our credential, which is a configuration fault, not the player's.
-  if (res.status === 400 || res.status === 404 || res.status === 410) return { ok: false, reason: "invalid" };
+  if (res.status === 429) {
+    pauseFor(res.headers.get("retry-after"), now);
+    return { ok: false, reason: "unavailable" };
+  }
+  // The platform answers 400 for every code it will not honour, without saying why.
+  if (res.status === 400) return { ok: false, reason: "invalid" };
   if (!res.ok) return { ok: false, reason: "unavailable" };
 
-  const body = (await res.json().catch(() => null)) as { identity?: Record<string, unknown> } | null;
-  const raw = body?.identity;
-  const userId = typeof raw?.userId === "string" ? raw.userId : "";
-  const username = typeof raw?.username === "string" ? raw.username.trim() : "";
-  const email = typeof raw?.email === "string" ? raw.email.trim() : "";
-  if (raw?.game !== undefined && raw.game !== GAME) return { ok: false, reason: "invalid" };
-  if (!PLATFORM_USER_ID_RE.test(userId) || !username) return { ok: false, reason: "unavailable" };
-  if (!email) return { ok: false, reason: "email-required" };
-  return { ok: true, identity: { ahdUserId: userId, email, username } };
+  const body = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+  const accountId = typeof body?.accountId === "string" ? body.accountId : "";
+  if (!PLATFORM_ACCOUNT_ID_RE.test(accountId)) return { ok: false, reason: "unavailable" };
+  // The display name only seeds the game username; a missing one gets a generated name.
+  const displayName = typeof body?.displayName === "string" ? body.displayName.trim() : "";
+  return {
+    ok: true,
+    identity: { ahdUserId: accountId, email: "", username: displayName },
+    ownedPackIds: ownedPacksFromEntitlements(body?.entitlements, now),
+  };
 }
 
 // ── Pack summary for the launcher tile ───────────────────────────────────────

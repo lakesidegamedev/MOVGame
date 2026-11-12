@@ -15,6 +15,7 @@
 //   POST /api/lakeside/launcher-exchange { code } -> { token, user, unlocked },
 //                                     where code is the platform's single-use
 //                                     launcher code, redeemed server to server
+//                                     (no email: see placeholderEmail.ts)
 //   GET /api/lakeside/launcher-packs?owned=a,b  pack names and election counts
 //                                     for the product ids the launcher owns
 //
@@ -31,7 +32,9 @@
 
 import { Router, type Response } from "express";
 import { signToken, verifyToken } from "../auth.js";
-import { unlockedForUserWithPlatform } from "../activation.js";
+import { unlockedForUserWithOwned, unlockedForUserWithPlatform } from "../activation.js";
+import { clearEntitlementsCacheFor, identityForUser } from "../entitlements.js";
+import { publicEmail } from "../placeholderEmail.js";
 import {
   checkInternalToken, configuredBaseUrl, getLakesideAuthClient, identityFromAuth,
   lakesideAuthAhdOrigin, linkOrCreateUser, mintHandoffCode, redeemHandoffCode,
@@ -80,8 +83,12 @@ function signedInUserId(header: string | undefined): string | null {
  * Link or create the local account for a verified Lakeside identity and answer
  * with the game's own session. A valid Bearer on the request is the account
  * the player already holds here, linked in place when it has no Lakeside link.
+ * ownedPackIds, when the caller already has the platform's current answer,
+ * replaces the platform entitlement read for this response.
  */
-async function signInAs(identity: LakesideIdentity, authorization: string | undefined, res: Response): Promise<void> {
+async function signInAs(
+  identity: LakesideIdentity, authorization: string | undefined, res: Response, ownedPackIds: string[] | null = null,
+): Promise<void> {
   let user;
   try {
     user = linkOrCreateUser(identity, signedInUserId(authorization));
@@ -92,10 +99,19 @@ async function signInAs(identity: LakesideIdentity, authorization: string | unde
     }
     throw error;
   }
+  let unlocked;
+  if (ownedPackIds) {
+    // Fresher than anything cached: drop the cache so the next read agrees.
+    const cached = identityForUser(user.id);
+    if (cached) clearEntitlementsCacheFor(cached);
+    unlocked = unlockedForUserWithOwned(user.id, ownedPackIds);
+  } else {
+    unlocked = await unlockedForUserWithPlatform(user.id);
+  }
   res.json({
     token: signToken({ userId: user.id, username: user.username }),
-    user: { id: user.id, username: user.username, email: user.email, ahdLinked: true },
-    unlocked: await unlockedForUserWithPlatform(user.id),
+    user: { id: user.id, username: user.username, email: publicEmail(user.email), ahdLinked: true },
+    unlocked,
   });
 }
 
@@ -137,12 +153,9 @@ lakesideRouter.post("/api/lakeside/launcher-exchange", async (req, res) => {
     if (result.reason === "invalid") {
       return res.status(401).json({ error: "The launcher sign in expired. Open the game from the launcher again." });
     }
-    if (result.reason === "email-required") {
-      return res.status(422).json({ error: "Your Lakeside account has no email address, which a game account needs.", code: "EMAIL_REQUIRED" });
-    }
     return res.status(503).json({ error: "Lakeside sign in is unavailable right now. Try again shortly." });
   }
-  await signInAs(result.identity, req.headers.authorization, res);
+  await signInAs(result.identity, req.headers.authorization, res, result.ownedPackIds);
 });
 
 lakesideRouter.get("/api/lakeside/launcher-packs", (req, res) => {

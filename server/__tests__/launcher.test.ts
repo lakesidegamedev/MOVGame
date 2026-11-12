@@ -17,21 +17,28 @@ process.env.INTERNAL_TOKEN = "fixture-internal";
 const { getDb } = await import("../db.ts");
 const { signToken, verifyToken } = await import("../auth.ts");
 const { lakesideRouter } = await import("../routes/lakeside.ts");
-const { launcherPackSummary, parseOwnedQuery } = await import("../launcherHandoff.ts");
+const { authRouter } = await import("../routes/auth.ts");
+const { linkOrCreateUser } = await import("../lakeside.ts");
+const { identityForUser } = await import("../entitlements.ts");
+const { launcherPackSummary, parseOwnedQuery, ownedPacksFromEntitlements, resetLauncherRedeemPause } =
+  await import("../launcherHandoff.ts");
 const { PACKS_BY_ID, STORE_PACKS } = await import("../../src/content/packs.ts");
 const { SCENARIO_REGISTRY } = await import("../../src/content/scenarioRegistry.ts");
 
 let api: Server, platform: Server, base = "";
 let platformStatus = 200;
 let platformBody: unknown = {};
+let platformHeaders: Record<string, string> = {};
 let calls: Array<{ path: string; auth: string; body: Record<string, unknown> }> = [];
 
 const code = () => randomUUID().replace(/-/g, "") + "_xY";
 const ahdId = () => randomUUID().replace(/-/g, "").slice(0, 24);
+const entitlementReads = () => calls.filter((x) => x.path.startsWith("/entitlements"));
 
-function identity(over: Record<string, unknown> = {}) {
+/** A redeem answer in the platform's shape: no email. */
+function redeemed(over: Record<string, unknown> = {}) {
   const id = ahdId();
-  return { userId: id, email: `p_${id.slice(0, 8)}@example.com`, username: `player_${id.slice(0, 6)}`, provider: "ahd", ...over };
+  return { accountId: id, displayName: `player_${id.slice(0, 6)}`, entitlements: [], ...over };
 }
 
 async function exchange(body: unknown, token?: string) {
@@ -47,8 +54,11 @@ function localUser(email: string, ahd: string | null = null) {
   const id = randomUUID(), username = "u_" + id.slice(0, 8);
   getDb().prepare("INSERT INTO users (id, username, email, password_hash, created_at, ahd_user_id) VALUES (?, ?, ?, 'x', ?, ?)")
     .run(id, username, email, Date.now(), ahd);
-  return { id, token: signToken({ userId: id, username }) };
+  return { id, username, token: signToken({ userId: id, username }) };
 }
+
+const userRow = (id: string) =>
+  getDb().prepare("SELECT * FROM users WHERE id = ?").get(id) as { email: string; ahd_user_id: string; username: string };
 
 beforeAll(async () => {
   platform = http.createServer(async (req, res) => {
@@ -60,7 +70,7 @@ beforeAll(async () => {
       res.writeHead(200, { "Content-Type": "application/json" });
       return res.end(JSON.stringify({ purchases: [] }));
     }
-    res.writeHead(platformStatus, { "Content-Type": "application/json" });
+    res.writeHead(platformStatus, { "Content-Type": "application/json", ...platformHeaders });
     res.end(JSON.stringify(platformBody));
   });
   await new Promise<void>((r) => platform.listen(0, "127.0.0.1", () => r()));
@@ -71,6 +81,7 @@ beforeAll(async () => {
   const app = express();
   app.use(express.json());
   app.use(lakesideRouter);
+  app.use("/api/auth", authRouter);
   await new Promise<void>((r) => { api = app.listen(0, "127.0.0.1", () => r()); });
   base = `http://127.0.0.1:${(api.address() as { port: number }).port}`;
 });
@@ -86,58 +97,141 @@ beforeEach(() => {
   calls = [];
   platformStatus = 200;
   platformBody = {};
+  platformHeaders = {};
+  resetLauncherRedeemPause();
 });
 
 describe("POST /api/lakeside/launcher-exchange", () => {
-  it("redeems the code server side and signs the player in", async () => {
-    const who = identity();
-    platformBody = { identity: who };
+  it("redeems the code with the shared handoff contract and signs the player in", async () => {
+    const who = redeemed();
+    platformBody = who;
     const c = code();
     const r = await exchange({ code: c });
 
     expect(r.status).toBe(200);
     expect(r.cache).toBe("no-store");
     const redeem = calls.find((x) => x.path === "/redeem")!;
-    expect(redeem.body).toEqual({ code: c, game: "electioneer" });
-    expect(redeem.auth).toBe("Bearer fixture-internal");
+    expect(redeem.body).toEqual({ code: c, clientId: "margin-of-victory" });
+    // Public call: the code is the credential, no game secret goes with it.
+    expect(redeem.auth).toBe("");
 
     expect(r.body.user.ahdLinked).toBe(true);
-    expect(r.body.user.email).toBe(who.email);
+    expect(r.body.user.username).toBe(who.displayName);
+    expect(r.body.user.email).toBe("");
     expect(verifyToken(r.body.token)?.userId).toBe(r.body.user.id);
     expect(r.body.unlocked).toEqual({ scenarioIds: [], packIds: [] });
-    const row = getDb().prepare("SELECT ahd_user_id FROM users WHERE id = ?").get(r.body.user.id) as { ahd_user_id: string };
-    expect(row.ahd_user_id).toBe(who.userId);
+    expect(userRow(r.body.user.id).ahd_user_id).toBe(who.accountId);
 
-    // The same platform identity lands on the same game account next time.
+    // The same platform account lands on the same game account next time.
+    platformBody = { ...who, displayName: "renamed_player" };
     const again = await exchange({ code: code() });
     expect(again.body.user.id).toBe(r.body.user.id);
   });
 
-  it("keys a Discord launcher identity by the platform's discord: id", async () => {
-    const who = identity({ userId: "discord:123456789012345678", provider: "discord" });
-    platformBody = { identity: who };
+  it("gives an account without an email an inert placeholder", async () => {
+    const who = redeemed();
+    platformBody = who;
+    const r = await exchange({ code: code() });
+    const row = userRow(r.body.user.id);
+    expect(row.email).toBe(`${who.accountId}@launcher.invalid`);
+    // Never sent to the platform, never shown.
+    expect(identityForUser(r.body.user.id)).toEqual({ ahdUserId: who.accountId, email: null });
+    const me = await fetch(`${base}/api/auth/me`, { headers: { Authorization: `Bearer ${r.body.token}` } });
+    expect((await me.json()).user.email).toBe("");
+    const read = new URL(`http://x${entitlementReads().at(-1)?.path}`);
+    expect(read.searchParams.get("ahdUserId")).toBe(who.accountId);
+    expect(read.searchParams.get("email")).toBe("");
+    // Nobody can sign up with it or log in with it.
+    const reg = await fetch(`${base}/api/auth/register`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: "squatter_1", email: row.email, password: "longenough1" }),
+    });
+    expect(reg.status).toBe(400);
+    const login = await fetch(`${base}/api/auth/login`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: row.email, password: "anything-at-all" }),
+    });
+    expect(login.status).toBe(401);
+    // Account deletion works as for any account.
+    const del = await fetch(`${base}/api/auth/account`, { method: "DELETE", headers: { Authorization: `Bearer ${r.body.token}` } });
+    expect(del.status).toBe(200);
+    expect(getDb().prepare("SELECT 1 FROM users WHERE id = ?").get(r.body.user.id)).toBeUndefined();
+  });
+
+  it("keeps the real email once a Lakeside sign in brings one", async () => {
+    const who = redeemed();
+    platformBody = who;
+    const r = await exchange({ code: code() });
+    const email = `real_${who.accountId.slice(0, 8)}@example.com`;
+    const user = linkOrCreateUser({ ahdUserId: who.accountId, email, username: "ignored" });
+    expect(user.id).toBe(r.body.user.id);
+    expect(userRow(user.id).email).toBe(email);
+  });
+
+  it("never matches an existing account by display name or anything but the platform id", async () => {
+    const other = localUser(`someone_${ahdId()}@example.com`);
+    platformBody = redeemed({ displayName: other.username });
     const r = await exchange({ code: code() });
     expect(r.status).toBe(200);
-    const row = getDb().prepare("SELECT ahd_user_id FROM users WHERE id = ?").get(r.body.user.id) as { ahd_user_id: string };
+    expect(r.body.user.id).not.toBe(other.id);
+    expect(r.body.user.username).not.toBe(other.username);
+  });
+
+  it("finds the game account already keyed to the platform id", async () => {
+    const accountId = ahdId();
+    const mine = localUser(`keyed_${accountId.slice(0, 8)}@example.com`, accountId);
+    platformBody = redeemed({ accountId });
+    const r = await exchange({ code: code() });
+    expect(r.body.user.id).toBe(mine.id);
+    expect(r.body.user.email).toBe(`keyed_${accountId.slice(0, 8)}@example.com`);
+  });
+
+  it("keys a Discord launcher account by the platform's discord: id", async () => {
+    platformBody = redeemed({ accountId: "discord:123456789012345678" });
+    const r = await exchange({ code: code() });
+    expect(r.status).toBe(200);
+    const row = userRow(r.body.user.id);
     expect(row.ahd_user_id).toBe("discord:123456789012345678");
+    expect(row.email).toBe("discord-123456789012345678@launcher.invalid");
   });
 
   it("links the account the player is already signed in to", async () => {
-    const mine = localUser(`linkme_${ahdId()}@example.com`);
-    platformBody = { identity: identity() };
+    const email = `linkme_${ahdId()}@example.com`;
+    const mine = localUser(email);
+    platformBody = redeemed();
     const r = await exchange({ code: code() }, mine.token);
     expect(r.status).toBe(200);
     expect(r.body.user.id).toBe(mine.id);
+    expect(userRow(mine.id).email).toBe(email);
   });
 
-  it("refuses to take over an existing account that shares the email", async () => {
-    const email = `taken_${ahdId()}@example.com`;
-    localUser(email);
-    platformBody = { identity: identity({ email }) };
+  it("names a player with no display name instead of failing", async () => {
+    platformBody = redeemed({ displayName: null });
     const r = await exchange({ code: code() });
-    expect(r.status).toBe(409);
-    expect(r.body.code).toBe("ACCOUNT_LINK_REQUIRES_PROOF");
-    expect(r.body.token).toBeUndefined();
+    expect(r.status).toBe(200);
+    expect(r.body.user.username).toMatch(/^player_[0-9a-f]{6}$/);
+  });
+
+  it("unlocks what the redeem answer says the account owns, without a second read", async () => {
+    platformBody = redeemed({
+      entitlements: [
+        { productId: "us-historical", game: "electioneer", source: "purchase" },
+        { productId: "uk-historical", game: "electioneer", source: "supporter", until: "2000-01-01T00:00:00.000Z" },
+        { productId: "ahd-client", game: "a-house-divided", source: "purchase" },
+      ],
+    });
+    const r = await exchange({ code: code() });
+    expect(r.status).toBe(200);
+    expect(r.body.unlocked.packIds).toEqual(["us-historical"]);
+    expect([...r.body.unlocked.scenarioIds].sort()).toEqual([...PACKS_BY_ID["us-historical"].scenarios].sort());
+    expect(entitlementReads()).toHaveLength(0);
+  });
+
+  it("falls back to the normal entitlement read when the answer has no list", async () => {
+    platformBody = redeemed({ entitlements: undefined });
+    const r = await exchange({ code: code() });
+    expect(r.status).toBe(200);
+    expect(entitlementReads()).toHaveLength(1);
   });
 
   it("rejects a malformed code without asking the platform", async () => {
@@ -148,22 +242,21 @@ describe("POST /api/lakeside/launcher-exchange", () => {
   });
 
   it("answers 401 when the platform does not honour the code", async () => {
-    for (const status of [400, 404, 410]) {
-      platformStatus = status;
-      platformBody = { error: "invalid_code" };
-      const r = await exchange({ code: code() });
-      expect(r.status).toBe(401);
-      expect(r.body.token).toBeUndefined();
-    }
+    platformStatus = 400;
+    platformBody = { error: "invalid_request" };
+    const r = await exchange({ code: code() });
+    expect(r.status).toBe(401);
+    expect(r.body.token).toBeUndefined();
   });
 
-  it("answers 503 when the platform fails or answers with an unusable identity", async () => {
+  it("answers 503 when the platform fails or answers with an unusable account", async () => {
     for (const [status, body] of [
       [500, {}],
-      [401, { error: "unauthorized" }],
+      [404, { error: "Not found" }],
       [200, {}],
-      [200, { identity: identity({ userId: "not-a-platform-id" }) }],
-      [200, { identity: identity({ username: "" }) }],
+      [200, redeemed({ accountId: "not-a-platform-id" })],
+      [200, redeemed({ accountId: "abc@example.com" })],
+      [200, redeemed({ accountId: 42 })],
     ] as const) {
       platformStatus = status;
       platformBody = body;
@@ -171,28 +264,52 @@ describe("POST /api/lakeside/launcher-exchange", () => {
     }
   });
 
-  it("refuses a code minted for another game", async () => {
-    platformBody = { identity: identity({ game: "ahd" }) };
-    expect((await exchange({ code: code() })).status).toBe(401);
+  it("treats 429 as unavailable and stops asking for a while", async () => {
+    platformStatus = 429;
+    platformHeaders = { "Retry-After": "30" };
+    platformBody = { error: "rate_limited" };
+    expect((await exchange({ code: code() })).status).toBe(503);
+    expect(calls).toHaveLength(1);
+
+    // Even once the platform recovers, the pause holds: no retry storm.
+    platformStatus = 200;
+    platformHeaders = {};
+    platformBody = redeemed();
+    for (let i = 0; i < 5; i++) expect((await exchange({ code: code() })).status).toBe(503);
+    expect(calls).toHaveLength(1);
+
+    resetLauncherRedeemPause();
+    expect((await exchange({ code: code() })).status).toBe(200);
   });
 
-  it("asks for an email when the identity has none", async () => {
-    platformBody = { identity: identity({ email: "" }) };
-    const r = await exchange({ code: code() });
-    expect(r.status).toBe(422);
-    expect(r.body.code).toBe("EMAIL_REQUIRED");
-  });
-
-  it("is unavailable, not open, when the internal token is missing", async () => {
+  it("does not need the internal token", async () => {
     const saved = process.env.INTERNAL_TOKEN;
     delete process.env.INTERNAL_TOKEN;
     try {
-      platformBody = { identity: identity() };
-      expect((await exchange({ code: code() })).status).toBe(503);
-      expect(calls).toHaveLength(0);
+      platformBody = redeemed();
+      const r = await exchange({ code: code() });
+      expect(r.status).toBe(200);
+      expect(calls.filter((x) => x.path === "/redeem")).toHaveLength(1);
     } finally {
       process.env.INTERNAL_TOKEN = saved;
     }
+  });
+});
+
+describe("ownedPacksFromEntitlements", () => {
+  it("keeps live Margin of Victory packs only", () => {
+    const now = Date.parse("2026-11-12T00:00:00Z");
+    expect(ownedPacksFromEntitlements([
+      { productId: "complete", game: "electioneer", source: "purchase" },
+      { productId: "us-historical", game: "electioneer", source: "supporter", until: "2026-12-01T00:00:00Z" },
+      { productId: "uk-historical", game: "electioneer", source: "supporter", until: "garbage" },
+      { productId: "not-a-pack", game: "electioneer", source: "purchase" },
+      { productId: "ahd-client", game: "a-house-divided", source: "purchase" },
+      null, "x", { game: "electioneer" },
+    ], now)).toEqual(["complete", "us-historical"]);
+    expect(ownedPacksFromEntitlements(undefined)).toBeNull();
+    expect(ownedPacksFromEntitlements({})).toBeNull();
+    expect(ownedPacksFromEntitlements([])).toEqual([]);
   });
 });
 

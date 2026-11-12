@@ -14,8 +14,7 @@ export type AuthNotice =
   | { kind: "lakeside-failed" }
   | { kind: "lakeside-link-needs-login" }
   // Opened from the Lakeside launcher but its sign in did not go through.
-  | { kind: "launcher-failed" }
-  | { kind: "launcher-link-conflict" };
+  | { kind: "launcher-failed" };
 
 interface AuthStore {
   user: ApiUser | null;
@@ -188,9 +187,9 @@ async function consumeLauncherCode(): Promise<void> {
     const { token, user, unlocked } = await api.lakesideLauncherExchange(taken.code);
     storeSession(token, user);
     useAuthStore.setState({ user, unlocked, notice: { kind: "lakeside-signed-in", username: user.username } });
-  } catch (e) {
-    const conflict = e instanceof ApiError && e.status === 409;
-    useAuthStore.setState({ notice: { kind: conflict ? "launcher-link-conflict" : "launcher-failed" } });
+  } catch {
+    // One attempt only: the code is single use, so retrying cannot help.
+    useAuthStore.setState({ notice: { kind: "launcher-failed" } });
   }
 }
 
