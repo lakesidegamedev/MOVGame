@@ -540,7 +540,8 @@ final class GameSession: ObservableObject {
 
     func states() -> [StateContest] { game?.stateList() ?? [] }
 
-    func issues() -> [Issue] { MobileGame.companion.issues() }
+    /// The running election's issues under that year's names; the static list only before a game starts.
+    func issues() -> [Issue] { game?.liveIssues() ?? MobileGame.companion.issues() }
     func playerIssuePosition(_ issueSerial: String) -> Double { game?.playerIssuePosition(issueSerial: issueSerial) ?? 0 }
     func plannedActions() -> [PlannedActionRow] { game?.plannedActions() ?? [] }
 
