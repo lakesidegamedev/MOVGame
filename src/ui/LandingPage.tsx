@@ -196,7 +196,9 @@ function NoticeBanner() {
       ? `Signed in as ${notice.username} with your Lakeside Games account.`
       : notice.kind === "lakeside-link-needs-login"
         ? "A game account already uses that email. Log in with its password first, then link your Lakeside account from Your Account."
-        : "That sign in link expired. Try again from the login screen.";
+        : notice.kind === "launcher-failed"
+          ? "The launcher could not sign you in. You can still play, or use Log In."
+          : "That sign in link expired. Try again from the login screen.";
   return (
     <div className={`notice-banner${good ? " good" : ""}`} role="status">
       {good ? <Check size={14} /> : null}

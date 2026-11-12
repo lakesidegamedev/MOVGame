@@ -8,6 +8,7 @@
 // an empty list so the game never blocks play on the platform being reachable.
 
 import { getDb } from "./db.js";
+import { isPlaceholderEmail } from "./placeholderEmail.js";
 
 const GAME = "electioneer";
 const CACHE_MS = 30_000;
@@ -79,13 +80,13 @@ export interface Identity {
 interface CacheEntry { at: number; purchases: PlatformPurchase[] }
 const cache = new Map<string, CacheEntry>();
 
-/** Look up the local user's Lakeside identity (ahd_user_id + email). */
+/** Look up the local user's Lakeside identity (ahd_user_id + email; a placeholder email is no email). */
 export function identityForUser(userId: string): Identity | null {
   const row = getDb().prepare("SELECT email, ahd_user_id FROM users WHERE id = ?").get(userId) as
     | { email: string; ahd_user_id: string | null }
     | undefined;
   if (!row) return null;
-  return { ahdUserId: row.ahd_user_id, email: row.email };
+  return { ahdUserId: row.ahd_user_id, email: isPlaceholderEmail(row.email) ? null : row.email };
 }
 
 function cacheKey(identity: Identity): string {

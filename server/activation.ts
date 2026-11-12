@@ -201,6 +201,14 @@ function mergePackIds(base: Unlocked, ownedPacks: string[]): Unlocked {
   return { scenarioIds: [...scenarioIds], packIds: [...packIds] };
 }
 
+/**
+ * Local activation-code unlocks OR'd with pack ids the caller already knows the
+ * platform grants (the launcher redeem answer), without asking the platform.
+ */
+export function unlockedForUserWithOwned(userId: string, ownedPacks: string[]): Unlocked {
+  return mergePackIds(unlockedForUser(userId), ownedPacks);
+}
+
 /** Local activation-code unlocks OR'd with platform entitlements. */
 export async function unlockedForUserWithPlatform(userId: string): Promise<Unlocked> {
   const local = unlockedForUser(userId);

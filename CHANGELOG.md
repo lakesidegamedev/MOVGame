@@ -11,6 +11,15 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ## [Unreleased]
 
+### Added
+
+- Opening Margin of Victory from the Lakeside launcher can sign you in with the launcher's
+  Lakeside account, so your packs and cloud saves are there without logging in again. The game
+  finds your account by your Lakeside account, never by name. If you have never played with that
+  Lakeside account, a new game account is made for it, and it needs no email address. If you are
+  already logged in to a game account that is not linked yet, the launcher sign in links that one
+  instead.
+
 ## [2.0.0] - 2026-11-12
 
 Margin of Victory 2.0 grows the game from six countries to fourteen, with 121 elections in all. It

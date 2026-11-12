@@ -45,7 +45,7 @@ export function UserMenu() {
           style={{ position: "absolute", right: 0, top: "calc(100% + 6px)", width: 260, zIndex: 60, padding: 14 }}
           onMouseLeave={() => setOpen(false)}
         >
-          <div className="muted small" style={{ marginBottom: 8 }}>{user.email}</div>
+          {user.email && <div className="muted small" style={{ marginBottom: 8 }}>{user.email}</div>}
           {serverDown && (
             <div className="muted small" style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
               <WifiOff size={13} /> Offline: scores won't sync

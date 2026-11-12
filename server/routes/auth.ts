@@ -4,6 +4,7 @@ import { getDb, type UserRow } from "../db.js";
 import { signToken, hashPassword, checkPassword, requireAuth, type AuthedRequest } from "../auth.js";
 import { unlockedForUserWithPlatform, unlockedWithVerification } from "../activation.js";
 import { identityForUser, redeemCodeOnPlatform, clearEntitlementsCacheFor } from "../entitlements.js";
+import { isReservedEmail, publicEmail } from "../placeholderEmail.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -15,7 +16,8 @@ authRouter.post("/register", async (req, res) => {
   if (typeof username !== "string" || !USERNAME_RE.test(username)) {
     return res.status(400).json({ error: "Username must be 3–20 characters (letters, numbers, underscore)" });
   }
-  if (typeof email !== "string" || !EMAIL_RE.test(email)) {
+  // .invalid is reserved for launcher accounts without an email (placeholderEmail.ts).
+  if (typeof email !== "string" || !EMAIL_RE.test(email) || isReservedEmail(email)) {
     return res.status(400).json({ error: "Invalid email address" });
   }
   if (typeof password !== "string" || password.length < 8) {
@@ -49,7 +51,7 @@ authRouter.post("/login", async (req, res) => {
   }
   res.json({
     token: signToken({ userId: user.id, username: user.username }),
-    user: { id: user.id, username: user.username, email: user.email },
+    user: { id: user.id, username: user.username, email: publicEmail(user.email) },
   });
 });
 
@@ -58,7 +60,7 @@ authRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
     .get(req.auth!.userId) as { id: string; username: string; email: string; created_at: number; ahd_user_id: string | null } | undefined;
   if (!row) return res.status(404).json({ error: "User not found" });
   const { ahd_user_id, ...user } = row;
-  res.json({ user: { ...user, ahdLinked: !!ahd_user_id }, unlocked: await unlockedForUserWithPlatform(req.auth!.userId) });
+  res.json({ user: { ...user, email: publicEmail(user.email), ahdLinked: !!ahd_user_id }, unlocked: await unlockedForUserWithPlatform(req.auth!.userId) });
 });
 
 // Account deletion (App Store Guideline 5.1.1(v)). Removes the game account and
