@@ -27,30 +27,34 @@ data class NativeChoice(val id: String, val text: String, val resultText: String
 data class NativePlan(val index: Int, val day: Int, val title: String, val detail: String, val cost: Double)
 data class NativePoint(val x: Double, val y: Double)
 data class NativePolygon(val points: List<NativePoint>)
-data class NativeShape(val id: String, val polygons: List<NativePolygon>)
-data class NativeMap(val width: Double, val height: Double, val shapes: List<NativeShape>)
+// `inset`: a box standing for voters, not a place (Italians abroad, the Maori
+// electorates); drawn with a dashed frame. `inert`: land with no vote in this
+// election (Northern Ireland on the Dail map); neutral, never tappable.
+data class NativeShape(val id: String, val polygons: List<NativePolygon>, val inset: Boolean = false)
+data class NativeMap(val width: Double, val height: Double, val shapes: List<NativeShape>, val inert: List<NativePolygon> = emptyList())
 
 @Serializable
-private data class MapShape(val d: String)
+private data class MapShape(val d: String, val inset: Boolean = false)
 @Serializable
-private data class MapGeometry(val viewBox: String, val shapes: Map<String, MapShape>)
+private data class MapGeometry(val viewBox: String, val shapes: Map<String, MapShape>, val inert: List<String> = emptyList())
+
+// The web's generated outlines are polygonal M/L/Z paths. Parse once into
+// points for native Canvas/SwiftUI Path.
+private fun parsePolygons(d: String): List<NativePolygon> {
+    require(d.none { it.isLetter() && it !in "MLZmlz" })
+    return d.split(Regex("[Zz]")).filter { it.isNotBlank() }.map { polygon ->
+        val coordinates = Regex("-?\\d+(?:\\.\\d+)?").findAll(polygon).map { it.value.toDouble() }.toList()
+        require(coordinates.size % 2 == 0)
+        NativePolygon(coordinates.chunked(2).map { NativePoint(it[0], it[1]) })
+    }
+}
 
 internal val nativeMaps: Map<String, NativeMap> by lazy {
     EngineJson.decodeFromString<Map<String, MapGeometry>>(bundleText("maps")).mapValues { (_, map) ->
         val box = map.viewBox.split(' ').map(String::toDouble)
         require(box[0] == 0.0 && box[1] == 0.0)
-        val shapes = map.shapes.map { (id, shape) ->
-            // The web's generated country outlines contain polygonal M/L/Z
-            // paths. Parse once into points for native Canvas/SwiftUI Path.
-            require(shape.d.none { it.isLetter() && it !in "MLZmlz" })
-            val polygons = shape.d.split(Regex("[Zz]")).filter { it.isNotBlank() }.map { polygon ->
-                val coordinates = Regex("-?\\d+(?:\\.\\d+)?").findAll(polygon).map { it.value.toDouble() }.toList()
-                require(coordinates.size % 2 == 0)
-                NativePolygon(coordinates.chunked(2).map { NativePoint(it[0], it[1]) })
-            }
-            NativeShape(id, polygons)
-        }
-        NativeMap(box[2], box[3], shapes)
+        val shapes = map.shapes.map { (id, shape) -> NativeShape(id, parsePolygons(shape.d), shape.inset) }
+        NativeMap(box[2], box[3], shapes, map.inert.flatMap(::parsePolygons))
     }
 }
 

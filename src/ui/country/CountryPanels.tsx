@@ -10,6 +10,7 @@ import { countryGameIssues, majorityFor, type CountryBundle, type CountryResult 
 import { partyColor, partyShort, partyName, sortBySeats, byDisplayOrder } from "./helpers";
 import { MpPollBlock } from "@ui/MpPollBlock";
 import { MapPin } from "lucide-react";
+import { InertLand, InsetFrames } from "@ui/mapExtras";
 
 function regionWinner(region: StateContest): { winner: string; seats: Record<string, number>; lead: number } {
   const { shareByParty } = tallyRegion(region);
@@ -118,6 +119,7 @@ export function CountryMap() {
       <div className="card mapwrap sheen">
         {header}
         <svg ref={labelRef} viewBox={viewBox} className="geo-map" preserveAspectRatio="xMidYMid meet">
+          <InertLand paths={country.map.inert} />
           {game.regions.map((region) => {
             const shape = shapes[region.id];
             if (!shape) return null;
@@ -136,6 +138,7 @@ export function CountryMap() {
               </g>
             );
           })}
+          <InsetFrames shapes={shapes} />
           {labels.map((l) => <MapLabel key={l.id} {...l} x={placed[l.id]!.x} mode={placed[l.id]!.mode} sizes={labelSizes} />)}
         </svg>
         {legend}

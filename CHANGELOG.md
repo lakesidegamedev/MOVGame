@@ -229,6 +229,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   in the game and say how many of those are already free, matching the Store banner, instead of
   counting only the paid ones. Android's country packs also count their free election, as the web
   does.
+- Ireland's map draws Northern Ireland as neutral land outside the game, so the island reads whole
+  and nothing suggests it votes in a Dáil election. Italy's Abroad box and New Zealand's Māori seats
+  box now have a dashed frame, on the web and on Android, so they read as boxes standing for voters
+  rather than places.
 - History check across the new countries and the older Canada, Australia, Germany, France and US
   elections: every national seat total and chamber size was checked against published results and
   held. A few regional vote shares in Canada, Australia and the US were corrected, and France's

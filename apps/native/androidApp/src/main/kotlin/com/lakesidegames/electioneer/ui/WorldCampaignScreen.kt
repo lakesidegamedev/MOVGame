@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
@@ -61,6 +62,17 @@ internal fun NativeCountryMap(map: NativeMap, fills: Map<String, Color>, selecte
             }
         }
     } }
+    // Land with no vote in this election: one neutral path, never tappable.
+    val inert = remember(map) { Path().apply {
+        map.inert.forEach { polygon ->
+            polygon.points.firstOrNull()?.let { first ->
+                moveTo(first.x.toFloat(), first.y.toFloat())
+                polygon.points.drop(1).forEach { lineTo(it.x.toFloat(), it.y.toFloat()) }
+                close()
+            }
+        }
+    } }
+    val insets = remember(map) { map.shapes.filter { it.inset }.map { it.id } }
     val hits = remember(map) { map.shapes.associate { shape ->
         val path = android.graphics.Path().apply {
             shape.polygons.forEach { polygon ->
@@ -92,10 +104,19 @@ internal fun NativeCountryMap(map: NativeMap, fills: Map<String, Color>, selecte
             val factor = minOf(size.width / map.width, size.height / map.height).toFloat()
             translate((size.width - map.width.toFloat() * factor) / 2, (size.height - map.height.toFloat() * factor) / 2) {
                 scale(factor, factor, pivot = androidx.compose.ui.geometry.Offset.Zero) {
+                    if (map.inert.isNotEmpty()) {
+                        drawPath(inert, Mov.Surface4)
+                        drawPath(inert, Mov.BorderStrong, style = Stroke(1.dp.toPx() / factor))
+                    }
                     paths.forEach { (id, path) ->
                         drawPath(path, fills[id] ?: Mov.Unclaimed)
                         drawPath(path, Mov.Surface0, style = Stroke(1.dp.toPx() / factor))
                     }
+                    // An inset box stands for voters, not a place: a dashed frame says so.
+                    insets.forEach { id -> paths[id]?.let {
+                        drawPath(it, Mov.Text2, style = Stroke(1.5.dp.toPx() / factor,
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx() / factor, 4.dp.toPx() / factor))))
+                    } }
                     selected?.let { id -> paths[id]?.let { drawPath(it, Mov.Warning, style = Stroke(2.5.dp.toPx() / factor)) } }
                 }
             }

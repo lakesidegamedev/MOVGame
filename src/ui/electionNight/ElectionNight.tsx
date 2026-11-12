@@ -5,6 +5,7 @@
 // the moment a party's running tally crosses the winning post a full-width
 // projection banner fires. One shared component drives all three engines
 // (US / UK / country) via the normalized RevealProps shape (see adapters.ts).
+import { InsetFrames } from "@ui/mapExtras";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, SkipForward, Zap } from "lucide-react";
 import { partyInk } from "@ui/colors";
@@ -24,7 +25,7 @@ export interface RevealParty {
 // their calls still show up in the callout and chip feed.
 export interface RevealMap {
   viewBox: string;
-  shapes: Record<string, { d: string; label?: [number, number] }>;
+  shapes: Record<string, { d: string; label?: [number, number]; inset?: boolean }>;
   // Geography with no vote this election (US states before admission), drawn inert.
   inert?: string[];
 }
@@ -210,7 +211,7 @@ export function ElectionNight(props: RevealProps) {
         {map && (
           <div className={`en-map${speed === "instant" ? " instant" : ""}`}>
             <svg viewBox={map.viewBox} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Election map">
-              {map.inert?.map((d, i) => <path key={`inert-${i}`} d={d} className="en-map-unit" opacity={0.4} aria-hidden="true" />)}
+              {map.inert?.map((d, i) => <path key={`inert-${i}`} d={d} className="en-map-unit" opacity={0.4} aria-hidden="true" pointerEvents="none" />)}
               {units.map((u) => {
                 const shape = map.shapes[u.id];
                 if (!shape) return null;
@@ -226,6 +227,7 @@ export function ElectionNight(props: RevealProps) {
                   </path>
                 );
               })}
+              <InsetFrames shapes={map.shapes} />
               {/* Upset rings render in a second pass so the gold pulse sits on top. */}
               {units.map((u) => {
                 const called = calledById.get(u.id);

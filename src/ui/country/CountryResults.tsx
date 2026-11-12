@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "@lib/distribution";
+import { InertLand, InsetFrames } from "@ui/mapExtras";
 import { partyFill, partyInk } from "@ui/colors";
 import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
@@ -146,6 +147,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
 
   const mapPreview = country.map ? (
     <svg viewBox={country.map.viewBox} preserveAspectRatio="xMidYMid meet">
+      <InertLand paths={country.map.inert} />
       {Object.entries(country.map.shapes).map(([id, shape]) => (
         <path
           key={id}
@@ -155,6 +157,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
           strokeWidth={0.8}
         />
       ))}
+      <InsetFrames shapes={country.map.shapes} />
     </svg>
   ) : undefined;
 

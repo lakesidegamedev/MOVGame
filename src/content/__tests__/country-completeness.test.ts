@@ -274,6 +274,15 @@ describe.each(multiparty.map((m) => [m.code, m.bundle!] as const))("%s content",
     for (const id of Object.keys(country.map!.shapes)) expect(regionIds.has(id), `stray map shape ${id}`).toBe(true);
   });
 
+  it("draws land that does not vote as inert, and marks boxes that stand for voters as insets", () => {
+    for (const d of country.map!.inert ?? []) expect(/^[MLZmlz0-9.,\s-]+$/.test(d), "inert path uses only M/L/Z").toBe(true);
+    const insets = Object.entries(country.map!.shapes).filter(([, s]) => s.inset).map(([id]) => id).sort();
+    // Northern Ireland has no Dail seats: inert land, never a region.
+    if (code === "IE") expect(country.map!.inert?.length).toBe(1);
+    else expect(country.map!.inert ?? []).toEqual([]);
+    expect(insets).toEqual(code === "IT" ? ["EST"] : code === "NZ" ? ["MAO"] : []);
+  });
+
   for (const [eid, election] of Object.entries(country.elections)) {
     describe(`${code} ${eid}`, () => {
       it("regional seats sum to the chamber and vote shares sum to about 1", () => {
