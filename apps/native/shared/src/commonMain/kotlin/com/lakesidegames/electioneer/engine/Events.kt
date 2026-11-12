@@ -310,7 +310,8 @@ fun queueEventsForTurn(game: GameState, rng: Rng) {
     if (rng.chance(if (historical) 0.35 else 0.75)) {
         val scenarioBeats = if (historical) emptyList() else HISTORICAL_EVENTS[game.scenarioId ?: "2020"] ?: emptyList()
         val pool = (GENERIC_EVENTS + scenarioBeats).filter { e ->
-            if (e.oncePerGame && (alreadyFired(game, e.id, CandidateId.DEM) || alreadyFired(game, e.id, CandidateId.REP))) return@filter false
+            // A random event runs at most once a campaign (TS queueEventsForTurn).
+            if (alreadyFired(game, e.id, CandidateId.DEM) || alreadyFired(game, e.id, CandidateId.REP)) return@filter false
             val g = e.gate
             if (g?.minTurn != null && game.turn < g.minTurn) return@filter false
             if (g?.maxTurn != null && game.turn > g.maxTurn) return@filter false

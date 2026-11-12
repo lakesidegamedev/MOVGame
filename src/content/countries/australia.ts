@@ -29,12 +29,11 @@
 // 1996 (March 2): LNP 94, ALP 49, crossbench 5.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule } from "./types";
 import { AU_ELECTION_ISSUES } from "./issues/au";
 import { AU_MAP } from "./paths/au";
 
-// The debate win is a one-off beat: it fires at most once a campaign.
-export const AUSTRALIA: CountryBundle = oncePerCampaign({
+export const AUSTRALIA: CountryBundle = {
   id: "AU",
   label: "Australia",
   flag: "🇦🇺",
@@ -634,7 +633,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       ],
     },
   ],
-}, ["debate_win"]);
+};
 attachElectionIssues(AUSTRALIA, AU_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.

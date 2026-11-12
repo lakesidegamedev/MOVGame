@@ -68,12 +68,11 @@
 // Coalition win one or two seats and stay in the results only.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule } from "./types";
 import { ES_MAP } from "./paths/es";
 import { ES_ELECTION_ISSUES } from "./issues/es";
 
-// The debate win is a one-off beat: it fires at most once a campaign.
-export const SPAIN: CountryBundle = oncePerCampaign({
+export const SPAIN: CountryBundle = {
   id: "ES",
   label: "Spain",
   flag: "🇪🇸",
@@ -478,7 +477,7 @@ export const SPAIN: CountryBundle = oncePerCampaign({
       ],
     },
   ],
-}, ["leaders_debate"]);
+};
 attachElectionIssues(SPAIN, ES_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.

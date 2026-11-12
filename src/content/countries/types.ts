@@ -153,24 +153,6 @@ export function countryModule(
 }
 
 /**
- * Moves the named generic events into every election's deck. The engine draws
- * the generic pool every week and can draw the same event again; an election's
- * deck events fire at most once a game. One-off beats, such as winning the
- * leaders' debate, belong in the deck so a campaign never shows the same
- * headline twice.
- */
-export function oncePerCampaign(bundle: CountryBundle, ids: readonly string[]): CountryBundle {
-  const once = bundle.events.filter((e) => ids.includes(e.id));
-  const missing = ids.filter((id) => !once.some((e) => e.id === id));
-  if (missing.length) throw new Error(`${bundle.id}: no generic event ${missing.join(", ")}`);
-  const elections: CountryBundle["elections"] = {};
-  for (const [id, election] of Object.entries(bundle.elections)) {
-    elections[id] = { ...election, events: [...(election.events ?? []), ...once] };
-  }
-  return { ...bundle, events: bundle.events.filter((e) => !ids.includes(e.id)), elections };
-}
-
-/**
  * Gives each election its own issue list (see countries/issues/*.ts), in place.
  * Every id must have a salience entry in that election; salience entries for
  * ids not on the list are ignored by the engine. Throws on an unknown election

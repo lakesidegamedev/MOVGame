@@ -563,11 +563,13 @@ private fun fireUkEvent(g: UkGameState, rng: Rng) {
     // Skip the random draw if a player decision is already pending this week.
     if (g.pendingEvent != null) return
 
-    val pool = deck.filter { it.turn == null && !firedList.contains(it.id) } + UK_EVENTS
+    val firedNow = firedList.toSet()
+    val pool = deck.filter { it.turn == null && it.id !in firedNow } +
+        unfiredGenericEvents(UK_EVENTS, firedNow, { it.id }, { !it.choices.isNullOrEmpty() })
     if (pool.isEmpty() || !rng.chance(UK_EVENT_CHANCE)) return
     val ev = rng.weightedPick(pool, pool.map { it.weight })
     applyUkEvent(g, ev, rng)
-    if (deck.any { it.id == ev.id }) firedList.add(ev.id)
+    if (ev.id !in firedNow) firedList.add(ev.id)
 }
 
 private fun buildUkRecap(g: UkGameState, turn: Int, seatsBefore: Int): List<RecapItem> {

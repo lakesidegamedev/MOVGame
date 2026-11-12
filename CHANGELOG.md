@@ -222,6 +222,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- A general campaign event, such as a gaffe, a newspaper endorsement or a debate win, now runs at
+  most once a campaign in every country, so the same headline never comes round twice. Decision
+  events such as a debate invitation can still return.
 - History check across the new countries and the older Canada, Australia, Germany, France and US
   elections: every national seat total and chamber size was checked against published results and
   held. A few regional vote shares in Canada, Australia and the US were corrected, and France's

@@ -16,6 +16,7 @@ import { computeSeatsResult, blocPartyShares, tallyRegion, softmax, levelingTilt
 import { planMultipartyAi, type MpDifficulty } from "./multipartyAi";
 import {
   buildCauseRecap,
+  unfiredGenericEvents,
   decayMultipartyTurn,
   finalizeMpCampaignTurn,
   resolvePendingChoiceGate,
@@ -915,12 +916,12 @@ function fireCountryEvent(g: CountryGameState, country: CountryBundle, rng: Rng)
 
   const pool = [
     ...deck.filter((e) => e.turn === undefined && !fired.has(e.id)),
-    ...country.events,
+    ...unfiredGenericEvents(country.events, fired),
   ];
   if (pool.length === 0 || !rng.chance(country.eventChance)) return;
   const ev = rng.weightedPick(pool, pool.map((e) => e.weight));
   applyCountryEvent(g, country, ev, rng);
-  if (deck.some((d) => d.id === ev.id)) firedList.push(ev.id);
+  if (!fired.has(ev.id)) firedList.push(ev.id);
 }
 
 function buildCountryRecap(g: CountryGameState, country: CountryBundle, turn: number, seatsBefore: number) {

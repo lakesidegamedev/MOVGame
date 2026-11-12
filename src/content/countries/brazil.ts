@@ -59,12 +59,11 @@
 // documents for France. The guide entry says so.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule } from "./types";
 import { BR_ELECTION_ISSUES } from "./issues/br";
 import { BR_MAP } from "./paths/br";
 
-// The debate win is a one-off beat: it fires at most once a campaign.
-export const BRAZIL: CountryBundle = oncePerCampaign({
+export const BRAZIL: CountryBundle = {
   id: "BR",
   label: "Brazil",
   flag: "🇧🇷",
@@ -452,7 +451,7 @@ export const BRAZIL: CountryBundle = oncePerCampaign({
       ],
     },
   ],
-}, ["debate_globo_br"]);
+};
 attachElectionIssues(BRAZIL, BR_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.

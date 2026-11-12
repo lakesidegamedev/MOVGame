@@ -615,11 +615,13 @@ private fun fireCountryEvent(
 
     if (g.pendingEvent != null) return
 
-    val pool = deck.filter { it.turn == null && !firedList.contains(it.id) } + country.events
+    val firedNow = firedList.toSet()
+    val pool = deck.filter { it.turn == null && it.id !in firedNow } +
+        unfiredGenericEvents(country.events, firedNow, { it.id }, { !it.choices.isNullOrEmpty() })
     if (pool.isEmpty() || !rng.chance(country.eventChance)) return
     val ev = rng.weightedPick(pool, pool.map { it.weight })
     applyCountryEvent(g, country, ev, rng)
-    if (deck.any { it.id == ev.id }) firedList.add(ev.id)
+    if (ev.id !in firedNow) firedList.add(ev.id)
 }
 
 private fun buildCountryRecap(

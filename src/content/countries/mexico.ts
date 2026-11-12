@@ -62,12 +62,11 @@
 //   Points 43, 37, 17, 3. The first defeat of the PRI in 71 years.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule } from "./types";
 import { MX_ELECTION_ISSUES } from "./issues/mx";
 import { MX_MAP } from "./paths/mx";
 
-// The debate win is a one-off beat: it fires at most once a campaign.
-export const MEXICO: CountryBundle = oncePerCampaign({
+export const MEXICO: CountryBundle = {
   id: "MX",
   label: "Mexico",
   flag: "🇲🇽",
@@ -397,7 +396,7 @@ export const MEXICO: CountryBundle = oncePerCampaign({
       ],
     },
   ],
-}, ["debate_mx"]);
+};
 attachElectionIssues(MEXICO, MX_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.

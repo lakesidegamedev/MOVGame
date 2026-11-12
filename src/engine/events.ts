@@ -324,7 +324,9 @@ export function queueEventsForTurn(game: GameState, rng: Rng) {
   if (rng.chance(historical ? 0.35 : 0.75)) {
     const scenarioBeats = historical ? [] : HISTORICAL_EVENTS[game.scenarioId ?? "2020"] ?? [];
     const pool = [...GENERIC_EVENTS, ...scenarioBeats].filter((e) => {
-      if (e.oncePerGame && (alreadyFired(game, e.id, "dem") || alreadyFired(game, e.id, "rep"))) return false;
+      // A random event runs at most once a campaign, so the same headline
+      // never comes round twice.
+      if (alreadyFired(game, e.id, "dem") || alreadyFired(game, e.id, "rep")) return false;
       const g = e.gate;
       if (g?.minTurn !== undefined && game.turn < g.minTurn) return false;
       if (g?.maxTurn !== undefined && game.turn > g.maxTurn) return false;

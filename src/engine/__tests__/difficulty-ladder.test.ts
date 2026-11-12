@@ -28,7 +28,9 @@ import { createRng } from "../rng";
 // Contested on normal: one or more per engine path (US, UK, FPTP country,
 // runoff, plurality presidency, proportional).
 const CONTESTED_ON_NORMAL = ["us-2008", "uk-1970", "uk-2010", "ca-2019", "fr-2027", "br-2022", "mx-2006", "ie-2020"];
-const SEEDS = 8;
+// Twenty seeds: at a true rate near 80% (Mexico 2006), a small sample comes up all
+// wins too often for "never always" to be a stable check.
+const SEEDS = 20;
 
 let rows: GauntletRow[] = [];
 

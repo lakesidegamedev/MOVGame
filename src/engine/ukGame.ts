@@ -17,6 +17,7 @@ import { liveIssuesOf, type LiveIssue } from "./countryGame";
 import { planMultipartyAi, type MpDifficulty } from "./multipartyAi";
 import {
   buildCauseRecap,
+  unfiredGenericEvents,
   decayMultipartyTurn,
   finalizeMpCampaignTurn,
   resolvePendingChoiceGate,
@@ -565,12 +566,12 @@ function fireUkEvent(g: UkGameState, rng: Rng) {
 
   const pool = [
     ...deck.filter((e) => e.turn === undefined && !fired.has(e.id)),
-    ...UK_EVENTS,
+    ...unfiredGenericEvents(UK_EVENTS, fired),
   ];
   if (pool.length === 0 || !rng.chance(UK_EVENT_CHANCE)) return;
   const ev = rng.weightedPick(pool, pool.map((e) => e.weight));
   applyUkEvent(g, ev, rng);
-  if (deck.some((d) => d.id === ev.id)) firedList.push(ev.id);
+  if (!fired.has(ev.id)) firedList.push(ev.id);
 }
 
 function buildUkRecap(g: UkGameState, turn: number, seatsBefore: number): UkRecapItem[] {

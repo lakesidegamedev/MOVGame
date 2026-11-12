@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { countryAdvanceTurn, createCountryGame, type CountryBundle } from "@engine/countryGame";
 import { COUNTRY_MODULES } from "@content/countries";
-import { oncePerCampaign } from "@content/countries/types";
 
-// The engine draws a country's generic events every week and may draw one
-// again; election-deck events fire at most once a game. One-off beats such
-// as a debate win live in every election's deck (oncePerCampaign).
+// A general event runs at most once a campaign (engine rule, see
+// unfiredGenericEvents), so a one-off beat such as a debate win can sit in a
+// country's generic pool without ever repeating.
 
 const bundles = COUNTRY_MODULES.flatMap((m) => (m.bundle ? [m.bundle] : []));
 
@@ -26,22 +25,6 @@ function headlines(country: CountryBundle, election: string, seed: string): stri
 }
 
 describe("one-off campaign beats", () => {
-  it("oncePerCampaign moves generic events into every deck", () => {
-    const mx = bundles.find((b) => b.id === "MX")!;
-    expect(mx.events.some((e) => e.id === "debate_mx")).toBe(false);
-    for (const e of Object.values(mx.elections)) expect(e.events?.some((x) => x.id === "debate_mx")).toBe(true);
-    expect(() => oncePerCampaign(mx, ["no_such_event"])).toThrow();
-  });
-
-  it("no debate win is left in a generic pool", () => {
-    for (const b of bundles) {
-      for (const e of b.events) {
-        if (e.choices) continue;
-        expect(/\b(wins|winner|takes|survives)\b.*\b(debate|duell)\b|\b(debate|duell)\b.*\bon points\b/i.test(e.headline), `${b.id} ${e.id}`).toBe(false);
-      }
-    }
-  });
-
   it("a Mexico 2006 campaign never shows the debate win twice", () => {
     const mx = bundles.find((b) => b.id === "MX")!;
     for (let seed = 0; seed < 40; seed++) {
