@@ -156,7 +156,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       // entries fire deterministically that week; the rest join the weekly draw.
       events: [
         { id: "au25_cyclone_alfred", turn: 0, party: "lnp", role: "any", weight: 1,
-          headline: "Cyclone Alfred washes out the campaign launch. The budget slips, and so does {party}'s opening week", momentum: -6 },
+          headline: "Cyclone Alfred delays the election call and forces a budget nobody planned. {party} loses its opening week", momentum: -6 },
         { id: "au25_wfh_backflip", turn: 1, party: "lnp", role: "any", weight: 1,
           headline: "{party} dumps its end-work-from-home policy mid-campaign: 'we got it wrong'", appeal: -0.03, momentum: -8 },
         { id: "au25_liberation_day", turn: 2, party: "lnp", role: "any", weight: 1,

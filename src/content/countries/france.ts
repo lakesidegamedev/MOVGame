@@ -379,7 +379,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
         { id: "front_national_2012", headline: "'Ni Sarkozy': after a record far-right first round, Le Pen's voters won't be told where to go, and the right finalist's {party} can't bank them all", role: "any", party: "rn", weight: 3, appeal: -0.025, momentum: -6, turn: 3 },
         { id: "changement_maintenant_2012", headline: "'Le changement, c'est maintenant': ten years of rejection of the sitting president crystallize behind {party}", role: "any", party: "ens", weight: 3, appeal: 0.03, momentum: 7, turn: 4 },
         { id: "bayrou_ralliement_2012", headline: "Bayrou announces he will vote Hollande, and the centre's blessing nudges wavering moderates toward {party}", role: "any", party: "ens", weight: 2, appeal: 0.02, momentum: 5 },
-        { id: "meeting_droite_2012", headline: "A giant Concorde rally and a hard pivot to the right rally the incumbent's {party} base in the final days", role: "any", party: "rn", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "meeting_droite_2012", headline: "A May Day rally at the Trocadéro and a hard pivot to the right rally the incumbent's {party} base in the final days", role: "any", party: "rn", weight: 2, appeal: 0.02, momentum: 5 },
       ],
     },
 
