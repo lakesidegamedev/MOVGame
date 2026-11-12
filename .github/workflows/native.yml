@@ -1,10 +1,29 @@
 name: Native and web
 
+# CI cost rules (keep these when editing):
+# - Every PR and push gets the fast tier: web checks plus shared Kotlin tests and the Android
+#   build, on Linux, in about 15 to 30 minutes.
+# - The device tier (Android emulator, iOS simulators on macOS) is slow and expensive. It runs
+#   only when app code changed (iOS app, Android app, shared Kotlin sources, this workflow or the
+#   device scripts), and never on a draft PR. Content and web-only changes never start it.
+# - A device loop on purpose: push to build/ios* or build/android* (one platform each), or run
+#   this workflow by hand with the matching input.
+# - build/desktop* belongs to desktop.yml and never starts this workflow.
 on:
   workflow_dispatch:
+    inputs:
+      ios:
+        description: Run the iOS simulator jobs
+        type: boolean
+        default: false
+      android:
+        description: Run the Android emulator job
+        type: boolean
+        default: false
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
-    branches: [main, 'build/**']
+    branches: [main, 'build/**', '!build/desktop*']
 
 permissions:
   contents: read
@@ -14,6 +33,53 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Decide device jobs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      ios: ${{ steps.pick.outputs.ios }}
+      android: ${{ steps.pick.outputs.android }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: pick
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref_name }}
+          DRAFT: ${{ github.event.pull_request.draft }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          IN_IOS: ${{ inputs.ios }}
+          IN_ANDROID: ${{ inputs.android }}
+        run: |
+          ios=false; android=false
+          if [ "$EVENT" = workflow_dispatch ]; then
+            ios=$IN_IOS; android=$IN_ANDROID
+          elif [ "$EVENT" = pull_request ] && [ "$DRAFT" = true ]; then
+            :
+          else
+            case "$REF" in
+              build/ios*) ios=true ;;
+              build/android*) android=true ;;
+              *)
+                base=$PR_BASE; [ -n "$base" ] || base=$PUSH_BEFORE
+                if [ -z "$base" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+                  files=$(git show --name-only --format= HEAD)
+                else
+                  files=$(git diff --name-only "$base" HEAD)
+                fi
+                shared='^(apps/native/shared/src/[a-zA-Z]+Main/kotlin/|apps/native/shared/build\.gradle|apps/native/gradle/|\.github/workflows/native\.yml$)'
+                echo "$files" | grep -Eq "$shared|^apps/native/iosApp/|^scripts/.*ios" && ios=true
+                echo "$files" | grep -Eq "$shared|^apps/native/androidApp/|^scripts/.*android" && android=true
+                ;;
+            esac
+          fi
+          echo "ios=$ios" >> "$GITHUB_OUTPUT"
+          echo "android=$android" >> "$GITHUB_OUTPUT"
+          echo "Device jobs: ios=$ios android=$android"
+
   web:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -86,7 +152,8 @@ jobs:
           retention-days: 7
   android-flows:
     name: Android emulator flows
-    needs: android
+    needs: [android, changes]
+    if: ${{ needs.changes.outputs.android == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -116,6 +183,8 @@ jobs:
           retention-days: 7
   ios:
     name: iOS simulator launch
+    needs: changes
+    if: ${{ needs.changes.outputs.ios == 'true' }}
     runs-on: macos-26
     timeout-minutes: 40
     defaults:
@@ -184,7 +253,7 @@ jobs:
   ios27:
     name: iOS 27 iPhone 17 Pro Max launch
     needs: ios
-    if: ${{ always() && needs.ios.result != 'cancelled' }}
+    if: ${{ always() && (needs.ios.result == 'success' || needs.ios.result == 'failure') }}
     runs-on: xcode-27
     timeout-minutes: 30
     env:
