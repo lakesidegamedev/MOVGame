@@ -4,6 +4,17 @@ name: Desktop builds
 # build/desktop* build the preview channel; a manual run picks the channel.
 # Every bundle is unsigned. The three jobs are independent so a slow or
 # failing platform never holds up the others.
+#
+# Smoke tests (apps/native/docs/desktop.md lists what each one proves):
+# - Windows: the full player lifecycle on desktop-direct installers (install an
+#   older build, play to week two, upgrade, resume the save, Buy opens checkout
+#   in the system browser and the purchase is picked up, uninstall keeps saves,
+#   reinstall), then a preview installer next to it. Driven over WebView2's
+#   debugging port by apps/native/scripts/desktop-smoke.mjs, on CI test builds
+#   of the same commit that open that port.
+# - Linux: the AppImage and the .deb (install, run, remove).
+# - macOS: open the .app, check its window, and record what Gatekeeper does
+#   with a downloaded copy.
 
 on:
   workflow_dispatch:
@@ -13,6 +24,10 @@ on:
         type: choice
         default: desktop-preview
         options: [desktop-preview, desktop-direct, steam]
+      lifecycle:
+        description: Run the Windows install, upgrade, checkout and uninstall test
+        type: boolean
+        default: true
   push:
     branches: ['build/desktop*']
 
@@ -25,12 +40,14 @@ concurrency:
 
 env:
   CHANNEL: ${{ inputs.channel || 'desktop-preview' }}
+  # Pushes always run it; a manual run can turn it off.
+  LIFECYCLE: ${{ github.event_name == 'push' || inputs.lifecycle }}
   CARGO_TERM_COLOR: always
 
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -66,14 +83,41 @@ jobs:
           name: mov-windows-${{ env.CHANNEL }}
           path: out/*
           if-no-files-found: error
-      - name: Smoke test
+      - name: Smoke test (portable exe)
         shell: pwsh
         run: ./apps/native/scripts/smoke-windows.ps1 -Exe "out/margin-of-victory-$env:CHANNEL-portable.exe" -Shot windows-smoke.png
+      # CI test installers: the same code with WebView2's debugging port open so
+      # desktop-smoke.mjs can drive the game (WebView2 ignores the environment
+      # variable for that, because wry always sets its own browser arguments).
+      # They are never uploaded.
+      - name: Build lifecycle installers (desktop-direct 1.9.0 and current, preview)
+        if: ${{ !cancelled() && env.LIFECYCLE == 'true' }}
+        shell: bash
+        working-directory: apps/native
+        run: |
+          set -e
+          version=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          nsis=src-tauri/target/release/bundle/nsis
+          mkdir -p ../../lifecycle
+          node scripts/desktop-build.mjs desktop-direct --app-version 1.9.0 --ci-debug-port 9222 --bundles nsis
+          cp "$nsis/Margin of Victory_1.9.0_x64-setup.exe" ../../lifecycle/old-setup.exe
+          node scripts/desktop-build.mjs desktop-direct --ci-debug-port 9222 --bundles nsis
+          cp "$nsis/Margin of Victory_${version}_x64-setup.exe" ../../lifecycle/new-setup.exe
+          node scripts/desktop-build.mjs desktop-preview --ci-debug-port 9222 --bundles nsis
+          cp "$nsis/Margin of Victory Preview_${version}_x64-setup.exe" ../../lifecycle/preview-setup.exe
+          ls -la ../../lifecycle
+      - name: Install, upgrade, play, buy, uninstall
+        timeout-minutes: 30
+        if: ${{ !cancelled() && env.LIFECYCLE == 'true' }}
+        shell: pwsh
+        run: ./apps/native/scripts/smoke-windows-lifecycle.ps1 -OldSetup lifecycle/old-setup.exe -NewSetup lifecycle/new-setup.exe -PreviewSetup lifecycle/preview-setup.exe -Out smoke
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mov-windows-smoke
-          path: windows-smoke.png
+          path: |
+            windows-smoke.png
+            smoke/
           if-no-files-found: warn
 
   linux:
@@ -119,42 +163,18 @@ jobs:
           name: mov-linux-${{ env.CHANNEL }}
           path: out/*
           if-no-files-found: error
-      - name: Smoke test (xvfb)
+      - name: Smoke test (AppImage and .deb under xvfb)
+        timeout-minutes: 15
         env:
           WEBKIT_DISABLE_DMABUF_RENDERER: '1'
           WEBKIT_DISABLE_COMPOSITING_MODE: '1'
           LIBGL_ALWAYS_SOFTWARE: '1'
-        run: |
-          set +e
-          xvfb-run -a -s "-screen 0 1280x800x24" bash -c '
-            apps/native/src-tauri/target/release/electioneer > app.log 2>&1 &
-            pid=$!
-            win=""
-            for i in $(seq 1 30); do
-              win=$(xdotool search --onlyvisible --name "Margin of Victory" 2>/dev/null | head -n1)
-              [ -n "$win" ] && break
-              sleep 2
-            done
-            sleep 12
-            import -window root linux-smoke.png
-            alive=no; kill -0 $pid 2>/dev/null && alive=yes
-            title=""; [ -n "$win" ] && title=$(xdotool getwindowname "$win")
-            colours=$(identify -format "%k" linux-smoke.png)
-            echo "alive=$alive window=$win title=$title distinctColours=$colours"
-            echo "--- windows"; xwininfo -root -tree | grep -i -E "margin|electioneer" | head -n 20
-            kill $pid 2>/dev/null || true
-            [ "$alive" = yes ] && [ -n "$win" ] && [ "$colours" -gt 16 ]
-          '
-          rc=$?
-          echo "--- app log"; tail -n 50 app.log || true
-          exit $rc
+        run: xvfb-run -a -s "-screen 0 1280x800x24" bash apps/native/scripts/smoke-linux.sh out smoke
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mov-linux-smoke
-          path: |
-            linux-smoke.png
-            app.log
+          path: smoke/
           if-no-files-found: warn
 
   macos:
@@ -185,6 +205,14 @@ jobs:
           mkdir -p out
           app=$(ls -d apps/native/src-tauri/target/release/bundle/macos/*.app | head -n1)
           name=$(basename "$app" .app)
+          # Tauri leaves only the linker's ad-hoc signature on the binary, which
+          # Gatekeeper rejects for a downloaded copy ("code has no resources but
+          # signature indicates they must be present"). Seal the whole bundle
+          # ad hoc so testers get the normal "Open Anyway" path. A Developer ID
+          # signature replaces this once there is one.
+          ditto "$app" "$RUNNER_TEMP/unsealed/$name.app"
+          codesign --force --deep --sign - "$app"
+          codesign --verify --deep --strict --verbose=2 "$app"
           ditto -c -k --keepParent "$app" "out/${name}-${CHANNEL}-macos-unsigned.zip"
           hdiutil create -volname "$name" -srcfolder "$app" -ov -format UDZO "out/${name}-${CHANNEL}-macos-unsigned.dmg"
           ls -la out
@@ -193,3 +221,14 @@ jobs:
           name: mov-macos-${{ env.CHANNEL }}
           path: out/*
           if-no-files-found: error
+      - name: Smoke test (open the .app)
+        timeout-minutes: 10
+        run: |
+          app=$(ls -d apps/native/src-tauri/target/release/bundle/macos/*.app | head -n1)
+          bash apps/native/scripts/smoke-macos.sh "$app" smoke "$RUNNER_TEMP/unsealed/$(basename "$app")"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mov-macos-smoke
+          path: smoke/
+          if-no-files-found: warn

@@ -22,6 +22,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- The United States setup screen no longer says "Locked years are part of the United States
+  pack" when you own every year, and years you buy while the screen is open unlock straight away.
 - The iPhone Store now describes the Complete Collection the way Android and the web do: every
   election in the game, with how many are already free, instead of only the paid ones.
 - iPhone and Android keep everything you own when the Lakeside account holds a pack your version
