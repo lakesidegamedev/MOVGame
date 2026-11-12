@@ -54,7 +54,7 @@ final class GameSession: ObservableObject {
         settings.play("turnAdvance")
         let afterUnits = campaign.standings().first { $0.partyId == campaign.playerParty() }?.units ?? 0
         if afterUnits != beforeUnits { settings.play(afterUnits > beforeUnits ? "pollUp" : "pollDown") }
-        if campaign.isOver() { settings.play(afterUnits >= campaign.majority() ? "win" : "lose"); presentReveal() }
+        if campaign.isOver() { settings.play(campaign.reachedGoal(units: afterUnits) ? "win" : "lose"); presentReveal() }
         else if campaign.hasPendingEvent() { settings.play("eventPopup") }
         return true
     }
@@ -63,16 +63,20 @@ final class GameSession: ObservableObject {
     @Published var setupScenarioId: String? = nil
     @Published var version = 0
     @Published var dailySetup: NativeDailyAssignment?
+    /// An election another screen (the store) asked the library to open.
+    @Published var libraryRequest: LibraryPick?
     let account = CampaignAccount()
     lazy var store = StoreKitAdapter(account: account)
     /// The bundle a blocked launch needs; ContentView turns it into an Unlock prompt.
     @Published var paywallPack: String?
 
-    /// Pack a new campaign needs, or nil when it is playable. Locks follow the
-    /// server's native gating switch, so with gating off this is always nil.
+    /// Pack a new campaign needs, or nil when it is playable. The shared
+    /// StoreGate rule (the same one Android uses) locks only what the App
+    /// Store can sell here, so with gating off this is always nil. Packs in
+    /// the shared wallet and scenarios unlocked on the account stay open.
     func lockedPack(country: String, nativeId: String) -> String? {
-        NativeAccess.shared.lockedPack(country: country, nativeId: nativeId, ownedPacks: Array(store.owned),
-                                       gating: store.gating, dailyScenarioId: dailyAssignment().scenarioId)
+        store.gate.lockedPack(country: country, nativeId: nativeId, ownedPacks: store.owned,
+                              accountScenarios: store.accountScenarios, dailyScenarioId: dailyAssignment().scenarioId)
     }
     let settings = NativePreferences()
     @Published var shortcutSequence = 0
@@ -321,8 +325,25 @@ final class GameSession: ObservableObject {
         guard !didPrepareSimulatorCapture else { return }
         didPrepareSimulatorCapture = true
         let arguments = ProcessInfo.processInfo.arguments
-        if arguments.contains("--mov-capture-library") {
+        if arguments.contains(where: { $0.hasPrefix("--mov-capture-locked") }) {
+            // Every pack sellable and nothing owned, so paid elections show locked.
+            store.pinGateForCapture(StoreGate(gating: true, sellable: Set(NativeCatalog.shared.packIds())))
+        }
+        if arguments.contains(where: { $0.hasPrefix("--mov-capture-library") || $0.hasPrefix("--mov-capture-briefing") || $0.hasPrefix("--mov-capture-locked") }) {
             playScreen = .library
+        } else if let us = [("--mov-capture-us1948", "1948"), ("--mov-capture-us1948-results", "1948"), ("--mov-capture-us1948-reveal", "1948")]
+                    .first(where: { arguments.contains($0.0) }) {
+            let mate = mates(scenarioId: us.1, playerSerial: "dem").first(where: { $0.historical }) ?? mates(scenarioId: us.1, playerSerial: "dem").first
+            guard let mate else { return }
+            newGame(scenarioId: us.1, playerSerial: "dem", mateId: mate.id, staffIds: [], difficulty: "normal",
+                    eventMode: "historical", totalTurns: 9, seed: "481102", whatIfState: "", mirrorMatch: false, pandemic: false)
+        } else if let target = GameSession.worldCaptureTarget(arguments) {
+            let elections = MobileCampaign.companion.elections(countryId: target.country)
+            guard let election = elections.first(where: { $0.free }) ?? elections.first else { return }
+            let parties = MobileCampaign.companion.parties(countryId: target.country, electionId: election.nativeId)
+            guard let party = parties.first(where: { $0.id == target.party }) ?? parties.first else { return }
+            newCampaign(countryId: target.country, electionId: election.nativeId, partyId: party.id,
+                        difficulty: "normal", seed: "native-ui-capture")
         } else if arguments.contains("--mov-capture-daily") {
             openDaily(restart: true)
         } else if arguments.contains("--mov-capture-ask-de") {
@@ -333,7 +354,7 @@ final class GameSession: ObservableObject {
             game = nil
             playScreen = .worldGame
             touch()
-        } else if let countryId = ["UK", "CA", "DE", "FR", "AU"].first(where: {
+        } else if let countryId = NativeCatalog.shared.countryIds().filter({ $0 != "US" }).first(where: {
             arguments.contains("--mov-capture-world-\($0.lowercased())") || ($0 == "DE" && arguments.contains("--mov-capture-world-results"))
         }) {
             guard let election = MobileCampaign.companion.elections(countryId: countryId).first,
@@ -353,6 +374,22 @@ final class GameSession: ObservableObject {
                     mirrorMatch: false, pandemic: false)
         }
     }
+
+    /// `--mov-capture-world-results-mx`, `--mov-capture-world-reveal-mx`,
+    /// `--mov-capture-world-es-erc`: country, optional party, and whether to
+    /// play the campaign to the end first.
+    nonisolated static func worldCaptureTarget(_ arguments: [String]) -> (country: String, party: String, finish: Bool, reveal: Bool)? {
+        for argument in arguments {
+            for (prefix, finish, reveal) in [("--mov-capture-world-results-", true, false), ("--mov-capture-world-reveal-", true, true), ("--mov-capture-world-", false, false)]
+                where argument.hasPrefix(prefix) {
+                let parts = argument.dropFirst(prefix.count).split(separator: "-").map(String.init)
+                guard let code = parts.first?.uppercased(), NativeCatalog.shared.countryIds().contains(code), parts.count <= 2 else { continue }
+                if prefix == "--mov-capture-world-" && parts.count == 1 { continue }
+                return (code, parts.count == 2 ? parts[1] : "", finish, reveal)
+            }
+        }
+        return nil
+    }
     #endif
 
     var hasGame: Bool { game != nil || campaign != nil }
@@ -366,7 +403,7 @@ final class GameSession: ObservableObject {
             let started = MobileCampaign.companion.start(countryId: countryId, electionId: electionId,
                 partyId: partyId, difficulty: difficulty, seed: seed)
             #if targetEnvironment(simulator)
-            if ProcessInfo.processInfo.arguments.contains("--mov-capture-world-results") {
+            if ProcessInfo.processInfo.arguments.contains("--mov-capture-world-results") || GameSession.worldCaptureTarget(ProcessInfo.processInfo.arguments)?.finish == true {
                 while !started.isOver() {
                     if started.hasPendingEvent(), let choice = started.eventChoices().first {
                         _ = started.answerEvent(choiceId: choice.id)
@@ -384,6 +421,9 @@ final class GameSession: ObservableObject {
                 self.playScreen = .worldGame
                 self.beginReplay()
                 self.touch()
+                #if targetEnvironment(simulator)
+                if GameSession.worldCaptureTarget(ProcessInfo.processInfo.arguments)?.reveal == true { self.presentReveal(force: true) }
+                #endif
             }
         }
     }
@@ -459,7 +499,7 @@ final class GameSession: ObservableObject {
                 totalTurns: Int32(totalTurns), seed: seed, whatIfState: whatIfState,
                 mirrorMatch: mirrorMatch, pandemic: pandemic)
             #if targetEnvironment(simulator)
-            if ProcessInfo.processInfo.arguments.contains("--mov-capture-results") || ProcessInfo.processInfo.arguments.contains("--mov-capture-reveal") {
+            if ["--mov-capture-results", "--mov-capture-reveal", "--mov-capture-us1948-results", "--mov-capture-us1948-reveal"].contains(where: { ProcessInfo.processInfo.arguments.contains($0) }) {
                 for _ in 0..<Int(started.totalTurns()) { _ = started.endTurn() }
             }
             #endif
@@ -483,7 +523,7 @@ final class GameSession: ObservableObject {
                 #endif
                 self.touch()
                 #if targetEnvironment(simulator)
-                if ProcessInfo.processInfo.arguments.contains("--mov-capture-reveal") { self.presentReveal(force: true) }
+                if ProcessInfo.processInfo.arguments.contains("--mov-capture-reveal") || ProcessInfo.processInfo.arguments.contains("--mov-capture-us1948-reveal") { self.presentReveal(force: true) }
                 if ProcessInfo.processInfo.arguments.contains("--mov-capture-saves") { self.saveNamed(name: "Campaign checkpoint") }
                 #endif
             }
@@ -506,7 +546,8 @@ final class GameSession: ObservableObject {
 
     func states() -> [StateContest] { game?.stateList() ?? [] }
 
-    func issues() -> [Issue] { MobileGame.companion.issues() }
+    /// The running election's issues under that year's names; the static list only before a game starts.
+    func issues() -> [Issue] { game?.liveIssues() ?? MobileGame.companion.issues() }
     func playerIssuePosition(_ issueSerial: String) -> Double { game?.playerIssuePosition(issueSerial: issueSerial) ?? 0 }
     func plannedActions() -> [PlannedActionRow] { game?.plannedActions() ?? [] }
 

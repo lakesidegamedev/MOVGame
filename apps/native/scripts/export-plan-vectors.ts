@@ -2,7 +2,7 @@
 // Expectations come from the web engines, independently of the Kotlin port.
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { COUNTRIES } from "../../../src/content/countries/index";
+import { COUNTRIES } from "../../../src/content/countries/all";
 import { UK_ELECTIONS } from "../../../src/content/uk/elections";
 import { createUkGame, ukAdvanceTurn, projectUkPreview, playablePartiesIn as ukParties } from "../../../src/engine/ukGame";
 import { createCountryGame, countryAdvanceTurn, projectCountryPreview, playablePartiesIn, type CountryAction } from "../../../src/engine/countryGame";

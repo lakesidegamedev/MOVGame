@@ -1,0 +1,7 @@
+{
+  "productName": "Margin of Victory Preview",
+  "identifier": "com.lakesidegames.electioneer.preview",
+  "build": {
+    "beforeBuildCommand": "node scripts/fetch-web.mjs desktop-preview"
+  }
+}

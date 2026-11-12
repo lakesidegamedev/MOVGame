@@ -5,16 +5,29 @@
 | Edition | Price | Included content |
 | --- | ---: | --- |
 | Base game, every platform | Free | US 2024, US 2020 and the daily challenge |
-| Country bundle | $0.99 each | United States (15), United Kingdom (18), Canada (4), Germany (3), France (4), Australia (3) |
+| Country bundle | $0.99 each | One per registered country: every paid election of that country |
 | Complete Collection | $3.99 | Every country bundle, including scenarios added later |
 
-Bundle ids: `us-historical`, `uk-elections`, `canada`, `germany`, `france`,
-`australia`, `complete`. The retired `global` pack is no longer sold; players who
-own it keep Canada, Germany, France and Australia. Native store SKUs mirror the
-same ids and the same US price tiers.
+Bundle ids are each country module's `pack.id` (`us-historical`, `uk-elections`,
+`canada`, `germany` and so on) plus `complete`; `src/content/packs.ts` derives the
+list, and the store shows each pack's elections. The retired `global` pack is no
+longer sold; players who own it keep its fourteen original Canada, Germany, France
+and Australia scenarios. Native store SKUs mirror the same ids and the same US
+price tiers. Prices here are the bundled fallback; the platform catalog is
+canonical.
 
 These are one-time prices. There is no subscription because the game does not
 yet deliver enough recurring value to justify one.
+
+## The store screen
+
+The Store opens from the landing page, the account menu, the setup and results
+screens, and every locked election. It leads with the Complete Collection, shows one
+tile per country pack, and has a page per pack listing its elections. Prices and the
+"on sale" answer come from the Lakeside platform catalog; the bundled prices are only
+a fallback for display. A pack the game ships before the platform lists it shows as
+"coming soon" with no Buy button, and while the platform cannot be reached Buy is off
+with a reason. A pack the player already has shows no price and no Buy.
 
 ## Platform rules
 

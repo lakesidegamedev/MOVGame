@@ -1,4 +1,5 @@
 import { useGameStore } from "@store/gameStore";
+import { partyInk } from "@ui/colors";
 import type { CandidateId } from "@engine/index";
 import { Avatar } from "@ui/Avatar";
 import { Gavel } from "lucide-react";
@@ -56,13 +57,13 @@ export function DebateScorecard() {
               <div key={c} className={`sc-row${isWinner ? " sc-win" : ""}`}>
                 <Avatar name={cands[c].name} color={cands[c].color} size={38} />
                 <div className="sc-meta">
-                  <div className="sc-name" style={{ color: cands[c].color }}>
+                  <div className="sc-name" style={{ color: partyInk(cands[c].color) }}>
                     {cands[c].name} {c === player && <span className="sc-you">you</span>}
                   </div>
                   <div className="sc-choice">{debate.choiceText[c]}</div>
                   <div className="sc-bar"><div className="sc-fill" style={{ width: `${debate.scores[c]}%`, background: cands[c].color }} /></div>
                 </div>
-                <div className="sc-score" style={{ color: cands[c].color }}>{debate.scores[c]}</div>
+                <div className="sc-score" style={{ color: partyInk(cands[c].color) }}>{debate.scores[c]}</div>
               </div>
             );
           })}

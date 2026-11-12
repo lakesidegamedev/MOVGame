@@ -39,3 +39,12 @@ export function turnLabel(turn: number, total: number): string {
   if (turn >= total) return "Election Day";
   return WEEK_LABELS[turn] ?? `Week ${turn + 1}`;
 }
+
+/**
+ * A seat bar segment's label, or "" when the label would not fit its slice
+ * of a track `trackPx` wide (measured; 300 before the first layout), at the
+ * bars' 11px bold type.
+ */
+export function segmentLabel(share: number, label: string, trackPx = 300): string {
+  return share * trackPx >= label.length * 6.5 + 12 ? label : "";
+}

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useGameStore } from "@store/gameStore";
 import "./coach.css";
 
 // First-run onboarding coach: a spotlight-tooltip walkthrough. Shows once
@@ -10,8 +9,9 @@ import "./coach.css";
 //  - bails without window/matchMedia (SSR, jsdom) and arms 600ms after
 //    mount so synchronous test renders never see it.
 //
-// US GameScreen uses the default export with no props (US store + copy).
-// UK / country shells pass engine-specific selectors and win-line copy.
+// Store-agnostic: every shell passes its game's turn, selection and plan. The
+// US desk uses UsOnboardingCoach (US store + default copy); the UK and country
+// shells pass engine-specific selectors and win-line copy.
 
 export const COACH_DONE_KEY = "coach-done-v1";
 
@@ -36,11 +36,13 @@ export interface OnboardingCoachProps {
   mapHint?: string;
   mapBody?: string;
   planBody?: string;
-  /** When provided, drives eligibility + action advances (non-US engines). */
+  /** The game's state: drives eligibility and the action advances. */
   selectedId?: string | null;
   queuedLen?: number;
   turn?: number;
   totalTurns?: number;
+  /** Fills {M} in the default (US) win line: electoral votes needed. */
+  majority?: number;
   mapSelector?: string;
   detailSelector?: (mobile: boolean) => Element | null;
   /** Bypass the localStorage/turn-0 gate; used by "Replay tutorial". */
@@ -66,7 +68,7 @@ function buildSteps(props: OnboardingCoachProps): CoachStep[] {
   return [
     {
       title: "Welcome to the war room",
-      body: props.winLine ?? "This is your war room. Win 270 electoral votes in {N} weeks. No pressure.",
+      body: props.winLine ?? "This is your war room. Win {M} electoral votes in {N} weeks. No pressure.",
       next: "Show me",
       target: () => null,
     },
@@ -129,7 +131,6 @@ export function OnboardingCoach(props: OnboardingCoachProps = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.doneKey, props.winLine, props.mapHint, props.mapBody, props.planBody, props.mapSelector],
   );
-  const external = props.turn !== undefined;
 
   // Eligibility is decided once, at mount, against the world as it is then.
   const [eligible] = useState<boolean>(() => {
@@ -141,9 +142,7 @@ export function OnboardingCoach(props: OnboardingCoachProps = {}) {
     } catch {
       return false;
     }
-    if (external) return (props.turn ?? 0) === 0;
-    const g = useGameStore.getState().game;
-    return g !== null && g.turn === 0;
+    return (props.turn ?? 0) === 0;
   });
 
   const [armed, setArmed] = useState(false);
@@ -151,20 +150,12 @@ export function OnboardingCoach(props: OnboardingCoachProps = {}) {
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
   const [mobile, setMobile] = useState(false);
-  const baseTurn = useRef<number>(
-    external ? (props.turn ?? 0) : (useGameStore.getState().game?.turn ?? 0),
-  );
+  const baseTurn = useRef<number>(props.turn ?? 0);
 
-  // US store subscriptions (ignored when external props drive the coach).
-  const usTotalTurns = useGameStore((s) => s.game?.totalTurns ?? 0);
-  const usSelected = useGameStore((s) => s.selectedStateId);
-  const usQueued = useGameStore((s) => s.game?.queuedActions.length ?? 0);
-  const usTurn = useGameStore((s) => s.game?.turn ?? 0);
-
-  const totalTurns = external ? (props.totalTurns ?? 0) : usTotalTurns;
-  const selectedId = external ? (props.selectedId ?? null) : usSelected;
-  const queuedLen = external ? (props.queuedLen ?? 0) : usQueued;
-  const turn = external ? (props.turn ?? 0) : usTurn;
+  const totalTurns = props.totalTurns ?? 0;
+  const selectedId = props.selectedId ?? null;
+  const queuedLen = props.queuedLen ?? 0;
+  const turn = props.turn ?? 0;
 
   const active = eligible && armed && !dismissed;
 
@@ -232,7 +223,7 @@ export function OnboardingCoach(props: OnboardingCoachProps = {}) {
   const advance = () => (step >= steps.length - 1 ? finish() : setStep(step + 1));
 
   const s = steps[step];
-  const body = s.body.replace("{N}", String(totalTurns));
+  const body = s.body.replace("{N}", String(totalTurns)).replace("{M}", String(props.majority ?? 0));
 
   const CARD_W = 340;
   const CARD_H = 200;

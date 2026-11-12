@@ -5,11 +5,12 @@ import { beginGame } from "../../../src/engine/turn";
 import { advanceCampaignWeek } from "../../../src/engine/campaignWeek";
 import { createUkGame, ukAdvanceTurn } from "../../../src/engine/ukGame";
 import { createCountryGame, countryAdvanceTurn } from "../../../src/engine/countryGame";
-import { COUNTRIES } from "../../../src/content/countries";
+import { COUNTRIES } from "../../../src/content/countries/all";
 import { usReveal, ukReveal, countryReveal } from "../../../src/ui/electionNight/adapters";
 import { SCENARIOS } from "../../../src/content/scenarios";
 import { SCENARIO_REGISTRY } from "../../../src/content/scenarioRegistry";
-import { US_NEXT_SCENARIO, UK_NEXT_SCENARIO, countryNextScenario } from "../../../src/content/nextScenario";
+import { nextScenarioFor } from "../../../src/content/nextScenario";
+import { ALL_COUNTRY_CODES } from "./fixtureCountries";
 import { defaultRunningMate } from "../../../src/content/runningMates";
 import { playablePartiesIn as ukPlayable } from "../../../src/engine/ukGame";
 import { playablePartiesIn as countryPlayable } from "../../../src/engine/countryGame";
@@ -19,7 +20,7 @@ import { buildShareText } from "../../../src/lib/shareCard";
 import { buildSchedule } from "../../../src/lib/electionReveal";
 
 const vectors = [];
-for (const country of ["US", "UK", "CA", "DE", "FR", "AU"]) {
+for (const country of ALL_COUNTRY_CODES) {
   const seed = "seat-reveal";
   let snapshot: string;
   let data;
@@ -43,24 +44,26 @@ for (const country of ["US", "UK", "CA", "DE", "FR", "AU"]) {
     data = countryReveal(bundle, game);
   }
   const { map, ...normalized } = data;
-  const schedule = buildSchedule(data.units, data.threshold);
+  const schedule = buildSchedule(data.units, data.threshold, data.pluralityWinner);
   const allocation: Record<string, number> = {};
   for (const unit of data.units) for (const [party, seats] of Object.entries(unit.allocation ?? { [unit.winnerId]: unit.units })) allocation[party] = (allocation[party] ?? 0) + seats;
-  if ((Object.entries(allocation).find(([, seats]) => seats >= data.threshold)?.[0] ?? null) !== schedule.projectedId) throw Error(`False projection: ${country}`);
+  // Plurality countries project the engine's winner; everyone else the first party over the line.
+  const expected = data.pluralityWinner ?? Object.entries(allocation).find(([, seats]) => seats >= data.threshold)?.[0] ?? null;
+  if (expected !== schedule.projectedId) throw Error(`False projection: ${country}`);
   const envelope = JSON.parse(snapshot);
   const game = envelope.state ?? envelope.uk ?? envelope.country;
   const player = game.playerCandidate ?? game.playerParty;
   const election = game.scenarioId ?? game.electionId;
   const meta = SCENARIO_REGISTRY.find(m => m.country === country && m.nativeId === election)!;
   const result = game.result;
-  const facts = country === "US" ? usScoreFacts(result, player, "normal") : multipartyScoreFacts(result, player, data.threshold, data.totalUnits, game.difficulty ?? "normal");
+  const facts = country === "US" ? usScoreFacts(result, player, "normal") : multipartyScoreFacts(result, player, data.threshold, data.totalUnits, game.difficulty ?? "normal", data.pluralityWinner !== undefined);
   const score = computeScoreFromFacts(facts);
   const units = (result.electoralVotes ?? result.seats)[player] ?? 0;
   const unitLine = `${units} ${country === "US" ? "EVs" : data.unitLabel}`;
   const won = country === "US" ? result.winner === player : result.government.kind === "majority" && result.government.party === player;
   const shareText = buildShareText({ date: "2000-01-01", label: meta.label, flag: meta.flag, role: roleShortName(player), won, unitLine, score })
     .replace(" Daily · 2000-01-01", "").replace(/\u2014/g, "·");
-  const hint = country === "US" ? US_NEXT_SCENARIO[election] : country === "UK" ? UK_NEXT_SCENARIO[election] : countryNextScenario(country, election);
+  const hint = nextScenarioFor(country, election);
   const target = hint && SCENARIO_REGISTRY.find(m => m.country === country && m.nativeId === hint.id);
   let next = null;
   if (target) {
@@ -73,7 +76,7 @@ for (const country of ["US", "UK", "CA", "DE", "FR", "AU"]) {
 }
 const serialized = JSON.stringify(vectors);
 const chunks = serialized.match(/[\s\S]{1,10000}/gu)!;
-const text = '// Generated from all six web election-night adapters and schedules.\npackage com.lakesidegames.electioneer.engine\n\ninternal val REVEAL_WEB_VECTORS: String by lazy {\n    listOf(\n' + chunks.map(s => '        ' + JSON.stringify(s).replace(/\$/g, '\\$') + ',\n').join('') + '    ).joinToString("")\n}\n';
+const text = '// Generated from the web election-night adapters and schedules of every registered country.\npackage com.lakesidegames.electioneer.engine\n\ninternal val REVEAL_WEB_VECTORS: String by lazy {\n    listOf(\n' + chunks.map(s => '        ' + JSON.stringify(s).replace(/\$/g, '\\$') + ',\n').join('') + '    ).joinToString("")\n}\n';
 const target = fileURLToPath(new URL('../shared/src/commonTest/kotlin/com/lakesidegames/electioneer/engine/RevealWebVectors.kt', import.meta.url));
 if (process.argv.includes('--check')) { if (readFileSync(target, 'utf8') !== text) throw Error('Reveal web vectors are stale'); } else writeFileSync(target, text);
 console.log(`Verified ${vectors.length} web election-night result allocations and schedules.`);

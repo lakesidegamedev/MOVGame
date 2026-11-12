@@ -63,6 +63,12 @@ class MobileGame private constructor(
             CampaignChoice(s.id, s.year, s.label, s.tagline, s.dem.shortName, s.rep.shortName)
         }
 
+        /** Read-only: the electoral college a scenario plays with (531 and 266 for 1948, 538 and 270 today). */
+        fun electoralRule(scenarioId: String): ElectoralRule {
+            val total = SCENARIOS[scenarioId]?.electoralCollege?.total ?: STANDARD_EV_TOTAL
+            return ElectoralRule(total, evMajority(total))
+        }
+
         fun mates(scenarioId: String, playerSerial: String): List<MateChoice> {
             val s = SCENARIOS.getValue(scenarioId)
             val roster = if (playerSerial == CandidateId.DEM.serial) s.dem.runningMates else s.rep.runningMates
@@ -95,6 +101,8 @@ class MobileGame private constructor(
                         staff.salaryPerWeek, bonuses.joinToString(" · "))
         }
 
+        // Every issue axis under its fallback (2020) name. A running game's
+        // own list is the instance method liveIssues().
         fun issues(): List<Issue> = IssueId.entries.map { ISSUES.getValue(it.serial) }
 
         fun startConfiguredGame(
@@ -164,6 +172,9 @@ class MobileGame private constructor(
 
     fun plannedActions(): List<PlannedActionRow> = plannedActionRows(game)
 
+    /** This election's issues, under the names voters used that year (in IssueId order). */
+    fun liveIssues(): List<Issue> = game.liveIssueIds().map { game.issues.getValue(it.serial) }
+
     fun playerIssuePosition(issueSerial: String): Double =
         game.candidates.getValue(game.playerCandidate.serial).issuePositions[issueSerial] ?: 0.0
 
@@ -181,6 +192,11 @@ class MobileGame private constructor(
     fun evRep(): Int = projectElection(game).ev.getValue(CandidateId.REP.serial)
 
     fun tossupEv(): Int = projectElection(game).tossupEv
+
+    // The scenario's electoral college and majority (538 and 270 on the modern map).
+    fun evTotal(): Int = game.electoralRule().total
+
+    fun evMajority(): Int = game.electoralRule().majority
 
     fun contests(): List<ContestProjection> = projectElection(game).contests
 

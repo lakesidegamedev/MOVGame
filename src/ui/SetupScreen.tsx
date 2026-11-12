@@ -1,9 +1,11 @@
 import { lazy, Suspense, useState } from "react";
 import { useGameStore, type Difficulty } from "@store/gameStore";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { SCENARIOS, SCENARIO_IDS } from "@content/scenarios";
 import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
-import { ScenarioArt } from "@ui/ScenarioArt";
+import { ElectionTile, PartyCard } from "@ui/ElectionTile";
+import { partyInk } from "@ui/colors";
 import { defaultRunningMate } from "@content/runningMates";
 import { STAFF_POOL, MAX_STAFF, STAFF_BY_ID } from "@content/staff";
 import { mateBonusChips } from "@ui/labels";
@@ -59,9 +61,9 @@ const DIFFICULTIES: {
   blurb: string;
   Icon: typeof Flag;
 }[] = [
-  { id: "easy", name: "Easy", blurb: "Favorable climate, a bigger war chest, and a sloppy opponent. You can win any year.", Icon: Flag },
-  { id: "normal", name: "Normal", blurb: "A fair fight on the real map, against a disciplined campaign.", Icon: Swords },
-  { id: "hard", name: "Hard", blurb: "The historical map, no help, a ruthless opponent. History is brutal.", Icon: Crosshair },
+  { id: "easy", name: "Easy", blurb: "A head start sized to the race, a bigger war chest, and a sloppy opponent. Landslides are still a fight.", Icon: Flag },
+  { id: "normal", name: "Normal", blurb: "The real map and a slightly stronger campaign than your rival's. Skill decides close races.", Icon: Swords },
+  { id: "hard", name: "Hard", blurb: "The real map, a lighter campaign, a ruthless opponent. Close races need a near-perfect run.", Icon: Crosshair },
 ];
 
 // Campaign length: how many weekly turns the race runs before Election Day.
@@ -89,7 +91,6 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
 }) {
   const newGame = useGameStore((s) => s.newGame);
   const canPlay = useAuthStore((s) => s.canPlay);
-  const openModal = useAuthStore((s) => s.openModal);
   const [step, setStep] = useState<StepId>(0);
   const [scenarioId, setScenarioId] = useState<string>(initialScenarioId ?? "2024");
   const [pick, setPick] = useState<CandidateId>(initialParty === "rep" ? "rep" : "dem");
@@ -116,7 +117,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
 
   const chooseScenario = (id: string) => {
     if (!canPlay(globalId(id))) {
-      openModal("activate", globalId(id));
+      openStoreForScenario(globalId(id));
       return;
     }
     setScenarioId(id);
@@ -148,7 +149,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
 
   const begin = () => {
     if (!unlocked) {
-      openModal("activate", globalId(scenarioId));
+      openStoreForScenario(globalId(scenarioId));
       return;
     }
     newGame({
@@ -193,36 +194,29 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
         <div className="su-panel" key={step}>
           {/* ── Step 1: Election ───────────────────────────────────── */}
           {step === 0 && (
-            <div className="field" style={{ textAlign: "left", margin: 0 }}>
+            <div className="field">
               <label>Election year: each cycle ships its own map, decks & tickets</label>
-              <div className="scenario-grid">
+              <div className="election-grid">
                 {SCENARIO_IDS.map((id) => {
                   const s = SCENARIOS[id];
-                  const open = canPlay(globalId(id));
                   return (
-                    <button
+                    <ElectionTile
                       key={id}
-                      type="button"
-                      className={`scenario-card has-cover${scenarioId === id ? " sel" : ""}`}
-                      style={{ ...(open ? undefined : { opacity: 0.6 }), alignItems: "stretch", textAlign: "left" }}
+                      scenarioId={globalId(id)}
+                      year={s.year}
+                      title={`${s.dem.shortName} v. ${s.rep.shortName}`}
+                      selected={scenarioId === id}
+                      locked={!canPlay(globalId(id))}
                       onClick={() => chooseScenario(id)}
-                    >
-                      <ScenarioArt
-                        scenarioId={globalId(id)}
-                        country="US"
-                        year={s.year}
-                      />
-                      <span className="scenario-year" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                        {s.year}{!open && <Lock size={13} style={{ color: "var(--gold)" }} />}
-                      </span>
-                      <span className="scenario-match">{s.dem.shortName} v. {s.rep.shortName}</span>
-                    </button>
+                    />
                   );
                 })}
               </div>
               {PAYWALL_ENABLED && (
-                <p className="muted small" style={{ marginTop: 8 }}>
-                  🔒 Locked years are part of the <strong>United States</strong> bundle. Pick one to buy it or redeem a code.
+                <p className="setup-note">
+                  <Lock size={12} aria-hidden="true" /> Locked years are part of the <strong>United States</strong> pack. Pick one to see it in the{" "}
+                  <button type="button" className="su-link" onClick={() => openStoreForScenario(globalId(SCENARIO_IDS.find((id) => !canPlay(globalId(id))) ?? SCENARIO_IDS[0]))}>store</button>,
+                  where you can buy it or redeem a code.
                 </p>
               )}
             </div>
@@ -231,28 +225,20 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
           {/* ── Step 2: Ticket ─────────────────────────────────────── */}
           {step === 1 && (
             <>
-              <div className="field" style={{ textAlign: "left", margin: "0 0 4px" }}>
+              <div className="field">
                 <label>Your candidate: the campaign you'll run</label>
               </div>
               <div className="pick">
                 {(["dem", "rep"] as CandidateId[]).map((id) => {
                   const c = id === "dem" ? scenario.dem : scenario.rep;
-                  const selClass = pick === id ? (id === "dem" ? " sel-d" : " sel-r") : "";
                   return (
-                    <div key={id} className={`candcard${selClass}`} onClick={() => choosePick(id)} style={{ cursor: "pointer" }}>
-                      <div className="row" style={{ gap: 10 }}>
-                        <Avatar name={c.name} color={c.color} size={44} />
-                        <div>
-                          <div className="nm" style={{ color: c.color }}>{c.name}</div>
-                          <div className="rm">{c.party}</div>
-                        </div>
-                      </div>
-                    </div>
+                    <PartyCard key={id} name={c.name} sub={c.party} leader={c.name} color={c.color}
+                      selected={pick === id} onClick={() => choosePick(id)} />
                   );
                 })}
               </div>
 
-              <div className="field" style={{ textAlign: "left" }}>
+              <div className="field">
                 <label>Running mate: shapes your coalition</label>
                 <div className="vp-roster">
                   {roster.map((m) => (
@@ -280,12 +266,12 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
 
           {/* ── Step 3: War Room (staff) ───────────────────────────── */}
           {step === 2 && (
-            <div className="field" style={{ textAlign: "left", margin: 0 }}>
+            <div className="field">
               <label>
-                <Briefcase size={13} style={{ verticalAlign: "-2px", marginRight: 5 }} />
+                <Briefcase size={13} aria-hidden="true" />
                 Hire up to {MAX_STAFF} staffers: passive bonuses, weekly salaries, real loyalty
               </label>
-              <div className="scenario-grid" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
+              <div className="staff-grid">
                 {STAFF_POOL.map((s) => {
                   const hired = staff.includes(s.id);
                   const full = !hired && staff.length >= MAX_STAFF;
@@ -293,21 +279,22 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
                     <button
                       key={s.id}
                       type="button"
-                      className={`scenario-card${hired ? " sel" : ""}`}
-                      style={{ textAlign: "left", alignItems: "flex-start", opacity: full ? 0.5 : 1 }}
+                      className={`staff-card${hired ? " sel" : ""}`}
+                      aria-pressed={hired}
                       onClick={() => toggleStaff(s.id)}
                       disabled={full}
                     >
-                      <span className="scenario-year" style={{ fontSize: 14 }}>
-                        {s.emoji} {s.name} {hired && "✓"}
+                      <span className="staff-card-head">
+                        <span className="staff-card-name">{s.name}</span>
+                        {hired && <Check size={14} className="staff-card-check" aria-label="Hired" />}
                       </span>
-                      <span className="scenario-match">{s.role} · ${(s.salaryPerWeek / 1000).toFixed(0)}k/week</span>
-                      <span className="muted small" style={{ fontSize: 11, lineHeight: 1.4 }}>{s.blurb}</span>
+                      <span className="staff-card-role num">{s.role} · ${(s.salaryPerWeek / 1000).toFixed(0)}k/week</span>
+                      <span className="staff-card-blurb">{s.blurb}</span>
                     </button>
                   );
                 })}
               </div>
-              <div className="su-summary" style={{ marginTop: 10 }}>
+              <div className="su-summary">
                 <div className="su-summary-row">
                   <span className="su-summary-k">Weekly payroll</span>
                   <span className="su-summary-v">{weeklyPayroll > 0 ? `$${(weeklyPayroll / 1000).toFixed(0)}k / week` : "None (running lean)"}</span>
@@ -323,7 +310,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
           {/* ── Step 4: Briefing ───────────────────────────────────── */}
           {step === 3 && (
             <>
-              <div className="field" style={{ textAlign: "left", margin: "0 0 10px" }}>
+              <div className="field">
                 <label>Events</label>
                 <div className="su-optgrid">
                   <button type="button" className={`su-opt${eventMode === "historical" ? " sel" : ""}`} onClick={() => setEventMode("historical")}>
@@ -339,7 +326,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
                 </div>
               </div>
 
-              <div className="field" style={{ textAlign: "left", margin: "0 0 10px" }}>
+              <div className="field">
                 <label>Difficulty: AI opponent strength</label>
                 <div className="su-optgrid su-optgrid-3">
                   {DIFFICULTIES.map(({ id, name, blurb, Icon }) => (
@@ -358,9 +345,9 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
               </div>
 
               {!isDaily && (
-                <div className="field" style={{ textAlign: "left", margin: "0 0 10px" }}>
+                <div className="field">
                   <label>
-                    <CalendarDays size={13} style={{ verticalAlign: "-2px", marginRight: 5 }} />
+                    <CalendarDays size={13} aria-hidden="true" />
                     Campaign length: how many weeks until Election Day
                   </label>
                   <div className="su-optgrid su-optgrid-3">
@@ -378,23 +365,23 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
                     ))}
                   </div>
                   {totalTurns !== 9 && (
-                    <p className="muted small" style={{ marginTop: 6 }}>
+                    <p className="muted small">
                       Short and Long games are for fun and do not count toward the leaderboard. Play Standard for a scored run.
                     </p>
                   )}
                 </div>
               )}
 
-              <div className="field" style={{ textAlign: "left", margin: "0 0 10px" }}>
+              <div className="field">
                 <label>
-                  <FlaskConical size={13} style={{ verticalAlign: "-2px", marginRight: 5 }} />
+                  <FlaskConical size={13} aria-hidden="true" />
                   Scenario modifiers: free ways to remix the race
                 </label>
                 <div className="su-optgrid su-optgrid-3">
-                  <div className="su-opt" style={{ cursor: "default" }}>
+                  <div className="su-opt static">
                     <span className="su-opt-name">What If…</span>
                     <span className="su-opt-blurb">Turn one state into a pure tossup.</span>
-                    <select value={whatIfState} onChange={(e) => setWhatIfState(e.target.value)} style={{ marginTop: 6, width: "100%" }}>
+                    <select value={whatIfState} onChange={(e) => setWhatIfState(e.target.value)} className="block-select">
                       {WHAT_IF_STATES.map((s) => <option key={s} value={s}>{s === "" ? "Off" : `${s} becomes a swing state`}</option>)}
                     </select>
                   </div>
@@ -409,7 +396,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
                 </div>
               </div>
 
-              <div className="field" style={{ textAlign: "left" }}>
+              <div className="field">
                 <label>Seed: same seed replays the same events & RNG</label>
                 <div className="su-seed">
                   <input type="text" value={seed} onChange={(e) => setSeed(e.target.value)} />
@@ -423,11 +410,11 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
               <div className="su-summary">
                 <div className="su-summary-row">
                   <span className="su-summary-k">Running as</span>
-                  <span className="su-summary-v" style={{ color: ticket.color }}>{ticket.name} / {selectedMate.name}</span>
+                  <span className="su-summary-v" style={{ color: partyInk(ticket.color) }}>{ticket.name} / {selectedMate.name}</span>
                 </div>
                 <div className="su-summary-row">
                   <span className="su-summary-k">Against</span>
-                  <span className="su-summary-v" style={{ color: opponent.color }}>{opponent.name}</span>
+                  <span className="su-summary-v" style={{ color: partyInk(opponent.color) }}>{opponent.name}</span>
                 </div>
                 <div className="su-summary-row">
                   <span className="su-summary-k">War room</span>
@@ -465,7 +452,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
             </button>
           ) : (
             <button className="primary su-next" onClick={begin}>
-              {unlocked ? `Begin ${scenario.year} as ${ticket.shortName} →` : "🔒 Unlock to play"}
+              {unlocked ? <>Begin {scenario.year} as {ticket.shortName} <ChevronRight size={16} aria-hidden="true" /></> : <><Lock size={14} aria-hidden="true" /> Unlock to play</>}
             </button>
           )}
         </div>

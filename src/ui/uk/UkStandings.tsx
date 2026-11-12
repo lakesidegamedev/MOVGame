@@ -1,8 +1,8 @@
 import { useUkStore } from "@store/ukStore";
-import { majorityForUk } from "@engine/ukGame";
+import { partyInk, partyFill } from "@ui/colors";
+import { majorityForUk, ukGameIssues } from "@engine/ukGame";
 import { partyColor, partyShort, sortBySeats } from "./parties";
 import { partyName } from "./parties";
-import { UK_ISSUES_BY_ID } from "@content/uk/issues";
 import { MpPollBlock } from "@ui/MpPollBlock";
 
 const GOV_LABEL: Record<string, string> = {
@@ -21,13 +21,15 @@ export function UkStandings() {
   if (!live) return null;
   const order = sortBySeats(live.seats);
   const maj = majorityForUk(game);
-  const issues = Object.keys(game.salience).filter((id) => game.salience[id] >= 0.1).sort((a, b) => game.salience[b] - game.salience[a]);
+  const liveIssues = ukGameIssues(game);
+  const issues = liveIssues.filter((i) => i.salience >= 0.1).sort((a, b) => b.salience - a.salience).map((i) => i.id);
+  const issueName = (id: string) => liveIssues.find((i) => i.id === id)?.name ?? id;
 
   return (
     <div className="card scroll">
       <h3>National Standings</h3>
-      <div className="kv"><span className="k">Projected government</span><span style={{ color: partyColor(live.largestParty) }}>{GOV_LABEL[live.government.kind]}</span></div>
-      <div className="kv"><span className="k">Largest party</span><span style={{ color: partyColor(live.largestParty) }}>{partyName(live.largestParty)}</span></div>
+      <div className="kv"><span className="k">Projected government</span><span style={{ color: partyInk(partyColor(live.largestParty)) }}>{GOV_LABEL[live.government.kind]}</span></div>
+      <div className="kv"><span className="k">Largest party</span><span style={{ color: partyInk(partyColor(live.largestParty)) }}>{partyName(live.largestParty)}</span></div>
       <div className="kv"><span className="k">Your momentum</span><span>{game.resources[game.playerParty].momentum.toFixed(0)}</span></div>
 
       <MpPollBlock
@@ -40,11 +42,11 @@ export function UkStandings() {
         partyColor={partyColor}
       />
 
-      <h3 style={{ marginTop: 14 }}>Seats</h3>
+      <h3 className="section-gap">Seats</h3>
       {order.map((p) => (
         <div className="bloc" key={p}>
-          <span className="name" style={{ color: p === game.playerParty ? partyColor(p) : undefined, fontWeight: p === game.playerParty ? 700 : 500 }}>
-            <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: 2, background: partyColor(p), marginRight: 6 }} />
+          <span className="name" style={{ color: p === game.playerParty ? partyInk(partyColor(p)) : undefined, fontWeight: p === game.playerParty ? 700 : 500 }}>
+            <span className="swatch" style={{ "--party": partyFill(partyColor(p)) } as React.CSSProperties} />
             {partyShort(p)}
           </span>
           <span className="meta">{live.seats[p]} seats · {((live.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
@@ -52,10 +54,10 @@ export function UkStandings() {
         </div>
       ))}
 
-      <h3 style={{ marginTop: 14 }}>Issue Salience</h3>
+      <h3 className="section-gap">Issue Salience</h3>
       {issues.map((id) => (
-        <div className="bloc issue-row" key={id} aria-label={`${UK_ISSUES_BY_ID[id as keyof typeof UK_ISSUES_BY_ID]?.name ?? id} salience ${(game.salience[id] * 100).toFixed(0)}%`}>
-          <span className="name">{UK_ISSUES_BY_ID[id as keyof typeof UK_ISSUES_BY_ID]?.name ?? id}</span>
+        <div className="bloc issue-row" key={id} aria-label={`${issueName(id)} salience ${(game.salience[id] * 100).toFixed(0)}%`}>
+          <span className="name">{issueName(id)}</span>
           <span className="meta">{(game.salience[id] * 100).toFixed(0)}%</span>
           <div className="suppbar"><div style={{ width: `${game.salience[id] * 100}%`, background: "var(--gold)" }} /></div>
         </div>

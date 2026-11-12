@@ -88,22 +88,34 @@ export function identityForUser(userId: string): Identity | null {
   return { ahdUserId: row.ahd_user_id, email: row.email };
 }
 
+function cacheKey(identity: Identity): string {
+  return `${identity.ahdUserId ?? ""}|${(identity.email ?? "").toLowerCase()}`;
+}
+
+export interface PurchaseLookup {
+  /** False when the platform could not be asked or answered badly; purchases is then empty and says nothing about ownership. */
+  verified: boolean;
+  purchases: PlatformPurchase[];
+}
+
 /**
- * Fetch the platform's Margin of Victory purchases for an identity. Cached ~30s per
- * identity. Returns [] on any failure.
+ * Fetch the platform's Margin of Victory purchases for an identity, saying
+ * whether the platform actually answered. Cached ~30s per identity; failures
+ * are never cached.
  */
-export async function fetchPlatformPurchaseHistory(identity: Identity): Promise<PlatformPurchase[]> {
+export async function lookupPlatformPurchases(identity: Identity): Promise<PurchaseLookup> {
   const ahdUserId = identity.ahdUserId ?? "";
   const email = (identity.email ?? "").toLowerCase();
-  if (!ahdUserId) return [];
+  // An unlinked account has no platform ledger to ask: an authoritative empty answer.
+  if (!ahdUserId) return { verified: true, purchases: [] };
 
   const token = process.env.INTERNAL_TOKEN;
-  if (!token) return [];
+  if (!token) return { verified: false, purchases: [] };
 
-  const key = `${ahdUserId}|${email}`;
+  const key = cacheKey(identity);
   const now = Date.now();
   const hit = cache.get(key);
-  if (hit && now - hit.at < CACHE_MS) return hit.purchases;
+  if (hit && now - hit.at < CACHE_MS) return { verified: true, purchases: hit.purchases };
 
   const url = new URL(entitlementsUrl());
   url.searchParams.set("ahdUserId", ahdUserId);
@@ -116,7 +128,7 @@ export async function fetchPlatformPurchaseHistory(identity: Identity): Promise<
       headers: { Authorization: `Bearer ${token}` },
       signal: controller.signal,
     });
-    if (!res.ok) return [];
+    if (!res.ok) return { verified: false, purchases: [] };
     const body = (await res.json().catch(() => ({}))) as { purchases?: unknown };
     const raw = Array.isArray(body.purchases) ? body.purchases : [];
     const purchases: PlatformPurchase[] = raw
@@ -135,12 +147,20 @@ export async function fetchPlatformPurchaseHistory(identity: Identity): Promise<
       }))
       .filter((p) => p.productId);
     cache.set(key, { at: now, purchases });
-    return purchases;
+    return { verified: true, purchases };
   } catch {
-    return [];
+    return { verified: false, purchases: [] };
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * Fetch the platform's Margin of Victory purchases for an identity. Cached ~30s per
+ * identity. Returns [] on any failure.
+ */
+export async function fetchPlatformPurchaseHistory(identity: Identity): Promise<PlatformPurchase[]> {
+  return (await lookupPlatformPurchases(identity)).purchases;
 }
 
 export async function fetchPlatformPurchases(identity: Identity): Promise<PlatformPurchase[]> {
@@ -151,6 +171,11 @@ export async function fetchPlatformPurchases(identity: Identity): Promise<Platfo
 export async function ownedProductIds(identity: Identity): Promise<string[]> {
   const purchases = await fetchPlatformPurchases(identity);
   return [...new Set(purchases.map((p) => p.productId))];
+}
+
+/** Drop one identity's cached purchases so the next read asks the platform. */
+export function clearEntitlementsCacheFor(identity: Identity): void {
+  cache.delete(cacheKey(identity));
 }
 
 /** Test-only: drop the per-identity cache. */

@@ -25,13 +25,14 @@ class TypesTest {
 
     @Test
     fun blocIdsCoverAllEightTsMembers() {
-        // Phase 0 contract: the US set leads; UK/country sets extend it.
+        // Phase 0 contract: the US bundle carries the TS union in TS order.
+        // Country bloc ids are open strings carried by each country bundle.
         assertEquals(
             listOf(
                 "noncollege_white", "college_white", "suburban_women", "black",
                 "hispanic", "asian_other", "seniors", "youth",
             ),
-            BlocId.entries.take(8).map { it.serial },
+            com.lakesidegames.electioneer.content.BLOC_IDS.map { it.serial },
         )
     }
 

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { loadedCountry } from "@content/countries";
 import { deriveReport, type ReplayLog } from "@lib/replay";
 import { Sparkline } from "./Sparkline";
 import { money } from "./format";
@@ -9,6 +10,23 @@ import { money } from "./format";
 
 const pts = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}`;
 
+/** Where the player finished against the top rival, in words, never a signed number. */
+export function verdictText(marginPts: number, rivalName: string, won: boolean | null, unitLabel: string): string {
+  const size = Math.abs(marginPts).toFixed(1);
+  const standing = Math.abs(marginPts) < 0.05
+    ? `level with ${rivalName}`
+    : `${size} ${size === "1.0" ? "point" : "points"} ${marginPts > 0 ? "ahead of" : "behind"} ${rivalName}`;
+  if (won === null) return `You finished ${standing}.`;
+  if (won) {
+    return marginPts > 0
+      ? `You finished ${standing} and took the lead in ${unitLabel}.`
+      : `You finished ${standing} on the vote but took the lead in ${unitLabel}.`;
+  }
+  return marginPts > 0
+    ? `You finished ${standing} on the vote but fell short in ${unitLabel}.`
+    : `You finished ${standing} and fell short in ${unitLabel}.`;
+}
+
 export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | null }) {
   const r = useMemo(() => deriveReport(log), [log]);
   if (!r.hasData) return null;
@@ -18,16 +36,16 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
   const flipsAway = r.flips.length - flipsToPlayer;
 
   // One plain-English read of the arc.
-  const verdict =
-    won === null
-      ? `You finished ${pts(r.finalMarginPts)} points against ${rivalName}.`
-      : won
-        ? `You closed ${pts(r.finalMarginPts)} points ahead of ${rivalName} and took the lead in ${r.unitLabel}.`
-        : `You finished ${pts(r.finalMarginPts)} points against ${rivalName} and fell short in ${r.unitLabel}.`;
+  const verdict = verdictText(r.finalMarginPts, rivalName, won, r.unitLabel);
 
   const debates = r.events.filter((e) => e.text.startsWith("Debate:"));
   const otherEvents = r.events.filter((e) => !e.text.startsWith("Debate:"));
-  const currency = log?.engine === "uk" ? "£" : log?.engine === "country" && /^(fr|de|france|germany)/i.test(log.scenarioId) ? "€" : "$";
+  // Country replay logs carry "<CODE>-<election>" as their scenario id.
+  const currency = log?.engine === "uk"
+    ? "£"
+    : log?.engine === "country"
+      ? loadedCountry(log.scenarioId.split("-")[0]!.toUpperCase())?.currency ?? "$"
+      : "$";
 
   return (
     <div className="card">
@@ -62,8 +80,8 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
 
       {/* Polling trend */}
       {r.marginTrend.length >= 2 && (
-        <div style={{ marginBottom: 12 }}>
-          <div className="rl" style={{ marginBottom: 4 }}>Your national margin, start to finish</div>
+        <div className="report-section">
+          <div className="report-title">Your national margin, start to finish</div>
           <Sparkline
             values={r.marginTrend.map((p) => p.value)}
             color="var(--gold)"
@@ -84,8 +102,8 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
 
       {/* Decisive contests */}
       {r.decisiveContests.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <div className="rl" style={{ marginBottom: 4 }}>Decisive contests (closest finishes)</div>
+        <div className="report-section">
+          <div className="report-title">Decisive contests (closest finishes)</div>
           {r.decisiveContests.map((c) => (
             <div className="report-row" key={c.id}>
               <span>{c.name}</span>
@@ -99,8 +117,8 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
 
       {/* Spending / action summary */}
       {r.actionTally.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <div className="rl" style={{ marginBottom: 4 }}>What you spent the campaign doing</div>
+        <div className="report-section">
+          <div className="report-title">What you spent the campaign doing</div>
           {r.actionTally.slice(0, 8).map((a) => (
             <div className="report-row" key={a.label}>
               <span>{a.label}</span>
@@ -112,11 +130,11 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
 
       {/* Debate outcomes */}
       {debates.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <div className="rl" style={{ marginBottom: 4 }}>Debate nights</div>
+        <div className="report-section">
+          <div className="report-title">Debate nights</div>
           {debates.map((d, i) => (
-            <div className="report-row" key={i}>
-              <span>Week {d.turn}</span>
+            <div className="report-row dated" key={i}>
+              <span className="num">Week {d.turn}</span>
               <span>{d.text.replace(/^Debate:\s*/, "")}</span>
             </div>
           ))}
@@ -126,10 +144,10 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
       {/* Event impact */}
       {otherEvents.length > 0 && (
         <div>
-          <div className="rl" style={{ marginBottom: 4 }}>Events that hit the campaign</div>
+          <div className="report-title">Events that hit the campaign</div>
           {otherEvents.slice(0, 10).map((e, i) => (
-            <div className="report-row" key={i}>
-              <span>Week {e.turn}</span>
+            <div className="report-row dated" key={i}>
+              <span className="num">Week {e.turn}</span>
               <span className="muted">{e.text}</span>
             </div>
           ))}

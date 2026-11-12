@@ -77,43 +77,44 @@ fun NativeEditorScreen(session: GameSession) {
             }.onFailure { message = it.message }
         }
     }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("SCENARIO EDITOR", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
-        Text("Create a casual campaign. Custom scenarios stay off daily and ranked leaderboards. Save and export them to share with the web editor.")
-        message?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+        ScreenHeader("Scenario editor", if (draft == null) "Your scenarios" else "Edit scenario",
+            "Create a casual campaign. Custom scenarios stay off daily and ranked leaderboards. Save and export them to share with the web editor.")
+        message?.let { Notice(it) }
         val json = draft
         if (json == null) {
-            Text("Country")
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                MobileCampaign.countries().forEach { c -> FilterChip(country == c.id, { country = c.id }, label = { Text("${c.flag} ${c.id}") }) }
+            MovCard {
+                CardHead("New scenario")
+                Eyebrow("Country")
+                ChipRow { MobileCampaign.countries().forEach { c -> MovChip("${c.flag} ${c.name}", country == c.id, { country = c.id }) } }
+                PrimaryButton("Create scenario", { draft = NativeCustomScenario.create(country, "custom-${UUID.randomUUID()}", null, System.currentTimeMillis()); dirty = true; message = null }, Modifier.fillMaxWidth())
+                SecondaryButton("Import scenario JSON", { importer.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }, Modifier.fillMaxWidth())
             }
-            Button(onClick = { draft = NativeCustomScenario.create(country, "custom-${UUID.randomUUID()}", null, System.currentTimeMillis()); dirty = true; message = null }) { Text("Create scenario") }
-            OutlinedButton(onClick = { importer.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }) { Text("Import scenario JSON") }
             entries.forEach { entry ->
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(entry.label, style = MaterialTheme.typography.titleMedium)
-                        Text("${entry.country} · Casual")
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TextButton(onClick = { draft = entry.json; dirty = false; message = null }) { Text("Edit") }
-                            TextButton(onClick = { draft = NativeCustomScenario.duplicate(entry.json, "custom-${UUID.randomUUID()}", System.currentTimeMillis()); dirty = true }) { Text("Duplicate") }
-                            TextButton(onClick = { NativeCustomScenario.start(entry.json)?.let { session.importCampaign(it) } }) { Text("Play") }
-                            TextButton(onClick = { deleting = entry.id }) { Text("Delete") }
-                        }
+                MovCard(tight = true) {
+                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        Text(entry.label, Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, color = Mov.Text1)
+                        Tag("${NativeCatalog.country(entry.country)?.flag ?: ""} ${entry.country} · Casual".trim(), TagKind.Outline)
+                    }
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
+                        SecondaryButton("Play", { NativeCustomScenario.start(entry.json)?.let { session.importCampaign(it) } })
+                        GhostButton("Edit", { draft = entry.json; dirty = false; message = null })
+                        GhostButton("Duplicate", { draft = NativeCustomScenario.duplicate(entry.json, "custom-${UUID.randomUUID()}", System.currentTimeMillis()); dirty = true })
+                        GhostButton("Delete", { deleting = entry.id }, color = Mov.Negative)
                     }
                 }
             }
         } else {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { save() }) { Text("Save") }
-                OutlinedButton(onClick = { save()?.let { exporting = it; exporter.launch("mov-scenario.json") } }) { Text("Export JSON") }
-                OutlinedButton(onClick = { save()?.let(NativeCustomScenario::start)?.let { session.importCampaign(it) } }) { Text("Play casual") }
-                TextButton(onClick = { if (dirty) leave = true else draft = null }) { Text("My scenarios") }
+                PrimaryButton("Save", { save() })
+                SecondaryButton("Play casual", { save()?.let(NativeCustomScenario::start)?.let { session.importCampaign(it) } })
+                GhostButton("Export JSON", { save()?.let { exporting = it; exporter.launch("mov-scenario.json") } })
+                GhostButton("My scenarios", { if (dirty) leave = true else draft = null }, color = Mov.Text2)
             }
             val entry = NativeCustomScenario.entry(json)
             if (entry != null && entry.country != "US") {
                 var choices by remember { mutableStateOf(false) }
-                OutlinedButton(onClick = { choices = true }) { Text("Change base election") }
+                SecondaryButton("Change base election", { choices = true })
                 DropdownMenu(choices, { choices = false }) {
                     MobileCampaign.elections(entry.country).forEach { election -> DropdownMenuItem(text = { Text(election.label) }, onClick = {
                         draft = NativeCustomScenario.changeElection(json, election.nativeId); dirty = true; choices = false
@@ -123,16 +124,16 @@ fun NativeEditorScreen(session: GameSession) {
             }
             NativeCustomScenario.fields(json).groupBy { it.section }.forEach { (section, fields) ->
                 var expanded by remember(section) { mutableStateOf(section == "Campaign") }
-                OutlinedButton(onClick = { expanded = !expanded }, modifier = Modifier.fillMaxWidth()) { Text("${if (expanded) "▾" else "▸"} $section") }
+                CardHead(section) { GhostButton(if (expanded) "Hide" else "Show", { expanded = !expanded }) }
                 if (expanded) fields.forEach { field ->
                     if (field.choices.isNotEmpty()) {
-                        Text(field.label)
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) { field.choices.forEach { value -> FilterChip(field.value == value, {
+                        Eyebrow(field.label)
+                        ChipRow { field.choices.forEach { value -> MovChip(value, field.value == value, {
                             draft = NativeCustomScenario.edit(draft ?: json, field.path, value); dirty = true
-                        }, label = { Text(value) }) } }
+                        }) } }
                     } else {
                         OutlinedTextField(field.value, { value -> draft = NativeCustomScenario.edit(draft ?: json, field.path, value); dirty = true },
-                            label = { Text(field.label) }, modifier = Modifier.fillMaxWidth(),
+                            label = { Text(field.label) }, modifier = Modifier.fillMaxWidth(), colors = movFieldColors(), shape = MovRadius.md,
                             keyboardOptions = KeyboardOptions(keyboardType = if (field.numeric) KeyboardType.Decimal else KeyboardType.Text))
                     }
                 }

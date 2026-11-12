@@ -124,9 +124,16 @@ dailyRouter.get("/board", optionalAuth, (req: AuthedRequest, res) => {
     if (mine) me = { rank: rankFor(date, mine.score, mine.finished_at), score: mine.score };
   }
 
+  // A past day reports the scenario its scores were actually played on, so
+  // registering new countries (which can reassign future rotation days)
+  // never relabels history. Today always follows the live assignment.
+  const played = date === utcDateString() ? undefined : getDb().prepare(
+    "SELECT scenario_id FROM daily_scores WHERE date = ? ORDER BY finished_at ASC LIMIT 1",
+  ).get(date) as { scenario_id: string } | undefined;
+
   res.json({
     date,
-    scenarioId: dailyAssignment(date).scenarioId,
+    scenarioId: played?.scenario_id ?? dailyAssignment(date).scenarioId,
     entries: boardEntries(date, 25),
     me,
   });

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { X } from "lucide-react";
 import { LakesideButton, AuthDivider } from "./LakesideButton";
 import { Spinner } from "@ui/Skeleton";
@@ -22,8 +23,8 @@ export function RegisterModal() {
     const err = await register(username, email, password);
     setBusy(false);
     if (err) { setError(err); return; }
-    if (paywallScenarioId) openModal("activate", paywallScenarioId);
-    else closeModal();
+    closeModal();
+    if (paywallScenarioId) openStoreForScenario(paywallScenarioId);
   };
 
   return (
@@ -32,7 +33,7 @@ export function RegisterModal() {
         <div className="head">
           <div className="tag">Account</div>
           <h2>Create Account</h2>
-          <button className="sheet-close" onClick={closeModal} aria-label="Close"><X size={18} /></button>
+          <button className="modal-close" onClick={closeModal} aria-label="Close"><X size={18} /></button>
         </div>
         <div className="body">
           <LakesideButton />

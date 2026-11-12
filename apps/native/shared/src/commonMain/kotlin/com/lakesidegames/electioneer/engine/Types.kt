@@ -1,6 +1,7 @@
 package com.lakesidegames.electioneer.engine
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmInline
 
 // ─────────────────────────────────────────────────────────────────────────
 // Port of MOVGame `src/engine/types.ts` (+ the PartyId family from
@@ -37,40 +38,28 @@ enum class IssueId(val serial: String) {
     TRADE("trade"),
 }
 
+// Voter bloc id. The TS type is the closed US union, but every country module
+// brings its own bloc ids as plain strings (New Zealand adds "maori" and
+// "pasifika", and each new country can add more). The id is therefore an open
+// wrapper around the TS string. The named members below are the US set (the
+// TS union). UK and country code takes its ids from the bundles, and any id a
+// bundle carries is valid.
 @Serializable(with = BlocIdSerial::class)
-enum class BlocId(val serial: String) {
-    // US set (Phase 0 contract).
-    NONCOLLEGE_WHITE("noncollege_white"),
-    COLLEGE_WHITE("college_white"),
-    SUBURBAN_WOMEN("suburban_women"),
-    BLACK("black"),
-    HISPANIC("hispanic"),
-    ASIAN_OTHER("asian_other"),
-    SENIORS("seniors"),
-    YOUTH("youth"),
-    // UK set (TS casts these unsoundly; the port types them exactly).
-    YOUNG("young"),
-    GRADUATE("graduate"),
-    WORKINGCLASS("workingclass"),
-    HOMEOWNER("homeowner"),
-    RENTER("renter"),
-    PENSIONER("pensioner"),
-    // Country sets (shared ids reuse the UK members above).
-    YOUNG_RENTER("young_renter"),
-    MORTGAGE_BELT("mortgage_belt"),
-    REGIONAL("regional"),
-    SENIOR("senior"),
-    MULTICULTURAL("multicultural"),
-    WORKER("worker"),
-    FRANCOPHONE("francophone"),
-    URBAN_GRADUATE("urban_graduate"),
-    PERIURBAN_WORKER("periurban_worker"),
-    RURAL("rural"),
-    ;
+@JvmInline
+value class BlocId(val serial: String) {
+    override fun toString(): String = serial
 
     companion object {
-        fun fromSerial(serial: String): BlocId =
-            entries.first { it.serial == serial }
+        val NONCOLLEGE_WHITE = BlocId("noncollege_white")
+        val COLLEGE_WHITE = BlocId("college_white")
+        val SUBURBAN_WOMEN = BlocId("suburban_women")
+        val BLACK = BlocId("black")
+        val HISPANIC = BlocId("hispanic")
+        val ASIAN_OTHER = BlocId("asian_other")
+        val SENIORS = BlocId("seniors")
+        val YOUTH = BlocId("youth")
+
+        fun fromSerial(serial: String): BlocId = BlocId(serial)
     }
 }
 
@@ -266,6 +255,9 @@ data class StateContest(
     val baselineSeats: Map<String, Int>? = null,
     val baselineShare: Map<String, Double>? = null,
     val seatElasticity: Double? = null,
+    // Presidential units (runoff or plurality presidency): the pool splits in
+    // proportion to the region's live vote (web StateContest.proportional).
+    val proportional: Boolean? = null,
 )
 
 @Serializable
@@ -566,6 +558,9 @@ data class MajorityRule(
     val threshold: Int,
     // Effective threshold net of abstentions/Speaker (UK ~= 320).
     val effectiveThreshold: Int? = null,
+    // Single-round plurality: the largest party wins outright (no threshold,
+    // no coalition step). Set from the bundle by majorityFor; null elsewhere.
+    val plurality: Boolean? = null,
 )
 
 @Serializable
@@ -576,3 +571,6 @@ data class PoliticalSystem(
     val allocation: AllocationStrategy,
     val majority: MajorityRule,
 )
+
+// The issue axes live in this game, in IssueId order (TS liveIssueIds).
+fun GameState.liveIssueIds(): List<IssueId> = IssueId.entries.filter { it.serial in issues }

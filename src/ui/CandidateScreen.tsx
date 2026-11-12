@@ -1,3 +1,5 @@
+import { X } from "lucide-react";
+import { partyInk } from "@ui/colors";
 import { useState } from "react";
 import { getScenario, type ScenarioTicket } from "@content/scenarios";
 import { TRAIT_LABELS, mateBonusChips } from "@ui/labels";
@@ -37,7 +39,7 @@ function CandidateCard({
     >
       <Avatar name={ticket.name} color={ticket.color} size={44} />
       <div className="candinfo">
-        <div className="nm" style={{ color: ticket.color }}>{ticket.name}</div>
+        <div className="nm" style={{ color: partyInk(ticket.color) }}>{ticket.name}</div>
         <div className="rm">{ticket.party}</div>
       </div>
     </div>
@@ -55,13 +57,9 @@ export function CandidateScreen({ scenarioId, onClose }: { scenarioId?: string; 
     <div className="overlay" onClick={onClose}>
       <div className="modal candidate-modal" onClick={(e) => e.stopPropagation()}>
         <div className="head">
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <div>
-              <div className="tag">{scenario.label}</div>
-              <h2>Ticket Profiles</h2>
-            </div>
-            <button className="ghost" onClick={onClose}>Close</button>
-          </div>
+          <div className="tag">{scenario.label}</div>
+          <h2>Ticket Profiles</h2>
+          <button className="modal-close" onClick={onClose} aria-label="Close" title="Close"><X size={16} /></button>
         </div>
         <div className="body">
           <div className="candselector">
@@ -69,11 +67,11 @@ export function CandidateScreen({ scenarioId, onClose }: { scenarioId?: string; 
             <CandidateCard ticket={scenario.rep} selected={selected === "rep"} onSelect={() => setSelected("rep")} />
           </div>
 
-          <div className="profile-tabs">
-            <button className={view === "candidate" ? "active" : ""} onClick={() => setView("candidate")}>
+          <div className="profile-tabs" role="tablist" aria-label="Profile view">
+            <button type="button" role="tab" aria-selected={view === "candidate"} className={view === "candidate" ? "active" : ""} onClick={() => setView("candidate")}>
               {ticket.name}
             </button>
-            <button className={view === "runningMate" ? "active" : ""} onClick={() => setView("runningMate")}>
+            <button type="button" role="tab" aria-selected={view === "runningMate"} className={view === "runningMate" ? "active" : ""} onClick={() => setView("runningMate")}>
               Running mates
             </button>
           </div>

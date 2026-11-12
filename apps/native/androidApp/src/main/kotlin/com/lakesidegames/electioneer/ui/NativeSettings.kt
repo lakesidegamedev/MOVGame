@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.lakesidegames.electioneer.engine.NativeCatalog
 import com.lakesidegames.electioneer.engine.NativeHelp
 import com.lakesidegames.electioneer.engine.NativeSound
 import com.lakesidegames.electioneer.BuildConfig
@@ -40,7 +41,7 @@ class NativePreferences(private val context: Context) {
     fun hotkeys(value: Boolean) { hotkeysOn = value; prefs.edit().putBoolean("hotkeys_on", value).apply() }
     fun tourDone(country: String) = prefs.getBoolean("tour_$country", false)
     fun finishTour(country: String) { prefs.edit().putBoolean("tour_$country", true).apply() }
-    fun replayTutorial() { replayRequested = true; prefs.edit().apply { listOf("US", "UK", "CA", "DE", "FR", "AU").forEach { remove("tour_$it") } }.apply(); tutorialNonce++ }
+    fun replayTutorial() { replayRequested = true; prefs.edit().apply { NativeCatalog.countryIds().forEach { remove("tour_$it") } }.apply(); tutorialNonce++ }
     fun play(cue: String) {
         if (!soundOn || volume <= 0f) return
         val file = File(context.cacheDir, "mov-cue-$cue.wav")
@@ -65,45 +66,61 @@ class NativePreferences(private val context: Context) {
 fun NativeSettingsScreen(session: GameSession) {
     val settings = session.settings
     val uri = LocalUriHandler.current
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text("SETTINGS", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
-        NativeToggle("Sound effects", settings.soundOn, settings::sound)
-        Text("Volume: ${(settings.volume * 100).toInt()}%")
-        Slider(settings.volume, settings::volume, enabled = settings.soundOn, modifier = Modifier.semantics { contentDescription = "Sound volume" })
-        Button(onClick = { settings.play("turnAdvance") }, enabled = settings.soundOn) { Text("Preview sound") }
-        NativeToggle("Reduce motion", settings.reducedMotion, settings::motion)
-        Text("Election night uses instant results when this or your device's animation setting is on.", style = MaterialTheme.typography.bodySmall)
-        NativeToggle("Keyboard shortcuts", settings.hotkeysOn, settings::hotkeys)
-        Text("Enter or Space ends the week, with confirmation if no moves are queued. 1 through 9 selects a move. Escape closes a recap or selection. ? opens Settings. Shortcuts pause while typing or resolving an event.", style = MaterialTheme.typography.bodySmall)
-        Button(onClick = { settings.replayTutorial(); session.resumeGame() }, enabled = (session.game.value.state != null || session.campaign.value != null)) { Text("Replay tutorial") }
-        OutlinedButton(onClick = { session.go(Screen.EDITOR) }) { Text("Scenario editor") }
-        OutlinedButton(onClick = { session.go(Screen.GUIDE) }) { Text("How to play") }
-        TextButton(onClick = { uri.openUri("https://lakesidegames.net/games/electioneer/?legal=privacy") }) { Text("Privacy policy") }
-        TextButton(onClick = { uri.openUri("https://lakesidegames.net/games/electioneer/?legal=terms") }) { Text("Terms of service") }
-        TextButton(onClick = { uri.openUri("mailto:support@lakesidegames.net") }) { Text("Contact support") }
-        TextButton(onClick = { uri.openUri("https://lakesidegames.net/games/electioneer/") }) { Text("Web game") }
-        Text("Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})", style = MaterialTheme.typography.bodySmall)
+    val slider = SliderDefaults.colors(thumbColor = Mov.Accent, activeTrackColor = Mov.Accent, inactiveTrackColor = Mov.Sunken)
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+        ScreenHeader("Settings", "Game settings")
+        MovCard {
+            CardHead("Sound")
+            NativeToggle("Sound effects", settings.soundOn, settings::sound)
+            KeyValue("Volume", "${(settings.volume * 100).toInt()}%")
+            Slider(settings.volume, settings::volume, enabled = settings.soundOn, modifier = Modifier.semantics { contentDescription = "Sound volume" }, colors = slider)
+            SecondaryButton("Preview sound", { settings.play("turnAdvance") }, enabled = settings.soundOn)
+        }
+        MovCard {
+            CardHead("Motion and controls")
+            NativeToggle("Reduce motion", settings.reducedMotion, settings::motion)
+            Text("Election night uses instant results when this or your device's animation setting is on.", style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
+            Hairline()
+            NativeToggle("Keyboard shortcuts", settings.hotkeysOn, settings::hotkeys)
+            Text("Enter or Space ends the week, with confirmation if no moves are queued. 1 through 9 selects a move. Escape closes a recap or selection. ? opens Settings. Shortcuts pause while typing or resolving an event.", style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
+        }
+        MovCard {
+            CardHead("Learn and create")
+            SecondaryButton("Replay tutorial", { settings.replayTutorial(); session.resumeGame() }, Modifier.fillMaxWidth(),
+                enabled = (session.game.value.state != null || session.campaign.value != null))
+            SecondaryButton("How to play", { session.go(Screen.GUIDE) }, Modifier.fillMaxWidth())
+            SecondaryButton("Scenario editor", { session.go(Screen.EDITOR) }, Modifier.fillMaxWidth())
+        }
+        MovCard(tight = true) {
+            CardHead("About")
+            GhostButton("Privacy policy", { uri.openUri("https://lakesidegames.net/games/electioneer/?legal=privacy") }, color = Mov.Info)
+            GhostButton("Terms of service", { uri.openUri("https://lakesidegames.net/games/electioneer/?legal=terms") }, color = Mov.Info)
+            GhostButton("Contact support", { uri.openUri("mailto:support@lakesidegames.net") }, color = Mov.Info)
+            GhostButton("Web game", { uri.openUri("https://lakesidegames.net/games/electioneer/") }, color = Mov.Info)
+            Text("Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})", style = MaterialTheme.typography.bodySmall.num, color = Mov.Text4)
+        }
     }
 }
 
 @Composable
 internal fun NativeToggle(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
-        .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = null)
+    Row(Modifier.fillMaxWidth().heightIn(min = MovSpace.touch).toggleable(value = checked, role = Role.Switch, onValueChange = onChange),
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(label, Modifier.weight(1f), color = Mov.Text1, style = MaterialTheme.typography.bodyLarge)
+        Switch(checked = checked, onCheckedChange = null, colors = SwitchDefaults.colors(checkedThumbColor = Mov.OnAccent, checkedTrackColor = Mov.Accent,
+            uncheckedThumbColor = Mov.Text3, uncheckedTrackColor = Mov.Sunken, uncheckedBorderColor = Mov.BorderStrong))
     }
 }
 
 @Composable
 fun NativeGuideScreen() {
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text("HOW TO PLAY", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+        ScreenHeader("How to play", "Run a winning campaign")
         NativeHelp.guide().forEach { lesson ->
-            Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(14.dp)) {
-                Text(lesson.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                Text(lesson.body)
-            } }
+            MovCard {
+                CardHead(lesson.title)
+                Text(lesson.body, color = Mov.Text2, style = MaterialTheme.typography.bodyMedium)
+            }
         }
     }
 }
@@ -120,12 +137,12 @@ fun NativeCampaignCoach(session: GameSession, country: String, goal: String, tur
     fun finish() { step = null; settings.finishTour(country) }
     step?.let { index ->
         val lesson = NativeHelp.steps(country, goal)[index]
-        Card(Modifier.fillMaxWidth().padding(12.dp).semantics { liveRegion = LiveRegionMode.Polite }) {
-            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row { Text("TOUR · ${index + 1}/8", Modifier.weight(1f), color = MaterialTheme.colorScheme.primary); TextButton(onClick = ::finish) { Text("Skip tour") } }
-                Text(lesson.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                Text(lesson.body)
-                Row { if (index > 0) TextButton(onClick = { step = index - 1 }) { Text("Back") }; Spacer(Modifier.weight(1f)); Button(onClick = { if (index == 7) finish() else step = index + 1 }) { Text(if (index == 7) "Done" else "Next") } }
+        Callout("Tour · ${index + 1} of 8 · ${lesson.title}", lesson.body, Modifier.padding(MovSpace.s3).semantics { liveRegion = LiveRegionMode.Polite }, kind = NoticeKind.Info) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                GhostButton("Skip tour", ::finish, color = Mov.Text2)
+                Spacer(Modifier.weight(1f))
+                if (index > 0) GhostButton("Back", { step = index - 1 }, color = Mov.Text2)
+                SecondaryButton(if (index == 7) "Done" else "Next", { if (index == 7) finish() else step = index + 1 })
             }
         }
     }

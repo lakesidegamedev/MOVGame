@@ -12,8 +12,11 @@ import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
+import com.lakesidegames.electioneer.engine.StoreGate
 import com.lakesidegames.electioneer.ui.CampaignAccount
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -95,6 +98,37 @@ class PlayBilling(
                 connecting = false
             }
         })
+    }
+
+    private val _gate = MutableStateFlow(StoreGate.OPEN)
+    /** Which paid elections lock on this device. Open until proven otherwise. */
+    val gate: StateFlow<StoreGate> = _gate
+    @Volatile private var gateGeneration = 0
+
+    /**
+     * Re-reads the lock switch for the current account. Everything opens at
+     * once; locks return only after the public catalog says native gating is
+     * on and Play has loaded the pack's product on this device. Signed-out
+     * players follow the same switch, so a lock never depends on sign-in.
+     */
+    fun refreshGate() {
+        val generation = ++gateGeneration
+        _gate.value = StoreGate.OPEN
+        scope.launch {
+            val server = try { StoreGate.fromServer(account.storeCatalog().toString(), StoreGate.GOOGLE) } catch (_: Exception) { return@launch }
+            if (generation != gateGeneration || !server.gate.gating) return@launch
+            ensureConnected {
+                val params = QueryProductDetailsParams.newBuilder().setProductList(server.skus.keys.map { sku ->
+                    QueryProductDetailsParams.Product.newBuilder().setProductId(sku).setProductType(BillingClient.ProductType.INAPP).build()
+                }).build()
+                client.queryProductDetailsAsync(params) { result, details ->
+                    if (generation != gateGeneration || result.responseCode != BillingClient.BillingResponseCode.OK) return@queryProductDetailsAsync
+                    val loaded = details.productDetailsList.filter { it.oneTimePurchaseOfferDetails != null }
+                        .mapNotNull { server.skus[it.productId] }.toSet()
+                    _gate.value = server.gate.onDevice(loaded)
+                }
+            }
+        }
     }
 
     fun listProducts(onDone: (List<StoreProduct>) -> Unit) {
@@ -209,6 +243,6 @@ class PlayBilling(
         try { account.refreshStoreOwnership() }
         catch (error: Exception) { if (lastNotice == null) lastNotice = error.message ?: "Shared purchases will refresh when online." }
     }
-    fun close() { onChange = null; pendingOnConnect.clear(); client.endConnection() }
+    fun close() { gateGeneration++; onChange = null; pendingOnConnect.clear(); client.endConnection() }
     fun entitlements(): Set<String> = account.cachedStorePacks()
 }

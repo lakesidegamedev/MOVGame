@@ -6,6 +6,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lakesidegames.electioneer.engine.MobileCampaign
 
@@ -26,27 +28,40 @@ fun DailyBoardsScreen(session: GameSession) {
         else if (dateValid) account.loadBoard(date, selected.takeIf { it != "daily" })
     }
     LaunchedEffect(selected, date, user?.id) { refresh() }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("LEADERBOARDS", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.headlineMedium)
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+        ScreenHeader("Leaderboards", "Daily and campaign boards", "Daily champions, the daily challenge, and every election's best scores.")
         ChoicePicker("Board", selected, listOf("champions" to "Daily champions", "daily" to "Daily challenge") + elections.map { it.scenarioId to "${it.flag} ${it.label}" }) { selected = it }
-        if (selected == "daily") OutlinedTextField(date, { date = it.take(10) }, label = { Text("Daily date (YYYY-MM-DD, UTC)") }, singleLine = true, isError = !dateValid, modifier = Modifier.fillMaxWidth())
-        if (selected == "champions") {
-            champions?.let { table ->
-                Text("${table.totalDays} days played")
-                if (table.entries.isEmpty()) Text("No daily champions yet.")
-                table.entries.forEach { entry ->
-                    Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(12.dp)) {
-                        Text("#${entry.rank} ${entry.username}", style = MaterialTheme.typography.titleMedium)
-                        Text("${entry.wins} wins · ${entry.podiums} podiums · ${entry.played} played · ${entry.totalScore} points")
-                    } }
+        if (selected == "daily") OutlinedTextField(date, { date = it.take(10) }, label = { Text("Daily date (YYYY-MM-DD, UTC)") }, singleLine = true, isError = !dateValid,
+            modifier = Modifier.fillMaxWidth(), colors = movFieldColors(), shape = MovRadius.md)
+        notice?.let { Notice(it) }
+        MovCard(tight = true) {
+            if (selected == "champions") {
+                val table = champions
+                CardHead("Daily champions") { table?.let { Text("${it.totalDays} days played", color = Mov.Text3, style = MaterialTheme.typography.labelMedium.num) } }
+                if (table == null || table.entries.isEmpty()) Text("No daily champions yet.", color = Mov.Text3, style = MaterialTheme.typography.bodyMedium)
+                table?.entries?.forEach { entry ->
+                    Row(Modifier.fillMaxWidth().heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
+                        Text("#${entry.rank}", Modifier.width(40.dp), color = if (entry.rank <= 3) Mov.Warning else Mov.Text3, style = MaterialTheme.typography.titleSmall.num)
+                        Column(Modifier.weight(1f)) {
+                            Text(entry.username, color = Mov.Text1, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                            Text("${entry.wins} wins · ${entry.podiums} podiums · ${entry.played} played", color = Mov.Text3, style = MaterialTheme.typography.bodySmall.num)
+                        }
+                        Text("${entry.totalScore}", color = Mov.Text1, style = MaterialTheme.typography.bodyMedium.num, fontWeight = FontWeight.Bold)
+                    }
+                }
+            } else {
+                CardHead("Scores")
+                rank?.let { KeyValue("Your rank", "#${it.rank} · ${it.score}", valueColor = Mov.Positive) }
+                if (board.isEmpty()) Text("No scores to show yet. You can keep playing offline.", color = Mov.Text3, style = MaterialTheme.typography.bodyMedium)
+                board.forEach { entry ->
+                    Row(Modifier.fillMaxWidth().heightIn(min = 36.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
+                        Text("#${entry.rank}", Modifier.width(40.dp), color = if (entry.rank <= 3) Mov.Warning else Mov.Text3, style = MaterialTheme.typography.titleSmall.num)
+                        Text(entry.username, Modifier.weight(1f), color = Mov.Text1, style = MaterialTheme.typography.bodyMedium)
+                        Text("${entry.score}", color = Mov.Text1, style = MaterialTheme.typography.bodyMedium.num, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
-        } else {
-            rank?.let { Text("Your daily rank: #${it.rank} · ${it.score}", color = MaterialTheme.colorScheme.primary) }
-            if (board.isEmpty()) Text("No scores to show yet. You can keep playing offline.")
-            board.forEach { entry -> Text("#${entry.rank} ${entry.username} · ${entry.score}") }
         }
-        TextButton(onClick = ::refresh) { Text("Refresh leaderboard") }
-        notice?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+        GhostButton("Refresh leaderboard", ::refresh)
     }
 }

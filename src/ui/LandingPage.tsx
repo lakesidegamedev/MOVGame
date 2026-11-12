@@ -1,40 +1,46 @@
-import { useMemo, useState, type ReactNode } from "react";
-import { PAYWALL_ENABLED, SCENARIO_REGISTRY, type CountryCode, type ScenarioMeta } from "@content/scenarioRegistry";
+import type { ReactNode } from "react";
+import { PAYWALL_ENABLED, SCENARIO_REGISTRY, type ScenarioMeta } from "@content/scenarioRegistry";
 import { packCovered, STORE_PACKS } from "@content/packs";
 import { countryCover } from "@content/covers";
+import { COUNTRY_MODULES } from "@content/countries";
+import {
+  COUNTRY_COUNT, ELECTION_COUNT, FREE_COUNTRY_COUNT, FREE_ELECTION_COUNT, VOTING_SYSTEM_COUNT,
+  countryInSentence, electionCountFor, firstYearFor, joinList,
+} from "@content/facts";
 import { useAuthStore } from "@store/authStore";
+import { useStoreNav } from "@store/storeNav";
 import { usePackPrices } from "@lib/usePackPrices";
-import { DISTRIBUTION } from "@lib/distribution";
+import { packFacts, COMPLETE_ID } from "@lib/storeModel";
+import { BUILD_COMMIT, DISTRIBUTION } from "@lib/distribution";
 import { UserMenu } from "@ui/auth/UserMenu";
 import { DailyCard } from "@ui/DailyCard";
-import { ScenarioArt } from "@ui/ScenarioArt";
+import { ElectionLibrary, LibraryCard } from "@ui/library/ElectionLibrary";
 import { EvBar } from "@ui/EvBar";
 import { Sparkline } from "@ui/Sparkline";
 import {
-  Lock, Play, Trophy, KeyRound, ChevronLeft, ChevronRight, Check, X, ShoppingBag,
-  LineChart, Mic2, Globe2, MessageCircleQuestion, Search,
+  Play, Trophy, Check, X, ShoppingBag,
+  LineChart, Mic2, Globe2,
 } from "lucide-react";
 import { BRAND } from "../brand";
-import { useGameStore } from "@store/gameStore";
+import { useSavesStore } from "@store/savesStore";
+import { sessionGame } from "@store/sessions";
+import type { GameState } from "@engine/types";
 import { listResumableCampaigns, type ResumeTarget } from "@persistence/resume";
 
-const COUNTRY_NAMES: Record<CountryCode, string> = {
-  US: "United States",
-  UK: "United Kingdom",
-  CA: "Canada",
-  DE: "Germany",
-  FR: "France",
-  AU: "Australia",
-};
-
-const COUNTRY_BLURBS: Record<CountryCode, string> = {
-  US: "Winner-take-all duels for 270 electoral votes.",
-  UK: "Multiparty FPTP: coalitions, landslides, hung parliaments.",
-  CA: "343 seats, five parties, coast to coast to coast.",
-  DE: "Proportional Bundestag politics and the firewall.",
-  FR: "The two-round runoff for the Élysée.",
-  AU: "Preferential voting across 150 seats.",
-};
+// "the UK, Canada, ..., and Japan": every registered country after the US.
+function otherCountriesList(): string {
+  return joinList(COUNTRY_MODULES.filter((m) => m.code !== "US").map((m) => countryInSentence(m.code, m.name)));
+}
+const COUNTRY_FLAGS = COUNTRY_MODULES.map((m) => m.flag);
+const VOTING_SYSTEMS_LINE = `${COUNTRY_COUNT} countries, ${VOTING_SYSTEM_COUNT} voting systems`;
+const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+// "13 full elections across 12 countries": every country has a free election.
+const FREE_LINE = `${FREE_ELECTION_COUNT} full elections across ${FREE_COUNTRY_COUNT} countries`;
+// The hero has just named the totals, so it says "15 of them, at least one in
+// every country" rather than repeating "across 14 countries".
+const HERO_FREE_LINE = FREE_COUNTRY_COUNT === COUNTRY_COUNT
+  ? `${FREE_ELECTION_COUNT} of them, at least one in every country`
+  : FREE_LINE;
 
 export type LandingDestination =
   | { kind: "us"; scenarioId: string }   // native id, e.g. "2024"
@@ -43,12 +49,6 @@ export type LandingDestination =
   | { kind: "leaderboard" }
   | { kind: "daily" }                    // App resolves via dailyAssignment()
   | { kind: "legal"; tab?: "privacy" | "terms" };
-
-const DIFF_COLOR: Record<ScenarioMeta["difficulty"], string> = {
-  easy: "var(--green)",
-  medium: "var(--gold)",
-  hard: "var(--rose)",
-};
 
 function CoverImg({ src, alt, tall }: { src?: string; alt: string; tall?: boolean }) {
   if (!src) return null;
@@ -60,59 +60,6 @@ function CoverImg({ src, alt, tall }: { src?: string; alt: string; tall?: boolea
       loading="lazy"
       decoding="async"
     />
-  );
-}
-
-function ScenarioCard({ s, unlocked, onPlay, onLocked, showCover = true }: {
-  s: ScenarioMeta;
-  unlocked: boolean;
-  onPlay: () => void;
-  onLocked: () => void;
-  showCover?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      className={`scenario-card${showCover ? " has-cover" : ""}`}
-      style={{ position: "relative", textAlign: "left", alignItems: showCover ? "stretch" : "flex-start", opacity: unlocked ? 1 : 0.75, minHeight: showCover ? undefined : 96 }}
-      onClick={unlocked ? onPlay : onLocked}
-      title={s.description}
-    >
-      {showCover && (
-        <ScenarioArt
-          scenarioId={s.scenarioId}
-          country={s.country}
-          year={s.year}
-        />
-      )}
-      <span className="row" style={{ gap: 8, alignItems: "center", width: "100%" }}>
-        <span style={{ fontSize: 18 }}>{s.flag}</span>
-        <span className="scenario-year" style={{ fontSize: 15 }}>{s.label.split("·")[0].trim()}</span>
-        <span style={{ marginLeft: "auto", display: "inline-flex", gap: 6, alignItems: "center" }}>
-          <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 1, color: DIFF_COLOR[s.difficulty] }}>{s.difficulty}</span>
-          {s.free && PAYWALL_ENABLED ? (
-            <span style={{ fontSize: 10, fontWeight: 800, color: "var(--green)", border: "1px solid var(--green)", borderRadius: 4, padding: "1px 5px" }}>FREE</span>
-          ) : !unlocked ? (
-            <Lock size={13} style={{ color: "var(--gold)" }} />
-          ) : (
-            <Play size={13} style={{ color: "var(--green)" }} />
-          )}
-        </span>
-      </span>
-      <span className="scenario-match" style={{ fontWeight: 700 }}>{s.label.split("·")[1]?.trim() ?? s.label}</span>
-      <span className="muted small" style={{ fontSize: 11, lineHeight: 1.4 }}>{s.description}</span>
-      {(s.scenarioId === "us-1984" || s.scenarioId === "uk-1983" || s.scenarioId === "uk-1997" || s.scenarioId === "uk-2001" || s.scenarioId === "uk-2024" || s.scenarioId === "fr-2017") && (
-        <span className="muted small" style={{ fontSize: 10, color: "var(--rose)" }}>Historical tide</span>
-      )}
-      {s.scenarioId === "uk-2017" && (
-        <span className="muted small" style={{ fontSize: 10, color: "var(--gold)" }}>Coin-flip election</span>
-      )}
-      {!unlocked && (
-        <span className="muted small" style={{ fontSize: 10, color: "var(--gold)" }}>
-          <KeyRound size={10} style={{ verticalAlign: "-1px" }} /> Unlock with a code
-        </span>
-      )}
-    </button>
   );
 }
 
@@ -135,14 +82,14 @@ function FeatureBlock({
       <div className="feature-illustration">{children}</div>
       <span className="feature-icon">{icon}</span>
       <h3>{title}</h3>
-      <p className="muted small" style={{ lineHeight: 1.5 }}>{blurb}</p>
+      <p className="small">{blurb}</p>
     </div>
   );
 }
 
 function FeaturesSection() {
   return (
-    <div className="field" style={{ margin: "8px 0 0" }}>
+    <div className="landing-features">
       <div className="feature-grid">
         <FeatureBlock
           icon={<LineChart size={18} />}
@@ -160,11 +107,11 @@ function FeaturesSection() {
         </FeatureBlock>
         <FeatureBlock
           icon={<Globe2 size={18} />}
-          title="Six countries, six voting systems"
+          title={VOTING_SYSTEMS_LINE}
           blurb="US electoral college duels, UK multiparty first-past-the-post with hung parliaments, French two-round runoffs, German proportional Bundestag seats, and more."
         >
           <div className="feature-flags">
-            {["\u{1F1FA}\u{1F1F8}", "\u{1F1EC}\u{1F1E7}", "\u{1F1E9}\u{1F1EA}", "\u{1F1EB}\u{1F1F7}", "\u{1F1E8}\u{1F1E6}", "\u{1F1E6}\u{1F1FA}"].map((f) => (
+            {COUNTRY_FLAGS.map((f) => (
               <span key={f}>{f}</span>
             ))}
           </div>
@@ -174,18 +121,21 @@ function FeaturesSection() {
   );
 }
 
-const FAQ_ITEMS: { q: string; a: string }[] = [
+const BUY_QUESTION = "Where do I buy bundles?";
+
+function faqItems(prices: Record<string, number>): { q: string; a: string }[] {
+  return [
   {
     q: "What's actually free?",
-    a: "Two full scenarios plus a new daily challenge every day, no account and no payment required. Nothing is time limited or ad supported.",
+    a: `${FREE_LINE}, so you can try every country before you buy it, plus a new daily challenge every day. No account and no payment required. Nothing is time limited or ad supported.`,
   },
   {
     q: "What do I get if I pay?",
-    a: "Each country is a $0.99 bundle: the rest of the US elections back to 1960, the UK, Canada, Germany, France, and Australia. The Complete Collection unlocks every country for $3.99. Both are one time purchases, not subscriptions.",
+    a: `Each country is a ${money(prices["us-historical"] ?? 99)} bundle with the rest of its elections: the US back to ${firstYearFor("US")}, ${otherCountriesList()}. The Complete Collection unlocks every country for ${money(prices.complete ?? 399)}. Both are one time purchases, not subscriptions.`,
   },
   {
-    q: "Where do I buy bundles?",
-    a: "Press Buy on any bundle or locked election. You sign in with your Lakeside account and pay through Stripe; the bundle unlocks on that account on every device. Activation codes are redeemed from the same prompt.",
+    q: BUY_QUESTION,
+    a: "Press Buy on any bundle or locked election. You sign in with your Lakeside account and pay through Stripe; the bundle unlocks on that account on every device. Have an activation code? Choose Redeem in the account menu.",
   },
   {
     q: "Can I play offline or without an account?",
@@ -199,15 +149,16 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
     q: "What platforms does this run on?",
     a: "It's a browser game: desktop and mobile, any modern browser, nothing to install.",
   },
-];
+  ];
+}
 
-function FaqSection() {
-  const items = FAQ_ITEMS.map((item) => {
+function FaqSection({ prices }: { prices: Record<string, number> }) {
+  const items = faqItems(prices).map((item) => {
     if (DISTRIBUTION.externalStore) return item;
     if (item.q === "What do I get if I pay?") {
       return { q: item.q, a: `Scenario packs unlock more elections. They are one time purchases managed by ${DISTRIBUTION.nativeStoreName}, not subscriptions.` };
     }
-    if (item.q === "Where do I buy packs?") {
+    if (item.q === BUY_QUESTION) {
       return { q: item.q, a: `Purchases and purchase restoration will be handled by ${DISTRIBUTION.nativeStoreName} in this edition.` };
     }
     if (item.q === "What's your refund policy?") {
@@ -219,13 +170,13 @@ function FaqSection() {
     return item;
   });
   return (
-    <div className="field" style={{ textAlign: "left", margin: "36px 0 0" }}>
-      <label><MessageCircleQuestion size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Frequently asked</label>
+    <div className="landing-section">
+      <div className="section-head"><h2 className="section-title">Frequently asked</h2></div>
       <div className="faq-list">
         {items.map((item) => (
           <details className="faq-item" key={item.q}>
             <summary>{item.q}</summary>
-            <p className="muted small" style={{ lineHeight: 1.55 }}>{item.a}</p>
+            <p className="faq-answer">{item.a}</p>
           </details>
         ))}
       </div>
@@ -239,17 +190,13 @@ function NoticeBanner() {
   const notice = useAuthStore((s) => s.notice);
   const dismiss = useAuthStore((s) => s.dismissNotice);
   if (!notice) return null;
-  const good = notice.kind === "purchase-success" || notice.kind === "lakeside-signed-in";
+  const good = notice.kind === "lakeside-signed-in";
   const text =
-    notice.kind === "purchase-success"
-      ? `Payment complete. ${notice.packName ?? "Your pack"} is unlocked on this account.`
-      : notice.kind === "purchase-cancelled"
-        ? "Checkout cancelled. Nothing was charged."
-        : notice.kind === "lakeside-signed-in"
-          ? `Signed in as ${notice.username} with your Lakeside Games account.`
-          : notice.kind === "lakeside-link-needs-login"
-            ? "A game account already uses that email. Log in with its password first, then link your Lakeside account from Your Account."
-            : "That sign in link expired. Try again from the login screen.";
+    notice.kind === "lakeside-signed-in"
+      ? `Signed in as ${notice.username} with your Lakeside Games account.`
+      : notice.kind === "lakeside-link-needs-login"
+        ? "A game account already uses that email. Log in with its password first, then link your Lakeside account from Your Account."
+        : "That sign in link expired. Try again from the login screen.";
   return (
     <div className={`notice-banner${good ? " good" : ""}`} role="status">
       {good ? <Check size={14} /> : null}
@@ -259,9 +206,21 @@ function NoticeBanner() {
   );
 }
 
+/** Marks an internal preview build so a screenshot can never pass for a release. */
+function PreviewBanner() {
+  return (
+    <div className="preview-banner" role="note" data-testid="preview-banner">
+      <strong>Preview build, not for distribution</strong>
+      <span>Commit {BUILD_COMMIT}. Every election is unlocked for testing. Nothing can be bought, and scores are not posted.</span>
+    </div>
+  );
+}
+
 export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestination) => void; onResume: (target: ResumeTarget) => void }) {
-  const usSaves = useGameStore((s) => s.saves);
-  const currentUsGame = useGameStore((s) => s.game);
+  const usSaves = useSavesStore((s) => s.saves);
+  // A US game still in memory (the player came back from the desk) is newer
+  // than its autosave. Null when the US shell never loaded.
+  const currentUsGame = sessionGame<GameState>("us");
   const resumable = listResumableCampaigns(usSaves);
   if (currentUsGame) {
     const autosaveIndex = resumable.findIndex((option) => option.target.kind === "us" && option.target.saveId === "autosave");
@@ -270,71 +229,8 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
   }
   const canPlay = useAuthStore((s) => s.canPlay);
   const unlocked = useAuthStore((s) => s.unlocked);
-  const openModal = useAuthStore((s) => s.openModal);
-  const buyPack = useAuthStore((s) => s.buyPack);
+  const openStore = useStoreNav((s) => s.openStore);
   const packPrices = usePackPrices();
-  const [country, setCountry] = useState<CountryCode | null>(null);
-  const [query, setQuery] = useState("");
-  const [difficultyFilter, setDifficultyFilter] = useState<"all" | ScenarioMeta["difficulty"]>("all");
-  const [accessFilter, setAccessFilter] = useState<"all" | "playable" | "locked">("all");
-  const [catalogView, setCatalogView] = useState<"compact" | "visual">("compact");
-  const [buyBusy, setBuyBusy] = useState<string | null>(null);
-  const [buyError, setBuyError] = useState<string | null>(null);
-
-  const buy = async (packId: string) => {
-    setBuyBusy(packId);
-    setBuyError(null);
-    const err = await buyPack(packId);
-    setBuyBusy(null);
-    if (err) setBuyError(err);
-  };
-
-  // Country-first browsing: one card per country, then that country's
-  // elections (newest first) once picked.
-  const countries = useMemo(() => {
-    const order: CountryCode[] = [];
-    for (const s of SCENARIO_REGISTRY) if (!order.includes(s.country)) order.push(s.country);
-    return order.map((code) => {
-      const rows = SCENARIO_REGISTRY.filter((s) => s.country === code);
-      const years = rows.map((r) => r.year);
-      return {
-        code,
-        flag: rows[0].flag,
-        name: COUNTRY_NAMES[code],
-        blurb: COUNTRY_BLURBS[code],
-        count: rows.length,
-        from: Math.min(...years),
-        to: Math.max(...years),
-        cover: countryCover(code),
-      };
-    });
-  }, []);
-
-  const normalizedQuery = query.trim().toLowerCase();
-  const scenarios = useMemo(() => {
-    const inCountry = country
-      ? SCENARIO_REGISTRY.filter((s) => s.country === country)
-      : SCENARIO_REGISTRY;
-    const matches = normalizedQuery
-      ? inCountry.filter((s) => [
-        s.label,
-        s.description,
-        String(s.year),
-        COUNTRY_NAMES[s.country],
-        s.difficulty,
-      ].some((value) => value.toLowerCase().includes(normalizedQuery)))
-      : inCountry;
-    return [...matches].sort((a, b) => b.year - a.year);
-  }, [country, normalizedQuery]);
-
-  const visibleScenarios = scenarios.filter((s) => {
-    if (difficultyFilter !== "all" && s.difficulty !== difficultyFilter) return false;
-    if (accessFilter === "playable" && !canPlay(s.scenarioId)) return false;
-    if (accessFilter === "locked" && canPlay(s.scenarioId)) return false;
-    return true;
-  });
-  const hasCatalogFilter = difficultyFilter !== "all" || accessFilter !== "all";
-  const playableScenarios = visibleScenarios.filter((s) => canPlay(s.scenarioId));
 
   const free = SCENARIO_REGISTRY.filter((s) => s.free);
 
@@ -345,13 +241,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
   };
 
   const locked = (s: ScenarioMeta) => {
-    openModal("activate", s.scenarioId);
-  };
-
-  const playRandom = () => {
-    if (!playableScenarios.length) return;
-    const pick = playableScenarios[Math.floor(Math.random() * playableScenarios.length)];
-    play(pick);
+    openStore({ scenarioId: s.scenarioId });
   };
 
   return (
@@ -363,11 +253,9 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             <span className="mark"><img src="brand/margin-of-victory-icon.png" alt="" width={24} height={24} /></span>{BRAND.name}
           </span>
           <span className="row" style={{ gap: 6 }}>
-            {DISTRIBUTION.externalStore && (
-              <a className="ghost small" href={BRAND.storeUrl}>
-                <ShoppingBag size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Store
-              </a>
-            )}
+            <button className="ghost small" onClick={() => openStore()}>
+              <ShoppingBag size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Store
+            </button>
             <button className="ghost small" onClick={() => onGo({ kind: "leaderboard" })}>
               <Trophy size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Leaderboard
             </button>
@@ -377,6 +265,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
       </div>
 
       <div className="landing-body">
+        {DISTRIBUTION.preview && <PreviewBanner />}
         <NoticeBanner />
         <header className="landing-hero">
           <div className="landing-hero-copy">
@@ -384,9 +273,9 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             <h1>{BRAND.name}</h1>
             <p className="sub">
               Run a real campaign turn by turn: allocate a budget, target battlegrounds, survive debates,
-              and watch the map move. {SCENARIO_REGISTRY.length} elections across {new Set(SCENARIO_REGISTRY.map((s) => s.country)).size} countries.
+              and watch the map move. {ELECTION_COUNT} elections across {COUNTRY_COUNT} countries.
               {PAYWALL_ENABLED
-                ? " Two full scenarios and the daily challenge are free forever. Every other country is $0.99, or $3.99 for everything."
+                ? ` ${HERO_FREE_LINE}, and the daily challenge are free forever. The rest of each country is ${money(packPrices["us-historical"] ?? 99)}, or ${money(packPrices.complete ?? 399)} for everything.`
                 : " All of them are free to play right now."}
             </p>
             <div className="landing-hero-actions">
@@ -396,8 +285,8 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
                   Resume {resumable[0].label} · Week {resumable[0].turn + 1}
                 </button>
               )}
-              <button className="ghost" onClick={() => document.getElementById("campaign-catalog")?.scrollIntoView({ behavior: "smooth" })}>
-                Browse 49 campaigns
+              <button className="ghost" onClick={() => document.getElementById("election-library")?.scrollIntoView({ behavior: "smooth" })}>
+                Browse {SCENARIO_REGISTRY.length} campaigns
               </button>
             </div>
             {resumable.length > 1 && (
@@ -416,7 +305,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
           <div className="landing-hero-art" aria-label="Campaigns from around the world">
             <div className="hero-art-card hero-art-main">
               <CoverImg src={countryCover("US")} alt="United States election campaigns" />
-              <span><b>17 US elections</b><small>Fight for 270</small></span>
+              <span><b>{electionCountFor("US")} US elections</b><small>Fight for 270</small></span>
             </div>
             <div className="hero-art-card hero-art-side hero-art-uk">
               <CoverImg src={countryCover("UK")} alt="United Kingdom election campaigns" />
@@ -424,7 +313,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             </div>
             <div className="hero-art-card hero-art-side hero-art-world">
               <CoverImg src={countryCover("FR")} alt="French election campaigns" />
-              <span><b>Six countries</b><small>Six voting systems</small></span>
+              <span><b>{COUNTRY_COUNT} countries</b><small>{VOTING_SYSTEM_COUNT} voting systems</small></span>
             </div>
           </div>
         </header>
@@ -432,151 +321,35 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
         <FeaturesSection />
 
         {/* Daily Challenge: one seeded race, same for everyone, every day */}
-        <div className="field" style={{ textAlign: "left", margin: "28px 0 0" }}>
+        <div className="landing-section daily-section">
           <DailyCard onPlay={() => onGo({ kind: "daily" })} />
         </div>
 
         {/* Featured starters, text-led (portraits live in the setup wizard) */}
-        <div className="field" id="campaign-catalog" style={{ textAlign: "left", margin: "36px 0 0", scrollMarginTop: 76 }}>
-          <label>{PAYWALL_ENABLED ? "Play free, no account needed" : "Start here, no account needed"}</label>
-          <div className="scenario-grid" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
+        <div className="landing-section" id="campaign-catalog">
+          <div className="section-head">
+            <h2 className="section-title">{PAYWALL_ENABLED ? "Play free, no account needed" : "Start here, no account needed"}</h2>
+          </div>
+          <div className="library-grid featured">
             {free.map((s) => (
-              <ScenarioCard key={s.scenarioId} s={s} unlocked showCover={false} onPlay={() => play(s)} onLocked={() => {}} />
+              <LibraryCard key={s.scenarioId} s={s} unlocked showFree={PAYWALL_ENABLED} onPlay={() => play(s)} onLocked={() => {}} />
             ))}
           </div>
         </div>
 
-        {/* Full catalog: search globally or pick a country, then an election. */}
-        <div className="field" style={{ textAlign: "left", margin: "36px 0 0" }}>
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-            <label>
-              {normalizedQuery
-                ? `${visibleScenarios.length} matching election${visibleScenarios.length === 1 ? "" : "s"}${country ? ` in ${COUNTRY_NAMES[country]}` : ""}`
-                : hasCatalogFilter
-                  ? `${visibleScenarios.length} campaign${visibleScenarios.length === 1 ? "" : "s"}${country ? ` in ${COUNTRY_NAMES[country]}` : ""}`
-                : country
-                  ? `${COUNTRY_NAMES[country]}: pick an election`
-                  : "Browse all campaigns"}
-            </label>
-            <span className="row" style={{ gap: 4 }}>
-              {normalizedQuery && (
-                <button className="ghost small" onClick={() => setQuery("")}>Clear search</button>
-              )}
-              {hasCatalogFilter && (
-                <button className="ghost small" onClick={() => { setDifficultyFilter("all"); setAccessFilter("all"); }}>
-                  Reset filters
-                </button>
-              )}
-              {country && (
-                <button className="ghost small" onClick={() => setCountry(null)}>
-                  <ChevronLeft size={13} style={{ verticalAlign: "-2px" }} /> All countries
-                </button>
-              )}
-            </span>
+        {/* Full library: search, filter and browse every election by country. */}
+        <div className="landing-section" id="election-library">
+          <div className="section-head">
+            <h2 className="section-title">Election library</h2>
+            <span className="section-note">Every election, grouped by country</span>
           </div>
-          <div className="catalog-search">
-            <Search size={15} aria-hidden="true" />
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              aria-label="Search election scenarios"
-              placeholder={country ? `Search ${COUNTRY_NAMES[country]} elections` : "Search by year, country, candidate, or issue"}
-            />
-          </div>
-          <div className="catalog-filters" aria-label="Filter election scenarios">
-            <span className="catalog-filter-group">
-              <span className="catalog-filter-label">Difficulty</span>
-              {(["all", "easy", "medium", "hard"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={difficultyFilter === value ? "sel" : ""}
-                  aria-pressed={difficultyFilter === value}
-                  onClick={() => setDifficultyFilter(value)}
-                >
-                  {value === "all" ? "Any" : value[0].toUpperCase() + value.slice(1)}
-                </button>
-              ))}
-            </span>
-            {PAYWALL_ENABLED && (
-              <span className="catalog-filter-group">
-                <span className="catalog-filter-label">Access</span>
-                {(["all", "playable", "locked"] as const).map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={accessFilter === value ? "sel" : ""}
-                    aria-pressed={accessFilter === value}
-                    onClick={() => setAccessFilter(value)}
-                  >
-                    {value === "all" ? "All" : value[0].toUpperCase() + value.slice(1)}
-                  </button>
-                ))}
-              </span>
-            )}
-            <span className="catalog-filter-group" aria-label="Catalog view">
-              <span className="catalog-filter-label">View</span>
-              {(["compact", "visual"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={catalogView === value ? "sel" : ""}
-                  aria-pressed={catalogView === value}
-                  onClick={() => setCatalogView(value)}
-                >
-                  {value[0].toUpperCase() + value.slice(1)}
-                </button>
-              ))}
-            </span>
-            {(country || normalizedQuery || hasCatalogFilter) && playableScenarios.length > 0 && (
-              <button type="button" className="catalog-random" onClick={playRandom}>
-                <Play size={12} aria-hidden="true" /> Pick a playable campaign
-              </button>
-            )}
-          </div>
-
-          {!country && !normalizedQuery && !hasCatalogFilter ? (
-            <div className="scenario-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
-              {countries.map((c) => (
-                <button
-                  key={c.code}
-                  type="button"
-                  className={`scenario-card${c.cover ? " has-cover" : ""}`}
-                  style={{ textAlign: "left", alignItems: c.cover ? "stretch" : "flex-start", minHeight: c.cover ? undefined : 88 }}
-                  onClick={() => setCountry(c.code)}
-                >
-                  <CoverImg src={c.cover} alt="" tall />
-                  <span className="row" style={{ gap: 10, alignItems: "center", width: "100%" }}>
-                    <span style={{ fontSize: 24 }}>{c.flag}</span>
-                    <span className="scenario-year" style={{ fontSize: 16 }}>{c.name}</span>
-                    <ChevronRight size={15} style={{ marginLeft: "auto", color: "var(--muted)" }} />
-                  </span>
-                  <span className="scenario-match" style={{ fontWeight: 700 }}>
-                    {c.count === 1 ? `1 election · ${c.to}` : `${c.count} elections · ${c.from}-${c.to}`}
-                  </span>
-                  <span className="muted small" style={{ fontSize: 11, lineHeight: 1.4 }}>{c.blurb}</span>
-                </button>
-              ))}
-            </div>
-          ) : visibleScenarios.length ? (
-            <div className="scenario-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
-              {visibleScenarios.map((s) => (
-                <ScenarioCard
-                  key={s.scenarioId}
-                  s={s}
-                  unlocked={canPlay(s.scenarioId)}
-                  onPlay={() => play(s)}
-                  onLocked={() => locked(s)}
-                  showCover={catalogView === "visual"}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="catalog-empty" role="status">
-              No elections match these filters{normalizedQuery ? ` for "${query.trim()}"` : ""}{country ? ` in ${COUNTRY_NAMES[country]}` : ""}.
-            </div>
-          )}
+          <ElectionLibrary
+            rows={SCENARIO_REGISTRY}
+            canPlay={canPlay}
+            showAccess={PAYWALL_ENABLED}
+            onPlay={play}
+            onLocked={locked}
+          />
         </div>
 
         {/* Pricing: honest free vs paid, no fake tiers */}
@@ -587,7 +360,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
               <h3>Free</h3>
               <p className="pricing-price">$0</p>
               <ul className="pricing-list">
-                <li><Check size={13} /> {PAYWALL_ENABLED ? "2 full scenarios" : `All ${SCENARIO_REGISTRY.length} scenarios`}, no account needed</li>
+                <li><Check size={13} /> {PAYWALL_ENABLED ? FREE_LINE : `All ${ELECTION_COUNT} scenarios`}, no account needed</li>
                 <li><Check size={13} /> A new daily challenge every day</li>
                 <li><Check size={13} /> Leaderboards with a free account</li>
               </ul>
@@ -595,10 +368,10 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             </div>
             <div className="pricing-card">
               <h3>Country bundles</h3>
-              <p className="pricing-price">{PAYWALL_ENABLED ? `$${((packPrices["us-historical"] ?? 99) / 100).toFixed(2)} per country` : "Free for now"}</p>
+              <p className="pricing-price">{PAYWALL_ENABLED ? `${money(packPrices["us-historical"] ?? 99)} per country` : "Free for now"}</p>
               <ul className="pricing-list">
                 <li><Check size={13} /> {SCENARIO_REGISTRY.length - free.length} additional elections across {STORE_PACKS.length - 1} country bundles</li>
-                <li><Check size={13} /> Complete Collection: every country for ${((packPrices.complete ?? 399) / 100).toFixed(2)}</li>
+                <li><Check size={13} /> Complete Collection: every country for {money(packPrices.complete ?? 399)}</li>
                 {PAYWALL_ENABLED ? (
                   <>
                     <li><Check size={13} /> One time purchase, yours to keep, no subscription</li>
@@ -629,8 +402,8 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
                   <span className="scenario-year" style={{ fontSize: 14 }}>
                     {p.name} {owned && <Check size={13} style={{ verticalAlign: "-2px", color: "var(--green)" }} />}
                   </span>
-                  <span className="scenario-match">{p.scenarios.length} scenarios</span>
-                  <span className="muted small" style={{ fontSize: 11 }}>{p.description}</span>
+                  <span className="scenario-match">{p.id === COMPLETE_ID ? `${ELECTION_COUNT} elections, every country` : packFacts(p).countLabel}</span>
+                  <span className="muted small pack-desc" title={p.description}>{p.description}</span>
                   <span className="pack-foot">
                     <span className="pack-price">
                       {PAYWALL_ENABLED ? (
@@ -645,8 +418,8 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
                     {owned ? (
                       <span className="muted small">Owned</span>
                     ) : PAYWALL_ENABLED && DISTRIBUTION.externalStore ? (
-                      <button className="primary small" disabled={buyBusy === p.id} onClick={() => buy(p.id)}>
-                        {buyBusy === p.id ? "Opening…" : "Buy"}
+                      <button className="primary small" onClick={() => openStore({ packId: p.id })}>
+                        View
                       </button>
                     ) : PAYWALL_ENABLED ? (
                       <span className="pack-beta-note">Available through {DISTRIBUTION.nativeStoreName}</span>
@@ -658,10 +431,9 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
               );
             })}
           </div>
-          {buyError && <p className="muted small" style={{ color: "var(--rose)", marginTop: 8 }}>{buyError}</p>}
         </div>
 
-        <FaqSection />
+        <FaqSection prices={packPrices} />
 
         {/* Footer: legal + studio credit + contact + attribution */}
         <div className="landing-foot">
@@ -669,7 +441,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
           <button className="ghost small" onClick={() => onGo({ kind: "legal", tab: "terms" })}>Terms</button>
           <a className="ghost small" href={`mailto:${BRAND.supportEmail}`}>Contact</a>
           <a className="ghost small" href="https://ask.lakesidegames.net/?game=electioneer" target="_blank" rel="noopener noreferrer">Ask about the game</a>
-          {DISTRIBUTION.externalStore && <a className="ghost small" href={BRAND.storeUrl}>Store</a>}
+          <button className="ghost small" onClick={() => openStore()}>Store</button>
           <span className="muted small" title="Coming soon">Discord (coming soon)</span>
           <a className="lakeside-credit" href="https://lakesidegames.net" target="_blank" rel="noopener">
             <img src="lakeside-mark.svg" alt="Lakeside Games logo" width={20} height={20} />

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { X } from "lucide-react";
 import { LakesideButton, AuthDivider } from "./LakesideButton";
 import { Spinner } from "@ui/Skeleton";
@@ -21,9 +22,9 @@ export function LoginModal() {
     const err = await login(email, password);
     setBusy(false);
     if (err) { setError(err); return; }
-    // Coming from a locked scenario? Move straight to code redemption.
-    if (paywallScenarioId) openModal("activate", paywallScenarioId);
-    else closeModal();
+    // Coming from a locked scenario? Carry on to the store, focused on its pack.
+    closeModal();
+    if (paywallScenarioId) openStoreForScenario(paywallScenarioId);
   };
 
   return (
@@ -32,7 +33,7 @@ export function LoginModal() {
         <div className="head">
           <div className="tag">Account</div>
           <h2>Log In</h2>
-          <button className="sheet-close" onClick={closeModal} aria-label="Close"><X size={18} /></button>
+          <button className="modal-close" onClick={closeModal} aria-label="Close"><X size={18} /></button>
         </div>
         <div className="body">
           <LakesideButton />

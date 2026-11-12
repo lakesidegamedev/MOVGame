@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGameStore } from "@store/gameStore";
 import type { ActionType, AdMode, CampaignAction, IssueId } from "@engine/index";
-import { ISSUES, ISSUE_IDS } from "@content/issues";
+import { liveIssueIds } from "@content/issues";
 import { money } from "./format";
 import { PlanBonusStrip } from "./PlanBonusStrip";
 import { actionCashCost, canQueueAction, plannedCashCost } from "@engine/actionBudget";
@@ -53,7 +53,7 @@ const NEEDS_STATE: ActionType[] = ["advertise", "rally", "surrogate", "ground_ga
 const DAYS = [1, 2, 3, 4, 5, 6, 7];
 const MAX_PER_DAY = 3;
 
-function shortDesc(a: CampaignAction): string {
+function shortDesc(a: CampaignAction, issueName: (id: IssueId) => string): string {
   switch (a.type) {
     case "advertise": return `${a.stateId} ads`;
     case "rally": return `${a.stateId} rally`;
@@ -64,12 +64,12 @@ function shortDesc(a: CampaignAction): string {
     case "oppo_research": return "Oppo research";
     case "debate_prep": return "Debate prep";
     case "policy_prep": return "Policy prep";
-    case "issue_pivot": return `Pivot ${a.issueId}`;
+    case "issue_pivot": return `Pivot ${a.issueId ? issueName(a.issueId) : ""}`;
     default: return a.type;
   }
 }
 
-export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => void; endWeekDisabled: boolean }) {
+export function ActionPanel() {
   const game = useGameStore((s) => s.game)!;
   const queueAction = useGameStore((s) => s.queueAction);
   const removeQueued = useGameStore((s) => s.removeQueuedAction);
@@ -102,9 +102,12 @@ export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => v
     return () => window.removeEventListener("hotkey-pick-action", onPick);
   }, []);
   const [adMode, setAdMode] = useState<AdMode>("positive");
-  const [issueId, setIssueId] = useState<IssueId>("economy");
+  // Only the issues this election has, under its own names.
+  const liveIssues = liveIssueIds(game);
+  const issueName = (id: IssueId) => game.issues[id]?.name ?? id;
+  const [issueId, setIssueId] = useState<IssueId>(liveIssues[0] ?? "economy");
   const [spendM, setSpendM] = useState<number>(8);
-  const [pivotPos, setPivotPos] = useState<number>(game.candidates[player].issuePositions.economy);
+  const [pivotPos, setPivotPos] = useState<number>(game.candidates[player].issuePositions[liveIssues[0] ?? "economy"]);
 
   const plan = game.queuedActions;
   const committedCash = plannedCashCost(game);
@@ -142,17 +145,17 @@ export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => v
   const TypeIcon = ICON[type];
 
   return (
-    <div className="card">
-      <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-        <h3 style={{ margin: 0 }}>Week Plan</h3>
-        <span className="muted small">{used}/{pool} actions · max {MAX_PER_DAY}/day</span>
+    <div className="card desk-plan">
+      <div className="card-head">
+        <h3>Week Plan</h3>
+        <span className="card-sub num">{used}/{pool} actions · max {MAX_PER_DAY}/day</span>
       </div>
-      <div className="row" style={{ gap: 16, margin: "6px 0 10px" }}>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Cash</span><span className="v">{money(res.cash)}</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Planned spend</span><span className="v">{money(committedCash)}</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Available</span><span className="v">{money(res.cash - committedCash)}</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Actions</span><span className="v">{res.actions}/{res.maxActions}</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Staff</span><span className="v">{res.staffCapacity}</span></div>
+      <div className="plan-budget">
+        <div className="metric"><span className="l">Cash</span><span className="v">{money(res.cash)}</span></div>
+        <div className="metric"><span className="l">Planned spend</span><span className="v">{money(committedCash)}</span></div>
+        <div className="metric"><span className="l">Available</span><span className="v">{money(res.cash - committedCash)}</span></div>
+        <div className="metric"><span className="l">Actions</span><span className="v">{res.actions}/{res.maxActions}</span></div>
+        <div className="metric"><span className="l">Staff</span><span className="v">{res.staffCapacity}</span></div>
       </div>
 
       {/* Action builder — configure one action, then drop it on a day below. */}
@@ -160,7 +163,7 @@ export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => v
         {ACTIONS.map((a) => {
           const Ico = ICON[a.type];
           return (
-            <button key={a.type} className={`actionbtn${type === a.type ? " sel" : ""}`} onClick={() => setType(a.type)}>
+            <button key={a.type} className={`actionbtn${type === a.type ? " sel" : ""}`} aria-pressed={type === a.type} onClick={() => setType(a.type)}>
               <Ico size={18} />
               <span className="t">{a.label}</span>
               <span className="c">{a.type === "fundraise" ? `≈+${money(estimatedFundraise(game, player, stateId))}` : a.cost}</span>
@@ -169,7 +172,7 @@ export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => v
         })}
       </div>
 
-      <div style={{ marginTop: 10 }}>
+      <div className="plan-config">
         {NEEDS_STATE.includes(type) && (
           <div className="field">
             <label>Target state</label>
@@ -195,7 +198,7 @@ export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => v
               <div className="field">
                 <label>Issue</label>
                 <select value={issueId} onChange={(e) => setIssueId(e.target.value as IssueId)}>
-                  {ISSUE_IDS.map((id) => <option key={id} value={id}>{ISSUES[id].name}</option>)}
+                  {liveIssues.map((id) => <option key={id} value={id}>{issueName(id)}</option>)}
                 </select>
               </div>
             )}
@@ -211,7 +214,7 @@ export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => v
             <div className="field">
               <label>Issue</label>
               <select value={issueId} onChange={(e) => { setIssueId(e.target.value as IssueId); setPivotPos(game.candidates[player].issuePositions[e.target.value as IssueId]); }}>
-                {ISSUE_IDS.map((id) => <option key={id} value={id}>{ISSUES[id].name}</option>)}
+                {liveIssues.map((id) => <option key={id} value={id}>{issueName(id)}</option>)}
               </select>
             </div>
             <div className="field">
@@ -224,7 +227,7 @@ export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => v
 
       <PlanBonusStrip plan={plan} />
       {configuredCost > res.cash - committedCash && (
-        <p className="muted small" role="status">
+        <p className="plan-warning" role="status">
           This action costs {money(configuredCost)}. You have {money(res.cash - committedCash)} uncommitted.
         </p>
       )}
@@ -245,7 +248,7 @@ export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => v
                     <span key={k} className={k < items.length ? "dot on" : "dot"} />
                   ))}
                 </span>
-                <button className="day-add" disabled={!canAdd} onClick={() => addToDay(d)} title={canAdd ? `Add ${type} to Day ${d}` : full ? "Day is full" : used >= pool ? "Action pool is full" : "Not enough available cash"}>
+                <button className="day-add" disabled={!canAdd} onClick={() => addToDay(d)} aria-label={`Add ${type.replace("_", " ")} to Day ${d}`} title={canAdd ? `Add ${type} to Day ${d}` : full ? "Day is full" : used >= pool ? "Action pool is full" : "Not enough available cash"}>
                   <Plus size={13} />
                 </button>
               </div>
@@ -256,8 +259,8 @@ export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => v
                   return (
                     <span className="plan-chip" key={i} title={a.type === "advertise" ? `${a.adMode} ads · ${money(a.spend ?? 0)}` : a.type}>
                       <Ico size={12} />
-                      {shortDesc(a)}
-                      <span className="x" onClick={() => removeQueued(i)}><X size={11} /></span>
+                      {shortDesc(a, issueName)}
+                      <button type="button" className="x" onClick={() => removeQueued(i)} aria-label={`Remove ${shortDesc(a, issueName)}`}><X size={11} /></button>
                     </span>
                   );
                 })}
@@ -267,19 +270,14 @@ export function ActionPanel({ onEndWeek, endWeekDisabled }: { onEndWeek: () => v
         })}
       </div>
 
-      <div className="row" style={{ gap: 8, marginTop: 6 }}>
-        <button className="primary" style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
-          disabled={!DAYS.some((d) => canQueueAction(game, { ...buildAction(), day: d }))}
-          onClick={() => { for (const d of DAYS) { if (dayItems(d).length < MAX_PER_DAY) { addToDay(d); break; } } }}>
-          <TypeIcon size={14} /> Add to next open day
-        </button>
-        <button className="primary" data-coach="endweek" onClick={onEndWeek} disabled={endWeekDisabled}>
-          {endWeekDisabled ? "Resolve event first" : "End Week →"}
-        </button>
-      </div>
+      <button className="block plan-add"
+        disabled={!DAYS.some((d) => canQueueAction(game, { ...buildAction(), day: d }))}
+        onClick={() => { for (const d of DAYS) { if (dayItems(d).length < MAX_PER_DAY) { addToDay(d); break; } } }}>
+        <TypeIcon size={14} /> Add to next open day
+      </button>
 
       {preview && (
-        <div className="preview">
+        <div className={`preview num${myDelta < 0 ? " down" : ""}`}>
           Projected with this plan: {game.candidates.dem.shortName} {evPreview} EV
           {myDelta !== 0 && <strong>{` (${myDelta > 0 ? "+" : ""}${myDelta} for you)`}</strong>}
         </div>

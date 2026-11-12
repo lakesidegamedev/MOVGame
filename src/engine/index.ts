@@ -23,6 +23,16 @@ export {
   type Projection,
   type ContestTally,
 } from "./voteModel";
+export {
+  STANDARD_EV_TOTAL,
+  evMajority,
+  evTotalOf,
+  electoralRule,
+  electoralWinner,
+  noMajorityTally,
+  type ElectoralCollege,
+  type ElectoralRule,
+} from "./electoralCollege";
 export { applyAction, issueAlignment, clamp } from "./actions";
 export {
   PLAN_BONUSES,

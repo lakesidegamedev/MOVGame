@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
+import { partyInk } from "@ui/colors";
 import { useGameStore } from "@store/gameStore";
 import { useUkStore } from "@store/ukStore";
 import { useCountryStore } from "@store/countryStore";
-import { ISSUES } from "@content/issues";
+import { electionIssueList } from "@content/issues";
+import { issueTemplateFor } from "@content/scenarios";
 import { BLOCS } from "@content/blocs";
 import { UK_ELECTIONS } from "@content/uk/elections";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRY_MODULES, loadAllCountries, loadedCountries, loadedCountry } from "@content/countries";
+import { Spinner } from "@ui/Skeleton";
 import type { BlocId, IssueId } from "@engine/types";
 import {
   makeDefaultCustomScenario,
@@ -29,6 +32,7 @@ import {
 } from "@content/customScenario";
 import { packForScenario } from "@content/packs";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import type { EditorLaunchTarget } from "@ui/SetupScreen";
 import { customScenarioStore } from "@persistence/local";
 import { X, Dices, Trash2, Play, Download, Upload, Save, Lock } from "lucide-react";
@@ -47,7 +51,7 @@ function ukElectionOptions(): { id: string; label: string }[] {
     .map((id) => ({ id, label: `${UK_ELECTIONS[id].year} · ${UK_ELECTIONS[id].label}` }));
 }
 function countryElectionOptions(countryId: string): { id: string; label: string }[] {
-  const c = COUNTRIES[countryId];
+  const c = loadedCountry(countryId);
   if (!c) return [];
   return Object.keys(c.elections)
     .sort((a, b) => c.elections[b].year - c.elections[a].year)
@@ -71,12 +75,16 @@ function num(e: React.ChangeEvent<HTMLInputElement>): number {
 function TicketForm({
   side,
   ticket,
+  year,
   onChange,
 }: {
   side: "dem" | "rep";
   ticket: CustomTicketInput;
+  year: number;
   onChange: (t: CustomTicketInput) => void;
 }) {
+  // The race runs on the issues of the built-in election nearest its year.
+  const issues = electionIssueList(issueTemplateFor(year).issues);
   const set = (patch: Partial<CustomTicketInput>) => onChange({ ...ticket, ...patch });
   const setTrait = (k: string, v: number) => set({ traits: { ...ticket.traits, [k]: v } });
   const setIssue = (id: IssueId, v: number) => set({ issuePositions: { ...ticket.issuePositions, [id]: v } });
@@ -89,7 +97,7 @@ function TicketForm({
 
   return (
     <div className="field" style={{ textAlign: "left" }}>
-      <label style={{ color: ticket.color }}>
+      <label style={{ color: partyInk(ticket.color) }}>
         {side === "dem" ? "Your candidate" : "The opponent"}
       </label>
 
@@ -128,9 +136,9 @@ function TicketForm({
 
       <div style={{ marginTop: 10 }}>
         <span className="muted small">Issue positions (left -1 to right +1)</span>
-        {(Object.keys(ISSUES) as IssueId[]).map((id) => (
+        {issues.map(({ id, name }) => (
           <div key={id} className="ed-slider">
-            <span className="ed-slider-k">{ISSUES[id].name}</span>
+            <span className="ed-slider-k">{name}</span>
             <input type="range" min={-1} max={1} step={0.05} value={ticket.issuePositions[id]} onChange={(e) => setIssue(id, num(e))} />
             <span className="ed-slider-v">{ticket.issuePositions[id].toFixed(2)}</span>
           </div>
@@ -234,7 +242,7 @@ function MultipartyForm({
   const setCountry = (countryId: string) => {
     const opts = countryElectionOptions(countryId);
     const baseElection = opts[0]?.id ?? mp.baseElection;
-    const c = COUNTRIES[countryId];
+    const c = loadedCountry(countryId);
     setDraft({
       ...draft,
       year: c?.elections[baseElection]?.year ?? draft.year,
@@ -245,7 +253,7 @@ function MultipartyForm({
   const setElection = (baseElection: string) => {
     const engine = isCountry ? "country" : "uk";
     const year = isCountry
-      ? COUNTRIES[mp.countryId ?? ""]?.elections[baseElection]?.year
+      ? loadedCountry(mp.countryId ?? "")?.elections[baseElection]?.year
       : UK_ELECTIONS[baseElection]?.year;
     setDraft({
       ...draft,
@@ -272,7 +280,7 @@ function MultipartyForm({
             <div>
               <span className="muted small">Country</span>
               <select value={mp.countryId} onChange={(e) => setCountry(e.target.value)} style={{ width: "100%" }}>
-                {Object.values(COUNTRIES).map((c) => (
+                {loadedCountries().map((c) => (
                   <option key={c.id} value={c.id}>{c.flag} {c.label}</option>
                 ))}
               </select>
@@ -315,12 +323,39 @@ function MultipartyForm({
   );
 }
 
-export function EditorScreen({ onClose, onLaunch }: { onClose: () => void; onLaunch?: (t: EditorLaunchTarget) => void }) {
+// The editor offers every country as a base, so it loads every country bundle
+// before it opens (the rest of the game loads one country at a time).
+const MULTIPARTY_COUNT = COUNTRY_MODULES.filter((m) => m.load).length;
+
+export function EditorScreen(props: { onClose: () => void; onLaunch?: (t: EditorLaunchTarget) => void }) {
+  const [ready, setReady] = useState(() => loadedCountries().length === MULTIPARTY_COUNT);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    if (ready) return;
+    let live = true;
+    loadAllCountries().then(() => { if (live) setReady(true); }, () => { if (live) setFailed(true); });
+    return () => { live = false; };
+  }, [ready]);
+  if (ready) return <EditorBody {...props} />;
+  return (
+    <div className="overlay" role="dialog" aria-modal="true" onClick={props.onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        {failed ? (
+          <>
+            <p className="sub">The campaign editor could not load the country content. Check your connection and try again.</p>
+            <button className="primary" onClick={props.onClose}>Close</button>
+          </>
+        ) : <p className="sub"><Spinner label="Loading the campaign editor…" /></p>}
+      </div>
+    </div>
+  );
+}
+
+function EditorBody({ onClose, onLaunch }: { onClose: () => void; onLaunch?: (t: EditorLaunchTarget) => void }) {
   const newGame = useGameStore((s) => s.newGame);
   const startUk = useUkStore((s) => s.startCustom);
   const startCountry = useCountryStore((s) => s.startCustom);
   const canPlay = useAuthStore((s) => s.canPlay);
-  const openModal = useAuthStore((s) => s.openModal);
   const [draft, setDraft] = useState<CustomScenario>(() => makeDefaultCustomScenario());
   const [saved, setSaved] = useState<CustomScenario[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
@@ -360,7 +395,7 @@ export function EditorScreen({ onClose, onLaunch }: { onClose: () => void; onLau
     return pack ? { scenarioId: id, packName: pack.name } : null;
   };
 
-  const unlock = (scenarioId: string) => openModal("activate", scenarioId);
+  const unlock = (scenarioId: string) => openStoreForScenario(scenarioId);
 
   const play = (cs: CustomScenario) => {
     // Free path stays open (US customs, free bases). A paid base needs its pack.
@@ -434,19 +469,19 @@ export function EditorScreen({ onClose, onLaunch }: { onClose: () => void; onLau
     setErrors([]);
     if (engine === "us") setDraft(makeDefaultCustomScenario());
     else if (engine === "uk") setDraft(makeDefaultMultiparty("uk"));
-    else setDraft(makeDefaultMultiparty("country", Object.values(COUNTRIES)[0]?.id));
+    else setDraft(makeDefaultMultiparty("country", loadedCountries()[0]?.id));
   };
 
   const ENGINE_OPTS: { id: CustomEngine; name: string; blurb: string }[] = [
     { id: "us", name: "United States", blurb: "Two tickets, the Electoral College." },
     { id: "uk", name: "United Kingdom", blurb: "Multiparty, first past the post." },
-    { id: "country", name: "Other country", blurb: "Canada, Germany, France, Australia." },
+    { id: "country", name: "Other country", blurb: `${loadedCountries().map((c) => c.label).join(", ")}.` },
   ];
 
   const subtitle = (cs: CustomScenario) =>
     cs.engine === "us"
       ? `${cs.dem.shortName} v. ${cs.rep.shortName}`
-      : `${cs.engine === "country" ? (COUNTRIES[cs.mp?.countryId ?? ""]?.label ?? "Country") : "UK"} · ${cs.mp?.parties.length ?? 0} parties`;
+      : `${cs.engine === "country" ? (loadedCountry(cs.mp?.countryId ?? "")?.label ?? "Country") : "UK"} · ${cs.mp?.parties.length ?? 0} parties`;
 
   return (
     <div className="overlay" role="dialog" aria-modal="true" onClick={onClose}>
@@ -547,8 +582,8 @@ export function EditorScreen({ onClose, onLaunch }: { onClose: () => void; onLau
           </div>
         </div>
 
-        <TicketForm side="dem" ticket={draft.dem} onChange={(t) => setDraft({ ...draft, dem: t })} />
-        <TicketForm side="rep" ticket={draft.rep} onChange={(t) => setDraft({ ...draft, rep: t })} />
+        <TicketForm side="dem" ticket={draft.dem} year={draft.year} onChange={(t) => setDraft({ ...draft, dem: t })} />
+        <TicketForm side="rep" ticket={draft.rep} year={draft.year} onChange={(t) => setDraft({ ...draft, rep: t })} />
         </>
         ) : (
           <MultipartyForm draft={draft} setDraft={setDraft} canPlay={canPlay} onUnlock={unlock} />

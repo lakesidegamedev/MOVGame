@@ -56,18 +56,24 @@ function contestShare(game: GameState, id: string): number {
 
 function GeoState({ id, game, onClick, selected }: { id: string; game: GameState; onClick: () => void; selected: boolean }) {
   const st = game.states.find((s) => s.id === id);
-  if (!st) return null;
-  const share = contestShare(game, id);
   // Split-state districts (ME-1, NE-2, etc.) use the parent state path
   const parentId = id.split("-")[0];
   const path = STATE_PATHS[id] ?? STATE_PATHS[parentId];
   if (!path) return null;
+  // Not voting this year (Alaska and Hawaii before 1960, DC before 1964):
+  // drawn for geography only, inert and unlabeled.
+  if (!st) return <path d={path} fill="var(--navy-700)" stroke="#1a2744" strokeWidth={0.5} opacity={0.5} aria-hidden="true" pointerEvents="none" />;
+  const share = contestShare(game, id);
 
   return (
     <g
       onClick={onClick}
       style={{ cursor: "pointer" }}
       className={selected ? "geo-selected" : ""}
+      role="button"
+      tabIndex={0}
+      aria-label={`${id}${selected ? ", selected" : ""}`}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
     >
       <path
         d={path}
@@ -90,6 +96,11 @@ function Tile({ id, game, size }: { id: string; game: GameState; size?: number }
       className={`tile${selected ? " selected" : ""}${st.battleground ? " bg" : ""}`}
       style={{ background: shareToColor(share), width: size }}
       onClick={() => select(id)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(id); } }}
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      aria-label={`${st.name}, ${st.electoralVotes} electoral votes${st.battleground ? ", battleground" : ""}`}
       title={`${st.name} · ${st.electoralVotes} EV`}
     >
       <span>{st.abbr}</span>
@@ -113,8 +124,8 @@ export function USMap() {
   if (mode === "geo") {
     return (
       <div className="card mapwrap sheen">
-        <div className="mapcontrols" style={{ justifyContent: "space-between" }}>
-          <h3 style={{ margin: 0, fontSize: 13, textTransform: "uppercase", letterSpacing: 0.8, color: "var(--muted)" }}>Electoral Map</h3>
+        <div className="mapcontrols">
+          <h3>Electoral Map</h3>
           {mapToggle}
         </div>
         <svg viewBox="0 0 1000 650" className="geo-map" preserveAspectRatio="xMidYMid meet">
@@ -145,7 +156,7 @@ export function USMap() {
           <span>{game.candidates.rep.shortName}</span>
           <span className="bar" />
           <span>{game.candidates.dem.shortName}</span>
-          <span style={{ marginLeft: 12 }}>◻ gold outline = battleground</span>
+          <span className="legend-item"><span className="legend-bg" aria-hidden="true" />Battleground</span>
         </div>
       </div>
     );
@@ -153,8 +164,8 @@ export function USMap() {
 
   return (
     <div className="card mapwrap sheen">
-      <div className="mapcontrols" style={{ justifyContent: "space-between" }}>
-        <h3 style={{ margin: 0, fontSize: 13, textTransform: "uppercase", letterSpacing: 0.8, color: "var(--muted)" }}>Electoral Map</h3>
+      <div className="mapcontrols">
+        <h3>Electoral Map</h3>
         {mapToggle}
       </div>
       <div
@@ -163,7 +174,8 @@ export function USMap() {
           gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
           gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`,
           aspectRatio: `${GRID_COLS} / ${GRID_ROWS}`,
-        }}
+          "--grid-aspect": GRID_COLS / GRID_ROWS,
+        } as React.CSSProperties}
       >
         {GRID.map((t) => (
           <div key={t.id} style={{ gridColumn: t.col + 1, gridRow: t.row + 1 }}>
@@ -190,9 +202,9 @@ export function USMap() {
         <span>{game.candidates.rep.shortName}</span>
         <span className="bar" />
         <span>{game.candidates.dem.shortName}</span>
-        <span style={{ marginLeft: 12 }}>◻ gold = battleground</span>
-        <span style={{ marginLeft: 12, display: "inline-flex", alignItems: "center", gap: 4 }}>
-          <MapPin size={12} color="#fff" fill="var(--dem-bright)" /><MapPin size={12} color="#fff" fill="var(--gop-bright)" /> stops
+        <span className="legend-item"><span className="legend-bg" aria-hidden="true" />Battleground</span>
+        <span className="legend-item">
+          <MapPin size={12} color="#fff" fill="var(--dem-bright)" aria-hidden="true" /><MapPin size={12} color="#fff" fill="var(--gop-bright)" aria-hidden="true" /> Candidate stops
         </span>
       </div>
     </div>

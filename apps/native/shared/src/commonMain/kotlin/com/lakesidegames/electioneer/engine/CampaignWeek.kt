@@ -21,7 +21,8 @@ fun advanceCampaignWeek(game: GameState, difficulty: String?): GameState {
         label = "Staff payroll", detail = hires.joinToString(", ") { STAFF_BY_ID[it]?.role ?: it })
     val projection = projectElection(next)
     val playerEV = projection.ev.getValue(player.serial)
-    if (playerEV < 195) {
+    // 195 of the modern 538, scaled to the scenario's college.
+    if (playerEV * STANDARD_EV_TOTAL < 195 * next.electoralRule().total) {
         val remaining = mutableListOf<String>()
         var maxActions = resource.maxActions
         for (id in hires) {

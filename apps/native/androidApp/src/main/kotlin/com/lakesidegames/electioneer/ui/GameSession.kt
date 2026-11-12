@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.lakesidegames.electioneer.billing.PlayBilling
+import com.lakesidegames.electioneer.engine.StoreGate
 import com.lakesidegames.electioneer.billing.StoreProduct
 import com.lakesidegames.electioneer.content.CANDIDATES
 import com.lakesidegames.electioneer.content.EVENTS_BY_ID
@@ -101,7 +102,7 @@ class GameSession : ViewModel() {
         settings.play("turnAdvance")
         val afterUnits = campaign.standings().first { it.partyId == campaign.playerParty() }.units
         if (afterUnits != beforeUnits) settings.play(if (afterUnits > beforeUnits) "pollUp" else "pollDown")
-        if (campaign.isOver()) { settings.play(if (afterUnits >= campaign.majority()) "win" else "lose"); presentReveal() }
+        if (campaign.isOver()) { settings.play(if (campaign.reachedGoal(afterUnits)) "win" else "lose"); presentReveal() }
         else if (campaign.hasPendingEvent()) settings.play("eventPopup")
         return true
     }
@@ -137,6 +138,12 @@ class GameSession : ViewModel() {
     lateinit var account: CampaignAccount
         private set
     var dailySetup: NativeDailyAssignment? = null
+    /** Scenario id the library opens straight into, then clears. */
+    var libraryPick: String? = null
+    /** Debug captures keep election night on screen instead of moving on. */
+    var captureHoldReveal = false
+    /** Debug captures can open the desk scrolled to its map. */
+    var captureFocus: String? = null
 
     fun dailyAssignment(): NativeDailyAssignment = NativeDaily.assignment(nativeUtcDay())
     fun openDaily(restart: Boolean = false) {
@@ -374,6 +381,7 @@ class GameSession : ViewModel() {
     val campaignVersion: StateFlow<Int> = _campaignVersion
 
     fun startCampaign(countryId: String, electionId: String, party: String, difficulty: String, seed: String) {
+        lockedPack(countryId, electionId)?.let { openStoreFor(it); return }
         undoHistory.clear()
         beginAutosave()
         _screen.value = Screen.LOADING
@@ -430,10 +438,30 @@ class GameSession : ViewModel() {
     private val _storeNotice = MutableStateFlow<String?>(null)
     val storeNotice: StateFlow<String?> = _storeNotice
 
+    // Paid election locks. Open until billing proves Play can sell the pack
+    // and the server turns native gating on; debug captures may pin a gate.
+    private val _gate = MutableStateFlow(StoreGate.OPEN)
+    val gate: StateFlow<StoreGate> = _gate
+    private var pinnedGate: StoreGate? = null
+    internal fun pinGateForCapture(gate: StoreGate) { pinnedGate = gate; _gate.value = gate }
+    /** Pack the store opens at next, set by a locked launch or Unlock button. */
+    var storeFocus: String? = null
+
+    /** Pack a new campaign on [country]/[nativeId] needs, or null when it is playable. */
+    fun lockedPack(country: String, nativeId: String): String? = _gate.value.lockedPack(country, nativeId, _owned.value,
+        if (::account.isInitialized) account.unlocked.value.toSet() else emptySet(), dailyAssignment().scenarioId)
+
+    /** A locked election opens its pack in the store instead of starting. */
+    fun openStoreFor(packId: String) {
+        storeFocus = packId
+        _screen.value = Screen.STORE
+    }
+
     fun attachBilling(context: Context) {
         if (billing != null) return
         val b = PlayBilling(context, account, scope)
         billing = b
+        scope.launch { b.gate.collect { gate -> _gate.value = pinnedGate ?: gate } }
         b.setOnChangeListener {
             _owned.value = b.entitlements()
             b.lastNotice?.let { _storeNotice.value = it }
@@ -443,6 +471,7 @@ class GameSession : ViewModel() {
         scope.launch { account.storeOwned.collect { _owned.value = account.cachedStorePacks() } }
         scope.launch {
             account.user.collect {
+                b.refreshGate()
                 _products.value = emptyList()
                 _owned.value = account.cachedStorePacks()
                 if (it?.ahdLinked == true) {
@@ -515,6 +544,7 @@ class GameSession : ViewModel() {
     }
 
     fun newGame(scenarioId: String, player: CandidateId, mateId: String, staffIds: List<String>, difficulty: String, eventMode: EventMode, totalTurns: Int, seed: String, whatIfState: String, mirrorMatch: Boolean, pandemic: Boolean) {
+        lockedPack("US", scenarioId)?.let { openStoreFor(it); return }
         undoHistory.clear()
         require(MobileGame.campaigns().any { it.id == scenarioId })
         require(MobileGame.mates(scenarioId, player.serial).any { it.id == mateId })

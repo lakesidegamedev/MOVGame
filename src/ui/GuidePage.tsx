@@ -1,10 +1,14 @@
+import { X } from "lucide-react";
 import { useState } from "react";
+import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
+import { FREE_ELECTIONS_NOTE, REGIONAL_PARTIES_NOTE, regionalPartiesGuide, regionalPartiesLine, votingSystemsGuide } from "@content/guide";
 
 const TABS = [
   { id: "actions", label: "Actions" },
   { id: "blocs", label: "Voter Blocs" },
   { id: "turns", label: "Turn Structure" },
   { id: "scoring", label: "Scoring & Polls" },
+  { id: "systems", label: "Voting Systems" },
   { id: "changelog", label: "Changelog" },
 ] as const;
 
@@ -153,6 +157,16 @@ const BLOC_GUIDE = [
 ];
 
 const CHANGELOG = [
+  { version: "2.0.0", date: "2026-11", changes: [
+    "Eight new countries: New Zealand, India, Japan, Brazil, Ireland, Spain, Italy and Mexico. The game now has 14 countries and 121 elections.",
+    "Canada, Australia, Germany and France go back to the 1980s and 1990s, and the United States goes back to 1932, each year with its own Electoral College.",
+    "Every country has one free election. Each country is a $0.99 pack, and the Complete Collection is $3.99.",
+    "A Store screen shows what you own, what each pack holds and how to buy it.",
+    "Difficulty means the same thing in every country: Normal is a fair fight you can win from either side, Easy gives a head start sized to the race, and Hard makes your campaigning land a little lighter.",
+    "Every election has its own issues, and scheduled events land in the weeks they really happened.",
+    "Regional parties, such as the Bloc Québécois and Spain's Catalan and Basque parties, play by their own rules and are scored against their real seats.",
+    "A new look on the web, desktop, iPhone and Android, and a faster first page load on the web.",
+  ] },
   { version: "0.2.0", date: "2026-06", changes: [
     "Debates are now scored head-to-head: both tickets get a 0-100 showing, a winner is called, and the margin swings national momentum. A blowout is a 'meltdown' that hits momentum hard.",
     "Real debate prep: Debate Prep raises readiness (stagecraft), new Policy Prep raises policy command (substance). Both lift your debate score and decay gently.",
@@ -162,7 +176,7 @@ const CHANGELOG = [
     "Historical events now name the real beats (RBG, the Comey letter, the 47% tape, Springfield, the bin Laden tape, and more).",
     "Setup redesigned as a guided wizard with a randomized seed.",
   ] },
-  { version: "0.1.0", date: "2024-06", changes: ["Initial release. 9 action types, 8 voter blocs, 2020 map.", "Mobile responsive layout.", "Guide page with actions, blocs, turns, scoring docs.", "Candidate profiles with stat bars and running mate tabs.", "Renamed traits: energy, debate prep, intelligence, policy knowledge, debating skill, fundraising prowess."] },
+  { version: "0.1.0", date: "2026-06", changes: ["Initial release. 9 action types, 8 voter blocs, 2020 map.", "Mobile responsive layout.", "Guide page with actions, blocs, turns, scoring docs.", "Candidate profiles with stat bars and running mate tabs.", "Renamed traits: energy, debate prep, intelligence, policy knowledge, debating skill, fundraising prowess."] },
 ];
 
 export function GuidePage({ onClose }: { onClose: () => void }) {
@@ -172,18 +186,14 @@ export function GuidePage({ onClose }: { onClose: () => void }) {
     <div className="overlay" onClick={onClose}>
       <div className="modal guide" onClick={(e) => e.stopPropagation()}>
         <div className="head">
-          <div className="row" style={{ justifyContent: "space-between" }}>
-            <div>
-              <div className="tag">GUIDE</div>
-              <h2>How to Play</h2>
-            </div>
-            <button className="ghost" onClick={onClose}>Close</button>
-          </div>
+          <div className="tag">GUIDE</div>
+          <h2>How to Play</h2>
+          <button className="modal-close" onClick={onClose} aria-label="Close" title="Close"><X size={16} /></button>
         </div>
         <div className="body">
-          <div className="tabbar">
+          <div className="tabbar" role="tablist" aria-label="Guide sections">
             {TABS.map((t) => (
-              <button key={t.id} className={tab === t.id ? "active" : ""} onClick={() => setTab(t.id)}>
+              <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} className={tab === t.id ? "active" : ""} onClick={() => setTab(t.id)}>
                 {t.label}
               </button>
             ))}
@@ -256,7 +266,7 @@ export function GuidePage({ onClose }: { onClose: () => void }) {
               </p>
               <h3>Electoral Votes</h3>
               <p className="guide-text">
-                Winner-take-all in every state except Maine and Nebraska (which use congressional districts). The EV bar at the top tracks live projections. 270 wins.
+                Winner-take-all in every state except Maine and Nebraska (which use congressional districts). The EV bar at the top tracks live projections. A majority wins: 270 of 538 on the modern map, 269 of 537 in 1960, and 266 of 531 before Alaska, Hawaii and DC had electoral votes.
               </p>
               <h3>Turnout</h3>
               <p className="guide-text">
@@ -271,6 +281,36 @@ export function GuidePage({ onClose }: { onClose: () => void }) {
                 <li>Opposition research (scandal or backfire)</li>
                 <li>Ground game + GOTV (turnout, not margin)</li>
               </ul>
+            </div>
+          )}
+
+          {tab === "systems" && (
+            <div className="guide-section">
+              <p className="guide-intro">
+                Each country plays under its own rules. The map, the goal line and the results screen follow the system of the election you pick.
+              </p>
+              {votingSystemsGuide().map((sys) => (
+                <div className="guide-card" key={sys.key}>
+                  <div className="guide-header">
+                    <strong>{sys.name}</strong>
+                    <span className="guide-meta">{sys.countries.map((c) => `${c.flag} ${c.name}`).join(" · ")}</span>
+                  </div>
+                  <p className="guide-text">{sys.note}</p>
+                </div>
+              ))}
+              <div className="guide-card">
+                <div className="guide-header"><strong>Regional parties</strong></div>
+                <p className="guide-text">{REGIONAL_PARTIES_NOTE}</p>
+                <ul className="guide-list">
+                  {regionalPartiesGuide().map((r) => <li key={r.code}>{r.flag} {regionalPartiesLine(r)}</li>)}
+                </ul>
+              </div>
+              {PAYWALL_ENABLED && (
+                <div className="guide-card">
+                  <div className="guide-header"><strong>Free elections</strong></div>
+                  <p className="guide-text">{FREE_ELECTIONS_NOTE}</p>
+                </div>
+              )}
             </div>
           )}
 

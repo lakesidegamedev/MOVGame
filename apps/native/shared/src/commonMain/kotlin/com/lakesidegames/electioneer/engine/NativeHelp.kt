@@ -1,5 +1,7 @@
 package com.lakesidegames.electioneer.engine
 
+import com.lakesidegames.electioneer.content.CONTENT_CATALOG
+
 class NativeHelpStep(val title: String, val body: String)
 class NativeHelp private constructor() {
     companion object {
@@ -14,10 +16,11 @@ class NativeHelp private constructor() {
             NativeHelpStep("Election night", "Watch the final calls, then inspect results and the campaign report. Standard campaigns with a known difficulty can post scores. Share your result or continue to the next election where available.")
         )
         fun guide(): List<NativeHelpStep> = listOf(
-            NativeHelpStep("United States", "Reach 270 electoral votes. Most states award their votes to the winner; Maine and Nebraska split statewide and district votes. The default campaign lasts nine weeks. Cash, candidate stamina, momentum, readiness and staff capacity constrain the plan."),
-            NativeHelpStep("Parliamentary elections", "UK, Canadian and Australian regional results produce seats. The majority line depends on the election and eligible seats. A hung parliament can yield a coalition, confidence and supply, or minority government. Check the government explanation in results."),
-            NativeHelpStep("Germany", "National proportional allocation determines seats. Regional plurality map colors do not award every seat to that party. The 5% threshold can exclude parties; CSU is exempt. Compatible coalitions can form a government."),
-            NativeHelpStep("France", "Win a majority of presidency points. Six planning weeks compress the two-week runoff. First-round transfers are included in opening support. National broadcasts and platform preparation reach the whole electorate."),
+            NativeHelpStep("United States", "Reach a majority of the electoral votes: 270 of 538 on the modern map, 269 of 537 in 1960, 266 of 531 before Alaska, Hawaii and DC voted. Most states award their votes to the winner; Maine and Nebraska split statewide and district votes. The default campaign lasts nine weeks. Cash, candidate stamina, momentum, readiness and staff capacity constrain the plan."),
+            NativeHelpStep("Parliamentary elections", "Regional results produce seats under each country's system, explained in its own entry below. The majority line depends on the election and the size of the chamber. A hung parliament can yield a coalition, confidence and supply, or minority government. Check the government explanation in results."),
+        ) + CONTENT_CATALOG.countries.mapNotNull { c -> c.guide?.let { NativeHelpStep(it.title, it.body) } } + listOf(
+            NativeHelpStep("Regional parties", "Some parties stand in only part of a country, such as the Bloc Québécois, India's state parties and the Catalan and Basque parties. They cannot win a majority, so success is beating their real seat count and holding the balance of power. The setup shows where they stand."),
+            NativeHelpStep("Free elections", "At least one election in every country is free to everyone, and so is the daily challenge. The rest of each country comes with its pack."),
             NativeHelpStep("Advertising and broadcasts", "Positive messages persuade aligned blocs. Contrast messages challenge rivals with backlash risk. Issue messages raise the salience of an issue. Spend, regional cost and diminishing returns affect the result."),
             NativeHelpStep("Visits, surrogates and fundraising", "Visits and rallies move local appeal and momentum, but travel and low stamina can produce gaffes. Surrogates cover more ground. Fundraising replenishes cash and depends on traits and momentum."),
             NativeHelpStep("Ground game and turnout", "Build field infrastructure early. Turnout pushes are strongest where offices already exist. Repeated GOTV in one region has diminishing returns. Prioritize tight contests and low-turnout blocs."),

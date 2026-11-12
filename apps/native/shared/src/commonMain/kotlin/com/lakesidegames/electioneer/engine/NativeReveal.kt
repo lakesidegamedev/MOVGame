@@ -10,7 +10,12 @@ import kotlin.math.ceil
     val upset: Boolean = false, val allocation: Map<String, Int>? = null)
 @Serializable data class NativeRevealData(val title: String, val totalUnits: Int, val threshold: Int,
     val parties: List<NativeRevealParty>, val units: List<NativeRevealUnit>, val playerPartyId: String,
-    val unitLabel: String, val noMajorityLabel: String, val storageKey: String)
+    val unitLabel: String, val noMajorityLabel: String, val storageKey: String,
+    // Plurality countries: the engine's winner (no threshold). Null elsewhere.
+    val pluralityWinner: String? = null) {
+    // Goal text for the running tally line.
+    fun goalLabel(): String = if (pluralityWinner != null) "most $unitLabel wins" else "$threshold to win"
+}
 @Serializable data class NativeRevealEntry(val at: Double, val kind: String, val unit: NativeRevealUnit? = null,
     val wave: Int? = null, val isCliff: Boolean? = null, val projectedId: String? = null)
 @Serializable data class NativeRevealSchedule(val entries: List<NativeRevealEntry>, val waveCount: Int, val projectedId: String?)
@@ -33,9 +38,13 @@ object NativeReveal {
             }
             val scenarioId = game.scenarioId ?: "2020"
             val title = customDocument(game.customScenario)?.label ?: (SCENARIOS[scenarioId]?.year ?: scenarioId).toString()
-            return NativeRevealData("Election Night · $title", units.sumOf { it.units }, 270,
+            // The scenario's college: 270 of 538, 269 of 537, 266 of 531.
+            val total = units.sumOf { it.units }
+            val threshold = evMajority(total)
+            val deadlock = if (result.winner == "tie") noMajorityTally(result.electoralVotes) else "${threshold - 1}-${threshold - 1}"
+            return NativeRevealData("Election Night · $title", total, threshold,
                 listOf("dem", "rep").map { id -> game.candidates.getValue(id).let { NativeRevealParty(id, it.shortName, it.color) } },
-                units, game.playerCandidate.serial, "EV", "269-269: ELECTION GOES TO THE HOUSE", "reveal-${game.seed}-us-$scenarioId")
+                units, game.playerCandidate.serial, "EV", "$deadlock: ELECTION GOES TO THE HOUSE", "reveal-${game.seed}-us-$scenarioId")
         }
         val world = runCatching { EngineJson.decodeFromString<RevealWorldSave>(snapshot) }.getOrNull() ?: return null
         val uk = world.uk
@@ -67,9 +76,10 @@ object NativeReveal {
         val threshold = if (uk != null) total / 2 + 1 else majorityFor(country!!, bundle!!).threshold
         val id = uk?.electionId ?: country!!.electionId
         val countryId = country?.countryId?.lowercase() ?: "uk"
+        val pluralityWinner = if (country != null && majorityFor(country, bundle!!).plurality == true) country.result!!.largestParty else null
         return NativeRevealData("Election Night · ${uk?.label ?: country!!.label}", total, threshold, parties, units,
             uk?.playerParty ?: country!!.playerParty, bundle?.unitNamePlural ?: "seats", "NO OVERALL MAJORITY: HUNG PARLIAMENT",
-            "reveal-${uk?.seed ?: country!!.seed}-$countryId-$id")
+            "reveal-${uk?.seed ?: country!!.seed}-$countryId-$id", pluralityWinner)
     }
 
     fun schedule(data: NativeRevealData): NativeRevealSchedule {
@@ -83,13 +93,32 @@ object NativeReveal {
         val tally = mutableMapOf<String, Int>()
         var projected: String? = null
         var time = 1300.0
+        // Plurality: project the winner once its lead beats every rival plus all
+        // units still out, or on the last call (a tie on units, already broken
+        // by the engine). Mirrors buildSchedule in electionReveal.ts.
+        val winner = data.pluralityWinner
+        val totalUnits = data.units.sumOf { it.units }
+        var calledUnits = 0
+        var callsLeft = data.units.size
         fun call(unit: NativeRevealUnit, wave: Int? = null, isCliff: Boolean? = null) {
             val at = time
             var projection: String? = null
-            for ((party, seats) in unit.allocation ?: mapOf(unit.winnerId to unit.units)) {
-                tally[party] = (tally[party] ?: 0) + seats
-                if (projected == null && tally.getValue(party) >= data.threshold) {
-                    projected = party; projection = party; time += 2200
+            if (winner == null) {
+                for ((party, seats) in unit.allocation ?: mapOf(unit.winnerId to unit.units)) {
+                    tally[party] = (tally[party] ?: 0) + seats
+                    if (projected == null && tally.getValue(party) >= data.threshold) {
+                        projected = party; projection = party; time += 2200
+                    }
+                }
+            } else {
+                for ((party, seats) in unit.allocation ?: mapOf(unit.winnerId to unit.units)) tally[party] = (tally[party] ?: 0) + seats
+                calledUnits += unit.units
+                callsLeft -= 1
+                if (projected == null) {
+                    val out = totalUnits - calledUnits
+                    val lead = tally[winner] ?: 0
+                    val rival = (listOf(0) + tally.filterKeys { it != winner }.values).max()
+                    if (lead > rival + out || callsLeft == 0) { projected = winner; projection = winner; time += 2200 }
                 }
             }
             entries += NativeRevealEntry(at, "call", unit, wave, isCliff, projection)

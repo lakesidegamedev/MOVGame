@@ -1,39 +1,25 @@
 package com.lakesidegames.electioneer.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.Card
-import androidx.compose.material3.Surface
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lakesidegames.electioneer.engine.CandidateId
+import com.lakesidegames.electioneer.engine.electoralRule
 
-// Native campaign desk: projection, state map, seven-day plan, events and recap.
+// U.S. campaign desk: scoreboard, state tile map, seven-day plan, events and recap.
 @Composable
 fun GameScreen(session: GameSession) {
     val game by session.game.collectAsState()
@@ -43,7 +29,9 @@ fun GameScreen(session: GameSession) {
     val eventResult by session.eventResult.collectAsState()
     val recap by session.recap.collectAsState()
     val g = game.state ?: return
-    var confirmEmptyWeek by remember { androidx.compose.runtime.mutableStateOf(false) }
+    // Older elections have smaller colleges (531 votes, 266 to win in 1932).
+    val college = remember(g.scenarioId, g.customScenario) { g.electoralRule() }
+    var confirmEmptyWeek by remember { mutableStateOf(false) }
     fun requestEndWeek() { if (pending == null && recap == null) { if (g.queuedActions.isEmpty()) confirmEmptyWeek = true else session.endTurn() } }
     var lastShortcut by remember { mutableIntStateOf(session.shortcutSequence) }
     LaunchedEffect(session.shortcutSequence) {
@@ -53,16 +41,12 @@ fun GameScreen(session: GameSession) {
         if (session.shortcut in listOf("enter", " ") && pending == null && recap == null ) requestEndWeek()
     }
 
-    if (confirmEmptyWeek) androidx.compose.material3.AlertDialog(onDismissRequest = { confirmEmptyWeek = false },
+    if (confirmEmptyWeek) AlertDialog(onDismissRequest = { confirmEmptyWeek = false },
         title = { Text("End week without moves?") }, text = { Text("You have no actions queued this week. Unspent slots win nothing. End the week anyway?") },
-        confirmButton = { androidx.compose.material3.TextButton(onClick = { confirmEmptyWeek = false; session.endTurn() }) { Text("End week") } },
-        dismissButton = { androidx.compose.material3.TextButton(onClick = { confirmEmptyWeek = false }) { Text("Keep planning") } })
-    val abbrToStateId = remember(g) {
-        g.states.associate { it.abbr.uppercase() to it.id }
-    }
-    val idToAbbr = remember(g) {
-        g.states.associate { it.id to it.abbr.uppercase() }
-    }
+        confirmButton = { TextButton(onClick = { confirmEmptyWeek = false; session.endTurn() }) { Text("End week") } },
+        dismissButton = { TextButton(onClick = { confirmEmptyWeek = false }) { Text("Keep planning") } }, containerColor = Mov.Surface2)
+    val abbrToStateId = remember(g) { g.states.associate { it.abbr.uppercase() to it.id } }
+    val idToAbbr = remember(g) { g.states.associate { it.id to it.abbr.uppercase() } }
     val selectedAbbr = selectedId?.let { idToAbbr[it] }
     val res = g.resources[g.playerCandidate.serial]
     val demEv = projection?.ev?.get(CandidateId.DEM.serial) ?: 0
@@ -70,124 +54,108 @@ fun GameScreen(session: GameSession) {
     val tossEv = projection?.tossupEv ?: 0
     val selectedState = g.states.firstOrNull { it.id == selectedId }
     val selectedContest = projection?.contests?.firstOrNull { it.stateId == selectedId }
+    val dem = g.candidates.getValue("dem")
+    val rep = g.candidates.getValue("rep")
+    val label = g.customScenario?.let { com.lakesidegames.electioneer.engine.NativeCustomScenario.entry(it)?.label }
+        ?: session.campaigns().firstOrNull { it.id == g.scenarioId }?.label ?: "The election"
+    fun leanText(lean: String?, share: Double): String = when (lean) {
+        CandidateId.DEM.serial -> "${dem.shortName} ${percent(share)}"
+        CandidateId.REP.serial -> "${rep.shortName} ${percent(1 - share)}"
+        else -> "Tossup"
+    }
 
     Column(Modifier.fillMaxSize()) {
-      NativeCampaignCoach(session, "US", "Win 270 electoral votes in ${g.totalTurns} weeks.", g.turn, selectedId, g.queuedActions.size)
-      Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(12.dp)) {
-        Text("CAMPAIGN DESK", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-        Text(g.customScenario?.let { com.lakesidegames.electioneer.engine.NativeCustomScenario.entry(it)?.label } ?: session.campaigns().firstOrNull { it.id == g.scenarioId }?.label ?: "The election", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        if (session.canViewReplay()) TextButton(onClick = { session.go(Screen.REPLAY) }) { Text("Campaign replay and report") }
-        TextButton(onClick = { session.go(Screen.ANALYSIS) }) { Text("Campaign analysis") }
-        TextButton(onClick = session::undo, enabled = session.canUndo()) { Text("Undo") }
-        Spacer(Modifier.height(10.dp))
-        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+      NativeCampaignCoach(session, "US", "Win ${college.majority} electoral votes in ${g.totalTurns} weeks.", g.turn, selectedId, g.queuedActions.size)
+      Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+        Column(verticalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
+            Eyebrow("Campaign desk · Week ${g.turn + 1}/${g.totalTurns}", color = Mov.Warning)
+            Text(label, style = MaterialTheme.typography.headlineSmall, color = Mov.Text1)
+        }
+        MovCard {
+            Row(verticalAlignment = Alignment.Bottom) {
+                Metric("$demEv", dem.shortName, color = Mov.DemText)
+                Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("${college.majority} TO WIN", color = Mov.Text2, style = MaterialTheme.typography.labelSmall)
+                    Text("$tossEv tossup", color = Mov.Text3, style = MaterialTheme.typography.labelMedium.num)
+                }
+                Metric("$repEv", rep.shortName, color = Mov.GopText, alignEnd = true)
+            }
+            SeatBar(listOf(Mov.Dem to demEv, Mov.Tossup to tossEv, Mov.Gop to repEv), college.total, college.majority,
+                description = "${dem.shortName} $demEv, tossup $tossEv, ${rep.shortName} $repEv electoral votes. ${college.majority} to win.")
+            StatRow {
+                Metric("\$${"%.1f".format((res?.cash ?: 0.0) / 1_000_000)}M", "Cash")
+                Metric("${session.slotsLeft()}", "Actions left")
+                Metric("${g.queuedActions.size}", "Planned")
+            }
+        }
+        MovCard(tight = true) {
+            CardHead("Electoral map") {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
+                    PartySwatch(Mov.Dem, size = 10.dp); Text(dem.shortName, color = Mov.Text3, style = MaterialTheme.typography.labelMedium)
+                    PartySwatch(Mov.Tossup, size = 10.dp); Text("Tossup", color = Mov.Text3, style = MaterialTheme.typography.labelMedium)
+                    PartySwatch(Mov.Gop, size = 10.dp); Text(rep.shortName, color = Mov.Text3, style = MaterialTheme.typography.labelMedium)
+                }
+            }
+            TileMap(projection = projection, abbrToStateId = abbrToStateId, selectedAbbr = selectedAbbr,
+                onSelect = { id, _ -> session.select(id) },
+                describe = { id ->
+                    val state = g.states.first { it.id == id }
+                    val contest = projection?.contests?.firstOrNull { it.stateId == id }
+                    "${state.name}, ${state.electoralVotes} electoral votes, ${contest?.let { leanText(it.lean, it.demShare) } ?: "no projection"}"
+                })
+            if (selectedState != null && selectedContest != null) Inset {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column {
-                        Text(g.candidates.getValue("dem").shortName.uppercase(), color = Color(0xFF7EA9FF), style = MaterialTheme.typography.labelSmall)
-                        Text("$demEv", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
-                    }
-                    Spacer(Modifier.weight(1f))
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("270 TO WIN", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelSmall)
-                        Text("$tossEv tossup", style = MaterialTheme.typography.labelSmall)
-                    }
-                    Spacer(Modifier.weight(1f))
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(g.candidates.getValue("rep").shortName.uppercase(), color = Color(0xFFFF8A83), style = MaterialTheme.typography.labelSmall)
-                        Text("$repEv", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
-                    }
+                    Text(selectedState.name, Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = Mov.Text1)
+                    Tag("${selectedState.electoralVotes} EV", TagKind.Outline)
+                    IconButton(onClick = { session.select(null) }) { Icon(Icons.Filled.Close, contentDescription = "Clear state selection", tint = Mov.Text3) }
                 }
-                LinearProgressIndicator(progress = { (demEv + tossEv / 2f) / 538f }, modifier = Modifier.fillMaxWidth())
+                Meter(selectedContest.demShare.toFloat(), Mov.Dem, height = 8.dp, mark = 0.5f)
                 Row {
-                    Text("WEEK ${g.turn + 1}/${g.totalTurns}", style = MaterialTheme.typography.labelSmall)
-                    Spacer(Modifier.weight(1f))
-                    Text("\$${"%.1f".format((res?.cash ?: 0.0) / 1_000_000)}M", style = MaterialTheme.typography.labelSmall)
-                    Spacer(Modifier.weight(1f))
-                    Text("${session.slotsLeft()} ACTIONS", style = MaterialTheme.typography.labelSmall)
+                    Text("${dem.shortName} ${percent(selectedContest.demShare)}", Modifier.weight(1f), color = Mov.DemText, style = MaterialTheme.typography.bodyMedium.num, fontWeight = FontWeight.SemiBold)
+                    Text("${rep.shortName} ${percent(1 - selectedContest.demShare)}", color = Mov.GopText, style = MaterialTheme.typography.bodyMedium.num, fontWeight = FontWeight.SemiBold)
                 }
+                Text("State moves in your plan target ${selectedState.name}.", style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
             }
         }
-        Spacer(Modifier.height(12.dp))
-
-        TileMap(
-            projection = projection,
-            abbrToStateId = abbrToStateId,
-            selectedAbbr = selectedAbbr,
-            onSelect = { id, _ -> session.select(id) },
-        )
-        Spacer(Modifier.height(8.dp))
-        if (selectedState != null && selectedContest != null) {
-            Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
-                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("${selectedState.name} · ${selectedState.electoralVotes} EV", fontWeight = FontWeight.Bold)
-                    Text("Democratic projection ${"%.1f".format(selectedContest.demShare * 100)}%", style = MaterialTheme.typography.bodySmall)
-                    Text("Select another state to retarget your plan.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-        }
-
         ActionPlanner(session, g, selectedId)
-        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
+            GhostButton("Analysis", { session.go(Screen.ANALYSIS) })
+            if (session.canViewReplay()) GhostButton("Replay and report", { session.go(Screen.REPLAY) })
+            GhostButton("Undo", session::undo, enabled = session.canUndo())
+        }
       }
-      Surface(shadowElevation = 8.dp) {
-        Button(
-            onClick = { requestEndWeek() },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-        ) { Text("End week · ${g.queuedActions.size} planned →") }
+      ActionBar {
+          PrimaryButton("End week · ${g.queuedActions.size} planned", { requestEndWeek() }, Modifier.weight(1f))
       }
     }
 
-    // Turn recap dialog.
     recap?.let { lines ->
         AlertDialog(
             onDismissRequest = { session.dismissRecap() },
             title = { Text("Week ${g.turn} recap") },
-            text = {
-                Column {
-                    for (line in lines) {
-                        Text(line, style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { session.dismissRecap() }) { Text("OK") }
-            },
+            text = { Column(verticalArrangement = Arrangement.spacedBy(MovSpace.s1_5)) { for (line in lines) Text(line, style = MaterialTheme.typography.bodyMedium, color = Mov.Text2) } },
+            confirmButton = { TextButton(onClick = { session.dismissRecap() }) { Text("Continue") } },
+            containerColor = Mov.Surface2,
         )
     }
 
-    // Pending event dialog (player-side events after each turn).
     pending?.let { pe ->
         val def = session.eventDef(pe.eventId)
         if (def != null) {
             val result = eventResult
             AlertDialog(
                 onDismissRequest = {},
-                title = { Text(def.title) },
+                title = { Column { Tag(if (result == null) "Decision required" else "Result", TagKind.Warning); Spacer(Modifier.height(MovSpace.s2)); Text(def.title) } },
                 text = {
-                    Column {
-                        Text(result ?: def.prompt)
-                    }
-                },
-                confirmButton = {},
-                dismissButton = {
-                    if (result == null) {
-                        Column {
-                            for (choice in session.availableChoices(pe.eventId)) {
-                                TextButton(
-                                    onClick = {
-                                        session.answerEvent(pe.eventId, choice.id)
-                                    },
-                                ) { Text(choice.text) }
-                            }
-                        }
-                    } else {
-                        TextButton(onClick = { session.closeEventDialog() }) {
-                            Text("Continue")
+                    Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
+                        Text(result ?: def.prompt, color = Mov.Text2)
+                        if (result == null) for (choice in session.availableChoices(pe.eventId)) {
+                            SecondaryButton(choice.text, { session.answerEvent(pe.eventId, choice.id) }, Modifier.fillMaxWidth())
                         }
                     }
                 },
+                confirmButton = { if (result != null) TextButton(onClick = { session.closeEventDialog() }) { Text("Continue") } },
+                containerColor = Mov.Surface2,
             )
         }
     }

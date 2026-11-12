@@ -16,6 +16,7 @@ import type { ReplayLog, ReplayMode } from "@lib/replay";
 import { truncateToTurn } from "@lib/replay";
 import { initUkReplayLog, recordUkWeek } from "./ukReplay";
 import { mpActionCost, mpPlannedCost } from "@engine/mpBudget";
+import { registerSession } from "./sessions";
 
 interface UkStore {
   game: UkGameState | null;
@@ -194,3 +195,5 @@ export const useUkStore = create<UkStore>((set, get) => ({
     return true;
   },
 }));
+
+registerSession("uk", useUkStore);

@@ -78,7 +78,7 @@ object NativeAnalysis {
                 NativeTrendChart("poll-margin", "Your national polling margin (points)", kotlin.math.min(-6.0, kotlin.math.floor(margins.min() - 2)),
                     kotlin.math.max(6.0, kotlin.math.ceil(margins.max() + 2)), 0.0, "Tie",
                     listOf(series(game.candidates.getValue(game.playerCandidate.serial), ::playerMargin))),
-                NativeTrendChart("ev", "Electoral vote projection", 0.0, 538.0, 270.0, "270 to win",
+                NativeTrendChart("ev", "Electoral vote projection", 0.0, game.electoralRule().total.toDouble(), game.electoralRule().majority.toDouble(), "${game.electoralRule().majority} to win",
                     listOf(series(dem) { it.demEV.toDouble() }, series(rep) { it.repEV.toDouble() })),
                 NativeTrendChart("momentum", "National momentum", -100.0, 100.0, 0.0, "Neutral",
                     listOf(series(dem) { it.demMomentum }, series(rep) { it.repMomentum })),
@@ -112,11 +112,11 @@ object NativeAnalysis {
                 NativeAnalysisRow("Momentum", points(resource?.momentum ?: countryResource!!.momentum)),
             ))
         }
-        val issues = countryBundle?.issues?.map { Triple(it.id, it.name, it.blurb) }
-            ?: UK_ISSUES.map { Triple(it.id, it.name, it.blurb) }
-        val salience = uk?.salience ?: country!!.salience
-        sections += NativeAnalysisSection("issues", "Issues", issues.map { (id, title, blurb) ->
-            NativeAnalysisRow("$title · ${percent(salience[id] ?: 0.0)}", blurb)
+        // This election's issues, under the names voters used that year.
+        val issues = uk?.let { ukGameIssues(it.electionId, it.salience) }
+            ?: countryGameIssues(countryBundle!!, country!!.electionId, country.salience)
+        sections += NativeAnalysisSection("issues", "Issues", issues.map {
+            NativeAnalysisRow("${it.name} · ${percent(it.salience)}", it.blurb)
         })
         sections += NativeAnalysisSection("polls", "${region.name} polls", pollRegion(uk?.seed ?: country!!.seed, uk?.turn ?: country!!.turn, region).map {
             NativeAnalysisRow("${it.pollster} · n=${it.sampleSize} · ±${points(it.marginOfError)} points",

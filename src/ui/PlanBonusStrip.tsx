@@ -1,3 +1,4 @@
+import { Check, Circle } from "lucide-react";
 import {
   PLAN_BONUSES,
   activePlanBonusIds,
@@ -22,7 +23,7 @@ export function PlanBonusStrip({ plan }: { plan: readonly PlanActionLike[] }) {
               className={`plan-bonus${unlocked ? " active" : ""}`}
               title={`${bonus.recipe}. ${bonus.description} Bonus applies to the follow-through action only.`}
             >
-              <span aria-hidden="true">{unlocked ? "✓" : "○"}</span>
+              {unlocked ? <Check size={11} aria-hidden="true" /> : <Circle size={9} aria-hidden="true" />}
               {bonus.name}
               <strong>+{Math.round((bonus.multiplier - 1) * 100)}%</strong>
             </span>

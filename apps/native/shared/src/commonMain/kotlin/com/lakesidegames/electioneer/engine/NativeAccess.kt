@@ -1,17 +1,21 @@
 package com.lakesidegames.electioneer.engine
 
-/** Bundles the retired Global pack still unlocks for players who own it. */
-private val globalCountries = setOf("canada", "germany", "france", "australia")
-
 /**
  * Scenario access for the native clients. Locks apply only while the server
  * turns native gating on, which it does only once a native purchase has been
  * proven to unlock a pack; with gating off every election stays playable.
+ * Ownership is resolved per scenario through the exported pack lists, exactly
+ * like the web (packs.ts): the Complete Collection holds every paid scenario
+ * and the retired Global pack holds its frozen list.
  */
 object NativeAccess {
-    /** True when owning [ownedPacks] covers [packId], directly or through a bundle. */
-    fun covers(packId: String, ownedPacks: List<String>): Boolean =
-        packId in ownedPacks || "complete" in ownedPacks || ("global" in ownedPacks && packId in globalCountries)
+    /** True when owning [ownedPacks] covers every scenario in [packId] (web packCovered). */
+    fun covers(packId: String, ownedPacks: List<String>): Boolean {
+        if (packId in ownedPacks) return true
+        val target = NativeCatalog.pack(packId) ?: return false
+        val owned = NativeCatalog.ownedScenarios(ownedPacks)
+        return target.scenarios.all { it in owned }
+    }
 
     /**
      * The pack a new campaign on [country]/[nativeId] needs, or null when it is
@@ -23,6 +27,6 @@ object NativeAccess {
             ?: return null
         if (election.free || election.scenarioId == dailyScenarioId) return null
         val pack = election.packId ?: return null
-        return if (covers(pack, ownedPacks)) null else pack
+        return if (pack in ownedPacks || election.scenarioId in NativeCatalog.ownedScenarios(ownedPacks)) null else pack
     }
 }

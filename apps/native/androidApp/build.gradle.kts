@@ -19,8 +19,11 @@ android {
         applicationId = "com.lakesidegames.electioneer"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.compileSdk.get().toInt()
-        versionCode = 1
-        versionName = "0.1.0"
+        // Play needs a versionCode above every build it has seen. Nothing has been
+        // uploaded yet; major * 1,000,000 + minor * 1,000 + patch keeps it rising
+        // with the version and matches the code the Tauri Android shell derives.
+        versionCode = 2_000_000
+        versionName = "2.0.0"
         // Empty until the store and crash reporting are configured.
         buildConfigField("String", "SENTRY_DSN", sentryDsn.get().asBuildConfigString())
     }

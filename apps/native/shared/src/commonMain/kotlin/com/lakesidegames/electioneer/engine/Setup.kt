@@ -3,6 +3,8 @@ package com.lakesidegames.electioneer.engine
 import com.lakesidegames.electioneer.content.BLOCS
 import com.lakesidegames.electioneer.content.BLOC_IDS
 import com.lakesidegames.electioneer.content.ISSUES
+import com.lakesidegames.electioneer.content.PANDEMIC_ISSUE
+import com.lakesidegames.electioneer.content.electionIssueList
 import com.lakesidegames.electioneer.content.OPPONENT_OF
 import com.lakesidegames.electioneer.content.STAFF_BY_ID
 import com.lakesidegames.electioneer.content.STATE_SEEDS
@@ -86,8 +88,10 @@ private fun buildBlocsForState(seed: StateSeed, targetDemShare: Double): List<St
 fun buildStates(
     priors: Map<String, Double>? = null,
     evOverrides: Map<String, Int>? = null,
+    absent: List<String>? = null,
 ): List<StateContest> {
-    return STATE_SEEDS.map { seed ->
+    val skip = absent.orEmpty().toSet()
+    return STATE_SEEDS.filter { it.id !in skip }.map { seed ->
         val isAggregate = seed.electorate <= 0 && seed.aggregateOf != null
         val demShare = priors?.get(seed.id) ?: seed.prior2020DemShare
         val ev = evOverrides?.get(seed.id) ?: seed.ev
@@ -108,19 +112,22 @@ fun buildStates(
     }
 }
 
-// Player-side handicap by difficulty.
+// Player-side handicap by difficulty (web setup.ts HANDICAP). gapShare and
+// gapResidual size easy's climate tilt from usLevelingTilt (climateTilt);
+// zero on normal and hard. Hard's campaigning lands at 90%.
 @Serializable
 data class PlayerHandicap(
     val actions: Int,
     val cash: Double,
     val persuasion: Double,
-    val environment: Double,
+    val gapShare: Double,
+    val gapResidual: Double,
 )
 
-private val HANDICAP: Map<String, PlayerHandicap> = mapOf(
-    "easy" to PlayerHandicap(actions = 5, cash = 110_000_000.0, persuasion = 1.55, environment = 0.55),
-    "normal" to PlayerHandicap(actions = 1, cash = 25_000_000.0, persuasion = 1.15, environment = 0.0),
-    "hard" to PlayerHandicap(actions = 0, cash = 0.0, persuasion = 1.0, environment = 0.0),
+internal val HANDICAP: Map<String, PlayerHandicap> = mapOf(
+    "easy" to PlayerHandicap(actions = 5, cash = 110_000_000.0, persuasion = 1.55, gapShare = 0.6, gapResidual = 0.15),
+    "normal" to PlayerHandicap(actions = 1, cash = 25_000_000.0, persuasion = 1.15, gapShare = 0.0, gapResidual = 0.0),
+    "hard" to PlayerHandicap(actions = 0, cash = 0.0, persuasion = 0.9, gapShare = 0.0, gapResidual = 0.0),
 )
 
 // Tilts every bloc's baseline toward the player by env logits. No-op at 0.
@@ -139,7 +146,7 @@ private fun startingResources(
     candidate: CandidateId,
     vp: RunningMate,
     baseEnergy: Double,
-    handicap: PlayerHandicap = PlayerHandicap(actions = 0, cash = 0.0, persuasion = 1.0, environment = 0.0),
+    handicap: PlayerHandicap = PlayerHandicap(actions = 0, cash = 0.0, persuasion = 1.0, gapShare = 0.0, gapResidual = 0.0),
 ): Resources {
     // Base 7 plus half the candidate's energy (0-10 scale, rounded up), plus
     // any energetic-VP bonus, plus the player handicap.
@@ -221,10 +228,19 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
 
     val scenario = opts.scenarioOverride ?: getScenario(opts.scenario)
 
-    // National issue salience: scenario values where given, else base.
+    // The election's own issues (its declared list, or every axis under the
+    // fallback names). Pandemic Mode adds the pandemic axis to any year.
+    val declaredIssues = scenario.issues
+    val pandemicAdded = opts.modifiers?.pandemic == true && declaredIssues != null &&
+        declaredIssues.none { it.id == IssueId.COVID_RESPONSE.serial }
+    val electionIssues = electionIssueList(if (pandemicAdded) declaredIssues!! + PANDEMIC_ISSUE else declaredIssues)
+    val live = electionIssues.map { it.id }.toSet()
+
+    // National issue salience: scenario values where given, else base. An axis
+    // the election does not have carries none, so it never moves a bloc.
     val salience = mutableMapOf<String, Double>()
     for (id in IssueId.entries) {
-        salience[id.serial] = scenario.issueSalience?.get(id.serial)
+        salience[id.serial] = if (id.serial !in live) 0.0 else scenario.issueSalience?.get(id.serial)
             ?: ISSUES.getValue(id.serial).baseSalience
     }
     val player = opts.playerCandidate
@@ -280,11 +296,11 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
     val repVp = if (player == CandidateId.REP) playerVp else oppVp
     val demRes = startingResources(
         CandidateId.DEM, demVp, scenario.dem.traits.energy,
-        if (player == CandidateId.DEM) handicap else PlayerHandicap(0, 0.0, 1.0, 0.0),
+        if (player == CandidateId.DEM) handicap else PlayerHandicap(0, 0.0, 1.0, 0.0, 0.0),
     )
     val repRes = startingResources(
         CandidateId.REP, repVp, scenario.rep.traits.energy,
-        if (player == CandidateId.REP) handicap else PlayerHandicap(0, 0.0, 1.0, 0.0),
+        if (player == CandidateId.REP) handicap else PlayerHandicap(0, 0.0, 1.0, 0.0, 0.0),
     )
     val resources = mutableMapOf(CandidateId.DEM.serial to demRes, CandidateId.REP.serial to repRes)
     val playerRes = resources.getValue(player.serial)
@@ -294,7 +310,7 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
         actions = playerRes.actions + staffActionBonus,
     )
 
-    return GameState(
+    val game = GameState(
         seed = seed,
         rngState = seed,
         turn = 0,
@@ -308,9 +324,11 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
         playerEdge = handicap.persuasion,
         locations = mutableMapOf(),
         candidates = candidates,
-        issues = ISSUES.toMap(),
+        issues = electionIssues.associate { issue ->
+            issue.id to Issue(IssueId.entries.first { it.serial == issue.id }, issue.name, salience.getValue(issue.id), issue.blurb)
+        },
         salience = salience,
-        states = withEnvironment(buildStates(priors, scenario.evOverrides), player, handicap.environment),
+        states = buildStates(priors, scenario.evOverrides, scenario.electoralCollege?.absent),
         resources = resources,
         pendingEvents = mutableListOf(),
         firedEventIds = mutableListOf(),
@@ -326,6 +344,10 @@ fun createGame(opts: NewGameOptions = NewGameOptions()): GameState {
         debateHistory = mutableListOf(),
         modifiers = opts.modifiers,
     )
+    if (handicap.gapShare > 0) {
+        withEnvironment(game.states, player, climateTilt(handicap.gapShare, handicap.gapResidual, usLevelingTilt(game, player)))
+    }
+    return game
 }
 
 // FNV-1a string seed (same algorithm as Rng.hashSeed; exported separately in

@@ -125,6 +125,8 @@ class EventsTest {
         queueEventsForTurn(hist, Rng.createRng("q1"))
         assertEquals(
             listOf(
+                PendingEvent("h20_covid", CandidateId.DEM),
+                PendingEvent("h20_covid", CandidateId.REP),
                 PendingEvent("h20_debate1", CandidateId.DEM),
                 PendingEvent("h20_debate1", CandidateId.REP),
             ),
@@ -134,8 +136,8 @@ class EventsTest {
         queueEventsForTurn(plaus, Rng.createRng("q2"))
         assertEquals(
             listOf(
-                PendingEvent("h20_vpdebate", CandidateId.DEM),
-                PendingEvent("h20_vpdebate", CandidateId.REP),
+                PendingEvent("h20_debate1", CandidateId.DEM),
+                PendingEvent("h20_debate1", CandidateId.REP),
             ),
             plaus.pendingEvents,
         )

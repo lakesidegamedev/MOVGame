@@ -5,8 +5,7 @@ import { SCENARIOS } from "@content/scenarios";
 import { HISTORICAL_EVENTS } from "@content/events";
 import { UK_ELECTIONS } from "@content/uk/elections";
 import { UK_ELECTION_EVENTS } from "@content/uk/electionEvents";
-import { COUNTRIES } from "@content/countries";
-import { playablePartiesIn } from "../countryGame";
+import { COUNTRIES } from "@content/countries/all";
 
 // ─────────────────────────────────────────────────────────────────────────
 // CONTENT COMPLETENESS — the sellability bar, as a test.
@@ -106,51 +105,6 @@ describe("UK elections: full-fat content", () => {
   });
 });
 
-describe("country elections: full-fat content", () => {
-  it("every election has leaders for all its playable parties", () => {
-    for (const [cid, country] of Object.entries(COUNTRIES)) {
-      for (const eid of Object.keys(country.elections)) {
-        for (const p of playablePartiesIn(country, eid)) {
-          expect(country.leaders[eid]?.[p], `${cid} ${eid}: leader for ${p}`).toBeDefined();
-        }
-      }
-    }
-  });
-
-  it("every election has a named story-beat deck", () => {
-    for (const [cid, country] of Object.entries(COUNTRIES)) {
-      for (const [eid, election] of Object.entries(country.elections)) {
-        const deck = election.events ?? [];
-        expect(deck.length, `${cid} ${eid} deck size`).toBeGreaterThanOrEqual(5);
-        expect(deck.some((e) => e.turn !== undefined), `${cid} ${eid} scheduled beats`).toBe(true);
-        for (const e of deck) {
-          if (e.turn !== undefined) expect(e.turn, `${cid} ${eid} ${e.id} turn in range`).toBeLessThan(6);
-          if (e.party) expect(country.system.parties.some((p) => p.id === e.party), `${cid} ${eid} ${e.id} pinned party exists`).toBe(true);
-        }
-        const ids = new Set(deck.map((e) => e.id));
-        expect(ids.size, `${cid} ${eid} deck ids unique`).toBe(deck.length);
-        expect(Object.keys(election.salience).length, `${cid} ${eid} salience`).toBeGreaterThan(0);
-      }
-    }
-  });
-
-  it("every country bundle ships a real-geography map covering all regions", () => {
-    for (const [cid, country] of Object.entries(COUNTRIES)) {
-      expect(country.map, `${cid} map`).toBeDefined();
-      for (const r of country.regions) {
-        const shape = country.map!.shapes[r.id];
-        expect(shape, `${cid} map shape for ${r.id}`).toBeDefined();
-        expect(shape.d.length, `${cid} ${r.id} path`).toBeGreaterThan(10);
-      }
-    }
-  });
-});
-
-describe("country cover images", () => {
-  it("every country has a landing cover", async () => {
-    const { countryCover } = await import("@content/covers");
-    for (const code of ["US", "UK", "CA", "DE", "FR", "AU"] as const) {
-      expect(countryCover(code), `country cover ${code}`).toBeTruthy();
-    }
-  });
-});
+// Country content (leaders, decks, maps, seat sums, calibration, covers and
+// every-party playthroughs) is checked per registered country in
+// src/content/__tests__/country-completeness.test.ts.

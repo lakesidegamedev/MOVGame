@@ -1,11 +1,12 @@
 import type { Projection } from "@engine/index";
 
-// The You/Tossup/Them tally bar, always Dem-left / GOP-right out of 538.
+// The You/Tossup/Them tally bar, always Dem-left / GOP-right, out of the
+// scenario's college (every contest is dem, rep or tossup, so they sum to it).
 export function EvBar({ projection }: { projection: Projection }) {
   const dem = projection.ev.dem;
   const gop = projection.ev.rep;
   const tossup = projection.tossupEv;
-  const total = 538;
+  const total = dem + gop + tossup || 538;
   const w = (n: number) => `${(n / total) * 100}%`;
   return (
     <div className="evbar">

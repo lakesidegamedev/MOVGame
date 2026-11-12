@@ -6,6 +6,7 @@ import com.lakesidegames.electioneer.engine.CandidateId
 import com.lakesidegames.electioneer.engine.EventTrigger
 import com.lakesidegames.electioneer.engine.GameEvent
 import com.lakesidegames.electioneer.engine.Issue
+import com.lakesidegames.electioneer.engine.IssueId
 import com.lakesidegames.electioneer.engine.RunningMate
 import kotlinx.serialization.Serializable
 import com.lakesidegames.electioneer.engine.EngineJson
@@ -112,6 +113,7 @@ private data class SetupFile(
     val seeds: List<StateSeed>,
     val totalEv: Int,
     val issues: List<Issue>,
+    val pandemicIssue: CountryIssueDef,
     val mates: Map<String, List<RunningMate>>,
     val scenarios: List<Scenario>,
     val ids: List<String>,
@@ -126,6 +128,26 @@ val STATE_SEEDS: List<StateSeed> by lazy { setupFile.seeds }
 val TOTAL_EV: Int by lazy { setupFile.totalEv }
 
 val ISSUES: Map<String, Issue> by lazy { setupFile.issues.associateBy { it.id.serial } }
+
+// Pandemic Mode's issue for an election that does not carry the axis itself.
+val PANDEMIC_ISSUE: CountryIssueDef by lazy { setupFile.pandemicIssue }
+
+// The issues an election runs on: its declared list, or every axis under its
+// fallback name. In IssueId order, so both engines build the same record.
+fun electionIssueList(declared: List<CountryIssueDef>?): List<CountryIssueDef> {
+    if (declared.isNullOrEmpty()) return IssueId.entries.map { id ->
+        val issue = ISSUES.getValue(id.serial)
+        CountryIssueDef(id.serial, issue.name, issue.blurb)
+    }
+    return IssueId.entries.flatMap { id -> declared.filter { it.id == id.serial } }
+}
+
+// The built-in election whose issues a custom U.S. race of this year runs on:
+// the latest one held in or before that year, else the earliest.
+fun issueTemplateFor(year: Int): Scenario {
+    val byYear = SCENARIO_IDS.mapNotNull { SCENARIOS[it] }.sortedBy { it.year }
+    return byYear.lastOrNull { it.year <= year } ?: byYear.first()
+}
 
 val RUNNING_MATES: Map<String, List<RunningMate>> by lazy { setupFile.mates }
 
@@ -203,10 +225,8 @@ val UK_ELECTIONS: Map<String, UkElectionData> by lazy { ukFile.elections }
 val UK_ELECTION_IDS: List<String> by lazy { ukFile.ids }
 
 // ── Countries ────────────────────────────────────────────────────────────
-private fun loadCountry(name: String): CountryBundle {
-    val decoded = EngineJson.decodeFromString<CountryBundleWire>(bundleText("countries/$name"))
-    return decoded.toBundle()
-}
+private fun loadCountryBundle(path: String): CountryBundle =
+    EngineJson.decodeFromString<CountryBundleWire>(bundleText(path)).toBundle()
 
 @Serializable
 private data class CountryBundleWire(
@@ -228,6 +248,12 @@ private data class CountryBundleWire(
     val leaders: Map<String, Map<String, CountryLeader>>,
     val events: List<CountryEventDef>,
     val eventChance: Double,
+    val coalitions: CoalitionRules? = null,
+    val governmentText: Map<String, String> = emptyMap(),
+    val runoff: Boolean = false,
+    val plurality: Boolean = false,
+    val goalHint: String? = null,
+    val regional: List<String> = emptyList(),
 ) {
     fun toBundle(): CountryBundle = CountryBundle(
         id = id, label = label, flag = flag, currency = currency,
@@ -235,11 +261,43 @@ private data class CountryBundleWire(
         system = system, playable = playable, abstaining = abstaining,
         defaultSeatElasticity = defaultSeatElasticity, issues = issues, blocs = blocs,
         regions = regions, elections = elections, leaders = leaders, events = events,
-        eventChance = eventChance,
+        eventChance = eventChance, coalitions = coalitions, governmentText = governmentText,
+        runoff = runoff, plurality = plurality, goalHint = goalHint, regional = regional,
     )
 }
 
-val AUSTRALIA_DATA: CountryBundle by lazy { loadCountry("au") }
-val CANADA_DATA: CountryBundle by lazy { loadCountry("ca") }
-val FRANCE_DATA: CountryBundle by lazy { loadCountry("fr") }
-val GERMANY_DATA: CountryBundle by lazy { loadCountry("de") }
+// ── Catalog: the registered country list, exported from the web modules ───
+@Serializable
+data class CatalogCountry(
+    val id: String,
+    val name: String,
+    val flag: String,
+    val engine: String,
+    val bundle: String? = null,
+    val dailyPair: List<String>,
+    val roleNames: Map<String, String> = emptyMap(),
+    val packId: String,
+    val guide: CatalogGuide? = null,
+)
+
+@Serializable
+data class CatalogGuide(val title: String, val body: String)
+
+@Serializable
+data class CatalogPack(val id: String, val name: String, val scenarios: List<String>, val legacy: Boolean = false)
+
+@Serializable
+data class ContentCatalog(val countries: List<CatalogCountry>, val packs: List<CatalogPack>)
+
+val CONTENT_CATALOG: ContentCatalog by lazy { EngineJson.decodeFromString<ContentCatalog>(bundleText("catalog")) }
+
+/** Every country on the shared multiparty engine, keyed by code, in registration order. */
+val COUNTRIES: Map<String, CountryBundle> by lazy {
+    CONTENT_CATALOG.countries.filter { it.engine == "country" }.associate { c ->
+        val bundle = loadCountryBundle(c.bundle ?: "countries/${c.id.lowercase()}")
+        require(bundle.id == c.id) { "catalog country ${c.id} loaded bundle ${bundle.id}" }
+        c.id to bundle
+    }
+}
+
+fun getCountry(id: String): CountryBundle? = COUNTRIES[id]

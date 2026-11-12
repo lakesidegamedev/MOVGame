@@ -52,6 +52,19 @@ export const PLAN_BONUSES: readonly PlanBonus[] = [
   },
 ] as const;
 
+// National prep actions in the multiparty engines (Debate Prep, Platform,
+// Issue Pivot) are free and reach every region at once. Each one after the
+// first in a week lands at half the strength of the one before, so a week of
+// nothing but Platform is worth about two launches, not seven. `completed` is
+// the week's earlier actions (the same list the plan bonuses read).
+export const NATIONAL_PREP_TYPES: ReadonlySet<string> = new Set(["debate_prep", "policy_prep", "issue_pivot"]);
+export function nationalPrepFactor(action: PlanActionLike, completed: readonly PlanActionLike[]): number {
+  if (!NATIONAL_PREP_TYPES.has(action.type)) return 1;
+  let earlier = 0;
+  for (const a of completed) if (NATIONAL_PREP_TYPES.has(a.type)) earlier++;
+  return Math.pow(0.5, earlier);
+}
+
 function targetOf(action: PlanActionLike): string | undefined {
   return action.stateId ?? action.regionId;
 }

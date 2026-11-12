@@ -1,13 +1,14 @@
 import { create } from "zustand";
-import { api, ApiError, clearSession, getStoredUser, getToken, lakesideCheckoutUrl, lakesideLoginUrl, storeSession, type ApiUser, type Purchase, type Unlocked } from "@lib/api";
+import { api, ApiError, clearSession, getStoredUser, getToken, storeSession, type ApiUser, type Purchase, type Unlocked } from "@lib/api";
 import { isFreeScenario } from "@content/scenarioRegistry";
 import { PACKS_BY_ID, STORE_PACKS } from "@content/packs";
 import { dailyAssignment, utcDateString } from "@lib/daily";
+import { DISTRIBUTION } from "@lib/distribution";
+import { useStoreNav } from "./storeNav";
 
-// Post-redirect notices (Stripe success/cancel, Lakeside sign-in).
+// Post-redirect notices (Lakeside sign-in). Checkout results are shown by the
+// Store itself, which opens when the player lands back from checkout.
 export type AuthNotice =
-  | { kind: "purchase-success"; packName: string | null }
-  | { kind: "purchase-cancelled" }
   | { kind: "lakeside-signed-in"; username: string }
   | { kind: "lakeside-failed" }
   | { kind: "lakeside-link-needs-login" };
@@ -30,8 +31,13 @@ interface AuthStore {
   login: (email: string, password: string) => Promise<string | null>;
   register: (username: string, email: string, password: string) => Promise<string | null>;
   activate: (code: string) => Promise<{ error?: string; packName?: string }>;
-  buyPack: (packId: string) => Promise<string | null>;
-  loadPurchases: () => Promise<void>;
+  /**
+   * Ask the platform again what this account owns (no server cache). Resolves
+   * true only when the platform actually answered; on false the held
+   * entitlements are left as they were.
+   */
+  refreshEntitlements: () => Promise<boolean>;
+  loadPurchases: () => Promise<boolean>;
   logout: () => void;
   refresh: () => Promise<void>;
 
@@ -84,28 +90,29 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 
-  buyPack: async (packId) => {
-    if (!STORE_PACKS.some((p) => p.id === packId)) return "That pack is not on sale.";
-    // Purchases are recorded against the Lakeside identity, so the game account
-    // must be linked first or the unlock could never reach it. Sign in with
-    // Lakeside (this links a signed-in local account in place), then come back
-    // with ?buy= and continue straight to checkout.
-    if (!get().user?.ahdLinked) {
-      window.location.assign(lakesideLoginUrl({ buy: packId }));
-      return null;
+  refreshEntitlements: async () => {
+    if (!getToken()) return false;
+    try {
+      const { verified, unlocked } = await api.refreshEntitlements();
+      if (!verified) return false;
+      set({ unlocked, serverDown: false });
+      return true;
+    } catch (e) {
+      // An expired session is handled the same way as everywhere else.
+      if (e instanceof ApiError && e.status === 401) await get().refresh();
+      return false;
     }
-    // Checkout is owned by the Lakeside platform. Hand off to it; it takes over
-    // the page and returns with ?purchase=success&pack=<id>.
-    window.location.assign(lakesideCheckoutUrl(packId));
-    return null;
   },
 
   loadPurchases: async () => {
     try {
-      const { purchases } = await api.myEntitlements();
-      set({ purchases: Array.isArray(purchases) ? purchases : [] });
+      const { purchases, verified } = await api.myEntitlements();
+      // An unverified answer is an outage, not an empty ledger: keep what we have.
+      if (verified) set({ purchases: Array.isArray(purchases) ? purchases : [] });
+      return verified;
     } catch {
-      /* account view shows an empty list; nothing to do */
+      /* account view keeps showing what it had */
+      return false;
     }
   },
 
@@ -147,6 +154,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   canPlay: (scenarioId) => {
+    // The internal preview build plays every election, including packs that
+    // are not on sale yet. DISTRIBUTION.preview is false on every other build.
+    if (DISTRIBUTION.preview) return true;
     if (isFreeScenario(scenarioId)) return true;
     // The Daily Challenge is free for everyone, every day, whatever the
     // paywall says: it lands on a rotating scenario (often a paid one) and the
@@ -158,9 +168,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 }));
 
 // Handle redirect landings once on module load, before the entitlement
-// refresh: ?lakeside_code= (Lakeside sign-in bounce) and ?purchase= (Stripe
-// success/cancel). Consumed params are stripped from the URL so reloads and
-// share links stay clean.
+// refresh: ?lakeside_code= (Lakeside sign-in bounce), ?purchase= (checkout
+// success/cancel) and ?store= (a link into the Store). Consumed params are
+// stripped from the URL so reloads and share links stay clean. Anything that
+// belongs to the Store is handed to it through storeNav.
 async function consumeRedirectParams(): Promise<void> {
   if (typeof window === "undefined") return;
   let params: URLSearchParams;
@@ -173,20 +184,24 @@ async function consumeRedirectParams(): Promise<void> {
   const purchase = params.get("purchase");
   const packId = params.get("pack");
   const buy = params.get("buy");
-  if (!lakesideCode && !purchase && !buy) return;
+  const storeParam = params.get("store");
+  if (!lakesideCode && !purchase && !buy && storeParam === null) return;
 
-  for (const p of ["lakeside_code", "purchase", "pack", "session_id", "buy"]) params.delete(p);
+  for (const p of ["lakeside_code", "purchase", "pack", "session_id", "buy", "store"]) params.delete(p);
   const clean = window.location.pathname + (params.toString() ? `?${params}` : "") + window.location.hash;
   window.history.replaceState(null, "", clean);
+
+  const knownPack = (id: string | null): string | null => (id && PACKS_BY_ID[id] ? id : null);
 
   if (lakesideCode) {
     try {
       const { token, user, unlocked } = await api.lakesideExchange(lakesideCode);
       storeSession(token, user);
       useAuthStore.setState({ user, unlocked, notice: { kind: "lakeside-signed-in", username: user.username } });
-      // A Buy click that needed sign-in first resumes here.
-      if (buy && STORE_PACKS.some((p) => p.id === buy) && user.ahdLinked) {
-        window.location.assign(lakesideCheckoutUrl(buy));
+      // A Buy click that needed sign-in first resumes here, in the Store.
+      const resumePack = buy && STORE_PACKS.some((p) => p.id === buy) ? buy : null;
+      if (resumePack && user.ahdLinked) {
+        useStoreNav.setState({ open: true, focus: { packId: resumePack }, resume: { kind: "buy", packId: resumePack } });
         return;
       }
     } catch (e) {
@@ -194,25 +209,16 @@ async function consumeRedirectParams(): Promise<void> {
       useAuthStore.setState({ notice: { kind: needsLogin ? "lakeside-link-needs-login" : "lakeside-failed" } });
     }
   }
-  if (purchase === "success") {
-    useAuthStore.setState({
-      notice: { kind: "purchase-success", packName: packId ? PACKS_BY_ID[packId]?.name ?? null : null },
+  if (purchase === "success" || purchase === "cancelled") {
+    const pack = knownPack(packId);
+    useStoreNav.setState({
+      open: true,
+      focus: pack ? { packId: pack } : {},
+      resume: { kind: "return", result: purchase, packId: pack },
     });
-    void awaitPurchasedPack(packId);
-  } else if (purchase === "cancelled") {
-    useAuthStore.setState({ notice: { kind: "purchase-cancelled" } });
-  }
-}
-
-// Stripe returns before (or just as) its webhook records the purchase, and the
-// server caches platform entitlements briefly. Re-check a few times so the
-// unlock appears without a manual reload.
-async function awaitPurchasedPack(packId: string | null): Promise<void> {
-  for (const delay of [3_000, 8_000, 20_000, 35_000]) {
-    await new Promise((r) => setTimeout(r, delay));
-    await useAuthStore.getState().refresh();
-    const owned = useAuthStore.getState().unlocked.packIds;
-    if (!packId || owned.includes(packId)) return;
+  } else if (storeParam !== null) {
+    const pack = knownPack(storeParam);
+    useStoreNav.setState({ open: true, focus: pack ? { packId: pack } : {} });
   }
 }
 

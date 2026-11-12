@@ -1,5 +1,7 @@
 package com.lakesidegames.electioneer.engine
 
+import com.lakesidegames.electioneer.content.COUNTRIES
+import com.lakesidegames.electioneer.content.UK_ELECTIONS
 import com.lakesidegames.electioneer.content.getCountry
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -80,7 +82,8 @@ class PlanBonusesTest {
     fun committedTurnsAndPreviewsMatchWebAcrossAllMultipartyElections() {
         val json = Json
         val vectors = json.decodeFromString<List<WebPlanVector>>(PLAN_WEB_VECTORS)
-        assertEquals(64, vectors.size)
+        // Two vectors per UK and country election.
+        assertEquals(2 * (UK_ELECTIONS.size + COUNTRIES.values.sumOf { it.elections.size }), vectors.size)
         for (v in vectors) {
             val label = "${v.countryId} ${v.electionId} failed setup=${v.failedSetup}"
             val funds = if (v.failedSetup) 0.0 else 100.0

@@ -318,5 +318,69 @@
     "artist": "Sandro Halank, Wikimedia Commons",
     "note": "Friedrich Merz \u2014 Commons",
     "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/2025-02-23_Bundestagswahl_%E2%80%93_Wahlabend_CDU_by_Sandro_Halank%E2%80%93025.jpg/1280px-2025-02-23_Bundestagswahl_%E2%80%93_Wahlabend_CDU_by_Sandro_Halank%E2%80%93025.jpg"
+  },
+  {
+    "file": "country-nz.jpg",
+    "commons": "File:Beehive and Parliament House - Wellington - New Zealand - DSC00165.jpg",
+    "license": "CC0",
+    "artist": "Daderot",
+    "note": "The Beehive and Parliament House, Wellington: CC0 (Daderot)",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Beehive_and_Parliament_House_-_Wellington_-_New_Zealand_-_DSC00165.jpg/1280px-Beehive_and_Parliament_House_-_Wellington_-_New_Zealand_-_DSC00165.jpg"
+  },
+  {
+    "file": "country-br.jpg",
+    "commons": "File:Palacio do Planalto.jpeg",
+    "license": "Public domain",
+    "artist": "Annemariebr",
+    "note": "Palácio do Planalto, the presidential offices in Brasília, at night: public domain (Annemariebr)",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Palacio_do_Planalto.jpeg/1280px-Palacio_do_Planalto.jpeg"
+  },
+  {
+    "file": "country-in.jpg",
+    "commons": "File:Sansad Bhavan-2.jpg",
+    "license": "Public domain",
+    "artist": "David Castor",
+    "note": "The old Sansad Bhavan (Parliament House), New Delhi: public domain, released by the photographer",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Sansad_Bhavan-2.jpg/1280px-Sansad_Bhavan-2.jpg"
+  },
+  {
+    "file": "country-es.jpg",
+    "commons": "File:Congreso de los Diputados, enero de 2015.JPG",
+    "license": "CC BY-SA 3.0",
+    "artist": "Vickybol",
+    "note": "Congress of Deputies, Madrid: CC BY-SA 3.0 (Vickybol)",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Congreso_de_los_Diputados%2C_enero_de_2015.JPG/1280px-Congreso_de_los_Diputados%2C_enero_de_2015.JPG"
+  },
+  {
+    "file": "country-ie.jpg",
+    "commons": "File:20130810 dublin214.JPG",
+    "license": "CC BY-SA 3.0",
+    "artist": "Jean Housen",
+    "note": "Leinster House, Dublin, seat of the Oireachtas: CC BY-SA 3.0 (Jean Housen). Cropped and resized.",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/20130810_dublin214.JPG/1280px-20130810_dublin214.JPG"
+  },
+  {
+    "file": "country-jp.jpg",
+    "commons": "File:National Diet Building.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "Kakidai",
+    "note": "National Diet Building, Tokyo: CC BY-SA 4.0 (Kakidai)",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/National_Diet_Building.jpg/1280px-National_Diet_Building.jpg"
+  },
+  {
+    "file": "country-it.jpg",
+    "commons": "File:2024-10-11 Rome, Palazzo Montecitorio.jpg",
+    "license": "CC BY 4.0",
+    "artist": "Alexkom000",
+    "note": "Palazzo Montecitorio, Rome, seat of the Chamber of Deputies: CC BY 4.0 (Alexkom000). Resized.",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/2024-10-11_Rome%2C_Palazzo_Montecitorio.jpg/1280px-2024-10-11_Rome%2C_Palazzo_Montecitorio.jpg"
+  },
+  {
+    "file": "country-mx.jpg",
+    "commons": "File:Zócalo CDMX 2019.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "Mikemamer",
+    "note": "The Zócalo, Mexico City, with the national flag and the Metropolitan Cathedral: CC BY-SA 4.0 (Mikemamer). Resized.",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Z%C3%B3calo_CDMX_2019.jpg/1280px-Z%C3%B3calo_CDMX_2019.jpg"
   }
 ]

@@ -242,7 +242,7 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
                 webView.evaluateJavaScript("(() => { try { const s = JSON.parse(sessionStorage.getItem('ask.movSnapshot')); return s?.version === 1 && s?.game === 'electioneer' && typeof s?.scenario === 'string' ? s.country : null; } catch { return null; } })()") { [weak self] result, _ in
                     guard let self, self.generation == current, self.phase == .ready,
                           let country = result as? String,
-                          ["US", "UK", "Canada", "Germany", "France", "Australia"].contains(country) else { return }
+                          NativeCatalog.shared.askCountryNames().contains(country) else { return }
                     NSLog("MOV_ASK_SNAPSHOT_COUNTRY_%@", country)
                 }
             }
@@ -391,9 +391,16 @@ struct ContentView: View {
                     }
                 }
             }
+            // Presented sheets do not pick up the capture text size from the root.
+            // Only the store is captured at large text; outside capture runs both
+            // values are the system size.
+            .environment(\.sizeCategory, destination == .store ? captureSizeCategory : systemSizeCategory)
         }
         .fullScreenCover(isPresented: $session.showReveal) {
-            if let night = session.electionNight { NativeElectionNightView(session: session, night: night) }
+            if let night = session.electionNight {
+                NativeElectionNightView(session: session, night: night)
+                    .environment(\.sizeCategory, captureSizeCategory)
+            }
         }
         .sheet(isPresented: $showingAsk) {
             NavigationStack {
@@ -526,16 +533,7 @@ struct CampaignGuideView: View {
     }
 }
 
-/// Player-facing bundle names, matching the store products.
+/// Player-facing bundle names, matching the store products (from the exported catalog).
 func nativePackName(_ packId: String?) -> String {
-    switch packId {
-    case "us-historical": return "United States"
-    case "uk-elections": return "United Kingdom"
-    case "canada": return "Canada"
-    case "germany": return "Germany"
-    case "france": return "France"
-    case "australia": return "Australia"
-    case "complete": return "Complete Collection"
-    default: return "country"
-    }
+    NativeCatalog.shared.packName(packId: packId)
 }

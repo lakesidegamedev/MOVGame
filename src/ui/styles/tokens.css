@@ -1,0 +1,220 @@
+/* ============================================================================
+   MARGIN OF VICTORY: DESIGN TOKENS
+   Dark, map-forward election-broadcast UI. Every color, size, radius and
+   shadow used by the web game comes from here. Documented in docs/ui-system.md.
+
+   Rules of thumb:
+   - Use the semantic tokens (surface, border, text, accent, positive...) in
+     new code. The raw ramps exist so the semantic layer has something to point
+     at, and so charts can pick exact steps.
+   - Text tokens are checked against every surface for WCAG AA (4.5:1) at
+     small sizes. --text-4 is the faintest text allowed for real content.
+   - Party colors come from game data. Use them for fills; for party-colored
+     text on dark surfaces use partyInk() from src/ui/colors.ts.
+   ============================================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Neutral ramp (cool slate, dark to light) ─────────────────────── */
+  --gray-950: #06090d;
+  --gray-900: #0a0f14;
+  --gray-850: #0d141c;
+  --gray-800: #111b26;
+  --gray-750: #16222e;
+  --gray-700: #1c2a38;
+  --gray-650: #243444;
+  --gray-600: #2e3f50;
+  --gray-500: #4a5b6d;
+  --gray-400: #6b7c8e;
+  --gray-300: #93a2b2;
+  --gray-200: #bcc7d2;
+  --gray-100: #dde5ed;
+  --gray-50: #eef3f8;
+
+  /* ── Surfaces (layered: each step sits visibly above the last) ────── */
+  --surface-0: var(--gray-900);      /* app background */
+  --surface-sunken: var(--gray-850); /* wells, tracks, inputs */
+  --surface-1: var(--gray-800);      /* cards and panels */
+  --surface-2: var(--gray-750);      /* raised: controls, nested rows */
+  --surface-3: var(--gray-700);      /* hover and selected fill */
+  --surface-4: var(--gray-650);      /* pressed, strongest fill */
+  --surface-scrim: rgba(4, 8, 14, 0.78);
+
+  /* ── Borders ──────────────────────────────────────────────────────── */
+  --border-subtle: rgba(234, 240, 246, 0.06);
+  --border-default: rgba(234, 240, 246, 0.1);
+  --border-strong: rgba(234, 240, 246, 0.2);
+
+  /* ── Text levels (all pass AA on surface-0 to surface-2) ───────────── */
+  --text-1: #eaf0f6;                   /* primary */
+  --text-2: rgba(234, 240, 246, 0.8);  /* body prose */
+  --text-3: rgba(234, 240, 246, 0.64); /* secondary, labels */
+  --text-4: rgba(234, 240, 246, 0.54); /* faint captions, units */
+  --text-on-accent: #0a0f14;
+
+  /* ── Semantic color ───────────────────────────────────────────────── */
+  --accent: #e05c4b;          /* Margin of Victory red: the main action */
+  --accent-hover: #e97463;
+  --accent-text: #f07a6a;     /* accent as text on dark surfaces */
+  --accent-soft: rgba(224, 92, 75, 0.14);
+
+  --positive: #34d399;
+  --positive-edge: #1f5641;
+  --positive-soft: rgba(52, 211, 153, 0.12);
+  --negative: #f87171;
+  --negative-edge: #6b2230;
+  --negative-soft: rgba(248, 113, 113, 0.12);
+  --warning: #f5b942;         /* battlegrounds, "decision required", current step */
+  --warning-edge: #6b5321;
+  --warning-soft: rgba(245, 185, 66, 0.12);
+  --info: #38bdf8;            /* links and focus */
+  --info-soft: rgba(56, 189, 248, 0.12);
+
+  /* ── Party (US) ───────────────────────────────────────────────────── */
+  --dem: #2563eb;
+  --dem-bright: #3b82f6;
+  --dem-deep: #1d4ed8;
+  --dem-text: #6ea8fe;        /* Democratic blue as text */
+  --gop: #dc2626;
+  --gop-bright: #ef4444;
+  --gop-deep: #b91c1c;
+  --gop-text: #f87171;        /* Republican red as text */
+  --tossup: var(--gray-600);
+
+  /* ── Spacing (4px grid) ───────────────────────────────────────────── */
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ── Type ─────────────────────────────────────────────────────────── */
+  /* "MOV Flags" only covers regional indicator letters (see base.css), so it is safe at the front of every
+     stack. Windows has no colour flag emoji, and this is what draws them there. */
+  --font-sans: "MOV Flags", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "MOV Flags", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --fs-2xs: 10px;   /* eyebrow labels, units */
+  --fs-xs: 11px;    /* captions, chips, table meta */
+  --fs-sm: 12px;    /* dense body, table cells */
+  --fs-md: 13px;    /* default UI text, buttons */
+  --fs-base: 14px;  /* prose, inputs */
+  --fs-lg: 16px;    /* card titles, key numbers */
+  --fs-xl: 20px;    /* modal titles, section heads */
+  --fs-2xl: 26px;   /* screen titles */
+  --fs-3xl: 34px;   /* hero numbers */
+  --fs-4xl: 48px;   /* landing title, result numbers */
+  --lh-tight: 1.1;
+  --lh-snug: 1.3;
+  --lh-body: 1.5;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-heavy: 800;
+  --tracking-label: 0.08em;
+
+  /* ── Radii (crisp) ────────────────────────────────────────────────── */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-pill: 999px;
+
+  /* ── Elevation ────────────────────────────────────────────────────── */
+  --elev-1: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --elev-2: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 20px -8px rgba(0, 0, 0, 0.6);
+  --elev-3: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 28px 64px -16px rgba(0, 0, 0, 0.75);
+
+  /* ── Selection and focus ──────────────────────────────────────────── */
+  --ring-select: 0 0 0 1.5px var(--warning), 0 0 14px rgba(245, 185, 66, 0.28);
+  --ring-accent: 0 0 0 1.5px var(--accent), 0 0 14px rgba(224, 92, 75, 0.26);
+  --focus-ring: 2px solid var(--info);
+
+  /* ── Control sizes ────────────────────────────────────────────────── */
+  --control-sm: 28px;
+  --control-md: 34px;
+  --control-lg: 42px;
+
+  /* ── Layers ───────────────────────────────────────────────────────── */
+  --z-sticky: 30;
+  --z-sheet: 45;
+  --z-modal: 50;
+  --z-toast: 60;
+
+  /* ── Motion ───────────────────────────────────────────────────────── */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 0.12s;
+  --dur-tile: 0.1s;
+  --dur-bar: 0.5s;
+  --dur-slide: 0.28s;
+
+  /* ── Content widths ───────────────────────────────────────────────── */
+  --page-max: 1200px;
+  --desk-max: 1600px;
+
+  /* ======================================================================
+     Legacy names. Older selectors and other stylesheets use these; they
+     point at the tokens above so everything moves together. Prefer the
+     semantic names in new code.
+     ====================================================================== */
+  --navy-900: var(--gray-900);
+  --navy-800: var(--gray-850);
+  --navy-700: var(--gray-800);
+  --navy-600: var(--gray-750);
+  --navy-500: var(--gray-700);
+  --navy-450: var(--border-default);
+  --navy-400: var(--gray-600);
+  --navy-350: var(--border-strong);
+  --ink-100: var(--text-1);
+  --ink-300: var(--text-2);
+  --ink-500: var(--text-3);
+  --accent-bright: var(--accent-hover);
+  --accent-ink: var(--text-on-accent);
+  --water: var(--info);
+  --gold: var(--warning);
+  --gold-soft: #fbd07a;
+  --green: var(--positive);
+  --rose: var(--negative);
+  --edge-up: var(--positive-edge);
+  --edge-down: var(--negative-edge);
+  --edge-danger: var(--negative-edge);
+  --bg: var(--surface-0);
+  --panel: var(--surface-1);
+  --panel-2: var(--surface-2);
+  --well: var(--surface-sunken);
+  --surface-hover: var(--surface-3);
+  --surface-raised: var(--surface-2);
+  --border: var(--border-default);
+  --border-hover: var(--border-strong);
+  --border-bright: var(--border-strong);
+  --text: var(--text-1);
+  --text-body: var(--text-2);
+  --text-strong: var(--text-1);
+  --muted: var(--text-3);
+  --glass-bg: var(--surface-1);
+  --glass-blur: 0px;
+  --glow-gold: var(--ring-select);
+  --glow-accent: var(--ring-accent);
+  --glow-dem: 0 0 0 2px rgba(59, 130, 246, 0.35);
+  --glow-gop: 0 0 0 2px rgba(239, 68, 68, 0.35);
+  --grad-app: var(--surface-0);
+  --grad-dem: linear-gradient(180deg, var(--dem-bright), var(--dem));
+  --grad-gop: linear-gradient(180deg, var(--gop-bright), var(--gop));
+  --grad-card: var(--surface-1);
+  --grad-modal-head: var(--surface-2);
+  --grad-spectrum: linear-gradient(90deg, var(--gop), #cbd5e1, var(--dem));
+  --shadow: var(--elev-2);
+  --shadow-tile: 0 4px 14px rgba(0, 0, 0, 0.5);
+  --shadow-sm: var(--elev-1);
+
+  font-synthesis: none;
+}

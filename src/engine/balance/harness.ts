@@ -11,7 +11,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 import { SCENARIO_REGISTRY, type ScenarioMeta } from "@content/scenarioRegistry";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 import type { CampaignAction, CandidateId, GameState } from "../types";
 import type { PartyId } from "../system";
 import { createGame } from "../setup";
@@ -33,11 +33,13 @@ import {
   computeCountryResult,
   playablePartiesIn,
   majorityFor,
+  countryCompatible,
   type CountryGameState,
   type CountryAction,
   type CountryBundle,
 } from "../countryGame";
-import { computeScoreFromFacts, usScoreFacts, multipartyScoreFacts } from "../scoring";
+import { computeScoreFromFacts, usScoreFacts, multipartyScoreFacts, multipartyUnitMargin } from "../scoring";
+import { electoralRule } from "../electoralCollege";
 import {
   mpFocusedActions,
   mpScattershotActions,
@@ -64,7 +66,7 @@ export interface GauntletRow {
   bot: BotStrategy;
   seeds: number;
   winRate: number; // player wins the unit majority / becomes largest party
-  avgUnitMargin: number; // player units − win threshold (EV−270 / seats−majority)
+  avgUnitMargin: number; // player units − win threshold (EV−majority / seats−majority)
   blowoutRate: number; // |player units − top rival units| > 25% of chamber
   avgScore: number; // leaderboard score (scoring.ts), player perspective
   // Fraction of seeds where the RUN's winner (either side) matches the
@@ -306,10 +308,11 @@ function runUsGame(
   const r = g.result ?? computeResult(g);
   const mine = r.electoralVotes[side] ?? 0;
   const theirs = r.electoralVotes[side === "dem" ? "rep" : "dem"] ?? 0;
+  const college = electoralRule(r.stateResults);
   return {
     won: r.winner === side,
-    unitMargin: mine - 270,
-    blowout: Math.abs(mine - theirs) > 538 * 0.25,
+    unitMargin: mine - college.majority,
+    blowout: Math.abs(mine - theirs) > college.total * 0.25,
     score: computeScoreFromFacts(usScoreFacts(r, side, difficulty)),
     matchedHistory: r.winner === baselineWinner,
     demEV: r.electoralVotes.dem,
@@ -321,7 +324,7 @@ function mpOutcome(
   voteShare: Record<PartyId, number>,
   largestParty: PartyId,
   side: PartyId,
-  majority: { total: number; threshold: number },
+  majority: { total: number; threshold: number; plurality?: boolean },
   baselineWinner: string,
   difficulty: UsDifficulty,
 ): RunOutcome {
@@ -333,11 +336,13 @@ function mpOutcome(
       .map((p) => seats[p] ?? 0),
   );
   return {
+    // Plurality countries: finishing first is the win, and the margin is the
+    // lead over the strongest rival (there is no threshold).
     won: largestParty === side,
-    unitMargin: mine - majority.threshold,
+    unitMargin: multipartyUnitMargin(seats, side, majority.threshold, majority.plurality === true),
     blowout: Math.abs(mine - rival) > majority.total * 0.25,
     score: computeScoreFromFacts(
-      multipartyScoreFacts({ seats, voteShare }, side, majority.threshold, majority.total, difficulty),
+      multipartyScoreFacts({ seats, voteShare }, side, majority.threshold, majority.total, difficulty, majority.plurality === true),
     ),
     matchedHistory: largestParty === baselineWinner,
   };
@@ -390,7 +395,7 @@ function runCountryGame(
       actions: g.resources[side].actions,
       majority,
       abstaining: g.abstaining,
-      compatible: bundle.compatible,
+      compatible: countryCompatible(bundle),
     };
     g.queuedActions = mpBotActions(bot, view, side) as CountryAction[];
     g = countryAdvanceTurn(g, bundle, { autoResolvePlayerEvents: true });

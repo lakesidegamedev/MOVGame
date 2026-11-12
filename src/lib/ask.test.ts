@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createGame } from "@engine/setup";
 import { projectElection } from "@engine/voteModel";
-import { createUkGame, projectUk } from "@engine/ukGame";
-import { movAskSnapshot, movAskUrl, movSeatAskSnapshot } from "./ask";
+import { createUkGame, projectUk, ukGameIssues } from "@engine/ukGame";
+import { movSeatAskSnapshot } from "./ask";
+import { movAskSnapshot, movAskUrl } from "./askUs";
 
 describe("Ask campaign handoff", () => {
   it("includes the current player-side map and omits the full save", () => {
@@ -24,7 +25,7 @@ describe("Ask campaign handoff", () => {
   it("uses the current multiparty seat projection for a UK campaign", () => {
     const game = createUkGame({ election: "2024", playerParty: "lab", seed: 42 });
     const projection = projectUk(game);
-    const snapshot = movSeatAskSnapshot(game, projection, "UK");
+    const snapshot = movSeatAskSnapshot(game, projection, "UK", ukGameIssues(game));
     expect(snapshot.player).toBe("lab");
     expect(snapshot.seatPlayer).toBe(projection.seats.lab);
     expect(snapshot.regions[0].playerSeats).toBe(projection.seatResults[0].seatsByParty.lab);

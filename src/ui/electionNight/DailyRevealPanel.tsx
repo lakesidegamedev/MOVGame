@@ -1,6 +1,7 @@
 // Daily Challenge compact result — score, percentile vs today's board,
 // one-click replay. Shown only when the finished game is today's daily.
 import { useEffect, useMemo, useState } from "react";
+import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "@lib/distribution";
 import {
   dailyAssignment,
   utcDateString,
@@ -17,7 +18,6 @@ import { buildShareText, copyShare } from "@lib/shareCard";
 import { api, type DailyBoardEntry } from "@lib/api";
 import { useAuthStore } from "@store/authStore";
 import { hashSeed } from "@engine/rng";
-import { hashStr } from "@engine/setup";
 import type { ScoreFacts } from "@engine/scoring";
 import { CalendarDays, Share2, RotateCcw } from "lucide-react";
 import "./shell.css";
@@ -25,7 +25,6 @@ import "./shell.css";
 export function DailyRevealPanel({
   gameSeed,
   scenarioId,
-  engine,
   won,
   unitLine,
   score,
@@ -36,6 +35,7 @@ export function DailyRevealPanel({
 }: {
   gameSeed: number;
   scenarioId: string;
+  /** The engine path. The daily seed hashes the same way on all of them. */
   engine: "us" | "uk" | "country";
   won: boolean;
   unitLine: string;
@@ -52,7 +52,7 @@ export function DailyRevealPanel({
   const today = useMemo(() => dailyAssignment(utcDateString()), []);
   const isDaily =
     today.scenarioId === scenarioId &&
-    gameSeed === (engine === "us" ? hashStr(today.seed) : hashSeed(today.seed));
+    gameSeed === hashSeed(today.seed);
 
   const [copied, setCopied] = useState(false);
   const [postState, setPostState] = useState<"idle" | "busy" | "done" | "error">("idle");
@@ -156,7 +156,9 @@ export function DailyRevealPanel({
           <Share2 size={14} style={{ verticalAlign: "-2px", marginRight: 5 }} />
           {copied ? "Copied ✓" : "Share"}
         </button>
-        {user ? (
+        {DISTRIBUTION.preview ? (
+          <span className="muted small">{PREVIEW_SCORE_NOTE}</span>
+        ) : user ? (
           <button
             className="primary"
             disabled={postState === "busy" || postState === "done" || serverDown}

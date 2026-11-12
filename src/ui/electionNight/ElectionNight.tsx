@@ -5,7 +5,10 @@
 // the moment a party's running tally crosses the winning post a full-width
 // projection banner fires. One shared component drives all three engines
 // (US / UK / country) via the normalized RevealProps shape (see adapters.ts).
+import { InsetFrames } from "@ui/mapExtras";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowRight, SkipForward, Zap } from "lucide-react";
+import { partyInk } from "@ui/colors";
 import "./electionNight.css";
 import { buildSchedule, unitAllocation, OTHERS_ID, type RevealUnit } from "@lib/electionReveal";
 export { buildSchedule, OTHERS_ID } from "@lib/electionReveal";
@@ -22,7 +25,9 @@ export interface RevealParty {
 // their calls still show up in the callout and chip feed.
 export interface RevealMap {
   viewBox: string;
-  shapes: Record<string, { d: string; label?: [number, number] }>;
+  shapes: Record<string, { d: string; label?: [number, number]; inset?: boolean }>;
+  // Geography with no vote this election (US states before admission), drawn inert.
+  inert?: string[];
 }
 
 export interface RevealProps {
@@ -35,6 +40,9 @@ export interface RevealProps {
   unitLabel?: string; // "EV" | "seats" | "points"
   map?: RevealMap; // live-filling map centerpiece; omitted ⇒ chip-only layout
   noMajorityLabel?: string; // hung-parliament / contingent-election banner text
+  // Plurality countries: the engine's winner. There is no threshold; the
+  // projection lands once the winner's lead cannot be overturned.
+  pluralityWinner?: string;
   storageKey?: string; // sessionStorage key so refresh/resume doesn't replay
   onDone: () => void;
 }
@@ -84,7 +92,11 @@ export function ElectionNight(props: RevealProps) {
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
-  const { entries, waveCount } = useMemo(() => buildSchedule(units, threshold), [units, threshold]);
+  const pluralityWinner = props.pluralityWinner;
+  const { entries, waveCount } = useMemo(
+    () => buildSchedule(units, threshold, pluralityWinner),
+    [units, threshold, pluralityWinner],
+  );
 
   // Reduced-motion users get the final board immediately (no theater).
   const [speed, setSpeed] = useState<Speed>(() => (prefersReduced() ? "instant" : "1x"));
@@ -187,10 +199,10 @@ export function ElectionNight(props: RevealProps) {
                 onClick={() => setSpeed(s)}
                 title={s === "instant" ? "Skip straight to the final board" : `Play at ${s}`}
               >
-                {s === "instant" ? "⚡" : s.replace("x", "×")}
+                {s === "instant" ? <Zap size={13} aria-label="Instant" /> : s.replace("x", "×")}
               </button>
             ))}
-            <button className="en-skip" onClick={skip}>Skip ⏭</button>
+            <button className="en-skip" onClick={skip}>Skip <SkipForward size={13} aria-hidden="true" /></button>
           </div>
         </div>
 
@@ -199,6 +211,7 @@ export function ElectionNight(props: RevealProps) {
         {map && (
           <div className={`en-map${speed === "instant" ? " instant" : ""}`}>
             <svg viewBox={map.viewBox} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Election map">
+              {map.inert?.map((d, i) => <path key={`inert-${i}`} d={d} className="en-map-unit" opacity={0.4} aria-hidden="true" pointerEvents="none" />)}
               {units.map((u) => {
                 const shape = map.shapes[u.id];
                 if (!shape) return null;
@@ -214,6 +227,7 @@ export function ElectionNight(props: RevealProps) {
                   </path>
                 );
               })}
+              <InsetFrames shapes={map.shapes} />
               {/* Upset rings render in a second pass so the gold pulse sits on top. */}
               {units.map((u) => {
                 const called = calledById.get(u.id);
@@ -229,7 +243,7 @@ export function ElectionNight(props: RevealProps) {
             <span className="en-call-flash" key={lastCall.unit!.id}>
               <span className="en-call-label">{lastCall.unit!.upset ? "UPSET" : "CALL"}</span>
               <span className="en-call-name">{lastCall.unit!.name}</span>
-              <span className="en-call-winner" style={{ color: lastCall.unit!.winnerColor }}>
+              <span className="en-call-winner" style={{ color: partyInk(lastCall.unit!.winnerColor) }}>
                 → {lastCall.unit!.winnerShort}
               </span>
               <span className="en-call-margin">+{lastCall.unit!.margin.toFixed(1)}</span>
@@ -251,10 +265,12 @@ export function ElectionNight(props: RevealProps) {
             const val = p.id === OTHERS_ID ? othersTotal : (tallies[p.id] ?? 0);
             return (
               <div className={`en-row${p.id === playerPartyId ? " mine" : ""}`} key={p.id}>
-                <span className="en-party" style={{ color: p.color }}>{p.short}</span>
+                <span className="en-party" style={{ color: partyInk(p.color) }}>{p.short}</span>
                 <div className="en-track">
                   <div className="en-fill" style={{ width: `${totalUnits > 0 ? (val / totalUnits) * 100 : 0}%`, background: p.color }} />
-                  <div className="en-thresh" style={{ left: `${totalUnits > 0 ? (threshold / totalUnits) * 100 : 50}%` }} />
+                  {pluralityWinner === undefined && (
+                    <div className="en-thresh" style={{ left: `${totalUnits > 0 ? (threshold / totalUnits) * 100 : 50}%` }} />
+                  )}
                 </div>
                 <span className="en-num">{val}</span>
               </div>
@@ -263,7 +279,7 @@ export function ElectionNight(props: RevealProps) {
         </div>
 
         <div className="en-remaining">
-          {remaining} {unitLabel} still out · {threshold} to win
+          {remaining} {unitLabel} still out · {pluralityWinner === undefined ? `${threshold} to win` : `most ${unitLabel} wins`}
         </div>
 
         <div className="en-feed">
@@ -276,7 +292,7 @@ export function ElectionNight(props: RevealProps) {
             <span className={`en-chip${c.unit!.upset ? " upset" : ""}`} key={c.unit!.id}>
               <span className="en-chip-call">CALL</span>
               {c.unit!.abbr}
-              <span style={{ color: c.unit!.winnerColor }}>{c.unit!.winnerShort}</span>
+              <span style={{ color: partyInk(c.unit!.winnerColor) }}>{c.unit!.winnerShort}</span>
               {c.unit!.upset && <span className="en-chip-upset-tag">UPSET</span>}
             </span>
           ))}
@@ -284,7 +300,7 @@ export function ElectionNight(props: RevealProps) {
 
         {finished && (
           <button className="primary en-cta" onClick={skip}>
-            See full results →
+            See full results <ArrowRight size={14} aria-hidden="true" />
           </button>
         )}
       </div>

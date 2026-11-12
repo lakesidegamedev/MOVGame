@@ -1,0 +1,73 @@
+/* Base layer: reset, document type, keyframes, focus and reduced motion. */
+
+/* Colour country flags. Windows ships no flag emoji (it draws the two letters instead), so the 14 flags the
+   game uses travel as a 4 KB colour font. unicode-range limits it to regional indicator pairs, so it never
+   touches any other text. Licence and rebuild notes: src/ui/fonts/LICENSE.md. */
+@font-face {
+  font-family: "MOV Flags";
+  src: url("../fonts/mov-flags.woff2") format("woff2");
+  unicode-range: U+1F1E6-1F1FF;
+  font-display: swap;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+html { background: var(--surface-0); }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: var(--lh-snug);
+  background: var(--surface-0);
+  color: var(--text-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 { margin: 0; font-weight: var(--fw-bold); letter-spacing: -0.01em; }
+p { margin: 0; }
+a { color: var(--info); }
+::selection { background: rgba(56, 189, 248, 0.32); }
+
+/* Every interactive element gets the same visible keyboard focus ring. */
+:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── Keyframes ─────────────────────────────────────────────────────── */
+@keyframes ahd-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ahd-modal-in { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: none; } }
+@keyframes ahd-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes ahd-toast-up { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes ahd-screen-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes ahd-bg-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 1.5px var(--warning), 0 0 0 rgba(245, 185, 66, 0); }
+  50% { box-shadow: inset 0 0 0 1.5px var(--warning), 0 0 10px rgba(245, 185, 66, 0.4); }
+}
+@keyframes ahd-queue-in { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+@keyframes ahd-call { from { transform: scale(0.55); opacity: 0; } 60% { transform: scale(1.12); } to { transform: scale(1); opacity: 1; } }
+@keyframes ahd-spin { to { transform: rotate(360deg); } }
+@keyframes ahd-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.screen { animation: ahd-screen-in var(--dur-slide) var(--ease); min-height: 100%; }
+
+.app { min-height: 100%; display: flex; flex-direction: column; }
+
+/* ── Reduced motion ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Controls inside scrolling rails would have an outer ring clipped by the
+   rail, so they draw the focus ring inside their own edge. */
+.segmented > button:focus-visible, .tabbar > button:focus-visible, .profile-tabs > button:focus-visible,
+.map-mode-toggle > button:focus-visible, .library-countries > button:focus-visible,
+.desk-tools button:focus-visible, .desk-tools a:focus-visible, .su-stepper > button:focus-visible {
+  outline-offset: -2px;
+}

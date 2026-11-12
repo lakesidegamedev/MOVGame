@@ -80,6 +80,8 @@ class CampaignAccount(context: Context, private val scope: CoroutineScope) {
         check(response.getString("owner") == owner && _user.value?.id == owner) { "Account changed during store setup." }
         return response
     }
+    /** Public store switches (readiness, native gating, SKUs); needs no sign-in. */
+    suspend fun storeCatalog(): JSONObject = call("/api/store/catalog")
     suspend fun verifyStorePurchase(purchaseToken: String): JSONObject =
         call("/api/store/verify", "POST", JSONObject().put("store", "google").put("purchaseToken", purchaseToken))
     suspend fun refreshStoreOwnership(): Set<String> {

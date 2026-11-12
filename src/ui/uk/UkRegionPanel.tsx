@@ -1,4 +1,5 @@
 import { useUkStore } from "@store/ukStore";
+import { partyInk, partyFill } from "@ui/colors";
 import { tallyRegion, allocateRegionSeats } from "@engine/multiparty";
 import { partyColor, partyShort, byDisplayOrder } from "./parties";
 import { MapPin } from "lucide-react";
@@ -26,7 +27,7 @@ export function UkRegionPanel() {
     return (
       <div className="card">
         <h3>Region Detail</h3>
-        <p className="muted small">Select a region on the map to inspect its vote shares, seat projection, and campaign there.</p>
+        <p className="empty-hint">Select a region on the map to inspect its vote shares, seat projection, and campaign there.</p>
       </div>
     );
   }
@@ -45,14 +46,13 @@ export function UkRegionPanel() {
       <h3>{region.name} · {region.seats} seats</h3>
 
       {playerStands ? (
-        <div className="row" style={{ gap: 6, margin: "2px 0 12px", flexWrap: "wrap" }}>
-          <button className="secondary" disabled={!canAct} onClick={() => queueAction({ type: "canvass", party: player, regionId: region.id })}
-            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+        <div className="detail-actions">
+          <button disabled={!canAct} onClick={() => queueAction({ type: "canvass", party: player, regionId: region.id })}>
             <MapPin size={14} /> Canvass
           </button>
-          <button className="secondary" disabled={!canAct} onClick={() => queueAction({ type: "rally", party: player, regionId: region.id })}>Rally</button>
+          <button disabled={!canAct} onClick={() => queueAction({ type: "rally", party: player, regionId: region.id })}>Rally</button>
           {topOpp && (
-            <button className="secondary" disabled={!canAct} onClick={() => queueAction({ type: "oppo_research", party: player, regionId: region.id, targetParty: topOpp })}>
+            <button disabled={!canAct} onClick={() => queueAction({ type: "oppo_research", party: player, regionId: region.id, targetParty: topOpp })}>
               Target {partyShort(topOpp)}
             </button>
           )}
@@ -64,11 +64,11 @@ export function UkRegionPanel() {
       <div className="kv"><span className="k">Vote share</span><span /></div>
       <div style={{ margin: "2px 0 10px" }}><ShareBar shares={shareByParty} /></div>
 
-      <h3 style={{ marginTop: 8 }}>Parties</h3>
+      <h3 className="section-gap">Parties</h3>
       {parties.map((p) => (
         <div className="bloc" key={p}>
-          <span className="name" style={{ color: p === player ? partyColor(p) : undefined, fontWeight: p === player ? 700 : 500 }}>
-            <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: 2, background: partyColor(p), marginRight: 6 }} />
+          <span className="name" style={{ color: p === player ? partyInk(partyColor(p)) : undefined, fontWeight: p === player ? 700 : 500 }}>
+            <span className="swatch" style={{ "--party": partyFill(partyColor(p)) } as React.CSSProperties} />
             {partyShort(p)}
           </span>
           <span className="meta">{((shareByParty[p] ?? 0) * 100).toFixed(1)}% · {seats[p] ?? 0} seats</span>

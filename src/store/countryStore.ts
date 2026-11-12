@@ -12,12 +12,13 @@ import {
   type CountryResult,
   type Difficulty,
 } from "@engine/countryGame";
-import { COUNTRIES } from "@content/countries";
+import { loadedCountry } from "@content/countries";
 import type { PartyId } from "@engine/system";
 import type { ReplayLog, ReplayMode } from "@lib/replay";
 import { truncateToTurn } from "@lib/replay";
 import { initCountryReplayLog, recordCountryWeek } from "./countryReplay";
 import { mpActionCost, mpPlannedCost } from "@engine/mpBudget";
+import { registerSession } from "./sessions";
 
 interface CountryStore {
   country: CountryBundle | null;
@@ -27,6 +28,7 @@ interface CountryStore {
   selectedRegionId: string | null;
   lastEventResult: { title: string; text: string } | null;
 
+  // Both need the country's bundle loaded first (await loadCountry(countryId)).
   newGame: (countryId: string, election: string, party: PartyId, seed?: string, difficulty?: Difficulty) => void;
   // Start a prebuilt (Campaign Editor) game with its cloned bundle. Casual only.
   startCustom: (country: CountryBundle, game: CountryGameState) => void;
@@ -81,7 +83,7 @@ export const useCountryStore = create<CountryStore>((set, get) => ({
   lastEventResult: null,
 
   newGame: (countryId, election, party, seed, difficulty) => {
-    const country = COUNTRIES[countryId];
+    const country = loadedCountry(countryId);
     if (!country) return;
     const playable = playablePartiesIn(country, election);
     const p = playable.includes(party) ? party : playable[0];
@@ -199,7 +201,7 @@ export const useCountryStore = create<CountryStore>((set, get) => ({
   },
 
   tryResumeAutosave: (countryId) => {
-    const country = COUNTRIES[countryId];
+    const country = loadedCountry(countryId);
     if (!country) return false;
     const saved = loadAutosave(countryId);
     if (!saved) return false;
@@ -207,3 +209,5 @@ export const useCountryStore = create<CountryStore>((set, get) => ({
     return true;
   },
 }));
+
+registerSession("country", useCountryStore);

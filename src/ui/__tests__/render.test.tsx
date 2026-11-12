@@ -8,12 +8,14 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "../../App";
 import { useGameStore } from "@store/gameStore";
+import { useStoreNav } from "@store/storeNav";
 import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
-import { BRAND } from "../../brand";
+import { loadedCountries } from "@content/countries";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const reset = () => {
+  useStoreNav.setState({ open: false, focus: {}, resume: null });
   window.history.replaceState({ movView: { kind: "landing" } }, "");
   useGameStore.setState({ game: null, history: [], lastEventResult: null });
 };
@@ -59,18 +61,26 @@ function typeInto(input: HTMLInputElement, value: string) {
 describe("App renders without crashing", () => {
   beforeEach(reset);
 
-  it("shows the landing scenario browser on first load, then the U.S. setup wizard", () => {
+  it("shows the landing scenario browser on first load, then the U.S. setup wizard", async () => {
     const m = mount();
     // The landing page: featured tier up top, full catalog, packs strip.
     expect(m.html()).toContain(PAYWALL_ENABLED ? "Play free" : "Start here");
     expect(m.html()).toContain("Harris v. Trump");
     expect(m.html()).toContain(PAYWALL_ENABLED ? "Country bundles" : "Scenario packs");
-    const storeLinks = [...m.container.querySelectorAll<HTMLAnchorElement>('a[href]')]
-      .filter((link) => link.textContent?.includes("Store"));
-    expect(storeLinks.length).toBeGreaterThan(0);
-    expect(storeLinks.every((link) => link.href === BRAND.storeUrl)).toBe(true);
-    // Entering a free U.S. scenario shows the setup wizard on that year.
+    // The Store is a screen inside the game, reachable from the top bar.
+    const storeButtons = [...m.container.querySelectorAll<HTMLButtonElement>("button")]
+      .filter((button) => button.textContent?.trim() === "Store");
+    expect(storeButtons.length).toBeGreaterThan(0);
+    // The landing page renders from metadata: no country bundle has loaded.
+    expect(loadedCountries()).toEqual([]);
+    // Entering a free U.S. scenario shows the setup wizard on that year. The
+    // US shell is a lazy chunk, so wait for it with a finite deadline.
     clickButton(m.container, "Biden v. Trump");
+    await m.flush();
+    const deadline = Date.now() + 10_000;
+    while (!m.html().includes("The Election") && Date.now() < deadline) {
+      await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+    }
     const html = m.html();
     expect(html).toContain("The Election"); // step 1 of the setup wizard
     expect(html).toContain("The War Room"); // staff-hire step present
@@ -84,13 +94,10 @@ describe("App renders without crashing", () => {
     typeInto(input!, "Thatcher");
     expect(m.html()).toContain("3 matching elections");
     expect(m.html()).toContain("Thatcher's third");
-    expect(m.container.querySelectorAll("[data-scenario-art]")).toHaveLength(0);
-    const visualView = [...m.container.querySelectorAll<HTMLButtonElement>('.catalog-filter-group button')]
-      .find((button) => button.textContent === "Visual");
-    act(() => { visualView!.click(); });
-    const campaignArt = [...m.container.querySelectorAll<HTMLElement>("[data-scenario-art]")];
-    expect(campaignArt).toHaveLength(3);
-    expect(new Set(campaignArt.map((art) => art.dataset.scenarioArt)).size).toBe(3);
+    // Results stay grouped by country: three UK elections, one group.
+    const groups = [...m.container.querySelectorAll<HTMLElement>(".library-group")];
+    expect(groups).toHaveLength(1);
+    expect(groups[0].querySelectorAll(".library-card")).toHaveLength(3);
 
     typeInto(input!, "no such campaign");
     expect(m.html()).toContain('for "no such campaign"');
@@ -107,7 +114,7 @@ describe("App renders without crashing", () => {
     expect(hardFilter!.getAttribute("aria-pressed")).toBe("true");
 
     if (PAYWALL_ENABLED) {
-      const playable = filterButtons.find((button) => button.textContent === "Playable");
+      const playable = filterButtons.find((button) => button.textContent === "Owned");
       act(() => { playable!.click(); });
       expect(playable!.getAttribute("aria-pressed")).toBe("true");
       expect(m.html()).toContain("Pick a playable campaign");
@@ -123,10 +130,13 @@ describe("App renders without crashing", () => {
     // Behavior past the card depends on the master paywall switch.
     clickButton(m.container, "United States");
     clickButton(m.container, "Clinton v. Trump");
-    await m.flush(); // AuthModals is lazy-loaded
+    await m.flush(); // AuthModals and the Store are lazy-loaded
+    await m.flush();
     const html = m.html();
     if (PAYWALL_ENABLED) {
-      expect(html).toContain("Unlock this election"); // signed-out click opens the unlock prompt
+      // A locked election opens the Store on its pack, with the pack and the Complete Collection side by side.
+      expect(html).toContain("Elections in this pack");
+      expect(html).toContain("The election you tried to open");
       expect(html).toContain("Buy United States");
       expect(html).toContain("Buy everything");
       expect(m.html()).not.toContain("The War Room"); // no setup wizard

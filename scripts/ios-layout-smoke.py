@@ -21,9 +21,9 @@ for label, device_type in [('small-phone', phone), ('tablet', tablet)]:
     device = subprocess.check_output(['xcrun', 'simctl', 'create', f'MOV {label}', device_type['identifier'], runtime], text=True).strip()
     try:
         env = dict(os.environ, SIMULATOR_UDID=device, MOV_CAPTURE_SCREENS='1', MOV_CAPTURE_LARGE_TEXT='1',
-                   MOV_CAPTURE_NAMES='setup,library,saves,settings,editor,world-de,champions')
+                   MOV_CAPTURE_NAMES='setup,library,saves,settings,editor,world-de,champions,store,library-free,briefing-in,world-in,world-results-es-erc,us1948')
         subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name('ios-launch-smoke.py')), str(app), str(output / label)],
-                       env=env, check=True, timeout=600)
+                       env=env, check=True, timeout=900)
     finally:
         subprocess.run(['xcrun', 'simctl', 'shutdown', device], timeout=30, check=False)
         subprocess.run(['xcrun', 'simctl', 'delete', device], timeout=30, check=False)

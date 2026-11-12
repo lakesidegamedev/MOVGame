@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useCountryStore } from "@store/countryStore";
-import type { CountryAction, CountryActionType, CountryAdMode } from "@engine/countryGame";
+import { countryGameIssues, type CountryAction, type CountryActionType, type CountryAdMode } from "@engine/countryGame";
 import type { PartyId } from "@engine/system";
 import { partyShort } from "./helpers";
 import { PlanBonusStrip } from "../PlanBonusStrip";
@@ -60,9 +60,11 @@ export function CountryActionPanel() {
   ];
 
   const [type, setType] = useState<CountryActionType>("broadcast");
-  const [regionId, setRegionId] = useState<string>(country.id === "FR" ? "__national" : regions[0]?.id ?? "");
+  const [regionId, setRegionId] = useState<string>(country.runoff ? "__national" : regions[0]?.id ?? "");
   const [mode, setMode] = useState<CountryAdMode>("positive");
-  const [issueId, setIssueId] = useState<string>(country.issues[0].id);
+  // This election's issues, under the names voters used that year.
+  const issues = countryGameIssues(country, game);
+  const [issueId, setIssueId] = useState<string>(issues[0]?.id ?? "");
   const [spendM, setSpendM] = useState<number>(2);
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export function CountryActionPanel() {
       case "oppo_research": return `Oppo${a.regionId ? where : ""}`;
       case "debate_prep": return "Debate prep";
       case "policy_prep": return "Platform";
-      case "issue_pivot": return `Pitch ${a.issueId ?? ""}`;
+      case "issue_pivot": return `Pitch ${a.issueId ? (issues.find((i) => i.id === a.issueId)?.name ?? a.issueId) : ""}`;
       case "fundraise": return "Fundraise";
       default: return a.type;
     }
@@ -122,16 +124,16 @@ export function CountryActionPanel() {
   const TypeIcon = ICON[type];
 
   return (
-    <div className="card">
-      <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-        <h3 style={{ margin: 0 }}>Week Plan</h3>
-        <span className="muted small">{used}/{pool} actions · max {MAX_PER_DAY}/day</span>
+    <div className="card desk-plan">
+      <div className="card-head">
+        <h3>Week Plan</h3>
+        <span className="card-sub num">{used}/{pool} actions · max {MAX_PER_DAY}/day</span>
       </div>
-      <div className="row" style={{ gap: 16, margin: "6px 0 10px" }}>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Funds</span><span className="v">{cur}{res.funds.toFixed(1)}M</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Planned / available</span><span className="v">{cur}{committedFunds.toFixed(1)}M / {cur}{availableFunds.toFixed(1)}M</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Actions</span><span className="v">{res.actions}/{res.maxActions}</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Momentum</span><span className="v">{res.momentum >= 0 ? "+" : ""}{res.momentum.toFixed(0)}</span></div>
+      <div className="plan-budget">
+        <div className="metric"><span className="l">Funds</span><span className="v">{cur}{res.funds.toFixed(1)}M</span></div>
+        <div className="metric"><span className="l">Planned / available</span><span className="v">{cur}{committedFunds.toFixed(1)}M / {cur}{availableFunds.toFixed(1)}M</span></div>
+        <div className="metric"><span className="l">Actions</span><span className="v">{res.actions}/{res.maxActions}</span></div>
+        <div className="metric"><span className="l">Momentum</span><span className="v">{res.momentum >= 0 ? "+" : ""}{res.momentum.toFixed(0)}</span></div>
       </div>
 
       <div className="actiongrid">
@@ -160,9 +162,9 @@ export function CountryActionPanel() {
                 <option key={r.id} value={r.id}>{r.name} ({r.seats} {country.unitNamePlural})</option>
               ))}
             </select>
-            {country.id === "FR" && type === "broadcast" && (
+            {country.runoff && type === "broadcast" && (
               <p className="muted small" style={{ margin: "4px 0 0" }}>
-                National broadcasts move runoff support across France. Choose a region for a concentrated push.
+                National broadcasts move runoff support across {country.label}. Choose a region for a concentrated push.
               </p>
             )}
           </div>
@@ -182,7 +184,7 @@ export function CountryActionPanel() {
               <div className="field">
                 <label>Issue</label>
                 <select value={issueId} onChange={(e) => setIssueId(e.target.value)}>
-                  {country.issues.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+                  {issues.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
                 </select>
               </div>
             )}
@@ -197,9 +199,9 @@ export function CountryActionPanel() {
           <div className="field">
             <label>Reframe campaign onto</label>
             <select value={issueId} onChange={(e) => setIssueId(e.target.value)}>
-              {country.issues.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+              {issues.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
-            <p className="muted small" style={{ margin: "4px 0 0" }}>{country.issues.find((i) => i.id === issueId)?.blurb}</p>
+            <p className="muted small" style={{ margin: "4px 0 0" }}>{issues.find((i) => i.id === issueId)?.blurb}</p>
           </div>
         )}
       </div>
@@ -232,7 +234,7 @@ export function CountryActionPanel() {
                     <span className="plan-chip" key={i} title={a.type}>
                       <Ico size={12} />
                       {shortDesc(a)}
-                      <span className="x" onClick={() => removeAction(i)}><X size={11} /></span>
+                      <button type="button" className="x" onClick={() => removeAction(i)} aria-label="Remove action"><X size={11} /></button>
                     </span>
                   );
                 })}
@@ -243,7 +245,7 @@ export function CountryActionPanel() {
       </div>
 
       <div className="row" style={{ gap: 8, marginTop: 6 }}>
-        <button className="primary" style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+        <button className="block plan-add"
           disabled={used >= pool || (regionRequired && !regionId) || mpActionCost(buildAction()) > availableFunds}
           onClick={() => { for (const d of DAYS) { if (dayItems(d).length < MAX_PER_DAY) { addToDay(d); break; } } }}>
           <TypeIcon size={14} /> Add to next open day

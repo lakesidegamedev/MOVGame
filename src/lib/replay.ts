@@ -64,6 +64,8 @@ export interface ReplayLog {
   parties: ReplayParty[];
   contestNames: Record<string, string>; // contest id -> display name
   snapshots: ReplaySnapshot[];
+  // Plurality countries only: most units wins and `majority` is not a goal.
+  plurality?: boolean;
 }
 
 export function createReplayLog(init: Omit<ReplayLog, "version" | "snapshots"> & {

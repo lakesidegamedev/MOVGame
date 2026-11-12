@@ -5,11 +5,12 @@ import { beginGame } from "../../../src/engine/turn";
 import { advanceCampaignWeek } from "../../../src/engine/campaignWeek";
 import { createUkGame, ukAdvanceTurn, playablePartiesIn as ukParties } from "../../../src/engine/ukGame";
 import { createCountryGame, countryAdvanceTurn, playablePartiesIn } from "../../../src/engine/countryGame";
-import { COUNTRIES } from "../../../src/content/countries";
+import { COUNTRIES } from "../../../src/content/countries/all";
 import { initUsReplayLog, recordUsWeek } from "../../../src/store/usReplay";
 import { initUkReplayLog, recordUkWeek } from "../../../src/store/ukReplay";
 import { initCountryReplayLog, recordCountryWeek } from "../../../src/store/countryReplay";
 import { deriveReport } from "../../../src/lib/replay";
+import { seatFixtureElections } from "./fixtureCountries";
 
 const vectors = [];
 for (const player of ["dem", "rep"] as const) {
@@ -29,7 +30,7 @@ for (const player of ["dem", "rep"] as const) {
   }
   vectors.push({country: "US", election, player, seed, mode, log, report: deriveReport(log)});
 }
-for (const [id, election] of [["UK", "2024"], ["CA", "2021"], ["DE", "2025"], ["FR", "2022"], ["AU", "2025"]]) {
+for (const [id, election] of seatFixtureElections()) {
   const country = COUNTRIES[id];
   const player = (id === "UK" ? ukParties(election) : playablePartiesIn(country, election)).at(-1)!;
   const seed = `replay-${id}`;
@@ -54,4 +55,4 @@ const destination = new URL("../shared/src/commonTest/kotlin/com/lakesidegames/e
 if (process.argv.includes("--check")) {
   if (readFileSync(fileURLToPath(destination), "utf8") !== output) throw new Error("Native replay fixtures differ from web. Regenerate and verify campaign reports.");
 } else writeFileSync(fileURLToPath(destination), output);
-console.log(`Verified ${vectors.length} full web replay logs and campaign reports across all six countries.`);
+console.log(`Verified ${vectors.length} full web replay logs and campaign reports across ${new Set(vectors.map(v => v.country)).size} countries.`);

@@ -4,7 +4,7 @@
 // queued actions and the events that fired.
 
 import type { CampaignAction, CandidateId, GameState } from "@engine/index";
-import { projectElection } from "@engine/index";
+import { electoralRule, projectElection } from "@engine/index";
 import { nationalPoll } from "@engine/index";
 import { EVENTS_BY_ID } from "@content/events";
 import { BLOC_LABELS } from "@ui/labels";
@@ -85,8 +85,8 @@ export function initUsReplayLog(game: GameState, mode: ReplayMode): ReplayLog {
     scenarioId: game.scenarioId ?? "2020",
     playerId: game.playerCandidate,
     unitLabel: "electoral votes",
-    unitTotal: 538,
-    majority: 270,
+    unitTotal: electoralRule(game.states).total,
+    majority: electoralRule(game.states).majority,
     totalTurns: game.totalTurns,
     mode,
     parties: (["dem", "rep"] as CandidateId[]).map((id) => ({

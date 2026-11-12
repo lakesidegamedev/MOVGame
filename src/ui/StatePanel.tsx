@@ -17,7 +17,7 @@ export function StatePanel() {
     return (
       <div className="card">
         <h3>State Detail</h3>
-        <p className="muted small">Select a state on the map to inspect its demographic blocs, polling, and your operation there.</p>
+        <p className="empty-hint">Select a state on the map to inspect its demographic blocs, polling, and your operation there.</p>
       </div>
     );
   }
@@ -102,7 +102,7 @@ export function StatePanel() {
         </div>
       )}
 
-      <h3 style={{ marginTop: 14 }}>Demographic Blocs</h3>
+      <h3 className="section-gap">Demographic Blocs</h3>
       {st.blocs.map((b) => {
         const arche = BLOCS[b.blocId];
         // Live campaign-adjusted share (baseline + ads/rallies/momentum), so the
@@ -123,7 +123,7 @@ export function StatePanel() {
         );
       })}
 
-      <h3 style={{ marginTop: 14 }}>Recent Polls</h3>
+      <h3 className="section-gap">Recent Polls</h3>
       {polls.map((p) => (
         <div className="pollrow" key={p.pollster}>
           <span>{p.pollster}</span>

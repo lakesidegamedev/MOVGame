@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCountryStore } from "@store/countryStore";
-import { COUNTRIES } from "@content/countries";
+import { loadCountry, loadedCountry } from "@content/countries";
+import type { CountryBundle } from "@engine/countryGame";
+import { LazyFallback, LoadFailed } from "@ui/Fallbacks";
 import { CountrySetup } from "./CountrySetup";
 import { CountryMap, CountrySeatBar, CountryStandings, CountryRegionPanel } from "./CountryPanels";
 import { CountryActionPanel } from "./CountryActionPanel";
@@ -9,13 +11,13 @@ import { partyColor, partyName } from "./helpers";
 import { WeekRecapModal } from "@ui/WeekRecapModal";
 import { MultipartyEventModal } from "@ui/MultipartyEventModal";
 import { OnboardingCoach } from "@ui/coach/OnboardingCoach";
-import { Vote } from "lucide-react";
-import { BRAND } from "../../brand";
+import { Home, MessageCircleQuestion } from "lucide-react";
+import { DeskHeader } from "@ui/DeskHeader";
+import { partyInk } from "@ui/colors";
 import { movAskUrlFromSnapshot, movSeatAskSnapshot } from "@lib/ask";
+import { countryGameIssues } from "@engine/countryGame";
 
-function countryEventView(countryId: string, electionId: string, eventId: string) {
-  const country = COUNTRIES[countryId];
-  if (!country) return null;
+function countryEventView(country: CountryBundle, electionId: string, eventId: string) {
   const deck = country.elections[electionId]?.events ?? [];
   const ev = deck.find((e) => e.id === eventId) ?? country.events.find((e) => e.id === eventId);
   if (!ev?.choices) return null;
@@ -26,13 +28,69 @@ function countryEventView(countryId: string, electionId: string, eventId: string
   };
 }
 
-// The generic country shell — the UkApp pattern, parameterized by bundle.
-// Takes the country ID (not the bundle) so the bundles + map data stay inside
-// this lazy chunk instead of the main bundle.
-export function CountryApp({ countryId, onExit, initialElection, initialSeed, initialParty }: { countryId: string; onExit: () => void; initialElection?: string; initialSeed?: string; initialParty?: string }) {
-  const country = COUNTRIES[countryId];
+interface CountryAppProps {
+  countryId: string;
+  onExit: () => void;
+  initialElection?: string;
+  initialSeed?: string;
+  initialParty?: string;
+  /** A fresh setup screen: do not restore the autosave. */
+  setup?: boolean;
+  /** The setup screen started a game. */
+  onStarted?: () => void;
+}
+
+type BundleState = { status: "loading" } | { status: "ready"; country: CountryBundle | undefined } | { status: "failed" };
+
+// The generic country shell: the UkApp pattern, parameterized by bundle.
+// Takes the country ID, not the bundle: it loads that one country's bundle
+// (map, parties, elections, events) on demand, so no country's content is in
+// the landing page download, and opening one country loads only that one.
+export function CountryApp(props: CountryAppProps) {
+  const { countryId, setup } = props;
+  const [state, setState] = useState<BundleState>(() => {
+    const ready = loadedCountry(countryId);
+    if (ready) restoreAutosave(countryId, setup);
+    return ready ? { status: "ready", country: ready } : { status: "loading" };
+  });
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    if (state.status === "ready") return;
+    let live = true;
+    loadCountry(countryId).then(
+      (country) => {
+        if (!live) return;
+        if (country) restoreAutosave(countryId, setup);
+        setState({ status: "ready", country });
+      },
+      () => { if (live) setState({ status: "failed" }); },
+    );
+    return () => { live = false; };
+    // Reload only on a new country or a retry.
+  }, [countryId, attempt]);
+
+  if (state.status === "loading") return <LazyFallback />;
+  if (state.status === "failed") {
+    return <LoadFailed onExit={props.onExit} onRetry={() => { setState({ status: "loading" }); setAttempt((n) => n + 1); }} />;
+  }
+  return <CountryShell {...props} country={state.country} />;
+}
+
+// Opened without a game in memory (a reload, the back button): bring this
+// country's autosave back once its bundle is in.
+function restoreAutosave(countryId: string, setup: boolean | undefined) {
+  if (!setup && !useCountryStore.getState().game) useCountryStore.getState().tryResumeAutosave(countryId);
+}
+
+function CountryShell({ country: baseCountry, onExit, initialElection, initialSeed, initialParty, setup, onStarted }: CountryAppProps & { country: CountryBundle | undefined }) {
   const storeCountry = useCountryStore((s) => s.country);
   const game = useCountryStore((s) => s.game);
+  // A campaign editor race runs on a clone of this country's bundle with its
+  // own id (customScenario.buildCountryCustomGame); the clone shares the base
+  // bundle's elections. Run it on the clone.
+  const customHere = !!game?.custom && !!storeCountry && !!baseCountry && storeCountry.id !== baseCountry.id
+    && storeCountry.elections === baseCountry.elections;
+  const country = customHere ? storeCountry : baseCountry;
   const endTurn = useCountryStore((s) => s.endTurn);
   const undo = useCountryStore((s) => s.undo);
   const canUndo = useCountryStore((s) => s.history.length > 0);
@@ -40,6 +98,10 @@ export function CountryApp({ countryId, onExit, initialElection, initialSeed, in
   const resolvePlayerEvent = useCountryStore((s) => s.resolvePlayerEvent);
   const selectedRegionId = useCountryStore((s) => s.selectedRegionId);
   const [recapOpen, setRecapOpen] = useState(false);
+  const started = !!game;
+  useEffect(() => {
+    if (setup && started) onStarted?.();
+  }, [setup, started, onStarted]);
 
   // A game from a different country in the store doesn't belong to this shell.
   if (!country) {
@@ -63,7 +125,7 @@ export function CountryApp({ countryId, onExit, initialElection, initialSeed, in
   const playerSeats = live ? live.seats[activeGame.playerParty] ?? 0 : 0;
   const hasPending = !!activeGame.pendingEvent;
   const pendingView = hasPending && activeGame.pendingEvent
-    ? countryEventView(country.id, activeGame.electionId, activeGame.pendingEvent.eventId)
+    ? countryEventView(country, activeGame.electionId, activeGame.pendingEvent.eventId)
     : null;
   const maj = activeGame.majority ?? country.system.majority;
 
@@ -79,37 +141,34 @@ export function CountryApp({ countryId, onExit, initialElection, initialSeed, in
   };
 
   return (
-    <div className="app screen">
-      <div className="topbar">
-        <div className="brand-lockup">
-          <span className="mark"><Vote size={22} /></span>
-          <div>
-            <div className="brand-name">{BRAND.nameCaps}</div>
-            <div className="brand-yr">{country.flag} {country.label.toUpperCase()} · {activeGame.label}</div>
+    <div className="app screen desk">
+      <DeskHeader
+        kicker={<>{country.flag} {country.label} · {activeGame.label}</>}
+        context={<>{weeksLeft} {weeksLeft === 1 ? "week" : "weeks"} to election day · leading{" "}
+          <strong style={{ color: partyInk(partyColor(country, activeGame.playerParty)) }}>{partyName(country, activeGame.playerParty)}</strong></>}
+        scoreboard={live ? <CountrySeatBar country={country} result={live} /> : undefined}
+        metrics={[
+          { label: `Your ${country.unitNamePlural}`, value: playerSeats, color: partyInk(partyColor(country, activeGame.playerParty)) },
+          { label: "Funds", value: `${country.currency}${res.funds.toFixed(0)}M` },
+          { label: "Actions", value: `${res.maxActions - used}/${res.maxActions}`, warn: used >= res.maxActions },
+        ]}
+        undoLabel="Undo"
+        onUndo={undo}
+        undoDisabled={!canUndo}
+        endWeekLabel={hasPending ? "Resolve event first" : "End Week"}
+        onEndWeek={handleEndTurn}
+        endWeekDisabled={hasPending}
+        ticker={activeGame.news.length > 0 ? (
+          <div className="ticker" role="status" aria-live="polite">
+            <span className="ticker-tag"><span className="ticker-dot" /> WIRE</span>
+            <span className="ticker-line">{activeGame.news[0].text}</span>
           </div>
-        </div>
-        <div className="turnchip">
-          {weeksLeft} {weeksLeft === 1 ? "week" : "weeks"} to election day · leading{" "}
-          <strong style={{ color: partyColor(country, activeGame.playerParty) }}>{partyName(country, activeGame.playerParty)}</strong>
-        </div>
-        {live && <CountrySeatBar country={country} result={live} />}
-        <div className="stat"><span className="v" style={{ color: partyColor(country, activeGame.playerParty) }}>{playerSeats}</span><span className="l">Your {country.unitNamePlural}</span></div>
-        <div className="stat"><span className="v">{country.currency}{res.funds.toFixed(0)}M</span><span className="l">Funds</span></div>
-        <div className="stat"><span className="v" style={{ color: used >= res.maxActions ? "var(--gold)" : undefined }}>{res.maxActions - used}/{res.maxActions}</span><span className="l">Actions</span></div>
-        <button className="ghost small" onClick={onExit}>Exit</button>
-        {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(activeGame, live, country.label))} target="_blank" rel="noopener noreferrer">Ask about campaign</a>}
-        <button onClick={undo} disabled={!canUndo}>↶ Undo</button>
-        <button className="primary" data-coach="endweek" onClick={handleEndTurn} disabled={hasPending}>
-          {hasPending ? "Resolve event first" : "End Week →"}
-        </button>
-      </div>
-
-      {activeGame.news.length > 0 && (
-        <div className="ticker" role="status" aria-live="polite">
-          <span className="ticker-tag"><span className="ticker-dot" /> WIRE</span>
-          <span className="ticker-line">{activeGame.news[0].text}</span>
-        </div>
-      )}
+        ) : undefined}
+        tools={<>
+          <button className="ghost small" onClick={onExit}><Home size={14} aria-hidden="true" />Home</button>
+          {live && <a className="ghost small" href={movAskUrlFromSnapshot(movSeatAskSnapshot(activeGame, live, country.label, countryGameIssues(country, activeGame)))} target="_blank" rel="noopener noreferrer"><MessageCircleQuestion size={14} aria-hidden="true" />Ask about campaign</a>}
+        </>}
+      />
 
       <div className="main">
         <div className="col">
@@ -136,7 +195,9 @@ export function CountryApp({ countryId, onExit, initialElection, initialSeed, in
 
       <OnboardingCoach
         doneKey={`coach-done-${country.id.toLowerCase()}-v1`}
-        winLine={`Win ${maj.threshold} ${country.unitNamePlural} in {N} weeks. No pressure.`}
+        winLine={country.plurality
+          ? `Finish ahead of every rival in {N} weeks. Most ${country.unitNamePlural} wins.`
+          : `Win ${maj.threshold} ${country.unitNamePlural} in {N} weeks. No pressure.`}
         mapHint="Click a region on the map to continue."
         mapBody="Your battleground. Colours show the current lean; click a competitive region."
         planBody="Queue your week: broadcasts, rallies, ground game. Actions cost slots. Spend all of them; unspent slots win nothing."

@@ -25,8 +25,10 @@ class NativeSaveTransfer private constructor() {
                 val seed = metadata?.get("seed")?.jsonPrimitive?.contentOrNull ?: state.seed.toString()
                 val difficulty = if (metadata?.containsKey("difficulty") == true)
                     metadata["difficulty"]?.jsonPrimitive?.contentOrNull?.takeUnless { it == "unknown" }
+                // playerEdge is the difficulty's persuasion (setup HANDICAP). Hard
+                // was 1.0 before the 2.0 balance pass; saves from then stay hard.
                 else when (state.playerEdge) {
-                    1.55 -> "easy"; 1.15 -> "normal"; 1.0 -> "hard"; else -> null
+                    1.55 -> "easy"; 1.15 -> "normal"; 0.9, 1.0 -> "hard"; else -> null
                 }
                 SavedGame(seed = seed, state = state, difficulty = difficulty)
             }
@@ -38,7 +40,10 @@ class NativeSaveTransfer private constructor() {
             require(game.seed in 0..0xffffffffL && game.rngState in 0..0xffffffffL)
             require(game.totalTurns in listOf(5, 9, 14) && game.turn in 0..game.totalTurns)
             require(game.states.isNotEmpty() && game.states.map { it.id }.distinct().size == game.states.size)
-            require(game.states.sumOf { it.electoralVotes } == 538)
+            // The scenario's college; saves made before a scenario's college was
+            // corrected keep the modern 538-vote map they were built with.
+            val college = game.states.sumOf { it.electoralVotes }
+            require(college == STANDARD_EV_TOTAL || college == (SCENARIOS[game.scenarioId ?: "2020"]?.electoralCollege?.total ?: STANDARD_EV_TOTAL))
             require(game.phase != GamePhase.RESULT || game.result != null)
             for (candidate in listOf("dem", "rep")) {
                 require(game.candidates[candidate] != null)

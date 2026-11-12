@@ -27,10 +27,10 @@ This runs shared JVM tests and builds the Compose debug APK at `androidApp/build
 
 The iOS app requires Xcode on macOS. Build the `MOVGameiOS` scheme in `iosApp/MOVGameiOS.xcodeproj`. GitHub Actions compiles the simulator app without signing. The manual iOS TestFlight workflow signs and uploads an exact reviewed main commit using Actions secrets.
 
-Desktop builds use `npm run desktop:build` or `npm run steam:build`. The desktop scripts build the web source from this same checkout. Install dependencies at both the repository root and `apps/native`.
+Desktop builds use `npm run desktop:build`, `npm run steam:build` or `npm run preview:build` (internal test build with every election unlocked). The desktop scripts build the web source from this same checkout. Install dependencies at both the repository root and `apps/native`. The Desktop builds workflow builds Windows, Linux and macOS packages; see `docs/desktop.md`.
 
 ## Release status
 
-The Android and iOS apps have native campaigns for all 49 elections across six countries, calendar planning, scores, historical comparisons, daily challenges, account sign-in, shared leaderboards, and billing adapters. GitHub Actions checks the web and shared engines, builds Android, and launches the Release iOS app on iOS 26 and iOS 27. Device testing, store products, purchase and refund exercises, privacy declarations, and signed release artifacts still need evidence before a store release. The SKU table is empty, so the apps currently sell no packs. See [release checklist](docs/release-checklist.md) for each gate.
+The Android and iOS apps have native campaigns for every election in every country the web game has, calendar planning, scores, historical comparisons, daily challenges, account sign-in, shared leaderboards, and billing adapters. GitHub Actions checks the web and shared engines, builds Android, and launches the Release iOS app on iOS 26 and iOS 27. Device testing, store products, purchase and refund exercises, privacy declarations, and signed release artifacts still need evidence before a store release. The SKU table is empty, so the apps currently sell no packs. See [release checklist](docs/release-checklist.md) for each gate.
 
 The old Tauri Android and iOS configs remain as historical build artifacts; they are not mobile release targets.

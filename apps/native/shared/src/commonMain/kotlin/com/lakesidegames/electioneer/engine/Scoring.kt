@@ -40,19 +40,30 @@ fun computeScoreFromFacts(f: ScoreFacts): Int {
     return floor(clampScore((500 + evScore + popScore) * mult, 0.0, 1000.0) + 0.5).toInt()
 }
 
+// `total` is the scenario's college; a finished result's tallies sum to it.
 fun usScoreFacts(
     electoralVotes: Map<String, Int>,
     popularShare: Map<String, Double>,
     player: CandidateId,
     difficulty: String,
+    total: Int = evTotalOf(electoralVotes.values),
 ): ScoreFacts {
     val rival = OPPONENT_OF.getValue(player)
     return ScoreFacts(
-        unitMargin = ((electoralVotes[player.serial] ?: 0) - 270).toDouble(),
-        chamberSize = 538,
+        unitMargin = ((electoralVotes[player.serial] ?: 0) - evMajority(total)).toDouble(),
+        chamberSize = total,
         popularMargin = ((popularShare[player.serial] ?: 0.0) - (popularShare[rival.serial] ?: 0.0)) * 100,
         difficulty = difficulty,
     )
+}
+
+// Player's units against the goal: units minus the threshold, or for plurality
+// countries units minus the strongest rival's units. Port of scoring.ts.
+fun multipartyUnitMargin(seats: Map<String, Int>, player: String, majorityThreshold: Int, plurality: Boolean = false): Int {
+    val mine = seats[player] ?: 0
+    if (!plurality) return mine - majorityThreshold
+    val rival = (listOf(0) + seats.keys.filter { it != player }.map { seats[it] ?: 0 }).max()
+    return mine - rival
 }
 
 fun multipartyScoreFacts(
@@ -62,12 +73,13 @@ fun multipartyScoreFacts(
     majorityThreshold: Int,
     chamberSize: Int,
     difficulty: String,
+    plurality: Boolean = false,
 ): ScoreFacts {
     val rivalShare = (listOf(0.0) + voteShare.keys
         .filter { it != player }
         .map { voteShare[it] ?: 0.0 }).max()
     return ScoreFacts(
-        unitMargin = ((seats[player] ?: 0) - majorityThreshold).toDouble(),
+        unitMargin = multipartyUnitMargin(seats, player, majorityThreshold, plurality).toDouble(),
         chamberSize = chamberSize,
         popularMargin = ((voteShare[player] ?: 0.0) - rivalShare) * 100,
         difficulty = difficulty,

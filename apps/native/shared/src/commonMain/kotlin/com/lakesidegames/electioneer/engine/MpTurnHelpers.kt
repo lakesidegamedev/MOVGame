@@ -18,6 +18,14 @@ interface MpResources {
 }
 
 // Group this turn's causes into a week-in-review list, headed by a projection line.
+/**
+ * The generic events still eligible for this week's random draw (TS
+ * unfiredGenericEvents). A general event fires at most once a campaign;
+ * decision events (with choices) recur by design.
+ */
+fun <E> unfiredGenericEvents(events: List<E>, fired: Set<String>, id: (E) -> String, hasChoices: (E) -> Boolean): List<E> =
+    events.filter { hasChoices(it) || id(it) !in fired }
+
 fun buildCauseRecap(
     causes: List<CauseEntry>,
     turn: Int,

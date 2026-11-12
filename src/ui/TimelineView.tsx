@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ReplayLog, ReplaySnapshot } from "@lib/replay";
 import { Sparkline } from "./Sparkline";
 import { money } from "./format";
-import { History } from "lucide-react";
+import { History, X } from "lucide-react";
 
 // Read-only campaign timeline. Scrub across recorded turns and see the polling
 // numbers, the map standings, and what the player did / what happened that
@@ -67,13 +67,9 @@ export function TimelineView({ log, onClose }: { log: ReplayLog; onClose: () => 
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 720 }}>
         <div className="head">
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <div className="tag"><History size={12} style={{ verticalAlign: "-2px", marginRight: 6 }} />REPLAY</div>
-              <h2>Campaign Timeline</h2>
-            </div>
-            <button className="ghost" onClick={onClose}>Close</button>
-          </div>
+          <div className="tag"><History size={12} aria-hidden="true" />REPLAY</div>
+          <h2>Campaign Timeline</h2>
+          <button className="modal-close" onClick={onClose} aria-label="Close" title="Close"><X size={16} /></button>
         </div>
 
         <div className="body">
@@ -156,7 +152,7 @@ export function TimelineView({ log, onClose }: { log: ReplayLog; onClose: () => 
                     <li key={id}>
                       <span>{log.contestNames[id] ?? id}</span>{" "}
                       <span className={share >= 0.5 ? "up" : "down"}>
-                        {share >= 0.5 ? "lead" : "behind"} {pts((share - 0.5) * 100)}
+                        {share >= 0.5 ? "lead by" : "behind by"} {Math.abs((share - 0.5) * 100).toFixed(1)}
                       </span>
                     </li>
                   ))}

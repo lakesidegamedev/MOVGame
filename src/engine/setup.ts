@@ -12,11 +12,13 @@ import type {
 } from "./types";
 import { BLOCS, BLOC_IDS, logit } from "@content/blocs";
 import { STATE_SEEDS, type StateSeed } from "@content/states";
-import { ISSUES, ISSUE_IDS } from "@content/issues";
+import { ISSUES, ISSUE_IDS, PANDEMIC_ISSUE, electionIssueList } from "@content/issues";
 import { OPPONENT_OF } from "@content/candidates";
 import { resolveRunningMate, defaultRunningMate } from "@content/runningMates";
 import { getScenario, type Scenario, type ScenarioTicket } from "@content/scenarios";
 import { STAFF_BY_ID, MAX_STAFF } from "@content/staff";
+import { usLevelingTilt } from "./voteModel";
+import { climateTilt } from "./multiparty";
 
 export function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
@@ -88,13 +90,16 @@ function buildBlocsForState(seed: StateSeed, targetDemShare: number): StateBloc[
 }
 
 // Build the contest list. A scenario supplies per-state two-party Dem priors
-// (falling back to the 2020 default) and electoral-vote overrides for its
-// cycle's apportionment.
+// (falling back to the 2020 default), electoral-vote overrides for its cycle's
+// apportionment, and the contests that cast no electoral votes that year
+// (left out of the game entirely).
 export function buildStates(
   priors?: Record<string, number>,
   evOverrides?: Record<string, number>,
+  absent?: readonly string[],
 ): StateContest[] {
-  return STATE_SEEDS.map((seed) => {
+  const skip = new Set(absent ?? []);
+  return STATE_SEEDS.filter((seed) => !skip.has(seed.id)).map((seed) => {
     const isAggregate = (seed.electorate ?? 0) <= 0 && seed.aggregateOf;
     const demShare = priors?.[seed.id] ?? seed.prior2020DemShare;
     const ev = evOverrides?.[seed.id] ?? seed.ev;
@@ -117,22 +122,23 @@ export function buildStates(
 
 // Player-side handicap by difficulty: extra weekly action-slots and starting
 // cash, so a skilled human can fight an adverse map on easier settings. Applied
-// only to the player's ticket; the AI keeps its baseline. Zero on hard — that's
-// the pure-challenge setting — and untouched difficulty (calibration, tests)
-// resolves to "normal".
-export interface PlayerHandicap { actions: number; cash: number; persuasion: number; environment: number; }
-const HANDICAP: Record<"easy" | "normal" | "hard", PlayerHandicap> = {
-  // `persuasion` multiplies how far the player's own campaigning moves the map.
-  // `environment` is a one-time pro-player shift to every bloc's baseline (logit;
-  // ~0.04 ≈ 1pt two-party) — a favorable national climate that brings otherwise
-  // out-of-reach states into play, so a skilled human can win even an adverse
-  // year. Tuned to clear the gauntlet winnability floor on landslides (us-1984)
-  // while leaving normal/hard historically calibrated (environment 0). UK/country
-  // easy uses environment 0.9 on a multiparty appeal scale; US logits need a
-  // larger shift because a 525-EV Reagan map starts ~25pts underwater.
-  easy: { actions: 5, cash: 110_000_000, persuasion: 1.55, environment: 0.55 },
-  normal: { actions: 1, cash: 25_000_000, persuasion: 1.15, environment: 0 },
-  hard: { actions: 0, cash: 0, persuasion: 1.0, environment: 0 },
+// only to the player's ticket; the AI keeps its baseline. Untouched difficulty
+// (calibration, tests) resolves to "normal".
+//   persuasion multiplies how far the player's own campaigning moves the map.
+//   gapShare, gapResidual: a one-time favorable climate. Every bloc's
+//              baseline tilts toward the player by gapShare of the tilt that
+//              would win the electoral college outright (usLevelingTilt), and
+//              always by enough to leave at most gapResidual to win by
+//              campaigning (climateTilt in multiparty.ts). Scaled to the race,
+//              so a tie gets nothing and a landslide gets a real but partial
+//              lift. Zero on normal and hard, so the opening map is the
+//              historical baseline and calibration is unchanged.
+// Hard is a campaign headwind: the player's campaigning lands at 90%.
+export interface PlayerHandicap { actions: number; cash: number; persuasion: number; gapShare: number; gapResidual: number; }
+export const HANDICAP: Record<"easy" | "normal" | "hard", PlayerHandicap> = {
+  easy: { actions: 5, cash: 110_000_000, persuasion: 1.55, gapShare: 0.6, gapResidual: 0.15 },
+  normal: { actions: 1, cash: 25_000_000, persuasion: 1.15, gapShare: 0, gapResidual: 0 },
+  hard: { actions: 0, cash: 0, persuasion: 0.9, gapShare: 0, gapResidual: 0 },
 };
 
 // Tilts every bloc's baseline toward the player by `env` logits — the easy-mode
@@ -148,7 +154,7 @@ function startingResources(
   candidate: CandidateId,
   vp: RunningMate,
   baseEnergy: number,
-  handicap: PlayerHandicap = { actions: 0, cash: 0, persuasion: 1, environment: 0 },
+  handicap: PlayerHandicap = { actions: 0, cash: 0, persuasion: 1, gapShare: 0, gapResidual: 0 },
 ): Resources {
   // Weekly action pool: a base 7 plus half the candidate's energy (on a 0–10
   // scale, rounded up), plus any energetic-VP bonus, plus the player handicap.
@@ -232,10 +238,17 @@ export function createGame(opts: NewGameOptions = {}): GameState {
   // the player's chosen pick, the AI's historical default.
   const scenario: Scenario = getScenario(opts.scenario);
 
-  // National issue salience — the scenario's year-specific values where given
-  // (so COVID isn't an issue in 2012), otherwise the issue's base salience.
+  // The election's own issues (its declared list, or every axis under the
+  // fallback names). Pandemic Mode adds the pandemic axis to any year.
+  const pandemicAdded = opts.modifiers?.pandemic && scenario.issues && !scenario.issues.some((i) => i.id === "covid_response");
+  const declared = electionIssueList(pandemicAdded ? [...scenario.issues!, PANDEMIC_ISSUE] : scenario.issues);
+  const live = new Set(declared.map((i) => i.id));
+
+  // National issue salience: the scenario's year-specific values where given,
+  // otherwise the issue's base salience. An axis the election does not have
+  // carries none, so it never moves a bloc.
   const salience = {} as GameState["salience"];
-  for (const id of ISSUE_IDS) salience[id] = scenario.issueSalience?.[id] ?? ISSUES[id].baseSalience;
+  for (const id of ISSUE_IDS) salience[id] = live.has(id) ? (scenario.issueSalience?.[id] ?? ISSUES[id].baseSalience) : 0;
   const player = opts.playerCandidate ?? "dem";
   const baseHandicap = HANDICAP[opts.difficulty ?? "normal"];
   // Mirror Match: the underdog boost — extra war chest + slots regardless of
@@ -288,7 +301,7 @@ export function createGame(opts: NewGameOptions = {}): GameState {
   resources[player].maxActions += staffActionBonus;
   resources[player].actions += staffActionBonus;
 
-  return {
+  const game: GameState = {
     seed,
     rngState: seed,
     turn: 0,
@@ -302,9 +315,9 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     playerEdge: handicap.persuasion,
     locations: {},
     candidates,
-    issues: structuredClone(ISSUES),
+    issues: Object.fromEntries(declared.map((i) => [i.id, { ...i, baseSalience: salience[i.id] }])),
     salience,
-    states: withEnvironment(buildStates(priors, scenario.evOverrides), player, handicap.environment),
+    states: buildStates(priors, scenario.evOverrides, scenario.electoralCollege?.absent),
     resources,
     pendingEvents: [],
     firedEventIds: [],
@@ -317,6 +330,10 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     debateHistory: [],
     modifiers: opts.modifiers,
   };
+  if (handicap.gapShare > 0) {
+    game.states = withEnvironment(game.states, player, climateTilt(handicap, usLevelingTilt(game, player)));
+  }
+  return game;
 }
 
 // Exported so daily-challenge detection can recompute the numeric seed a

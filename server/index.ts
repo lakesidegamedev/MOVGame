@@ -16,8 +16,8 @@ import { savesRouter } from "./routes/saves.js";
 import { lakesideRouter } from "./routes/lakeside.js";
 import { storeRouter } from "./routes/store.js";
 import { requireAuth, type AuthedRequest } from "./auth.js";
-import { fetchPlatformPurchaseHistory, identityForUser } from "./entitlements.js";
-import { getCatalog } from "./catalog.js";
+import { lookupPlatformPurchases, identityForUser } from "./entitlements.js";
+import { getCatalogResult } from "./catalog.js";
 import { PACKS_BY_ID } from "../src/content/packs.js";
 
 const PORT = Number(process.env.PORT ?? 3401);
@@ -38,8 +38,11 @@ app.get("/api/health", (_req, res) => {
 // bundled prices are the offline-safe fallback). Same-origin so the SPA reads
 // it regardless of which host it is mounted on.
 app.get("/api/catalog", async (_req, res) => {
-  res.set("Cache-Control", "public, max-age=300");
-  res.json({ products: await getCatalog() });
+  const { source, items } = await getCatalogResult();
+  // An answer from the bundled fallback means the platform was unreachable;
+  // do not let a cache keep serving it after the platform recovers.
+  res.set("Cache-Control", source === "platform" ? "public, max-age=300" : "no-store");
+  res.json({ source, products: items });
 });
 
 app.use("/api/auth", authRouter);
@@ -58,8 +61,10 @@ app.get("/api/my-entitlements", (_req, res, next) => {
   next();
 }, requireAuth, async (req: AuthedRequest, res) => {
   const identity = identityForUser(req.auth!.userId);
-  const purchases = identity ? await fetchPlatformPurchaseHistory(identity) : [];
+  const lookup = identity ? await lookupPlatformPurchases(identity) : { verified: true, purchases: [] };
+  const purchases = lookup.purchases;
   res.json({
+    verified: lookup.verified,
     purchases: purchases.map((p) => ({
       packId: p.productId,
       packName: p.name ?? PACKS_BY_ID[p.productId]?.name ?? p.productId,

@@ -7,7 +7,8 @@ import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { OnboardingCoach, COACH_DONE_KEY } from "../OnboardingCoach";
+import { COACH_DONE_KEY } from "../OnboardingCoach";
+import { UsOnboardingCoach as OnboardingCoach } from "../UsOnboardingCoach";
 import { useGameStore } from "@store/gameStore";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;

@@ -3,7 +3,7 @@ import { createRng } from "../rng";
 import { createUkGame, ukAdvanceTurn, resolveUkPlayerEvent } from "../ukGame";
 import { planMultipartyAi, mpFocusedActions, mpTargets, MP_DIFFICULTY } from "../multipartyAi";
 import { nationalMpPoll } from "../multipartyPolls";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 import { createCountryGame } from "../countryGame";
 import { UK_EVENTS } from "@content/uk/events";
 

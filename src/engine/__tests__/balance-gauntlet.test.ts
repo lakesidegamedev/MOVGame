@@ -41,17 +41,21 @@ const SMOKE_SCENARIOS = [
 // moves the needle (focused strictly outperforms passive). Remove an entry once
 // the gap closes and the assertion tightens automatically.
 //
-// Tracked winnability gaps. The 2026-07-09 US easy-environment bump (0.55 logit)
-// is meant to clear us-1984; keep it listed until a gauntlet re-run confirms,
-// then remove. Skill-moves-the-needle still holds while it's here.
+// Tracked winnability gaps on easy (measured 2026-11-12, 20 seeds). Easy's
+// climate leaves at most 0.15 logits for the campaign to make up; in these
+// landslides the campaign still cannot. ca-1993 and fr-2002 are structural:
+// the Bloc stands only in Quebec and cannot be largest party, and Le Pen's
+// 2002 runoff opens at 18%. us-1984 was cleared by the gap-scaled climate.
 const KNOWN_UNWINNABLE = new Set([
-  "us-1984",
+  "us-1936", "in-2014", "es-2011", "it-2008", "ca-1984", "ca-1993", "fr-2002",
 ]);
 // uk-2017 is the genuine hung-parliament coin flip: even on hard the baseline
 // winner (con) holds largest-party only ~30% of the time — correctly below the
 // 40% no-pushover bar, because 2017 really was a near-tie. Kept as documented
 // debt, not a bug.
-const KNOWN_PUSHOVER_GAPS = new Set(["uk-2017"]);
+// de-2005 (226 to 222 seats) is the same kind of near-tie: hard's campaign
+// headwind tips it to the challenger about two times in three.
+const KNOWN_PUSHOVER_GAPS = new Set(["uk-2017", "de-2005"]);
 
 const SCENARIOS = FULL ? SCENARIO_REGISTRY.map((m) => m.scenarioId) : SMOKE_SCENARIOS;
 const BOTS: BotStrategy[] = FULL ? ["passive", "focused"] : ["passive", "focused", "scattershot"];

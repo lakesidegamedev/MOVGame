@@ -57,8 +57,8 @@ fun tallyContest(state: StateContest): ContestTally {
 }
 
 // Runs the full electoral model: every contest, the ME/NE at-large
-// aggregates, the EV tally, the national popular vote, and the winner
-// (incl. the 269-269 tie).
+// aggregates, the EV tally, the national popular vote, and the winner (no
+// majority of the scenario's college, such as 269-269, sends it to the House).
 fun computeResult(game: GameState): GameResult {
     val tallies = linkedMapOf<String, ContestTally>()
     for (st in game.states) {
@@ -108,11 +108,7 @@ fun computeResult(game: GameState): GameResult {
     }
 
     val totalPop = popularVote.getValue(CandidateId.DEM.serial) + popularVote.getValue(CandidateId.REP.serial)
-    val winner: String = when {
-        ev.getValue(CandidateId.DEM.serial) >= 270 -> CandidateId.DEM.serial
-        ev.getValue(CandidateId.REP.serial) >= 270 -> CandidateId.REP.serial
-        else -> "tie"
-    }
+    val winner: String = electoralWinner(ev, evTotalOf(game.states.map { it.electoralVotes }))
 
     // Post-mortem: the player's biggest self-caused swings, by magnitude.
     // sortedWith is stable, matching Array.prototype.sort stability.
@@ -169,4 +165,26 @@ fun projectElection(game: GameState, tossupBand: Int = 3): Projection {
         ContestProjection(stateId = sr.stateId, demShare = sr.demShare, lean = lean, ev = sr.electoralVotes)
     }
     return Projection(ev = ev, tossupEv = tossupEv, contests = contests)
+}
+
+// The climate tilt that would hand the player the electoral-vote majority
+// (web usLevelingTilt): bisection with a fixed step count.
+const val MAX_US_LEVELING_TILT = 1.5
+fun usLevelingTilt(game: GameState, player: CandidateId): Double {
+    val sign = if (player == CandidateId.DEM) 1.0 else -1.0
+    fun wins(tilt: Double): Boolean {
+        val states = game.states.map { st ->
+            st.copy(blocs = st.blocs.map { b -> b.copy(baselineMargin = b.baselineMargin + sign * tilt) })
+        }
+        return computeResult(game.copy(states = states)).winner == player.serial
+    }
+    if (wins(0.0)) return 0.0
+    if (!wins(MAX_US_LEVELING_TILT)) return MAX_US_LEVELING_TILT
+    var lo = 0.0
+    var hi = MAX_US_LEVELING_TILT
+    repeat(20) {
+        val mid = (lo + hi) / 2
+        if (wins(mid)) hi = mid else lo = mid
+    }
+    return hi
 }

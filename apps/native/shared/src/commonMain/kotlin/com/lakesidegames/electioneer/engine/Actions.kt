@@ -74,8 +74,13 @@ internal fun toFixed1(x: Double): String {
     return if (r == floor(r)) "${r.toLong()}.0" else r.toString()
 }
 
+// An issue's name in this election, for the cause log.
+private fun issueLabel(game: GameState, id: String): String = game.issues[id]?.name ?: id
+
 private fun applyAdvertise(game: GameState, action: CampaignAction, rng: Rng, mult: Double = 1.0, actionPower: Double = 1.0) {
     val state = findState(game, action.stateId) ?: return
+    // An issue ad needs an issue this election actually has.
+    if ((action.adMode ?: AdMode.POSITIVE) == AdMode.ISSUE && action.issueId != null && action.issueId.serial !in game.issues) return
     val c = action.candidate
     val spend = max(0.0, action.spend ?: 0.0)
     val res = game.resources.getValue(c.serial)
@@ -99,7 +104,7 @@ private fun applyAdvertise(game: GameState, action: CampaignAction, rng: Rng, mu
         game.causes.add(
             CauseEntry(
                 turn = game.turn, stateId = state.id,
-                cause = "Issue ads raised salience of $key", marginDelta = 0.0,
+                cause = "Issue ads raised salience of ${issueLabel(game, key)}", marginDelta = 0.0,
             ),
         )
         return
@@ -306,6 +311,8 @@ private fun applyIssuePivot(game: GameState, action: CampaignAction, mult: Doubl
     val c = action.candidate
     val issueId = action.issueId ?: return
     val newPosition = action.newPosition ?: return
+    // Only an issue this election has can be pivoted on.
+    if (issueId.serial !in game.issues) return
     val cand = game.candidates.getValue(c.serial)
     val old = cand.issuePositions[issueId.serial] ?: 0.0
     val next = clamp(newPosition, -1.0, 1.0)
@@ -324,7 +331,7 @@ private fun applyIssuePivot(game: GameState, action: CampaignAction, mult: Doubl
             val before = 1 - abs(old - ideal) / 2
             val after = 1 - abs(next - ideal) / 2
             val delta = (after - before) * weight * 0.5 * mult
-            addCause(game, bloc, st, "Pivot on ${issueId.serial}", favorSign(c) * delta)
+            addCause(game, bloc, st, "Pivot on ${issueLabel(game, issueId.serial)}", favorSign(c) * delta)
         }
     }
     // Flip-flopper tax with suburban / college voters who prize authenticity.
@@ -334,7 +341,7 @@ private fun applyIssuePivot(game: GameState, action: CampaignAction, mult: Doubl
         for (bloc in st.blocs) {
             if (bloc.blocId == BlocId.COLLEGE_WHITE || bloc.blocId == BlocId.SUBURBAN_WOMEN) {
                 addCause(
-                    game, bloc, st, "\"Flip-flopper\" cost on ${issueId.serial}",
+                    game, bloc, st, "\"Flip-flopper\" cost on ${issueLabel(game, issueId.serial)}",
                     -favorSign(c) * tax * 0.3,
                 )
             }

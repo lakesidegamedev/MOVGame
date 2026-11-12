@@ -1,0 +1,91 @@
+/* ── Packs, purchases, Lakeside ID ──────────────────────────────────── */
+
+/* Pack card is a plain div (the buy button inside is the only control), so it
+   needs the surface treatment buttons get for free. */
+.pack-card {
+  background: var(--panel); border: 1px solid var(--border);
+  gap: 4px; padding: 12px 12px 10px;
+}
+.pack-card:hover { border-color: var(--navy-350); }
+.pack-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border);
+}
+/* Descriptions differ a lot in length: clamp them so every card in a row has
+   its price and button on the same line. */
+.pack-desc {
+  font-size: 11px; line-height: 1.45; margin-bottom: 8px;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+.pack-price { font-weight: 800; font-variant-numeric: tabular-nums; font-size: var(--fs-base); }
+.pack-beta-note { font-size: var(--fs-xs); color: var(--green); }
+
+/* "Sign in with Lakeside Games": the studio door on login/register.
+   Water-blue studio accent, not the game accent. */
+.lakeside-btn {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 10px 14px; border-radius: var(--radius-md);
+  background: var(--panel-2); border: 1px solid var(--navy-350);
+  color: var(--ink-100); text-decoration: none; text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.lakeside-btn:hover { border-color: var(--water); background: var(--surface-hover); }
+.lakeside-btn strong { color: var(--water); }
+.lakeside-btn img { flex-shrink: 0; border-radius: 5px; }
+.lakeside-btn span { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.lakeside-btn strong { font-size: var(--fs-md); font-weight: 700; }
+.lakeside-btn small { font-size: var(--fs-xs); color: var(--ink-500); }
+
+.auth-divider {
+  display: flex; align-items: center; gap: 10px; margin: 14px 0;
+  color: var(--ink-500); font-size: var(--fs-xs); letter-spacing: 0.5px; text-transform: uppercase;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ""; flex: 1; height: 1px; background: var(--border);
+}
+
+/* Account view: calm hairline cards. */
+.account-card {
+  background: var(--well); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 12px 14px; margin-bottom: 12px;
+}
+.account-title {
+  font-size: var(--fs-xs); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--ink-500); margin-bottom: 4px;
+}
+.account-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 5px 0; font-size: var(--fs-md);
+}
+.account-row + .account-row { border-top: 1px solid var(--border); }
+.account-row .k { color: var(--ink-500); font-size: var(--fs-sm); }
+.account-chip {
+  font-size: var(--fs-2xs); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; color: var(--ink-500);
+}
+.account-chip.linked { color: var(--green); border-color: var(--edge-up); }
+
+/* Internal preview build marker on the landing page. */
+.preview-banner {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px;
+  margin: 16px 0 0; padding: 10px 14px; border-radius: var(--radius-md);
+  background: var(--warning-soft); border: 1px solid var(--warning);
+  font-size: var(--fs-md); color: var(--ink-100);
+}
+.preview-banner strong { color: var(--warning); text-transform: uppercase; letter-spacing: 0.04em; font-size: var(--fs-sm); }
+
+/* Post-redirect notice (Stripe result, Lakeside sign-in). */
+.notice-banner {
+  display: flex; align-items: center; gap: 8px;
+  margin: 16px 0 0; padding: 10px 12px; border-radius: var(--radius-md);
+  background: var(--panel); border: 1px solid var(--border);
+  font-size: var(--fs-md); color: var(--ink-300);
+}
+.notice-banner.good { border-color: var(--edge-up); color: var(--ink-100); }
+.notice-banner.good svg { color: var(--green); flex-shrink: 0; }
+.notice-banner span { flex: 1; }
+.notice-close {
+  background: transparent; border: none; padding: 2px; color: var(--ink-500);
+  cursor: pointer; line-height: 0;
+}
+.notice-close:hover { color: var(--ink-100); }

@@ -1,14 +1,18 @@
 import { describe, it, expect } from "vitest";
 import {
+  CLASSIC_DAILY_POOL_SIZE,
+  CLASSIC_DAILY_POOL_IDS,
   DAILY_ROLE_PAIRS,
   dailyAssignment,
+  dailyPairFor,
+  isAddedDailyDay,
   fnv1a,
   isDailyDate,
   roleShortName,
   utcDateString,
 } from "../daily";
 import { SCENARIOS_BY_ID, SCENARIO_REGISTRY } from "../../content/scenarioRegistry";
-import { COUNTRIES } from "../../content/countries";
+import { COUNTRIES } from "../../content/countries/all";
 import { playablePartiesIn as countryPlayable } from "../../engine/countryGame";
 import { playablePartiesIn as ukPlayable } from "../../engine/ukGame";
 
@@ -41,8 +45,7 @@ describe("dailyAssignment", () => {
       const a = dailyAssignment(d);
       const meta = SCENARIOS_BY_ID[a.scenarioId];
       expect(meta).toBeDefined();
-      const pair = DAILY_ROLE_PAIRS[meta!.country];
-      expect(pair).toContain(a.role);
+      expect(dailyPairFor(meta!)).toContain(a.role);
     }
   });
 
@@ -105,5 +108,51 @@ describe("roleShortName", () => {
       expect(roleShortName(b)).not.toBe(b.toUpperCase());
     }
     expect(roleShortName("xyz")).toBe("XYZ");
+  });
+});
+
+describe("daily rotation as countries are added", () => {
+  const legacy = (date: string) => CLASSIC_DAILY_POOL_IDS[fnv1a(`daily:${date}`) % CLASSIC_DAILY_POOL_SIZE];
+
+  it("the classic pool is the frozen original 49, all still registered", () => {
+    expect(CLASSIC_DAILY_POOL_IDS.length).toBe(CLASSIC_DAILY_POOL_SIZE);
+    expect(CLASSIC_DAILY_POOL_IDS[CLASSIC_DAILY_POOL_SIZE - 1]).toBe("au-2019");
+    for (const id of CLASSIC_DAILY_POOL_IDS) expect(SCENARIO_REGISTRY.some((s) => s.scenarioId === id), id).toBe(true);
+  });
+
+  it("every classic day keeps the scenario the pre-expansion rotation gave it", () => {
+    const total = SCENARIO_REGISTRY.length;
+    const added = total - CLASSIC_DAILY_POOL_SIZE;
+    let classicDays = 0;
+    for (const d of dates(730, "2025-07-01")) {
+      if (isAddedDailyDay(d, total, added)) {
+        expect(CLASSIC_DAILY_POOL_IDS.includes(dailyAssignment(d).scenarioId)).toBe(false);
+        continue;
+      }
+      classicDays++;
+      expect(dailyAssignment(d).scenarioId, d).toBe(legacy(d));
+    }
+    // Added scenarios take roughly their share of days, no more.
+    const share = 1 - classicDays / 730;
+    expect(share).toBeGreaterThan(0);
+    expect(share).toBeLessThan((added / total) * 2 + 0.02);
+  });
+
+  it("registering more scenarios only converts classic days, never the reverse", () => {
+    for (const d of dates(365, "2026-01-01")) {
+      for (let added = 1; added < 60; added++) {
+        if (isAddedDailyDay(d, CLASSIC_DAILY_POOL_SIZE + added, added)) {
+          expect(isAddedDailyDay(d, CLASSIC_DAILY_POOL_SIZE + added + 1, added + 1), `${d} +${added}`).toBe(true);
+        }
+      }
+    }
+  });
+});
+
+describe("per-election daily pairs", () => {
+  it("Japan 2026 pairs the LDP with the CRA; other Japan elections keep LDP v DPJ/CDP", () => {
+    expect(dailyPairFor(SCENARIOS_BY_ID["jp-2026"]!)).toEqual(["ldp", "cra"]);
+    expect(dailyPairFor(SCENARIOS_BY_ID["jp-2024"]!)).toEqual(["ldp", "dpj"]);
+    expect(roleShortName("cra")).toBe("the CRA");
   });
 });

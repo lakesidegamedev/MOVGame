@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { COUNTRIES } from "@content/countries";
+import { COUNTRIES } from "@content/countries/all";
 import { createCountryGame, countryAdvanceTurn } from "@engine/countryGame";
 import { countryReveal } from "../adapters";
 import { buildSchedule } from "../ElectionNight";

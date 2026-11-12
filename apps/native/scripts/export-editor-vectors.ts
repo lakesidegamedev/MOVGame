@@ -1,5 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+// Country custom scenarios build on country bundles; load them all up front.
+import "../../../src/content/countries/all";
 import { validateCustomScenario, makeDefaultCustomScenario, makeDefaultMultiparty, registerCustomScenario, buildUkCustomGame, buildCountryCustomGame, TRAIT_KEYS, MP_TRAIT_KEYS } from "../../../src/content/customScenario";
 import { ISSUE_IDS } from "../../../src/content/issues";
 import { BLOC_IDS } from "../../../src/content/blocs";
@@ -9,8 +11,9 @@ import { advanceCampaignWeek } from "../../../src/engine/campaignWeek";
 import { projectElection, computeResult } from "../../../src/engine/voteModel";
 import { ukAdvanceTurn, projectUk } from "../../../src/engine/ukGame";
 import { countryAdvanceTurn, projectCountry } from "../../../src/engine/countryGame";
+import { MULTIPARTY_COUNTRY_CODES } from "./fixtureCountries";
 
-const defaults = [makeDefaultCustomScenario(), makeDefaultMultiparty("uk"), ...["CA", "DE", "FR", "AU"].map(id => makeDefaultMultiparty("country", id))];
+const defaults = [makeDefaultCustomScenario(), makeDefaultMultiparty("uk"), ...MULTIPARTY_COUNTRY_CODES.map(id => makeDefaultMultiparty("country", id))];
 for (const [i, doc] of defaults.entries()) { doc.id = `custom-editor-${i}`; doc.createdAt = 100; doc.updatedAt = 200; }
 const validations: { input: string; result: unknown }[] = [];
 function capture(raw: unknown) { validations.push({ input: JSON.stringify(raw), result: validateCustomScenario(raw) }); }

@@ -29,14 +29,14 @@ class TurnloopTest {
         assertEquals("rep", r.winner)
         assertEquals(9, g.turn)
         assertEquals(GamePhase.RESULT, g.phase)
-        assertEquals(996543667L, g.rngState)
-        close(0.5067322556147777, r.popularShare.getValue("dem"), "popDem")
-        close(0.4500454976509189, r.stateResults.first { it.stateId == "PA" }.demShare, "paShare")
+        assertEquals(3824483681L, g.rngState)
+        close(0.5059119695305253, r.popularShare.getValue("dem"), "popDem")
+        close(0.44930207675888384, r.stateResults.first { it.stateId == "PA" }.demShare, "paShare")
 
         assertEquals("Projected electoral votes", g.lastRecap[0].label)
         assertEquals("Biden 227 (was 227)", g.lastRecap[0].detail)
         assertEquals(0.0, g.lastRecap[0].marginDelta)
-        assertEquals(3312, g.causes.size)
+        assertEquals(3460, g.causes.size)
 
         val timeline = g.timeline!!
         assertEquals(10, timeline.size)

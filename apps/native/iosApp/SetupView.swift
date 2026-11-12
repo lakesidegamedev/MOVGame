@@ -14,6 +14,10 @@ enum CampaignStyle {
 struct HomeView: View {
     @ObservedObject var session: GameSession
     let onAsk: () -> Void
+    private let catalog: (countries: Int, elections: Int, firstYear: Int) = {
+        let elections = MobileCampaign.companion.countries().flatMap { MobileCampaign.companion.elections(countryId: $0.id) }
+        return (MobileCampaign.companion.countries().count, elections.count, elections.map { Int($0.year) }.min() ?? 0)
+    }()
 
     var body: some View {
         let daily = session.dailyAssignment()
@@ -44,8 +48,8 @@ struct HomeView: View {
                 }
                 .frame(height: 4)
                 .clipShape(Capsule())
-                Text("THE ROAD TO 270").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
-                Text("Margin of\nVictory").font(.system(size: 46, weight: .black, design: .serif)).fixedSize(horizontal: false, vertical: true)
+                Text("\(catalog.countries) COUNTRIES · \(catalog.elections) ELECTIONS").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
+                Text("Margin of\nVictory").font(.system(size: 46, weight: .black)).fixedSize(horizontal: false, vertical: true)
                 Text("Every state has a story. Every decision moves the map.")
                     .font(.subheadline).foregroundStyle(CampaignStyle.muted)
                 if session.hasGame {
@@ -95,7 +99,7 @@ struct HomeView: View {
                     .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 16))
                 }
                 .buttonStyle(.plain)
-                Text("Six countries. Historical campaigns and today's political battles.").font(.caption).foregroundStyle(CampaignStyle.muted)
+                Text("\(catalog.countries) countries and \(catalog.elections) elections from \(String(catalog.firstYear)) to today. One election in every country is free.").font(.caption).foregroundStyle(CampaignStyle.muted)
             }
             .padding(18)
         }
@@ -126,6 +130,7 @@ struct SetupView: View {
     private var selectedCampaignNumber: Int { (campaigns.firstIndex(where: { $0.id == scenarioId }) ?? 0) + 1 }
     private var mates: [MateChoice] { session.mates(scenarioId: scenarioId, playerSerial: player) }
     private var selectedMate: MateChoice? { mates.first(where: { $0.id == mateId }) ?? mates.first(where: { $0.historical }) ?? mates.first }
+    private var rule: ElectoralRule { MobileGame.companion.electoralRule(scenarioId: scenarioId) }
     private var canAdvance: Bool { (step != 0 || !player.isEmpty) && (step != 3 || selectedMate != nil) }
     private var usesAccessibilityLayout: Bool { dynamicTypeSize.isAccessibilitySize }
     private var usesCompactAX: Bool { usesAccessibilityLayout && horizontalSizeClass == .compact }
@@ -204,6 +209,8 @@ struct SetupView: View {
                         if !usesAccessibilityLayout {
                             Text(campaign.tagline).font(.subheadline).foregroundStyle(CampaignStyle.muted)
                         }
+                        Text("\(rule.majority) of \(rule.total) electoral votes to win")
+                            .font(.subheadline.bold()).foregroundStyle(CampaignStyle.gold)
                         if !usesCompactAX {
                             Text("CHOOSE YOUR SIDE")
                                 .font(.caption.bold()).tracking(1.5).foregroundStyle(CampaignStyle.muted)
@@ -275,14 +282,14 @@ struct SetupView: View {
                         Text("1. Tap a gray, amber-ringed state on the EV map. Those are the closest races.")
                         Text("2. Choose a campaign move and tune its settings. The projected margin updates before you add it.")
                         Text("3. Schedule moves across seven days, then end the week to see what changed.")
-                        Text("Win 270 electoral votes by Election Day.").font(.subheadline.bold())
+                        Text("Win \(rule.majority) of \(rule.total) electoral votes by Election Day.").font(.subheadline.bold())
                     }
                     .font(.subheadline).foregroundStyle(.white)
                     .padding(12).background(CampaignStyle.background, in: RoundedRectangle(cornerRadius: 12))
                     Picker("Difficulty", selection: $difficulty) {
                         ForEach(session.difficulties(), id: \.self) { Text($0.capitalized).tag($0) }
                     }.pickerStyle(.segmented)
-                    Text(difficulty == "easy" ? "More cash and a softer opponent." : difficulty == "hard" ? "Fewer resources and a tougher opponent." : "Balanced resources and opposition.")
+                    Text(nativeDifficultyBlurb(difficulty))
                         .font(.caption).foregroundStyle(CampaignStyle.muted)
                     Picker("Events", selection: $eventMode) {
                         Text("Historical").tag("historical")

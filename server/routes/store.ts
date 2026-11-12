@@ -61,12 +61,16 @@ storeRouter.post(["/binding", "/verify", "/ownership"], async (req: AuthedReques
   }
   if (result.body.owner !== identity.ahdUserId) return res.status(503).json({ error: "Shared account ownership could not be verified." });
   if (path === "ownership") {
-    const packs = result.body.packIds;
-    if (!Array.isArray(packs) || !packs.every(p => typeof p === "string" && !!PACKS_BY_ID[p]) ||
+    const reported = result.body.packIds;
+    if (!Array.isArray(reported) || !reported.every(p => typeof p === "string") ||
         typeof result.body.verifiedAt !== "number" || !Number.isSafeInteger(result.body.verifiedAt) ||
         result.body.verifiedAt < Date.now() - 300_000 || result.body.verifiedAt > Date.now() + 300_000) {
       return res.status(503).json({ error: "Shared account ownership could not be read." });
     }
+    // The platform can sell packs this build does not ship yet (a newer
+    // country, a newer client). Drop ids we do not know instead of failing the
+    // whole wallet, so everything the player owns here keeps working.
+    const packs = (reported as string[]).filter(p => Object.prototype.hasOwnProperty.call(PACKS_BY_ID, p));
     const local = unlockedForUser(userId).packIds;
     return res.json({ owner: userId, packIds: [...new Set([...packs, ...local])], verifiedAt: result.body.verifiedAt });
   }

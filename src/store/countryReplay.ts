@@ -40,6 +40,7 @@ function cfg(game: CountryGameState, country: CountryBundle, mode: ReplayMode): 
     unitLabel: country.unitNamePlural ?? "seats",
     unitTotal: maj.total,
     majority: maj.threshold,
+    ...(maj.plurality ? { plurality: true } : {}),
     mode,
     partyName: (id: PartyId) => nameOf(id)?.name ?? id,
     partyColor: (id: PartyId) => nameOf(id)?.color ?? "#888",

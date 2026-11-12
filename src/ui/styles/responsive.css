@@ -1,0 +1,24 @@
+/* Phone and tablet overrides for the setup and results screens. The desk,
+   modals and shared components carry their own responsive rules. */
+@media (max-width: 768px) {
+  .setup .title { font-size: 28px; }
+  .pick { grid-template-columns: 1fr; }
+  .candcard { padding: var(--space-3); }
+  /* !important: several screens set grid-template-columns inline (3-up year
+     grids, minmax(280px) card walls). On a phone they must collapse to two
+     min-0 columns or the min-content of nowrap labels blows out the page. */
+  .scenario-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .scenario-card { min-width: 0; }
+  .scenario-card .scenario-match { white-space: normal; }
+  /* The wizard step strip scrolls sideways instead of shoving the page wide. */
+  .su-stepper { overflow-x: auto; padding-bottom: 2px; }
+  .su-step { flex: 1 0 auto; padding: var(--space-2); gap: 7px; }
+  .su-step-hint { display: none; }
+  .su-step-label { font-size: var(--fs-xs); }
+  .su-optgrid, .su-optgrid-3 { grid-template-columns: 1fr; }
+  .su-panel { min-height: 0; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .field { margin: 6px 0; gap: 2px; }
+  .bigresult .who { font-size: 24px; }
+  .bigresult .ev { font-size: 42px; }
+}

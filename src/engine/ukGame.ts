@@ -5,16 +5,19 @@
 import type { PartyId } from "./system";
 import type { CauseEntry, Government, SeatResult, StateContest } from "./types";
 import { createRng, hashSeed, type Rng } from "./rng";
-import { computeSeatsResult, blocPartyShares, tallyRegion } from "./multiparty";
+import { computeSeatsResult, blocPartyShares, tallyRegion, levelingTilt, handicapMultiplier, climateTilt } from "./multiparty";
 import { UK_ABSTAINING, PARTY_BY_ID } from "@content/uk/parties";
 import { UK_ELECTIONS, type UkElectionData, majorityForElection, type UkMajority } from "@content/uk/elections";
 import { leaderFor, type UkLeader } from "@content/uk/leaders";
 import { UK_EVENTS, UK_EVENT_CHANCE, headlineFor, pickTarget, type UkEvent } from "@content/uk/events";
 import { UK_ELECTION_EVENTS } from "@content/uk/electionEvents";
+import { UK_ISSUES, type UkElectionIssue } from "@content/uk/issues";
 import { buildUkRegions } from "./ukSetup";
+import { liveIssuesOf, type LiveIssue } from "./countryGame";
 import { planMultipartyAi, type MpDifficulty } from "./multipartyAi";
 import {
   buildCauseRecap,
+  unfiredGenericEvents,
   decayMultipartyTurn,
   finalizeMpCampaignTurn,
   resolvePendingChoiceGate,
@@ -23,6 +26,7 @@ import {
   orderedPlan,
   planBonusMultiplier,
   planBonusesForAction,
+  nationalPrepFactor,
   type PlanBonus,
 } from "./planBonuses";
 
@@ -129,6 +133,16 @@ export interface UkGameState {
   result?: UkResult;
 }
 
+/** The issues a UK election runs on: its own list, or else the shared one. */
+export function ukElectionIssues(electionId: string): UkElectionIssue[] {
+  return UK_ELECTIONS[electionId]?.issues ?? UK_ISSUES;
+}
+
+/** A UK game's issues for display and the pickers (see countryGameIssues). */
+export function ukGameIssues(g: Pick<UkGameState, "electionId" | "salience">): LiveIssue[] {
+  return liveIssuesOf(g.salience, [...UK_ISSUES, ...ukElectionIssues(g.electionId)]);
+}
+
 /** Winning post for this election's boundary set (650/326 default). */
 export function majorityForUk(g: UkGameState): UkMajority {
   return g.majority ?? majorityForElection(g.electionId);
@@ -157,19 +171,15 @@ export function playablePartiesIn(electionId: string): PartyId[] {
 
 export type Difficulty = "easy" | "normal" | "hard";
 
-// Underdog handicap — see the country engine's COUNTRY_HANDICAP for the full
-// rationale. `normal` is the identity element (calibration stays byte-identical);
-// `easy` gives a favorable climate + bigger operation + sloppier opponent so a
-// skilled human can overturn a landslide; `hard` is a mild headwind.
+// Underdog handicap: the same levers and values as the country engine's
+// COUNTRY_HANDICAP (see there for what each one does).
 export interface UkHandicap {
-  funds: number; actions: number; persuasion: number; aiPersuasion: number; environment: number;
+  funds: number; actions: number; persuasion: number; aiPersuasion: number; gapShare: number; gapResidual: number;
 }
 export const UK_HANDICAP: Record<Difficulty, UkHandicap> = {
-  easy:   { funds: 6, actions: 2, persuasion: 1.5, aiPersuasion: 0.5, environment: 0.9 },
-  normal: { funds: 0, actions: 0, persuasion: 1.0, aiPersuasion: 1.0, environment: 0 },
-  // Hard is a campaign-only headwind: no baseline (environment) shift, so a
-  // dominant winner stays dominant — only genuinely knife-edge elections tip.
-  hard:   { funds: 0, actions: 0, persuasion: 0.85, aiPersuasion: 1.1, environment: 0 },
+  easy:   { funds: 6, actions: 2, persuasion: 1.5, aiPersuasion: 0.5, gapShare: 0.6, gapResidual: 0.15 },
+  normal: { funds: 2, actions: 1, persuasion: 1.4, aiPersuasion: 1.0, gapShare: 0, gapResidual: 0 },
+  hard:   { funds: 0, actions: 0, persuasion: 0.9, aiPersuasion: 1.05, gapShare: 0, gapResidual: 0 },
 };
 
 // One-time favorable-climate tilt toward the player, then refresh live support.
@@ -223,7 +233,7 @@ export function createUkGame(opts: NewUkGameOptions = {}): UkGameState {
   }
 
   const regions = buildUkRegions(election);
-  applyUkEnvironment(regions, playerParty, hc.environment);
+  applyUkEnvironment(regions, playerParty, climateTilt(hc, levelingTilt(regions, playerParty)));
 
   return {
     systemId: "UK",
@@ -238,7 +248,9 @@ export function createUkGame(opts: NewUkGameOptions = {}): UkGameState {
     playerParty,
     parties,
     leaders,
-    salience: { ...election.salience },
+    salience: election.issues
+      ? Object.fromEntries(election.issues.map((i) => [i.id, election.salience[i.id] ?? 0]))
+      : { ...election.salience },
     regions,
     resources,
     causes: [],
@@ -265,11 +277,12 @@ function saturate(bloc: StateContest["blocs"][number], party: PartyId, raw: numb
   return raw * room;
 }
 
-function addAppeal(g: UkGameState, region: StateContest, party: PartyId, cause: string, delta: number) {
-  // Difficulty scales campaigning: player effort by `persuasion`, rivals by
-  // `aiPersuasion`. Both 1.0 on normal (identity).
-  const hc = UK_HANDICAP[g.difficulty ?? "normal"];
-  const scaled = delta * (party === g.playerParty ? hc.persuasion : hc.aiPersuasion);
+// `actor` is the party whose action this is (the attacker on a contrast
+// broadcast or dossier, where `party` is the target).
+function addAppeal(g: UkGameState, region: StateContest, party: PartyId, cause: string, delta: number, actor: PartyId = party) {
+  // Difficulty scales campaigning by who campaigns: player effort by
+  // `persuasion`, the chief rival's by `aiPersuasion` (see UK_HANDICAP).
+  const scaled = delta * handicapMultiplier(UK_HANDICAP[g.difficulty ?? "normal"], g.regions, g.playerParty, actor);
   for (const bloc of region.blocs) {
     if (!bloc.campaignAppeal) bloc.campaignAppeal = {};
     bloc.campaignAppeal[party] = (bloc.campaignAppeal[party] ?? 0) + saturate(bloc, party, scaled);
@@ -297,6 +310,8 @@ function applyUkAction(
   rng: Rng,
   planMultiplier = 1,
   planBonuses: readonly PlanBonus[] = [],
+  // nationalPrepFactor: repeated national prep in one week lands weaker.
+  prepFactor = 1,
 ) {
   const res = g.resources[a.party];
   if (res.actions < 1) return;
@@ -365,7 +380,7 @@ function applyUkAction(
         const scope = region ? [region] : targets;
         for (const t of scope) {
           const foe = a.targetParty ?? topRivalIn(t, a.party);
-          if (foe) addAppeal(g, t, foe, `${leader.name} contrast broadcast`, -per * 0.9);
+          if (foe) addAppeal(g, t, foe, `${leader.name} contrast broadcast`, -per * 0.9, a.party);
         }
       } else {
         for (const t of targets) addAppeal(g, t, a.party, `${leader.name} broadcast`, per);
@@ -380,21 +395,21 @@ function applyUkAction(
       const scope = region ? [region] : standsIn(g, a.party);
       for (const t of scope) {
         const foe = a.targetParty ?? topRivalIn(t, a.party);
-        if (foe) addAppeal(g, t, foe, `${leader.name}'s team releases dossier on ${foe.toUpperCase()}`, -0.05 * compSkill);
+        if (foe) addAppeal(g, t, foe, `${leader.name}'s team releases dossier on ${foe.toUpperCase()}`, -0.05 * compSkill, a.party);
       }
       break;
     }
     case "debate_prep": {
       // Sharpen the leader for the TV debates — national lift + momentum.
       res.actions -= 1;
-      for (const t of standsIn(g, a.party)) addAppeal(g, t, a.party, `${leader.name} debate performance`, 0.012 * compSkill);
+      for (const t of standsIn(g, a.party)) addAppeal(g, t, a.party, `${leader.name} debate performance`, 0.012 * compSkill * prepFactor);
       res.momentum = clamp(res.momentum + 4, -100, 100);
       break;
     }
     case "policy_prep": {
       // Manifesto launch — competence-driven national credibility bump.
       res.actions -= 1;
-      for (const t of standsIn(g, a.party)) addAppeal(g, t, a.party, `${leader.name} manifesto launch`, 0.014 * compSkill);
+      for (const t of standsIn(g, a.party)) addAppeal(g, t, a.party, `${leader.name} manifesto launch`, 0.014 * compSkill * prepFactor);
       res.momentum = clamp(res.momentum + 2, -100, 100);
       break;
     }
@@ -402,7 +417,7 @@ function applyUkAction(
       // Reframe the campaign onto a chosen issue: raise its salience + a lift.
       res.actions -= 1;
       if (a.issueId) g.salience[a.issueId] = clamp((g.salience[a.issueId] ?? 0.4) + 0.08 * planMultiplier, 0, 1);
-      for (const t of standsIn(g, a.party)) addAppeal(g, t, a.party, `${leader.name} pivots the campaign`, 0.008 * skill * planMultiplier);
+      for (const t of standsIn(g, a.party)) addAppeal(g, t, a.party, `${leader.name} pivots the campaign`, 0.008 * skill * planMultiplier * prepFactor);
       break;
     }
     case "fundraise": {
@@ -551,12 +566,12 @@ function fireUkEvent(g: UkGameState, rng: Rng) {
 
   const pool = [
     ...deck.filter((e) => e.turn === undefined && !fired.has(e.id)),
-    ...UK_EVENTS,
+    ...unfiredGenericEvents(UK_EVENTS, fired),
   ];
   if (pool.length === 0 || !rng.chance(UK_EVENT_CHANCE)) return;
   const ev = rng.weightedPick(pool, pool.map((e) => e.weight));
   applyUkEvent(g, ev, rng);
-  if (deck.some((d) => d.id === ev.id)) firedList.push(ev.id);
+  if (!fired.has(ev.id)) firedList.push(ev.id);
 }
 
 function buildUkRecap(g: UkGameState, turn: number, seatsBefore: number): UkRecapItem[] {
@@ -613,7 +628,7 @@ export function ukAdvanceTurn(g: UkGameState, opts: UkAdvanceOptions = {}): UkGa
   for (const a of playerPlan) {
     const bonuses = planBonusesForAction(a, completedActions);
     const causeCount = next.causes.length;
-    applyUkAction(next, a, rng, planBonusMultiplier(bonuses), bonuses);
+    applyUkAction(next, a, rng, planBonusMultiplier(bonuses), bonuses, nationalPrepFactor(a, completedActions));
     if (next.causes.length > causeCount) completedActions.push(a);
   }
   next.queuedActions = [];
@@ -675,7 +690,7 @@ export function projectUkPreview(g: UkGameState): UkResult {
   for (const a of plan) {
     const bonuses = planBonusesForAction(a, completed);
     const causeCount = clone.causes.length;
-    applyUkAction(clone, a, rng, planBonusMultiplier(bonuses), bonuses);
+    applyUkAction(clone, a, rng, planBonusMultiplier(bonuses), bonuses, nationalPrepFactor(a, completed));
     if (clone.causes.length > causeCount) completed.push(a);
   }
   for (const region of clone.regions)

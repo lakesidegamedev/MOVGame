@@ -81,7 +81,7 @@ struct GameView: View {
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("CAMPAIGN DESK").font(.caption2.bold()).tracking(1.5).foregroundStyle(CampaignStyle.gold)
-                            Text(g.campaignLabel()).font(.headline.bold()).lineLimit(1).minimumScaleFactor(0.8)
+                            Text(g.campaignLabel()).font(.headline.bold()).lineLimit(2).minimumScaleFactor(0.8)
                         }
                         Spacer(minLength: 4)
                         Button(action: onAsk) {
@@ -103,7 +103,7 @@ struct GameView: View {
                             }
                             Spacer()
                             VStack(spacing: 1) {
-                                Text("TOSS-UP EV").font(.caption2.bold()).foregroundStyle(CampaignStyle.gold)
+                                Text("TOSS-UP EV").font(.caption2.bold()).lineLimit(1).minimumScaleFactor(0.6).foregroundStyle(CampaignStyle.gold)
                                 Text("\(proj.tossup)").font(.title.bold()).foregroundStyle(CampaignStyle.gold)
                             }
                             Spacer()
@@ -114,17 +114,17 @@ struct GameView: View {
                         }
                         GeometryReader { geometry in
                             HStack(spacing: 0) {
-                                CampaignStyle.democrat.frame(width: geometry.size.width * CGFloat(proj.dem) / 538)
-                                CampaignStyle.gold.frame(width: geometry.size.width * CGFloat(proj.tossup) / 538)
+                                CampaignStyle.democrat.frame(width: geometry.size.width * CGFloat(proj.dem) / CGFloat(g.evTotal()))
+                                CampaignStyle.gold.frame(width: geometry.size.width * CGFloat(proj.tossup) / CGFloat(g.evTotal()))
                                 CampaignStyle.republican
                             }
                             .clipShape(Capsule())
                             Rectangle().fill(.white)
                                 .frame(width: 2, height: 16)
-                                .position(x: geometry.size.width * 270 / 538, y: 6)
+                                .position(x: geometry.size.width * CGFloat(g.evMajority()) / CGFloat(g.evTotal()), y: 6)
                         }
                         .frame(height: 12)
-                        Text("270 TO WIN").font(.caption2.bold()).foregroundStyle(CampaignStyle.muted)
+                        Text("\(g.evMajority()) OF \(g.evTotal()) TO WIN").font(.caption2.bold()).foregroundStyle(CampaignStyle.muted)
                             .frame(maxWidth: .infinity)
                         HStack(spacing: 8) {
                             headerStat("WEEK", "\(Int(g.turn()) + 1)/\(Int(g.totalTurns()))")
@@ -265,7 +265,7 @@ struct GameView: View {
             .background(Color(red: 10/255, green: 15/255, blue: 20/255))
             .preferredColorScheme(.dark)
             .overlay(alignment: .bottom) {
-                NativeCampaignCoach(country: "US", goal: "Win 270 electoral votes in \(g.totalTurns()) weeks.", turn: Int(g.turn()), selected: selectedStateId, queued: session.plannedActions().count, settings: session.settings)
+                NativeCampaignCoach(country: "US", goal: "Win \(g.evMajority()) electoral votes in \(g.totalTurns()) weeks.", turn: Int(g.turn()), selected: selectedStateId, queued: session.plannedActions().count, settings: session.settings)
             }
             .onAppear {
                 if draft.target.isEmpty, let first = battlegrounds.first {
@@ -314,7 +314,7 @@ struct GameView: View {
     private func headerStat(_ label: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(label).font(.system(size: 9, weight: .bold)).foregroundStyle(CampaignStyle.muted)
-            Text(value).font(.subheadline.bold()).minimumScaleFactor(0.75).lineLimit(1)
+            Text(value).font(.subheadline.bold()).minimumScaleFactor(0.5).lineLimit(1)
         }
     }
 

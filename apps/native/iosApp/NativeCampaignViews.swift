@@ -69,136 +69,531 @@ private struct NativeCountryMapView: View {
     }
 }
 
+/// Election title without the leading "2024 · " year prefix.
+/// "1 seat", "2 seats": singular when the count is one.
+func nativeUnits(_ count: Int, _ plural: String) -> String {
+    "\(count) \(count == 1 && plural.hasSuffix("s") ? String(plural.dropLast()) : plural)"
+}
+
+func nativeElectionTitle(_ label: String) -> String {
+    guard let range = label.range(of: " · ") else { return label }
+    return String(label[range.upperBound...])
+}
+
+/// Registry challenge rating colour: easy, medium, hard.
+/// One line per difficulty, the same ladder the web setup describes.
+func nativeDifficultyBlurb(_ difficulty: String) -> String {
+    switch difficulty {
+    case "easy": return "A head start sized to the race, a bigger war chest, and a sloppy opponent. Landslides are still a fight."
+    case "hard": return "The real map, a lighter campaign, a ruthless opponent. Close races need a near-perfect run."
+    default: return "The real map and a slightly stronger campaign than your rival's. Skill decides close races."
+    }
+}
+
+func nativeChallengeColor(_ difficulty: String) -> Color {
+    difficulty == "easy" ? Color(red: 0.37, green: 0.80, blue: 0.55) : difficulty == "hard" ? CampaignStyle.coral : CampaignStyle.gold
+}
+
+struct NativeBadge: View {
+    let text: String
+    let color: Color
+    var body: some View {
+        Text(text).font(.caption2.bold()).lineLimit(1)
+            .padding(.horizontal, 7).padding(.vertical, 3)
+            .foregroundStyle(color)
+            .background(color.opacity(0.16), in: Capsule())
+            .overlay(Capsule().strokeBorder(color.opacity(0.5), lineWidth: 1))
+    }
+}
+
+/// One election the player opened from the library (or the daily challenge).
+struct LibraryPick: Identifiable, Equatable {
+    let countryId: String
+    let electionId: String
+    var role: String? = nil
+    var seed: String? = nil
+    var id: String { "\(countryId)-\(electionId)" }
+}
+
+private struct LibraryGroup: Identifiable {
+    let country: NativeCountry
+    let elections: [NativeElection]
+    var id: String { country.id }
+}
+
+private enum LibraryEra: String, CaseIterable {
+    case any, early, late20, early21, recent
+    var title: String {
+        switch self {
+        case .any: return "Any era"
+        case .early: return "1932 to 1979"
+        case .late20: return "1980 to 1999"
+        case .early21: return "2000 to 2014"
+        case .recent: return "2015 on"
+        }
+    }
+    func contains(_ year: Int) -> Bool {
+        switch self {
+        case .any: return true
+        case .early: return year < 1980
+        case .late20: return (1980...1999).contains(year)
+        case .early21: return (2000...2014).contains(year)
+        case .recent: return year >= 2015
+        }
+    }
+}
+
+/// Every country and election from the exported catalog, grouped by country,
+/// with search and filters. Choosing an election opens its briefing.
 struct NativeCampaignLibrary: View {
     @ObservedObject var session: GameSession
-    @State private var countryId = "US"
-    @State private var electionId = "2024"
-    @State private var partyId = ""
-    @State private var difficulty = "normal"
-    @State private var seed = String(Int(Date().timeIntervalSince1970))
-    private var elections: [NativeElection] { MobileCampaign.companion.elections(countryId: countryId) }
-    private var selectedElectionId: String {
-        elections.contains(where: { $0.nativeId == electionId }) ? electionId : (elections.first?.nativeId ?? "")
-    }
-    private var parties: [NativeParty] {
-        countryId == "US" ? [] : MobileCampaign.companion.parties(countryId: countryId, electionId: selectedElectionId)
-    }
-    private var selectedElection: NativeElection? { elections.first(where: { $0.nativeId == selectedElectionId }) }
-    private var canLaunch: Bool {
-        countryId == "US" || (!partyId.isEmpty && !seed.trimmingCharacters(in: .whitespaces).isEmpty)
-    }
-    private var launchTitle: String { countryId == "US" ? "Choose your presidential ticket" : "Launch campaign" }
+    @ObservedObject private var store: StoreKitAdapter
+    @State private var query = ""
+    @State private var access = "all"
+    @State private var challenge = "any"
+    @State private var era = LibraryEra.any
+    @State private var expanded: Set<String> = []
+    @State private var pick: LibraryPick?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    private let pendingPick: LibraryPick?
+    private let catalog: [LibraryGroup] =
+        MobileCampaign.companion.countries().map { LibraryGroup(country: $0, elections: MobileCampaign.companion.elections(countryId: $0.id)) }
 
     init(session: GameSession) {
         self.session = session
-        let daily = session.dailySetup
-        _countryId = State(initialValue: daily?.countryId ?? "US")
-        _electionId = State(initialValue: daily?.electionId ?? "2024")
-        _partyId = State(initialValue: daily?.role ?? "")
-        _seed = State(initialValue: daily?.seed ?? String(Int(Date().timeIntervalSince1970)))
+        self.store = session.store
+        pendingPick = session.dailySetup.map { LibraryPick(countryId: $0.countryId, electionId: $0.electionId, role: $0.role, seed: $0.seed) }
+            ?? session.libraryRequest
+    }
+
+    private var filtering: Bool { !query.trimmingCharacters(in: .whitespaces).isEmpty || access != "all" || challenge != "any" || era != .any }
+    private var ownedScenarios: Set<String> {
+        NativeCatalog.shared.ownedScenarios(ownedPacks: Array(store.owned)).union(store.accountScenarios)
+    }
+
+    private func matches(_ election: NativeElection, country: NativeCountry) -> Bool {
+        if access == "free" && !election.free { return false }
+        if access == "owned" && !ownedScenarios.contains(election.scenarioId) { return false }
+        if challenge != "any" && election.difficulty != challenge { return false }
+        if !era.contains(Int(election.year)) { return false }
+        let words = query.lowercased().split(separator: " ").map(String.init)
+        let haystack = "\(country.name) \(country.id) \(election.label) \(election.blurb)".lowercased()
+        return words.allSatisfy { haystack.contains($0) }
     }
 
     var body: some View {
+        let groups = catalog.compactMap { group -> LibraryGroup? in
+            let shown = group.elections.filter { matches($0, country: group.country) }
+            return shown.isEmpty ? nil : LibraryGroup(country: group.country, elections: shown)
+        }
+        let total = catalog.reduce(0) { $0 + $1.elections.count }
+        let shownCount = groups.reduce(0) { $0 + $1.elections.count }
+        let freeCount = catalog.flatMap { $0.elections }.filter { $0.free }.count
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            LazyVStack(alignment: .leading, spacing: 12) {
                 Text("CAMPAIGN LIBRARY").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
-                Text("Choose your election").font(.largeTitle.bold())
-                Picker("Country", selection: $countryId) {
-                    ForEach(MobileCampaign.companion.countries(), id: \.id) { country in
-                        Text("\(country.flag) \(country.name)").tag(country.id)
-                    }
+                if !dynamicTypeSize.isAccessibilitySize {
+                    Text("Choose your election").font(.largeTitle.bold())
                 }
-                .pickerStyle(.menu)
-                Menu {
-                    ForEach(elections, id: \.nativeId) { election in
-                        Button(election.label) { electionId = election.nativeId }
-                    }
-                } label: {
-                    choiceRow(selectedElection?.label ?? "Choose an election")
+                (Text("\(catalog.count) countries · \(total) elections · ").foregroundColor(CampaignStyle.muted)
+                    + Text("\(freeCount) free").foregroundColor(CampaignStyle.gold))
+                    .font(.subheadline)
+                filters
+                if filtering || !dynamicTypeSize.isAccessibilitySize {
+                    Text(filtering ? "\(shownCount) of \(total) elections match" : "Tap a country to see its elections")
+                        .font(.caption).foregroundStyle(CampaignStyle.muted)
                 }
-                .accessibilityLabel("Election")
-                .accessibilityValue(selectedElection?.label ?? "")
-                if let election = elections.first(where: { $0.nativeId == electionId }) {
-                    Text(election.blurb).font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                if groups.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(access == "owned" && ownedScenarios.isEmpty ? "You do not own a pack yet" : "No elections match").font(.headline)
+                        Text(access == "owned" && ownedScenarios.isEmpty ? "Packs you buy on your Lakeside account show here. Every country has a free election under Free." : "Try another search or clear the filters.")
+                            .font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                        Button("Clear filters") { query = ""; access = "all"; challenge = "any"; era = .any }
+                            .font(.subheadline.bold()).foregroundStyle(CampaignStyle.gold)
+                    }
+                    .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
                 }
-                if countryId != "US" {
-                    Menu {
-                        ForEach(parties, id: \.id) { party in
-                            Button("\(party.name) · \(party.leader)") { partyId = party.id }
-                        }
-                    } label: {
-                        choiceRow(parties.first(where: { $0.id == partyId }).map { "\($0.name) · \($0.leader)" } ?? "Choose your party")
-                    }
-                    .accessibilityLabel("Your party")
-                    .accessibilityValue(parties.first(where: { $0.id == partyId })?.name ?? "")
-                    if let party = parties.first(where: { $0.id == partyId }) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(party.leader).font(.title2.bold())
-                            Text("Charisma \(Int(party.charisma)) · Energy \(Int(party.energy))")
-                            Text("Competence \(Int(party.competence)) · Machine \(Int(party.machine))")
-                        }
-                        .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-                        .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
-                    }
-                    Picker("Difficulty", selection: $difficulty) {
-                        ForEach(["easy", "normal", "hard"], id: \.self) { Text($0.capitalized).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    TextField("Campaign seed", text: $seed).textFieldStyle(.roundedBorder)
-                        .textInputAutocapitalization(.never).autocorrectionDisabled()
+                ForEach(groups) { group in
+                    countrySection(group.country, elections: group.elections,
+                                   all: catalog.first { $0.country.id == group.country.id }?.elections ?? group.elections)
                 }
             }
             .padding(20)
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            Button(action: launch) {
-                Text(launchTitle)
-                    .font(.headline)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
-                    .padding(16)
+        .scrollDismissesKeyboard(.interactively)
+        .background(CampaignStyle.background).preferredColorScheme(.dark)
+        .sheet(item: $pick) { chosen in
+            NavigationStack {
+                NativeElectionBriefing(session: session, store: store, pick: chosen) { pick = nil }
+                    .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Close") { pick = nil } } }
+                    .navigationBarTitleDisplayMode(.inline)
+            }
+            .dynamicTypeSize(dynamicTypeSize)
+        }
+        .onChange(of: session.libraryRequest) { request in
+            guard let request else { return }
+            session.libraryRequest = nil
+            pick = request
+        }
+        .onAppear {
+            session.dailySetup = nil
+            session.libraryRequest = nil
+            store.refresh()
+            if let pendingPick {
+                DispatchQueue.main.async { pick = pendingPick }
+            }
+            #if targetEnvironment(simulator)
+            let arguments = ProcessInfo.processInfo.arguments
+            if arguments.contains("--mov-capture-library-free") { access = "free" }
+            if arguments.contains("--mov-capture-library-search") { query = "1948" }
+            if arguments.contains("--mov-capture-library") { expanded = ["US"] }
+            if arguments.contains("--mov-capture-locked-library") { expanded = ["UK"] }
+            if arguments.contains("--mov-capture-locked-uk") {
+                // Today's daily always opens, so pick a paid election that is not it.
+                let daily = session.dailyAssignment().scenarioId
+                let election = MobileCampaign.companion.elections(countryId: "UK").first { !$0.free && $0.scenarioId != daily }?.nativeId ?? "2019"
+                DispatchQueue.main.async { pick = LibraryPick(countryId: "UK", electionId: election) }
+            }
+            for (argument, countryId, party) in [("--mov-capture-briefing-es", "ES", "erc"), ("--mov-capture-briefing-in", "IN", ""), ("--mov-capture-briefing-us1948", "US", "")]
+                where arguments.contains(argument) {
+                let election = countryId == "US" ? "1948" : MobileCampaign.companion.elections(countryId: countryId).first?.nativeId ?? ""
+                DispatchQueue.main.async { pick = LibraryPick(countryId: countryId, electionId: election, role: party.isEmpty ? nil : party) }
+            }
+            #endif
+        }
+    }
+
+    private var filters: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass").foregroundStyle(CampaignStyle.muted).accessibilityHidden(true)
+                TextField("Search country, year or candidate", text: $query)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
+                    .submitLabel(.search)
+                if !query.isEmpty {
+                    Button { query = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(CampaignStyle.muted) }
+                        .buttonStyle(.plain).accessibilityLabel("Clear search")
+                }
+            }
+            .padding(12)
+            .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
+            Picker("Show", selection: $access) {
+                Text("All").tag("all")
+                Text("Free").tag("free")
+                Text("Owned").tag("owned")
+            }
+            .pickerStyle(.segmented)
+            .accessibilityLabel("Show elections")
+            if dynamicTypeSize.isAccessibilitySize {
+                Menu {
+                    Picker("Challenge", selection: $challenge) {
+                        Text("Any challenge").tag("any")
+                        Text("Easy").tag("easy")
+                        Text("Medium").tag("medium")
+                        Text("Hard").tag("hard")
+                    }
+                    Picker("Era", selection: $era) {
+                        ForEach(LibraryEra.allCases, id: \.self) { Text($0.title).tag($0) }
+                    }
+                } label: {
+                    filterLabel(challenge == "any" && era == .any ? "Filters" : "Filters on", active: challenge != "any" || era != .any)
+                }
+                .accessibilityLabel("Challenge and era filters")
+                .accessibilityValue("\(challenge == "any" ? "Any challenge" : challenge.capitalized), \(era.title)")
+            } else {
+                HStack(spacing: 8) { challengeMenu; eraMenu; Spacer(minLength: 0) }
+            }
+        }
+    }
+
+    private var challengeMenu: some View {
+        Menu {
+            Picker("Challenge", selection: $challenge) {
+                Text("Any challenge").tag("any")
+                Text("Easy").tag("easy")
+                Text("Medium").tag("medium")
+                Text("Hard").tag("hard")
+            }
+        } label: {
+            filterLabel(challenge == "any" ? "Any challenge" : "\(challenge.capitalized) challenge", active: challenge != "any")
+        }
+        .accessibilityLabel("Challenge filter")
+        .accessibilityValue(challenge == "any" ? "Any" : challenge.capitalized)
+    }
+
+    private var eraMenu: some View {
+        Menu {
+            Picker("Era", selection: $era) {
+                ForEach(LibraryEra.allCases, id: \.self) { Text($0.title).tag($0) }
+            }
+        } label: {
+            filterLabel(era.title, active: era != .any)
+        }
+        .accessibilityLabel("Era filter")
+        .accessibilityValue(era.title)
+    }
+
+    private func filterLabel(_ title: String, active: Bool) -> some View {
+        HStack(spacing: 6) {
+            Text(title).font(.subheadline.bold()).lineLimit(1)
+            Image(systemName: "chevron.down").font(.caption2.bold())
+        }
+        .foregroundStyle(active ? CampaignStyle.background : .white)
+        .padding(.horizontal, 12).padding(.vertical, 9)
+        .background(active ? CampaignStyle.gold : CampaignStyle.card, in: Capsule())
+    }
+
+    @ViewBuilder
+    private func countrySection(_ country: NativeCountry, elections: [NativeElection], all: [NativeElection]) -> some View {
+        let open = filtering || expanded.contains(country.id)
+        let years = all.map { Int($0.year) }
+        let packId = NativeCatalog.shared.country(id: country.id)?.packId ?? ""
+        let owned = !packId.isEmpty && NativeAccess.shared.covers(packId: packId, ownedPacks: Array(store.owned))
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                if expanded.contains(country.id) { expanded.remove(country.id) } else { expanded.insert(country.id) }
+            } label: {
+                let badge = Group {
+                    if owned { NativeBadge(text: "Owned", color: Color(red: 0.37, green: 0.80, blue: 0.55)) }
+                    else if all.contains(where: { $0.free }) { NativeBadge(text: "\(all.filter { $0.free }.count) free", color: CampaignStyle.gold) }
+                }
+                let chevron = Image(systemName: open ? "chevron.up" : "chevron.down").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
+                    .opacity(filtering ? 0 : 1)
+                Group {
+                    if dynamicTypeSize.isAccessibilitySize {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(spacing: 8) { badge; Spacer(minLength: 4); chevron }
+                            Text("\(country.flag) \(country.name)").font(.headline).foregroundStyle(.white)
+                            Text("\(all.count) elections · \(String(years.min() ?? 0)) to \(String(years.max() ?? 0))")
+                                .font(.caption).foregroundStyle(CampaignStyle.muted)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        HStack(alignment: .center, spacing: 12) {
+                            Text(country.flag).font(.title2).accessibilityHidden(true)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(country.name).font(.headline).foregroundStyle(.white)
+                                Text("\(all.count) elections · \(String(years.min() ?? 0)) to \(String(years.max() ?? 0))")
+                                    .font(.caption).foregroundStyle(CampaignStyle.muted)
+                            }
+                            Spacer(minLength: 6)
+                            badge
+                            chevron
+                        }
+                    }
+                }
+                .padding(14)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .foregroundStyle(canLaunch ? CampaignStyle.background : CampaignStyle.muted)
-            .background(canLaunch ? CampaignStyle.coral : CampaignStyle.card,
-                        in: RoundedRectangle(cornerRadius: 14))
-            .disabled(!canLaunch)
+            .accessibilityLabel("\(country.name), \(all.count) elections, \(owned ? "owned" : "\(all.filter { $0.free }.count) free")")
+            .accessibilityHint(filtering ? "" : open ? "Hides its elections" : "Shows its elections")
+            if open {
+                Divider().overlay(CampaignStyle.background)
+                ForEach(elections, id: \.scenarioId) { election in
+                    electionRow(election, countryId: country.id)
+                    if election.scenarioId != elections.last?.scenarioId { Divider().overlay(CampaignStyle.background).padding(.leading, 14) }
+                }
+            }
+        }
+        .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func electionRow(_ election: NativeElection, countryId: String) -> some View {
+        let locked = session.lockedPack(country: countryId, nativeId: election.nativeId)
+        return Button { pick = LibraryPick(countryId: countryId, electionId: election.nativeId) } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text(String(election.year)).font(.subheadline.bold()).monospacedDigit().foregroundStyle(CampaignStyle.gold)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(nativeElectionTitle(election.label)).font(.subheadline.bold()).foregroundStyle(.white)
+                        .multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 6) {
+                        if election.free { NativeBadge(text: "Free", color: Color(red: 0.37, green: 0.80, blue: 0.55)) }
+                        NativeBadge(text: election.difficulty.capitalized, color: nativeChallengeColor(election.difficulty))
+                        if locked != nil { NativeBadge(text: "Locked", color: CampaignStyle.muted) }
+                    }
+                }
+                Spacer(minLength: 4)
+                Image(systemName: locked == nil ? "chevron.right" : "lock.fill").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
+            }
+            .padding(.horizontal, 14).padding(.vertical, 11)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(election.year), \(nativeElectionTitle(election.label))\(election.free ? ", free" : ""), \(election.difficulty) challenge\(locked != nil ? ", locked" : "")")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint("Opens the election briefing")
+    }
+}
+
+/// The briefing for one election: what it is, how it is won, the side to
+/// play and the campaign settings, with a single launch action.
+struct NativeElectionBriefing: View {
+    @ObservedObject var session: GameSession
+    @ObservedObject var store: StoreKitAdapter
+    let pick: LibraryPick
+    let close: () -> Void
+    @State private var partyId = ""
+    @State private var difficulty = "normal"
+    @State private var seed = String(Int(Date().timeIntervalSince1970))
+
+    private var isUS: Bool { pick.countryId == "US" }
+    private var election: NativeElection? {
+        MobileCampaign.companion.elections(countryId: pick.countryId).first { $0.nativeId == pick.electionId }
+    }
+    private var country: NativeCountry? { MobileCampaign.companion.countries().first { $0.id == pick.countryId } }
+    private var parties: [NativeParty] {
+        isUS ? [] : MobileCampaign.companion.parties(countryId: pick.countryId, electionId: pick.electionId)
+    }
+    private var goalLine: String {
+        if isUS {
+            let rule = MobileGame.companion.electoralRule(scenarioId: pick.electionId)
+            return "\(rule.majority) of \(rule.total) electoral votes to win"
+        }
+        return MobileCampaign.companion.goalLine(countryId: pick.countryId, electionId: pick.electionId) ?? ""
+    }
+    private var reach: NativeRegionalReach? {
+        partyId.isEmpty ? nil : MobileCampaign.companion.regionalReach(countryId: pick.countryId, electionId: pick.electionId, partyId: partyId)
+    }
+    private var locked: String? { session.lockedPack(country: pick.countryId, nativeId: pick.electionId) }
+    private var canLaunch: Bool { isUS || (!partyId.isEmpty && !seed.trimmingCharacters(in: .whitespaces).isEmpty) }
+
+    var body: some View {
+        ScrollView {
+            if let election {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("\(country?.flag ?? "") \(country?.name.uppercased() ?? "")").font(.caption.bold()).tracking(1.5).foregroundStyle(CampaignStyle.gold)
+                    Text(election.label).font(.title2.bold()).fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 6) {
+                        if election.free { NativeBadge(text: "Free", color: Color(red: 0.37, green: 0.80, blue: 0.55)) }
+                        else { NativeBadge(text: "\(nativePackName(election.packId)) pack", color: CampaignStyle.muted) }
+                        NativeBadge(text: "\(election.difficulty.capitalized) challenge", color: nativeChallengeColor(election.difficulty))
+                    }
+                    Text(election.blurb).font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Image(systemName: "flag.checkered").foregroundStyle(CampaignStyle.gold).accessibilityHidden(true)
+                        Text(goalLine).font(.subheadline.bold()).fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(12).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
+                    .accessibilityElement(children: .combine)
+                    if !isUS {
+                        Text("CHOOSE YOUR PARTY · \(parties.count)").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+                        VStack(spacing: 6) {
+                            ForEach(parties, id: \.id) { party in partyRow(party) }
+                        }
+                        if let reach, let party = parties.first(where: { $0.id == partyId }) {
+                            NativeRegionalPartyNote(party: party.name, reach: reach, unitName: "seats")
+                        }
+                        Text("DIFFICULTY").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+                        Picker("Difficulty", selection: $difficulty) {
+                            ForEach(["easy", "normal", "hard"], id: \.self) { Text($0.capitalized).tag($0) }
+                        }
+                        .pickerStyle(.segmented)
+                        Text(nativeDifficultyBlurb(difficulty)).font(.caption).foregroundStyle(CampaignStyle.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+                        TextField("Campaign seed", text: $seed).textFieldStyle(.roundedBorder)
+                            .textInputAutocapitalization(.never).autocorrectionDisabled()
+                        Text("Use the same seed to replay the same campaign").font(.caption).foregroundStyle(CampaignStyle.muted)
+                    } else {
+                        Text("You choose the ticket, running mate and advisers on the next screen.")
+                            .font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                    }
+                }
+                .padding(20)
+            }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Button(action: launch) {
+                Text(locked != nil ? "Unlock with \(nativePackName(locked))" : isUS ? "Choose your presidential ticket" : canLaunch ? "Launch campaign" : "Choose a party")
+                    .font(.headline).multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity).padding(16)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(canLaunch || locked != nil ? CampaignStyle.background : CampaignStyle.muted)
+            .background(canLaunch || locked != nil ? CampaignStyle.coral : CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
+            .disabled(!canLaunch && locked == nil)
             .padding(.horizontal, 20).padding(.vertical, 10)
             .background(CampaignStyle.background)
         }
         .background(CampaignStyle.background).preferredColorScheme(.dark)
-        .onAppear { session.dailySetup = nil }
-        .onChange(of: countryId) { _ in
-            electionId = elections.first?.nativeId ?? "2024"
-            partyId = parties.first?.id ?? ""
+        .onAppear {
+            if let seed = pick.seed { self.seed = seed }
+            if let role = pick.role, parties.contains(where: { $0.id == role }) { partyId = role }
+            else if partyId.isEmpty { partyId = parties.first?.id ?? "" }
         }
-        .onChange(of: electionId) { _ in partyId = parties.first?.id ?? "" }
+    }
+
+    private func partyRow(_ party: NativeParty) -> some View {
+        let selected = party.id == partyId
+        let regional = MobileCampaign.companion.regionalReach(countryId: pick.countryId, electionId: pick.electionId, partyId: party.id) != nil
+        return Button { partyId = party.id } label: {
+            HStack(spacing: 10) {
+                RoundedRectangle(cornerRadius: 3).fill(nativePartyColor(party.color)).frame(width: 6, height: 34).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(party.name).font(.subheadline.bold()).foregroundStyle(.white)
+                    Text(party.leader).font(.caption).foregroundStyle(CampaignStyle.muted)
+                }
+                Spacer(minLength: 4)
+                if regional { NativeBadge(text: "Regional", color: CampaignStyle.gold) }
+                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(selected ? CampaignStyle.gold : CampaignStyle.muted).accessibilityHidden(true)
+            }
+            .padding(.horizontal, 12).padding(.vertical, 8)
+            .frame(minHeight: 44)
+            .background(selected ? CampaignStyle.gold.opacity(0.14) : CampaignStyle.card, in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(selected ? CampaignStyle.gold : .clear, lineWidth: 1.5))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(party.name), led by \(party.leader)\(regional ? ", regional party" : "")")
+        .accessibilityValue("Charisma \(Int(party.charisma)), energy \(Int(party.energy)), competence \(Int(party.competence)), machine \(Int(party.machine))")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private func launch() {
-        if countryId == "US" {
-            session.setupScenarioId = selectedElectionId
+        if let pack = locked {
+            close()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { session.paywallPack = pack }
+            return
+        }
+        guard canLaunch else { return }
+        close()
+        if isUS {
+            session.setupScenarioId = pick.electionId
             session.playScreen = .setup
         } else {
-            session.newCampaign(countryId: countryId, electionId: selectedElectionId, partyId: partyId,
+            session.newCampaign(countryId: pick.countryId, electionId: pick.electionId, partyId: partyId,
                                 difficulty: difficulty, seed: seed)
         }
     }
+}
 
-    private func choiceRow(_ title: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(title)
-                .font(.headline)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 8)
-            Image(systemName: "chevron.up.chevron.down").font(.caption.bold())
+/// Regional party callout (web RegionalPartyBanner): where it stands, why it
+/// cannot win, and what counts as success.
+struct NativeRegionalPartyNote: View {
+    let party: String
+    let reach: NativeRegionalReach
+    let unitName: String
+    var body: some View {
+        let names = reach.regionNames
+        let where_ = names.count <= 1 ? names.joined() : names.dropLast().joined(separator: ", ") + " and " + (names.last ?? "")
+        let one = unitName.hasSuffix("s") ? String(unitName.dropLast()) : unitName
+        VStack(alignment: .leading, spacing: 6) {
+            Text("REGIONAL PARTY").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+            Text("\(party) stands only in \(where_): \(reach.units) of \(reach.total) \(unitName), so it cannot win a majority or the most \(unitName). Success is beating its real result of \(reach.historical) \(reach.historical == 1 ? one : unitName) and ending with the votes a government needs.")
+                .font(.subheadline).fixedSize(horizontal: false, vertical: true)
         }
-        .foregroundStyle(.blue)
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 10))
-        .contentShape(Rectangle())
+        .padding(14).frame(maxWidth: .infinity, alignment: .leading)
+        .background(CampaignStyle.gold.opacity(0.10), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(CampaignStyle.gold.opacity(0.5)))
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -211,7 +606,7 @@ private struct NativeStandingRows: View {
                 RoundedRectangle(cornerRadius: 3).fill(nativePartyColor(row.color)).frame(width: 14, height: 14)
                 Text(row.name).font(.subheadline.bold())
                 Spacer(minLength: 4)
-                Text("\(row.units) \(units) · \(String(format: "%.1f", row.voteShare * 100))%")
+                Text("\(nativeUnits(Int(row.units), units)) · \(String(format: "%.1f", row.voteShare * 100))%")
                     .font(.caption).monospacedDigit()
             }
             .padding(.vertical, 4)
@@ -243,11 +638,18 @@ struct NativeWorldCampaign: View {
                     Text(game.isOver() ? "ELECTION RESULT" : "WEEK \(game.turn() + 1) OF \(game.totalTurns())")
                         .font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
                     Text(game.goalText()).font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                    if let reach = game.regionalReach(), let me = game.standings().first(where: { $0.partyId == game.playerParty() }) {
+                        if game.isOver() {
+                            Text("\(me.name): \(me.units) \(game.unitName()) against \(reach.historical) in the real election")
+                                .font(.headline).foregroundStyle(me.units > reach.historical ? Color(red: 0.37, green: 0.80, blue: 0.55) : me.units == reach.historical ? .white : CampaignStyle.coral)
+                        }
+                        NativeRegionalPartyNote(party: me.name, reach: reach, unitName: game.unitName())
+                    }
                     if !game.isOver() { Button("Undo week", action: session.undo).disabled(!session.canUndo()) }
                     VStack(alignment: .leading, spacing: 8) {
                         Text(game.isOver() ? game.outcome() : "Projected standings").font(.headline)
                         NativeStandingRows(rows: game.standings(), units: game.unitName())
-                        Text("\(game.majority()) of \(game.totalUnits()) \(game.unitName()) to win outright")
+                        Text(game.goalLine())
                             .font(.caption).foregroundStyle(CampaignStyle.muted)
                     }.nativeCampaignCard()
                     if game.hasPendingEvent() { eventCard(game) }
@@ -261,7 +663,7 @@ struct NativeWorldCampaign: View {
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text(region.name).font(.subheadline.bold()).foregroundStyle(.white)
                                     Text("\(region.winner) leads").font(.caption.bold()).foregroundStyle(nativePartyColor(region.color))
-                                    Text("\(region.totalUnits) \(game.unitName()) in region").font(.caption)
+                                    Text("\(nativeUnits(Int(region.totalUnits), game.unitName())) in region").font(.caption)
                                     Text("You: \(region.playerUnits) · \(String(format: "%.1f", region.playerShare * 100))%")
                                         .font(.caption).monospacedDigit()
                                 }
@@ -284,7 +686,7 @@ struct NativeWorldCampaign: View {
                         if let summary = game.resultSummary() {
                             VStack(alignment: .leading, spacing: 7) {
                                 Text("CAMPAIGN SCORE \(summary.score) / 1000").font(.headline).foregroundStyle(CampaignStyle.gold)
-                                Text("\(summary.difficulty.capitalized) difficulty · \(game.unitName().capitalized) above majority: \(summary.unitMargin)").font(.subheadline)
+                                Text("\(summary.difficulty.capitalized) difficulty · \(game.isPlurality() ? "Lead over the runner-up" : "\(game.unitName().capitalized) above majority"): \(summary.unitMargin)").font(.subheadline)
                                 Text(String(format: "Vote margin vs. leading rival: %+.1f points", summary.popularMargin)).font(.subheadline)
                             }.nativeCampaignCard()
                         }

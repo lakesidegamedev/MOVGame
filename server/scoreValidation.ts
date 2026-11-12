@@ -15,14 +15,16 @@ import {
   type MultipartyResultFacts,
 } from "../src/engine/scoring.js";
 import { SCENARIOS_BY_ID, type ScenarioMeta } from "../src/content/scenarioRegistry.js";
-import { COUNTRIES } from "../src/content/countries/index.js";
+import { electoralCollegeOf } from "../src/content/scenarios.js";
+import { evMajority } from "../src/engine/electoralCollege.js";
+import { COUNTRIES } from "../src/content/countries/all.js";
 import { UK_SYSTEM } from "../src/content/uk/parties.js";
 
 // The chamber a scenario's game plays for — a submitted chamberSize must
 // match. Country chambers resolve per ELECTION (Canada 2021 = 338 next to
 // 2025 = 343; the 2021 Bundestag = 735 with overhang).
 function chamberFor(meta: ScenarioMeta): number | undefined {
-  if (meta.engine === "us") return 538;
+  if (meta.engine === "us") return electoralCollegeOf(meta.nativeId).total;
   if (meta.engine === "uk") return UK_SYSTEM.majority.total;
   const country = COUNTRIES[meta.country];
   const election = country?.elections[meta.nativeId];
@@ -30,7 +32,7 @@ function chamberFor(meta: ScenarioMeta): number | undefined {
 }
 
 function majorityThresholdFor(meta: ScenarioMeta): number | undefined {
-  if (meta.engine === "us") return 270;
+  if (meta.engine === "us") return evMajority(electoralCollegeOf(meta.nativeId).total);
   if (meta.engine === "uk") return UK_SYSTEM.majority.threshold;
   const country = COUNTRIES[meta.country];
   const election = country?.elections[meta.nativeId];
@@ -69,12 +71,14 @@ function factsFromSubmission(sub: ScoreSubmission, meta: ScenarioMeta): ScoreFac
       if (sub.playerSide !== "dem" && sub.playerSide !== "rep") {
         return { error: "US playerSide must be dem or rep" };
       }
+      const college = chamberFor(meta)!;
       const evSum = Object.values(sub.electoralVotes!).reduce((a, b) => a + b, 0);
-      if (evSum < 520 || evSum > 538) return { error: "electoralVotes must sum to ~538" };
+      if (evSum < college - 18 || evSum > college) return { error: `electoralVotes must sum to ~${college}` };
       return usScoreFacts(
         { electoralVotes: sub.electoralVotes!, popularShare: sub.popularShare! },
         sub.playerSide,
         sub.difficulty,
+        college,
       );
     }
     if (!hasRawMp) return { error: "Multiparty submissions need seats + voteShare" };
@@ -91,6 +95,7 @@ function factsFromSubmission(sub: ScoreSubmission, meta: ScenarioMeta): ScoreFac
       threshold,
       chamber,
       sub.difficulty,
+      meta.engine === "country" && COUNTRIES[meta.country]?.plurality === true,
     );
   }
 

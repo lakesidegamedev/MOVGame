@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -37,6 +42,7 @@ import com.lakesidegames.electioneer.engine.ActionType
 import com.lakesidegames.electioneer.engine.AdMode
 import com.lakesidegames.electioneer.engine.GameState
 import com.lakesidegames.electioneer.engine.IssueId
+import com.lakesidegames.electioneer.engine.liveIssueIds
 import com.lakesidegames.electioneer.engine.plannedActionRows
 import com.lakesidegames.electioneer.engine.plannedBonuses
 import com.lakesidegames.electioneer.engine.PlanBonus
@@ -58,12 +64,12 @@ fun ActionPlanner(session: GameSession, game: GameState, selectedId: String?) {
     var day by remember { mutableIntStateOf(1) }
     var adMode by remember { mutableStateOf(AdMode.POSITIVE) }
     var spend by remember { mutableFloatStateOf(8f) }
-    var issue by remember { mutableStateOf(IssueId.ECONOMY) }
+    // Only the issues this election has, under its own names.
+    val liveIssues = remember(game.scenarioId, game.issues.keys) { game.liveIssueIds() }
+    var issue by remember(game.scenarioId) { mutableStateOf(liveIssues.firstOrNull() ?: IssueId.ECONOMY) }
     var position by remember(game.scenarioId) {
-        mutableFloatStateOf((game.candidates[game.playerCandidate.serial]?.issuePositions?.get(IssueId.ECONOMY.serial) ?: 0.0).toFloat())
+        mutableFloatStateOf((game.candidates[game.playerCandidate.serial]?.issuePositions?.get(issue.serial) ?: 0.0).toFloat())
     }
-    var stateMenu by remember { mutableStateOf(false) }
-    var issueMenu by remember { mutableStateOf(false) }
     var notice by remember { mutableStateOf<String?>(null) }
     val states = remember(game.scenarioId) { game.states.filter { it.blocs.isNotEmpty() } }
     LaunchedEffect(selectedId) {
@@ -81,95 +87,67 @@ fun ActionPlanner(session: GameSession, game: GameState, selectedId: String?) {
     val plannedSpend = game.queuedActions.sumOf { if (it.type == ActionType.ADVERTISE) it.spend ?: 0.0 else 0.0 }
     val availableCash = ((game.resources[game.playerCandidate.serial]?.cash ?: 0.0) - plannedSpend).coerceAtLeast(0.0)
 
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("WEEK PLAN", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-            Text("Choose an action, set the target, then add it to a day.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("Planned ads $${"%.1f".format(plannedSpend / 1_000_000)}M · Available $${"%.1f".format(availableCash / 1_000_000)}M", style = MaterialTheme.typography.bodySmall)
-            PlanBonusHints(plannedBonuses(game))
-            if (game.queuedActions.isNotEmpty()) {
-                Text("Plan estimate: ${projectPlannedElection(game).ev.getValue(game.playerCandidate.serial)} EV. Rival moves and events can change the result.",
-                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+    MovCard {
+        CardHead("Week plan") { Tag("${session.slotsLeft()} actions left", if (session.slotsLeft() > 0) TagKind.Accent else TagKind.Outline) }
+        KeyValue("Planned ads", "$${"%.1f".format(plannedSpend / 1_000_000)}M")
+        KeyValue("Available cash", "$${"%.1f".format(availableCash / 1_000_000)}M")
+        if (game.queuedActions.isNotEmpty()) {
+            Text("Plan estimate: ${projectPlannedElection(game).ev.getValue(game.playerCandidate.serial)} EV. Rival moves and events can change the result.",
+                style = MaterialTheme.typography.bodySmall, color = Mov.Info)
+        }
+        PlanBonusHints(plannedBonuses(game))
+        Eyebrow("Action")
+        ChipRow { ACTIONS.forEach { (action, label) -> MovChip(label, type == action, { type = action; notice = null }) } }
+        if (targetsState) ChoicePicker("Target state", target, states.map { it.id to "${it.name} · ${it.electoralVotes} EV" }) { target = it }
+        if (type == ActionType.ADVERTISE) {
+            Eyebrow("Ad mode")
+            Segmented(AdMode.entries.map { it.serial to it.serial.replaceFirstChar(Char::titlecase) }, adMode.serial, { id -> adMode = AdMode.entries.first { it.serial == id } }, label = "Ad mode")
+            KeyValue("Spend", "$${spend.toInt()}M")
+            Slider(value = spend, onValueChange = { spend = it }, valueRange = 1f..30f, steps = 28, modifier = Modifier.semantics { contentDescription = "Ad spend in millions" },
+                colors = SliderDefaults.colors(thumbColor = Mov.Accent, activeTrackColor = Mov.Accent, inactiveTrackColor = Mov.Sunken))
+        }
+        if (type == ActionType.ISSUE_PIVOT || (type == ActionType.ADVERTISE && adMode == AdMode.ISSUE)) {
+            ChoicePicker("Issue", issue.serial, liveIssues.map { it.serial to (game.issues[it.serial]?.name ?: it.serial) }) { id ->
+                issue = IssueId.entries.first { it.serial == id }
+                position = (game.candidates[game.playerCandidate.serial]?.issuePositions?.get(id) ?: 0.0).toFloat()
             }
-            ACTIONS.chunked(2).forEach { pair ->
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    pair.forEach { (action, label) ->
-                        FilterChip(selected = type == action, onClick = { type = action; notice = null }, label = { Text(label) })
-                    }
-                }
-            }
-            if (targetsState) {
-                Box {
-                    OutlinedButton(onClick = { stateMenu = true }) {
-                        Text("Target: ${states.firstOrNull { it.id == target }?.name ?: "Pennsylvania"}  ▾")
-                    }
-                    DropdownMenu(expanded = stateMenu, onDismissRequest = { stateMenu = false }) {
-                        states.forEach { state ->
-                            DropdownMenuItem(text = { Text("${state.name} · ${state.electoralVotes} EV") }, onClick = { target = state.id; stateMenu = false })
-                        }
-                    }
-                }
-            }
-            if (type == ActionType.ADVERTISE) {
-                Text("Ad mode", style = MaterialTheme.typography.labelMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    AdMode.entries.forEach { mode ->
-                        FilterChip(selected = adMode == mode, onClick = { adMode = mode }, label = { Text(mode.serial.replaceFirstChar(Char::titlecase)) })
-                    }
-                }
-                Text("Spend: $${spend.toInt()}M", style = MaterialTheme.typography.labelMedium)
-                Slider(value = spend, onValueChange = { spend = it }, valueRange = 1f..30f, steps = 28, modifier = Modifier.semantics { contentDescription = "Ad spend in millions" })
-            }
-            if (type == ActionType.ISSUE_PIVOT || (type == ActionType.ADVERTISE && adMode == AdMode.ISSUE)) {
-                Box {
-                    OutlinedButton(onClick = { issueMenu = true }) { Text("Issue: ${game.issues[issue.serial]?.name ?: issue.serial}  ▾") }
-                    DropdownMenu(expanded = issueMenu, onDismissRequest = { issueMenu = false }) {
-                        IssueId.entries.forEach { id ->
-                            DropdownMenuItem(text = { Text(game.issues[id.serial]?.name ?: id.serial) }, onClick = {
-                                issue = id
-                                position = (game.candidates[game.playerCandidate.serial]?.issuePositions?.get(id.serial) ?: 0.0).toFloat()
-                                issueMenu = false
-                            })
-                        }
-                    }
-                }
-            }
-            if (type == ActionType.ISSUE_PIVOT) {
-                Text("Position: ${"%.2f".format(position)}  ·  left −1 to right +1", style = MaterialTheme.typography.labelMedium)
-                Slider(value = position, onValueChange = { position = it }, valueRange = -1f..1f, modifier = Modifier.semantics { contentDescription = "Issue position: ${game.issues[issue.serial]?.name ?: issue.serial}" })
-            }
-            Text("Add to day", style = MaterialTheme.typography.labelMedium)
-            listOf(1, 2, 3, 4, 5, 6, 7).chunked(4).forEach { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    row.forEach { n -> FilterChip(selected = day == n, onClick = { day = n }, label = { Text("$n") }) }
-                }
-            }
-            Text("Day $day · $dayCount/3 actions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Button(onClick = {
-                val added = session.queueConfiguredAction(type, if (targetsState) target else null, day,
-                    if (type == ActionType.ADVERTISE) adMode else null,
-                    if (type == ActionType.ADVERTISE) spend.toInt().toDouble() else null,
-                    if (type == ActionType.ISSUE_PIVOT || (type == ActionType.ADVERTISE && adMode == AdMode.ISSUE)) issue else null,
-                    if (type == ActionType.ISSUE_PIVOT) position.toDouble() else null)
-                notice = if (added) null else "Check your day, action slots, and available cash."
-            }, enabled = session.slotsLeft() > 0 && dayCount < 3 && (type != ActionType.ADVERTISE || spend * 1_000_000 <= availableCash), modifier = Modifier.fillMaxWidth()) { Text("Add to day $day") }
-            if (dayCount >= 3) Text("Day $day is full. Choose another day.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            else if (session.slotsLeft() == 0) Text("Weekly action pool is spent.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            notice?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
-            Row {
-                Text("${game.queuedActions.size} planned", style = MaterialTheme.typography.titleSmall)
-                Spacer(Modifier.weight(1f))
-                TextButton(onClick = { session.clearQueue() }, enabled = game.queuedActions.isNotEmpty()) { Text("Clear all") }
-            }
-            val rows = plannedActionRows(game)
-            (1..7).forEach { n ->
-                val items = rows.filter { it.day == n }
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("DAY $n", modifier = Modifier.width(52.dp), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelSmall)
-                    if (items.isEmpty()) Text("Open", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    else Column {
-                        items.forEach { item ->
-                            TextButton(onClick = { session.removeAction(item.index) }) { Text("${item.label}  ×") }
+        }
+        if (type == ActionType.ISSUE_PIVOT) {
+            KeyValue("Position, left -1 to right +1", "%.2f".format(position))
+            Slider(value = position, onValueChange = { position = it }, valueRange = -1f..1f, modifier = Modifier.semantics { contentDescription = "Issue position: ${game.issues[issue.serial]?.name ?: issue.serial}" },
+                colors = SliderDefaults.colors(thumbColor = Mov.Accent, activeTrackColor = Mov.Accent, inactiveTrackColor = Mov.Sunken))
+        }
+        Eyebrow("Day · $dayCount of 3 used")
+        ChipRow { (1..7).forEach { n -> MovChip("$n", day == n, { day = n }) } }
+        SecondaryButton("Add to day $day", {
+            val added = session.queueConfiguredAction(type, if (targetsState) target else null, day,
+                if (type == ActionType.ADVERTISE) adMode else null,
+                if (type == ActionType.ADVERTISE) spend.toInt().toDouble() else null,
+                if (type == ActionType.ISSUE_PIVOT || (type == ActionType.ADVERTISE && adMode == AdMode.ISSUE)) issue else null,
+                if (type == ActionType.ISSUE_PIVOT) position.toDouble() else null)
+            notice = if (added) null else "Check your day, action slots, and available cash."
+        }, Modifier.fillMaxWidth(), enabled = session.slotsLeft() > 0 && dayCount < 3 && (type != ActionType.ADVERTISE || spend * 1_000_000 <= availableCash))
+        if (dayCount >= 3) Text("Day $day is full. Choose another day.", style = MaterialTheme.typography.bodySmall, color = Mov.Warning)
+        else if (session.slotsLeft() == 0) Text("Weekly action pool is spent.", style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
+        notice?.let { Text(it, color = Mov.Negative, style = MaterialTheme.typography.bodySmall) }
+        Hairline()
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("${game.queuedActions.size} planned", Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, color = Mov.Text1)
+            GhostButton("Clear all", { session.clearQueue() }, enabled = game.queuedActions.isNotEmpty())
+        }
+        val rows = plannedActionRows(game)
+        (1..7).forEach { n ->
+            val items = rows.filter { it.day == n }
+            Row(Modifier.fillMaxWidth().heightIn(min = 32.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("DAY $n", modifier = Modifier.width(52.dp), color = if (items.isEmpty()) Mov.Text4 else Mov.Warning, style = MaterialTheme.typography.labelSmall)
+                if (items.isEmpty()) Text("Open", style = MaterialTheme.typography.bodySmall, color = Mov.Text4)
+                else Column(Modifier.weight(1f)) {
+                    items.forEach { item ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(item.label, Modifier.weight(1f), color = Mov.Text1, style = MaterialTheme.typography.bodyMedium)
+                            IconButton(onClick = { session.removeAction(item.index) }) {
+                                Icon(Icons.Filled.Close, contentDescription = "Remove ${item.label} from day $n", tint = Mov.Text3)
+                            }
                         }
                     }
                 }
@@ -181,12 +159,10 @@ fun ActionPlanner(session: GameSession, game: GameState, selectedId: String?) {
 @Composable
 internal fun PlanBonusHints(active: List<PlanBonus>) {
     var expanded by remember { mutableStateOf(false) }
-    active.forEach { bonus ->
-        Text("${bonus.name} +${bonus.percent}%", color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.bodySmall)
-    }
-    TextButton(onClick = { expanded = !expanded }) { Text(if (expanded) "Hide plan bonuses" else "How to combine moves") }
-    if (expanded) PLAN_BONUSES.forEach { bonus ->
-        Text("${bonus.recipe} · +${bonus.percent}%\n${bonus.blurb}", style = MaterialTheme.typography.bodySmall)
-    }
+    if (active.isNotEmpty()) ChipRow { active.forEach { bonus -> Tag("${bonus.name} +${bonus.percent}%", TagKind.Positive, Modifier.padding(bottom = 4.dp)) } }
+    GhostButton(if (expanded) "Hide plan bonuses" else "How to combine moves", { expanded = !expanded }, color = Mov.Text2)
+    if (expanded) Inset { PLAN_BONUSES.forEach { bonus ->
+        Text("${bonus.recipe} · +${bonus.percent}%", style = MaterialTheme.typography.labelLarge, color = Mov.Text1)
+        Text(bonus.blurb, style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
+    } }
 }

@@ -19,6 +19,19 @@ export interface MpResources {
   maxActions: number;
 }
 
+/**
+ * The generic events still eligible for this week's random draw. A general
+ * event fires at most once a campaign, so the same headline never runs twice.
+ * Decision events (those with choices, such as a debate invitation) recur by
+ * design. An exhausted pool means no random event, never a repeat.
+ */
+export function unfiredGenericEvents<E extends { id: string; choices?: readonly unknown[] }>(
+  events: readonly E[],
+  fired: ReadonlySet<string>,
+): E[] {
+  return events.filter((e) => (e.choices?.length ?? 0) > 0 || !fired.has(e.id));
+}
+
 /** Group this turn's causes into a week-in-review list, headed by a projection line. */
 export function buildCauseRecap(
   causes: CauseEntry[],

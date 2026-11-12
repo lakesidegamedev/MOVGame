@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useUkStore } from "@store/ukStore";
-import type { UkAction, UkActionType, UkAdMode } from "@engine/ukGame";
+import { ukGameIssues, type UkAction, type UkActionType, type UkAdMode } from "@engine/ukGame";
 import type { PartyId } from "@engine/system";
-import { UK_ISSUES, UK_ISSUES_BY_ID, type UkIssueId } from "@content/uk/issues";
 import { partyShort } from "./parties";
 import { PlanBonusStrip } from "../PlanBonusStrip";
 import { mpActionCost, mpPlannedCost } from "@engine/mpBudget";
@@ -47,7 +46,7 @@ const OPTIONAL_REGION: UkActionType[] = ["broadcast", "oppo_research"];
 const DAYS = [1, 2, 3, 4, 5, 6, 7];
 const MAX_PER_DAY = 3;
 
-function shortDesc(a: UkAction, regionAbbr: (id?: string) => string): string {
+function shortDesc(a: UkAction, regionAbbr: (id?: string) => string, issueName: (id: string) => string): string {
   const where = a.regionId ? ` ${regionAbbr(a.regionId)}` : "";
   switch (a.type) {
     case "broadcast": return `${a.mode === "contrast" ? "Attack" : a.mode === "issue" ? "Issue" : "Air"} ${a.regionId ? regionAbbr(a.regionId) : "natl"}`;
@@ -59,7 +58,7 @@ function shortDesc(a: UkAction, regionAbbr: (id?: string) => string): string {
     case "oppo_research": return `Oppo${a.regionId ? where : ""}`;
     case "debate_prep": return "Debate prep";
     case "policy_prep": return "Manifesto";
-    case "issue_pivot": return `Pitch ${a.issueId ?? ""}`;
+    case "issue_pivot": return `Pitch ${a.issueId ? issueName(a.issueId) : ""}`;
     case "fundraise": return "Fundraise";
     default: return a.type;
   }
@@ -81,7 +80,9 @@ export function UkActionPanel() {
   const [type, setType] = useState<UkActionType>("broadcast");
   const [regionId, setRegionId] = useState<string>(regions[0]?.id ?? "");
   const [mode, setMode] = useState<UkAdMode>("positive");
-  const [issueId, setIssueId] = useState<UkIssueId>(UK_ISSUES[0].id);
+  // This election's issues, under the names voters used that year.
+  const issues = ukGameIssues(game);
+  const [issueId, setIssueId] = useState<string>(issues[0]?.id ?? "");
   const [spendM, setSpendM] = useState<number>(2);
 
   // Selecting a region on the map targets it here.
@@ -127,16 +128,16 @@ export function UkActionPanel() {
   const TypeIcon = ICON[type];
 
   return (
-    <div className="card">
-      <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-        <h3 style={{ margin: 0 }}>Week Plan</h3>
-        <span className="muted small">{used}/{pool} actions · max {MAX_PER_DAY}/day</span>
+    <div className="card desk-plan">
+      <div className="card-head">
+        <h3>Week Plan</h3>
+        <span className="card-sub num">{used}/{pool} actions · max {MAX_PER_DAY}/day</span>
       </div>
-      <div className="row" style={{ gap: 16, margin: "6px 0 10px" }}>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Funds</span><span className="v">£{res.funds.toFixed(1)}M</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Planned / available</span><span className="v">£{committedFunds.toFixed(1)}M / £{availableFunds.toFixed(1)}M</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Actions</span><span className="v">{res.actions}/{res.maxActions}</span></div>
-        <div className="stat" style={{ alignItems: "flex-start" }}><span className="l">Momentum</span><span className="v">{res.momentum >= 0 ? "+" : ""}{res.momentum.toFixed(0)}</span></div>
+      <div className="plan-budget">
+        <div className="metric"><span className="l">Funds</span><span className="v">£{res.funds.toFixed(1)}M</span></div>
+        <div className="metric"><span className="l">Planned / available</span><span className="v">£{committedFunds.toFixed(1)}M / £{availableFunds.toFixed(1)}M</span></div>
+        <div className="metric"><span className="l">Actions</span><span className="v">{res.actions}/{res.maxActions}</span></div>
+        <div className="metric"><span className="l">Momentum</span><span className="v">{res.momentum >= 0 ? "+" : ""}{res.momentum.toFixed(0)}</span></div>
       </div>
 
       {/* Action builder — configure one action, then drop it on a day below. */}
@@ -179,8 +180,8 @@ export function UkActionPanel() {
             {mode === "issue" && (
               <div className="field">
                 <label>Issue</label>
-                <select value={issueId} onChange={(e) => setIssueId(e.target.value as UkIssueId)}>
-                  {UK_ISSUES.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+                <select value={issueId} onChange={(e) => setIssueId(e.target.value)}>
+                  {issues.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
                 </select>
               </div>
             )}
@@ -194,10 +195,10 @@ export function UkActionPanel() {
         {type === "issue_pivot" && (
           <div className="field">
             <label>Reframe campaign onto</label>
-            <select value={issueId} onChange={(e) => setIssueId(e.target.value as UkIssueId)}>
-              {UK_ISSUES.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+            <select value={issueId} onChange={(e) => setIssueId(e.target.value)}>
+              {issues.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
-            <p className="muted small" style={{ margin: "4px 0 0" }}>{UK_ISSUES_BY_ID[issueId].blurb}</p>
+            <p className="muted small" style={{ margin: "4px 0 0" }}>{issues.find((i) => i.id === issueId)?.blurb}</p>
           </div>
         )}
       </div>
@@ -231,8 +232,8 @@ export function UkActionPanel() {
                   return (
                     <span className="plan-chip" key={i} title={a.type}>
                       <Ico size={12} />
-                      {shortDesc(a, regionAbbr)}
-                      <span className="x" onClick={() => removeAction(i)}><X size={11} /></span>
+                      {shortDesc(a, regionAbbr, (id) => issues.find((i) => i.id === id)?.name ?? id)}
+                      <button type="button" className="x" onClick={() => removeAction(i)} aria-label="Remove action"><X size={11} /></button>
                     </span>
                   );
                 })}
@@ -243,7 +244,7 @@ export function UkActionPanel() {
       </div>
 
       <div className="row" style={{ gap: 8, marginTop: 6 }}>
-        <button className="primary" style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+        <button className="block plan-add"
           disabled={used >= pool || (regionRequired && !regionId) || mpActionCost(buildAction()) > availableFunds}
           onClick={() => { for (const d of DAYS) { if (dayItems(d).length < MAX_PER_DAY) { addToDay(d); break; } } }}>
           <TypeIcon size={14} /> Add to next open day

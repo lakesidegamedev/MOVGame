@@ -1,36 +1,56 @@
 package com.lakesidegames.electioneer.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.lakesidegames.electioneer.engine.*
 import java.util.Locale
 
-private fun partyColor(hex: String): Color = runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(Color.Gray)
-private fun number(value: Double): String = String.format(Locale.getDefault(), "%.1f", value)
-private fun actionName(value: String): String = value.replace('_', ' ').replaceFirstChar { it.uppercase() }
+internal fun number(value: Double): String = String.format(Locale.getDefault(), "%.1f", value)
+internal fun percent(share: Double): String = String.format(Locale.getDefault(), "%.1f%%", share * 100)
+internal fun signed(value: Double): String = String.format(Locale.getDefault(), "%+.1f", value)
 
+private val ACTION_NAMES = mapOf(
+    "broadcast" to "Broadcast", "rally" to "Rally", "surrogate" to "Surrogate", "fundraise" to "Fundraise",
+    "ground_game" to "Ground game", "gotv" to "Get out the vote", "canvass" to "Canvass",
+    "oppo_research" to "Oppo research", "debate_prep" to "Debate prep", "policy_prep" to "Policy prep",
+    "issue_pivot" to "Issue pivot",
+)
+internal fun actionName(value: String): String = ACTION_NAMES[value] ?: value.replace('_', ' ').replaceFirstChar { it.uppercase() }
+
+/**
+ * Country outline map. Every region is tappable; the selected one gets the
+ * warning ring. The region list under it offers the same choices to TalkBack.
+ */
 @Composable
-private fun NativeCountryMap(map: NativeMap, regions: List<NativeRegion>, selected: String, onSelect: (String) -> Unit) {
+internal fun NativeCountryMap(map: NativeMap, fills: Map<String, Color>, selected: String?, onSelect: ((String) -> Unit)?, description: String, maxHeight: androidx.compose.ui.unit.Dp = 340.dp) {
     val paths = remember(map) { map.shapes.associate { shape ->
         shape.id to Path().apply {
             shape.polygons.forEach { polygon ->
@@ -42,6 +62,17 @@ private fun NativeCountryMap(map: NativeMap, regions: List<NativeRegion>, select
             }
         }
     } }
+    // Land with no vote in this election: one neutral path, never tappable.
+    val inert = remember(map) { Path().apply {
+        map.inert.forEach { polygon ->
+            polygon.points.firstOrNull()?.let { first ->
+                moveTo(first.x.toFloat(), first.y.toFloat())
+                polygon.points.drop(1).forEach { lineTo(it.x.toFloat(), it.y.toFloat()) }
+                close()
+            }
+        }
+    } }
+    val insets = remember(map) { map.shapes.filter { it.inset }.map { it.id } }
     val hits = remember(map) { map.shapes.associate { shape ->
         val path = android.graphics.Path().apply {
             shape.polygons.forEach { polygon ->
@@ -54,97 +85,82 @@ private fun NativeCountryMap(map: NativeMap, regions: List<NativeRegion>, select
         }
         shape.id to android.graphics.Region().apply { setPath(path, android.graphics.Region(0, 0, map.width.toInt() + 1, map.height.toInt() + 1)) }
     } }
-    val byId = regions.associateBy { it.id }
-    Canvas(Modifier.fillMaxWidth().height(300.dp).pointerInput(map, onSelect) {
-        detectTapGestures { point ->
-            val factor = minOf(size.width / map.width, size.height / map.height)
-            val x = (point.x - (size.width - map.width * factor) / 2) / factor
-            val y = (point.y - (size.height - map.height * factor) / 2) / factor
-            hits.entries.firstOrNull { it.value.contains(x.toInt(), y.toInt()) }?.let { onSelect(it.key) }
-        }
-    }) {
-        val factor = minOf(size.width / map.width, size.height / map.height).toFloat()
-        translate((size.width - map.width.toFloat() * factor) / 2, (size.height - map.height.toFloat() * factor) / 2) {
-            scale(factor, factor, pivot = androidx.compose.ui.geometry.Offset.Zero) {
-                paths.forEach { (id, path) ->
-                    drawPath(path, partyColor(byId[id]?.color ?: "#94a3b8"))
-                    drawPath(path, if (id == selected) Color.White else Color(0xFF0A0F14), style = Stroke(if (id == selected) 3f / factor else 1f / factor))
-                }
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val height = (maxWidth * (map.height / map.width).toFloat()).coerceAtMost(maxHeight)
+        var tap = Modifier.fillMaxWidth().height(height).semantics { contentDescription = description }
+        if (onSelect != null) tap = tap.pointerInput(map, onSelect) {
+            detectTapGestures { point ->
+                val factor = minOf(size.width / map.width, size.height / map.height)
+                val x = (point.x - (size.width - map.width * factor) / 2) / factor
+                val y = (point.y - (size.height - map.height * factor) / 2) / factor
+                // Small regions: when the tap misses every shape, take the nearest within a few pixels.
+                val hit = hits.entries.firstOrNull { it.value.contains(x.toInt(), y.toInt()) }
+                    ?: (-6..6 step 3).flatMap { dx -> (-6..6 step 3).map { dy -> dx to dy } }.firstNotNullOfOrNull { (dx, dy) ->
+                        hits.entries.firstOrNull { it.value.contains((x + dx / factor).toInt(), (y + dy / factor).toInt()) } }
+                hit?.let { onSelect(it.key) }
             }
         }
-    }
-}
-
-@Composable
-internal fun ChoicePicker(label: String, selected: String, choices: List<Pair<String, String>>, onSelect: (String) -> Unit) {
-    var open by remember { mutableStateOf(false) }
-    Column {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Box {
-            OutlinedButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth()) {
-                Text(choices.firstOrNull { it.first == selected }?.second ?: "Choose")
-            }
-            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-                choices.forEach { (id, title) -> DropdownMenuItem(text = { Text(title) }, onClick = { onSelect(id); open = false }) }
-            }
-        }
-    }
-}
-
-@Composable
-fun CampaignLibraryScreen(session: GameSession) {
-    val countries = remember { MobileCampaign.countries() }
-    val daily = remember { session.dailySetup }
-    var countryId by remember { mutableStateOf(daily?.countryId ?: "US") }
-    val elections = remember(countryId) { MobileCampaign.elections(countryId) }
-    var electionId by remember(countryId) { mutableStateOf(daily?.electionId?.takeIf { id -> elections.any { it.nativeId == id } } ?: elections.first().nativeId) }
-    val election = elections.first { it.nativeId == electionId }
-    val parties = remember(countryId, electionId) {
-        if (countryId == "US") emptyList() else MobileCampaign.parties(countryId, electionId)
-    }
-    var partyId by remember(countryId, electionId) { mutableStateOf(daily?.role?.takeIf { id -> parties.any { it.id == id } } ?: parties.firstOrNull()?.id ?: "") }
-    var difficulty by remember { mutableStateOf("normal") }
-    var seed by remember { mutableStateOf(daily?.seed ?: System.currentTimeMillis().toString()) }
-    LaunchedEffect(Unit) { session.dailySetup = null }
-    LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item {
-            Text("CAMPAIGN LIBRARY", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
-            Text("Choose your election", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(countries) { country -> FilterChip(selected = countryId == country.id,
-                    onClick = { countryId = country.id }, label = { Text("${country.flag} ${country.name}") }) }
-            }
-        }
-        item { ChoicePicker("Election", electionId, elections.map { it.nativeId to it.label }) { electionId = it } }
-        item { Text(election.blurb, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-        if (countryId == "US") {
-            item { Button(onClick = { session.setupScenarioId = electionId; session.go(Screen.SETUP) }, modifier = Modifier.fillMaxWidth()) { Text("Choose your presidential ticket") } }
-        } else {
-            item { ChoicePicker("Your party", partyId, parties.map { it.id to "${it.name} · ${it.leader}" }) { partyId = it } }
-            item {
-                val party = parties.first { it.id == partyId }
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(party.leader, style = MaterialTheme.typography.titleLarge)
-                        Text("Charisma ${party.charisma.toInt()} · Energy ${party.energy.toInt()}")
-                        Text("Competence ${party.competence.toInt()} · Machine ${party.machine.toInt()}")
+        Canvas(tap) {
+            val factor = minOf(size.width / map.width, size.height / map.height).toFloat()
+            translate((size.width - map.width.toFloat() * factor) / 2, (size.height - map.height.toFloat() * factor) / 2) {
+                scale(factor, factor, pivot = androidx.compose.ui.geometry.Offset.Zero) {
+                    if (map.inert.isNotEmpty()) {
+                        drawPath(inert, Mov.Surface4)
+                        drawPath(inert, Mov.BorderStrong, style = Stroke(1.dp.toPx() / factor))
                     }
+                    paths.forEach { (id, path) ->
+                        drawPath(path, fills[id] ?: Mov.Unclaimed)
+                        drawPath(path, Mov.Surface0, style = Stroke(1.dp.toPx() / factor))
+                    }
+                    // An inset box stands for voters, not a place: a dashed frame says so.
+                    insets.forEach { id -> paths[id]?.let {
+                        drawPath(it, Mov.Text2, style = Stroke(1.5.dp.toPx() / factor,
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx() / factor, 4.dp.toPx() / factor))))
+                    } }
+                    selected?.let { id -> paths[id]?.let { drawPath(it, Mov.Warning, style = Stroke(2.5.dp.toPx() / factor)) } }
                 }
             }
-            item { ChoicePicker("Difficulty", difficulty, DIFFICULTIES.map { it to actionName(it) }) { difficulty = it } }
-            item { OutlinedTextField(seed, { seed = it.take(64) }, label = { Text("Campaign seed") }, modifier = Modifier.fillMaxWidth(), singleLine = true) }
-            item { Button(onClick = { session.startCampaign(countryId, electionId, partyId, difficulty, seed) }, enabled = seed.isNotBlank(), modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("Launch campaign") } }
         }
     }
 }
 
+/** Labelled dropdown that looks like a form field. */
 @Composable
-private fun StandingRows(rows: List<NativeStanding>, units: String) {
-    rows.forEach { row ->
-        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Box(Modifier.size(14.dp).background(partyColor(row.color), RoundedCornerShape(3.dp)))
-            Text(row.name, Modifier.weight(1f))
-            Text("${row.units} $units · ${number(row.voteShare * 100)}%")
+internal fun ChoicePicker(label: String, selected: String, choices: List<Pair<String, String>>, modifier: Modifier = Modifier, onSelect: (String) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    val current = choices.firstOrNull { it.first == selected }?.second ?: "Choose"
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
+        Eyebrow(label)
+        Box {
+            Row(Modifier.fillMaxWidth().heightIn(min = MovSpace.touch).clip(MovRadius.md).background(Mov.Sunken)
+                .border(1.dp, Mov.Border, MovRadius.md).clickable(onClickLabel = "Change $label") { open = true }
+                .semantics { contentDescription = "$label: $current" }
+                .padding(horizontal = MovSpace.s3), verticalAlignment = Alignment.CenterVertically) {
+                Text(current, Modifier.weight(1f), color = Mov.Text1, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Mov.Text3)
+            }
+            DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = Mov.Surface2) {
+                choices.forEach { (id, title) -> DropdownMenuItem(text = { Text(title, fontWeight = if (id == selected) FontWeight.Bold else FontWeight.Normal) },
+                    onClick = { onSelect(id); open = false }) }
+            }
+        }
+    }
+}
+
+/** Standings table with a seat bar: the same block on the desk, results and analysis. */
+@Composable
+internal fun StandingsTable(rows: List<NativeStanding>, unit: String, total: Int, majority: Int?, player: String?) {
+    SeatBar(rows.map { partyFill(it.color) to it.units }, total, majority,
+        description = rows.joinToString("; ") { "${it.name} ${it.units} $unit" } +
+            (majority?.let { ". $it needed for a majority." } ?: ". The most $unit wins."))
+    Row(Modifier.fillMaxWidth().padding(horizontal = MovSpace.s1_5)) {
+        Text("PARTY", Modifier.weight(1f), color = Mov.Text4, style = MaterialTheme.typography.labelSmall)
+        Text(unit.uppercase(), Modifier.widthIn(min = 40.dp), color = Mov.Text4, style = MaterialTheme.typography.labelSmall, textAlign = androidx.compose.ui.text.style.TextAlign.End)
+        Text("VOTE", Modifier.padding(start = MovSpace.s2).widthIn(min = 52.dp), color = Mov.Text4, style = MaterialTheme.typography.labelSmall, textAlign = androidx.compose.ui.text.style.TextAlign.End)
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        rows.forEach { row ->
+            PartyRow(row.color, row.name, listOf("${row.units}", percent(row.voteShare)), highlight = row.partyId == player, tag = if (row.partyId == player) "You" else null)
         }
     }
 }
@@ -169,6 +185,9 @@ fun WorldCampaignScreen(session: GameSession) {
     var showHistory by remember(game) { mutableStateOf(false) }
     fun requestEndWeek() { if (game.plan().isEmpty()) confirmEmptyWeek = true else if (session.endWorldWeek()) showRecap = game.recap().isNotEmpty() }
     val unit = game.unitName()
+    val flag = remember(game) { NativeCatalog.country(game.countryId())?.flag ?: "" }
+    val player = game.playerParty()
+    val mine = rows.firstOrNull { it.partyId == player }
     var lastShortcut by remember { mutableIntStateOf(session.shortcutSequence) }
     LaunchedEffect(session.shortcutSequence) {
         if (lastShortcut == session.shortcutSequence) return@LaunchedEffect
@@ -183,120 +202,198 @@ fun WorldCampaignScreen(session: GameSession) {
     if (confirmEmptyWeek) AlertDialog(onDismissRequest = { confirmEmptyWeek = false }, title = { Text("End week without moves?") },
         text = { Text("You have no actions queued this week. Unspent slots win nothing. End the week anyway?") },
         confirmButton = { TextButton(onClick = { confirmEmptyWeek = false; if (session.endWorldWeek()) showRecap = game.recap().isNotEmpty() }) { Text("End week") } },
-        dismissButton = { TextButton(onClick = { confirmEmptyWeek = false }) { Text("Keep planning") } })
+        dismissButton = { TextButton(onClick = { confirmEmptyWeek = false }) { Text("Keep planning") } },
+        containerColor = Mov.Surface2)
     val regional = type in listOf("rally", "surrogate", "ground_game", "gotv", "canvass")
-    LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item {
-            NativeCampaignCoach(session, game.countryId(), game.goalText(), game.turn(), regionId.takeIf { it.isNotEmpty() }, game.plan().size)
-        Text(game.label(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            Text(if (game.isOver()) "ELECTION RESULT" else "WEEK ${game.turn() + 1} OF ${game.totalTurns()}", color = MaterialTheme.colorScheme.primary)
-            Text(game.goalText(), color = MaterialTheme.colorScheme.onSurfaceVariant)
+    val selectedRegion = regions.firstOrNull { it.id == regionId }
+    val list = androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(Unit) {
+        if (session.captureFocus == "map") {
+            session.captureFocus = null
+            list.scrollToItem(3 + (if (game.hasPendingEvent()) 1 else 0) + (if (notice != null) 1 else 0))
         }
+    }
+    Column(Modifier.fillMaxSize()) {
+    LazyColumn(Modifier.weight(1f), state = list, contentPadding = PaddingValues(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+        item { NativeCampaignCoach(session, game.countryId(), game.goalText(), game.turn(), regionId.takeIf { it.isNotEmpty() }, game.plan().size) }
         item {
-            Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp)) {
-                Text(if (game.isOver()) game.outcome() else "Projected standings", style = MaterialTheme.typography.titleMedium)
-                StandingRows(rows, unit)
-                Text("${game.majority()} of ${game.totalUnits()} $unit to win outright", style = MaterialTheme.typography.bodySmall)
-            } }
-        }
-        if (game.hasPendingEvent()) {
-            item {
-                Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(game.eventTitle(), style = MaterialTheme.typography.titleMedium)
-                    Text(game.eventPrompt())
-                    game.eventChoices().forEach { choice -> Button(onClick = {
-                        if (game.answerEvent(choice.id)) { notice = choice.resultText; session.campaignChanged() }
-                    }, modifier = Modifier.fillMaxWidth()) { Text(choice.text) } }
-                } }
+            Column(verticalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
+                Eyebrow(if (game.isOver()) "Election result" else "Week ${game.turn() + 1} of ${game.totalTurns()}", color = Mov.Warning)
+                Text("$flag ${game.label()}".trim(), style = MaterialTheme.typography.headlineSmall, color = Mov.Text1)
+                StatRow {
+                    Metric(if (game.isPlurality()) "${mine?.units ?: 0}" else "${mine?.units ?: 0}/${game.majority()}", "Your $unit", color = partyInk(mine?.color))
+                    Metric("${game.currency()}${number(game.funds())}M", "Cash")
+                    if (!game.isOver()) Metric("${game.slotsLeft()}", "Moves left")
+                    Metric(percent(mine?.voteShare ?: 0.0), "Vote share")
+                }
             }
         }
-        if (notice != null) item { Text(notice!!, color = MaterialTheme.colorScheme.primary) }
-        item { Text("REGIONAL ${if (game.isOver()) "RESULTS" else "PROJECTIONS"}", style = MaterialTheme.typography.labelLarge) }
-        item { NativeCountryMap(game.map(), regions, regionId) { regionId = it } }
-        items(regions.chunked(2)) { pair ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                pair.forEach { region ->
-                    Card(Modifier.weight(1f).clickable { regionId = if (regionId == region.id) "" else region.id },
-                        colors = CardDefaults.cardColors(containerColor = if (regionId == region.id) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant)) {
-                        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(region.name, fontWeight = FontWeight.Bold)
-                            Text("${region.winner} leads", color = partyColor(region.color))
-                            Text("${region.totalUnits} $unit in region", style = MaterialTheme.typography.bodySmall)
-                            Text("You: ${region.playerUnits} $unit · ${number(region.playerShare * 100)}%", style = MaterialTheme.typography.bodySmall)
+        if (game.hasPendingEvent()) item {
+            Callout("Decision required", "${game.eventTitle()}\n${game.eventPrompt()}") {
+                game.eventChoices().forEach { choice -> SecondaryButton(choice.text, {
+                    if (game.answerEvent(choice.id)) { notice = choice.resultText; session.campaignChanged() }
+                }, Modifier.fillMaxWidth()) }
+            }
+        }
+        notice?.let { item { Notice(it) } }
+        item {
+            MovCard {
+                CardHead(if (game.isOver()) "Final standings" else "Projected standings") { Tag(if (game.isPlurality()) "Most $unit wins" else "${game.majority()} to win", TagKind.Outline) }
+                if (game.isOver()) Text(game.outcome(), color = Mov.Text1, style = MaterialTheme.typography.titleSmall)
+                StandingsTable(rows, unit, game.totalUnits(), game.majority().takeUnless { game.isPlurality() }, player)
+                Text(game.goalText(), color = Mov.Text3, style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        item {
+            MovCard {
+                CardHead(if (game.isOver()) "Regional results" else "Regional projections") {
+                    if (selectedRegion != null) IconButton(onClick = { regionId = "" }) { Icon(Icons.Filled.Close, contentDescription = "Clear region selection", tint = Mov.Text3) }
+                }
+                NativeCountryMap(game.map(), regions.associate { it.id to partyFill(it.color) }, regionId.takeIf { it.isNotEmpty() }, { id -> regionId = if (regionId == id) "" else id },
+                    "Map of ${regions.size} regions, colored by the leading party. Choose a region from the list below the map.")
+                val leaders = regions.groupBy { it.winner }.map { (name, list) -> Triple(name, list.first().color, list.size) }.sortedByDescending { it.third }
+                ChipRow { leaders.forEach { (name, color, count) ->
+                    Row(Modifier.padding(end = MovSpace.s2, bottom = MovSpace.s1), verticalAlignment = Alignment.CenterVertically) {
+                        PartySwatch(partyFill(color), size = 10.dp)
+                        Text(" $name $count", color = Mov.Text3, style = MaterialTheme.typography.labelMedium)
+                    }
+                } }
+                if (selectedRegion != null) Inset {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(selectedRegion.name, Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = Mov.Text1)
+                        Text("${selectedRegion.totalUnits} $unit", color = Mov.Text3, style = MaterialTheme.typography.bodyMedium.num)
+                    }
+                    game.regionStandings(regionId).filter { it.units > 0 || it.voteShare >= 0.01 }.forEach { row ->
+                        PartyRow(row.color, row.name, listOf("${row.units}", percent(row.voteShare)), highlight = row.partyId == player)
+                    }
+                    if (!game.isOver()) Text("Regional moves in your plan target this region.", color = Mov.Text3, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+        item {
+            MovCard(tight = true) {
+                CardHead("Regions") { Text("Leader · $unit · you", color = Mov.Text4, style = MaterialTheme.typography.labelMedium) }
+                regions.forEach { region ->
+                    val on = region.id == regionId
+                    Row(Modifier.fillMaxWidth().heightIn(min = MovSpace.touch).clip(MovRadius.md)
+                        .background(if (on) Mov.Surface3 else Color.Transparent)
+                        .then(if (on) Modifier.border(1.5.dp, Mov.Warning, MovRadius.md) else Modifier)
+                        .clickable(onClickLabel = if (on) "Clear selection" else "Select region") { regionId = if (on) "" else region.id }
+                        .semantics { selected = on }
+                        .padding(horizontal = MovSpace.s2), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
+                        PartySwatch(partyFill(region.color))
+                        Column(Modifier.weight(1f)) {
+                            Text(region.name, color = Mov.Text1, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text("${region.winner} leads", color = partyInk(region.color), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                        }
+                        Text("${region.totalUnits}", Modifier.widthIn(min = 32.dp), color = Mov.Text2, style = MaterialTheme.typography.bodyMedium.num, textAlign = androidx.compose.ui.text.style.TextAlign.End)
+                        Column(horizontalAlignment = Alignment.End, modifier = Modifier.widthIn(min = 64.dp)) {
+                            Text("${region.playerUnits}", color = Mov.Text1, style = MaterialTheme.typography.bodyMedium.num, fontWeight = FontWeight.Bold)
+                            Text(percent(region.playerShare), color = Mov.Text3, style = MaterialTheme.typography.labelMedium.num)
                         }
                     }
                 }
-                if (pair.size == 1) Spacer(Modifier.weight(1f))
             }
         }
-        if (regionId.isNotEmpty()) item { Card { Column(Modifier.padding(16.dp)) {
-            Text(regions.first { it.id == regionId }.name, style = MaterialTheme.typography.titleMedium)
-            StandingRows(game.regionStandings(regionId), unit)
-        } } }
-        if (session.canViewReplay()) item { TextButton(onClick = { session.go(Screen.REPLAY) }) { Text("Campaign replay and report") } }
-        item { TextButton(onClick = { session.go(Screen.ANALYSIS) }) { Text("Campaign analysis") } }
-        if (!game.isOver()) item { TextButton(onClick = session::undo, enabled = session.canUndo()) { Text("Undo week") } }
         if (!game.isOver()) {
-            item { Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Plan your week", style = MaterialTheme.typography.titleLarge)
-                Text("${game.currency()}${number(game.funds())}M cash · ${game.slotsLeft()} moves left")
-                Text("Planned ${game.currency()}${number(game.plannedSpend())}M · Available ${game.currency()}${number(game.availableFunds())}M")
-                Text("Plan estimate: ${game.previewPlayerUnits()} $unit after your queued actions. Rival moves and events can change the result.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            item { MovCard {
+                CardHead("Week plan") { Tag("${game.slotsLeft()} moves left", if (game.slotsLeft() > 0) TagKind.Accent else TagKind.Outline) }
+                KeyValue("Cash", "${game.currency()}${number(game.funds())}M")
+                KeyValue("Planned spend", "${game.currency()}${number(game.plannedSpend())}M")
+                KeyValue("Available", "${game.currency()}${number(game.availableFunds())}M")
+                Text("Plan estimate: ${game.previewPlayerUnits()} $unit after your queued actions. Rival moves and events can change the result.", style = MaterialTheme.typography.bodySmall, color = Mov.Info)
                 PlanBonusHints(game.planBonuses())
-                ChoicePicker("Action", type, game.actionTypes().map { it to actionName(it) }) { type = it }
-                ChoicePicker("Target", regionId, listOf("" to "National") + regions.map { it.id to it.name }) { regionId = it }
-                if (regional && regionId.isEmpty()) Text("Choose a region for this action.", color = MaterialTheme.colorScheme.primary)
-                ChoicePicker("Day", day.toString(), (1..7).map { it.toString() to "Day $it" }) { day = it.toInt() }
+                Eyebrow("Action")
+                ChipRow { game.actionTypes().forEach { id -> MovChip(actionName(id), type == id, { type = id; notice = null }) } }
+                ChoicePicker("Target", regionId, listOf("" to "National") + regions.map { it.id to "${it.name} · ${it.totalUnits} $unit" }) { regionId = it }
+                if (regional && regionId.isEmpty()) Text("Choose a region for this action.", color = Mov.Warning, style = MaterialTheme.typography.bodySmall)
+                Eyebrow("Day")
+                ChipRow { (1..7).forEach { n -> MovChip("$n", day == n, { day = n }) } }
                 if (type == "broadcast") {
-                    ChoicePicker("Broadcast mode", mode, listOf("positive", "contrast", "issue").map { it to actionName(it) }) { mode = it }
-                    Text("Spend ${game.currency()}${number(spend.toDouble())}M")
-                    Slider(spend, { spend = it }, valueRange = 0.5f..10f, modifier = Modifier.semantics { contentDescription = "Campaign spend in millions" })
-                    Text(if (regionId.isEmpty()) "National reaches every region where your party stands." else "Regional spending concentrates on this target.", style = MaterialTheme.typography.bodySmall)
+                    Eyebrow("Broadcast mode")
+                    Segmented(listOf("positive", "contrast", "issue").map { it to actionName(it) }, mode, { mode = it }, label = "Broadcast mode")
+                    KeyValue("Spend", "${game.currency()}${number(spend.toDouble())}M")
+                    Slider(spend, { spend = it }, valueRange = 0.5f..10f, modifier = Modifier.semantics { contentDescription = "Campaign spend in millions" },
+                        colors = SliderDefaults.colors(thumbColor = Mov.Accent, activeTrackColor = Mov.Accent, inactiveTrackColor = Mov.Sunken))
+                    Text(if (regionId.isEmpty()) "National reaches every region where your party stands." else "Regional spending concentrates on this target.", style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
                 }
                 if (type == "issue_pivot" || (type == "broadcast" && mode == "issue")) {
                     ChoicePicker("Issue", issueId, game.issues().map { it.id to "${it.name} · ${number(it.salience * 100)}% salience" }) { issueId = it }
-                    Text(game.issues().first { it.id == issueId }.blurb, style = MaterialTheme.typography.bodySmall)
+                    Text(game.issues().first { it.id == issueId }.blurb, style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
                 }
                 if (type == "oppo_research" || (type == "broadcast" && mode == "contrast"))
                     ChoicePicker("Rival", rival, listOf("" to "Leading rival") + game.rivals().map { it.partyId to it.name }) { rival = it }
-                Button(onClick = {
+                SecondaryButton("Add ${actionName(type)} to day $day", {
                     val added = game.queue(type, regionId.ifEmpty { null }, day, if (type == "broadcast") mode else null,
                         if (type == "broadcast") spend.toDouble() else null,
                         if (type == "issue_pivot" || (type == "broadcast" && mode == "issue")) issueId else null,
                         if (type == "oppo_research" || (type == "broadcast" && mode == "contrast")) rival.ifEmpty { null } else null)
                     if (added) { notice = null; session.campaignChanged() } else notice = "Check your target, cash, remaining moves, and the three-move daily limit."
-                }, enabled = game.slotsLeft() > 0 && !game.hasPendingEvent() && (!regional || regionId.isNotEmpty()), modifier = Modifier.fillMaxWidth()) { Text("Add to plan") }
-            } } }
-            items(game.plan()) { action ->
-                Row(Modifier.fillMaxWidth()) {
-                    Column(Modifier.weight(1f)) { Text("Day ${action.day} · ${action.title}"); Text("${action.detail} · ${game.currency()}${number(action.cost)}M", style = MaterialTheme.typography.bodySmall) }
-                    TextButton(onClick = { game.removeAction(action.index); session.campaignChanged() }) { Text("Remove") }
+                }, Modifier.fillMaxWidth(), enabled = game.slotsLeft() > 0 && !game.hasPendingEvent() && (!regional || regionId.isNotEmpty()))
+                if (game.plan().isNotEmpty()) {
+                    Hairline()
+                    Eyebrow("${game.plan().size} planned")
+                    game.plan().forEach { action ->
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text("DAY ${action.day}", Modifier.width(48.dp), color = Mov.Warning, style = MaterialTheme.typography.labelSmall)
+                            Column(Modifier.weight(1f)) {
+                                Text(action.title, color = Mov.Text1, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                                Text("${action.detail} · ${game.currency()}${number(action.cost)}M", style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
+                            }
+                            IconButton(onClick = { game.removeAction(action.index); session.campaignChanged() }) {
+                                Icon(Icons.Filled.Close, contentDescription = "Remove ${action.title} from day ${action.day}", tint = Mov.Text3)
+                            }
+                        }
+                    }
                 }
-            }
-            item { Button(onClick = { requestEndWeek() },
-                enabled = !game.hasPendingEvent(), modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("End week") } }
+            } }
         } else {
             item { ScorePosting(session) }
-            if (game.isCustom()) item { Text("CUSTOM CAMPAIGN · CASUAL ONLY", color = MaterialTheme.colorScheme.primary) }
-            item { game.resultSummary()?.let { summary -> Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("CAMPAIGN SCORE ${summary.score} / 1000", style = MaterialTheme.typography.titleMedium)
-                Text("${summary.difficulty.replaceFirstChar { it.uppercase() }} difficulty · $unit above majority: ${summary.unitMargin}")
-                Text("Vote margin vs. leading rival: ${"%+.1f".format(summary.popularMargin)} points")
-            } } } }
-            item { TextButton(onClick = { showHistory = !showHistory }) { Text(if (showHistory) "Hide historical comparison" else "Compare with history") } }
-            if (showHistory) items(game.historicalRegions()) { region -> Column(Modifier.fillMaxWidth()) {
-                Text(region.name, fontWeight = FontWeight.Bold)
-                Text("${region.units} $unit now · ${region.historicalUnits} historically", style = MaterialTheme.typography.bodySmall)
-                Text("Vote share swing ${"%+.1f".format(region.shareSwing)} points", style = MaterialTheme.typography.bodySmall)
+            if (game.isCustom()) item { Tag("Custom campaign · casual only", TagKind.Warning) }
+            item { game.resultSummary()?.let { summary -> MovCard {
+                CardHead("Campaign score") { Text("${summary.score} / 1000", style = MaterialTheme.typography.titleLarge.num, color = Mov.Text1, fontWeight = FontWeight.Bold) }
+                KeyValue("Difficulty", summary.difficulty.replaceFirstChar { it.uppercase() })
+                KeyValue(game.marginLabel().replaceFirstChar { it.uppercase() }, "${summary.unitMargin}")
+                KeyValue("Vote margin vs. leading rival", "${signed(summary.popularMargin)} pts")
+            } } }
+            item { MovCard {
+                CardHead("What decided it")
+                game.resultCauses().forEach { Text(it, color = Mov.Text2, style = MaterialTheme.typography.bodyMedium) }
             } }
-            item { Text("WHAT DECIDED IT", style = MaterialTheme.typography.labelLarge) }
-            items(game.resultCauses()) { Text(it) }
-            item { Button(onClick = { session.go(Screen.LIBRARY) }, modifier = Modifier.fillMaxWidth()) { Text("Choose another campaign") } }
+            item { MovCard {
+                CardHead("Compared with history") { GhostButton(if (showHistory) "Hide" else "Show", { showHistory = !showHistory }) }
+                if (showHistory) game.historicalRegions().forEach { region ->
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(region.name, color = Mov.Text1, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                            Text("${region.units} $unit now · ${region.historicalUnits} historically", color = Mov.Text3, style = MaterialTheme.typography.bodySmall.num)
+                        }
+                        Text(signed(region.shareSwing), color = if (region.shareSwing >= 0) Mov.Positive else Mov.Negative, style = MaterialTheme.typography.bodyMedium.num, fontWeight = FontWeight.Bold)
+                    }
+                }
+            } }
+            item { SecondaryButton("Choose another campaign", { session.go(Screen.LIBRARY) }, Modifier.fillMaxWidth()) }
         }
-        item { Text("CAMPAIGN NEWS", style = MaterialTheme.typography.labelLarge) }
-        items(game.news()) { Text("Week ${it.turn + 1} · ${it.text}", style = MaterialTheme.typography.bodySmall) }
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
+                GhostButton("Analysis", { session.go(Screen.ANALYSIS) })
+                if (session.canViewReplay()) GhostButton("Replay and report", { session.go(Screen.REPLAY) })
+                if (!game.isOver()) GhostButton("Undo week", session::undo, enabled = session.canUndo())
+            }
+        }
+        if (game.news().isNotEmpty()) item { MovCard(tight = true) {
+            CardHead("Campaign news")
+            game.news().forEach { Row {
+                Text("WK ${it.turn + 1}", Modifier.width(44.dp), color = Mov.Text4, style = MaterialTheme.typography.labelSmall)
+                Text(it.text, color = Mov.Text2, style = MaterialTheme.typography.bodySmall)
+            } }
+        } }
+    }
+    if (!game.isOver()) ActionBar {
+        PrimaryButton("End week · ${game.plan().size} planned", { requestEndWeek() }, Modifier.weight(1f), enabled = !game.hasPendingEvent())
+    }
     }
     if (showRecap) AlertDialog(onDismissRequest = { showRecap = false }, title = { Text("Week in review") },
-        text = { LazyColumn { items(game.recap()) { Text("${it.label}: ${it.detail}", Modifier.padding(vertical = 6.dp)) } } },
-        confirmButton = { TextButton(onClick = { showRecap = false }) { Text("Continue") } })
+        text = { LazyColumn { items(game.recap()) { Text("${it.label}: ${it.detail}", Modifier.padding(vertical = 6.dp), color = Mov.Text2) } } },
+        confirmButton = { TextButton(onClick = { showRecap = false }) { Text("Continue") } }, containerColor = Mov.Surface2)
 }

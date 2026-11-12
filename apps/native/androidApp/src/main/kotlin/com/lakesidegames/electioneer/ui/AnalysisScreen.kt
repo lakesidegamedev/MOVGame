@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -21,33 +22,32 @@ fun AnalysisScreen(session: GameSession, timeline: Boolean = false) {
     var region by remember { mutableStateOf<String?>(null) }
     var expanded by remember { mutableStateOf(if (timeline) setOf("standings", "week-actions", "report") else setOf("polls")) }
     val document = (if (timeline) session.replayDocument(region) else session.analysis(region)) ?: return
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(if (timeline) "CAMPAIGN REPLAY AND REPORT" else "CAMPAIGN ANALYSIS", style = MaterialTheme.typography.headlineSmall)
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+        GhostButton("Back to campaign", session::resumeGame, color = Mov.Text2)
+        ScreenHeader(if (timeline) "Campaign replay and report" else "Campaign analysis", session.savedCampaignLabel() ?: "Your campaign")
         document.charts.forEach { chart -> TrendChart(chart) }
         ChoicePicker(if (timeline) "Campaign week" else "State or region", document.selectedRegion, document.regions.map { it.id to it.name }) { region = it }
         document.sections.forEach { section ->
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { expanded = if (section.id in expanded) expanded - section.id else expanded + section.id }) {
-                        Text("${if (section.id in expanded) "▾" else "▸"} ${section.title}", style = MaterialTheme.typography.titleMedium)
-                    }
-                    if (section.id in expanded) section.rows.forEach { row ->
-                        Text(row.label, style = MaterialTheme.typography.titleSmall)
-                        Text(row.value, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            val open = section.id in expanded
+            MovCard(tight = true) {
+                CardHead(section.title) { GhostButton(if (open) "Hide" else "Show", { expanded = if (open) expanded - section.id else expanded + section.id }) }
+                if (open) section.rows.forEach { row ->
+                    Column {
+                        Text(row.label, style = MaterialTheme.typography.titleSmall, color = Mov.Text1)
+                        Text(row.value, style = MaterialTheme.typography.bodySmall, color = Mov.Text3)
                     }
                 }
             }
         }
-        OutlinedButton(onClick = session::resumeGame) { Text("Back to campaign") }
     }
 }
 
 @Composable
 private fun TrendChart(chart: NativeTrendChart) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(chart.title, style = MaterialTheme.typography.titleMedium)
-            Text("${chart.minimum.toInt()} to ${chart.maximum.toInt()} · ${chart.referenceLabel}", style = MaterialTheme.typography.bodySmall)
+    MovCard(tight = true) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            CardHead(chart.title)
+            Text("${chart.minimum.toInt()} to ${chart.maximum.toInt()} · ${chart.referenceLabel}", style = MaterialTheme.typography.bodySmall.num, color = Mov.Text3)
             val maxTurn = chart.series.flatMap { it.points }.maxOfOrNull { it.turn }?.coerceAtLeast(1) ?: 1
             Canvas(Modifier.fillMaxWidth().height(160.dp).semantics {
                 contentDescription = chart.title + ". " + chart.series.joinToString(". ") { series ->
@@ -59,12 +59,12 @@ private fun TrendChart(chart: NativeTrendChart) {
                     6f + (size.height - 12f) * (1 - (value - chart.minimum) / (chart.maximum - chart.minimum)).toFloat())
                 for (fraction in listOf(0.0, 0.25, 0.5, 0.75, 1.0)) {
                     val y = 6f + (size.height - 12f) * fraction.toFloat()
-                    drawLine(Color.Gray.copy(alpha = 0.25f), Offset(6f, y), Offset(size.width - 6f, y))
+                    drawLine(Mov.Border, Offset(6f, y), Offset(size.width - 6f, y))
                 }
                 val reference = position(0, chart.reference).y
-                drawLine(Color.Gray, Offset(6f, reference), Offset(size.width - 6f, reference))
+                drawLine(Mov.Text4, Offset(6f, reference), Offset(size.width - 6f, reference), strokeWidth = 1.5.dp.toPx())
                 chart.series.forEach { series ->
-                    val color = runCatching { Color(android.graphics.Color.parseColor(series.color)) }.getOrDefault(Color.White)
+                    val color = partyFill(series.color)
                     val path = Path()
                     series.points.forEachIndexed { index, point ->
                         val at = position(point.turn, point.value)
@@ -74,7 +74,13 @@ private fun TrendChart(chart: NativeTrendChart) {
                     drawPath(path, color, style = Stroke(width = 2.dp.toPx()))
                 }
             }
-            Text("Start → Week $maxTurn · ${chart.series.joinToString(" / ") { it.label }}", style = MaterialTheme.typography.bodySmall)
+            ChipRow { chart.series.forEach { series ->
+                Row(Modifier.padding(end = MovSpace.s3), verticalAlignment = Alignment.CenterVertically) {
+                    PartySwatch(partyFill(series.color), size = 10.dp)
+                    Text(" ${series.label}", color = partyInk(series.color), style = MaterialTheme.typography.labelMedium)
+                }
+            } }
+            Text("Start to week $maxTurn", style = MaterialTheme.typography.bodySmall, color = Mov.Text4)
         }
     }
 }

@@ -37,13 +37,14 @@ struct ResultsView: View {
                         }
                         Text(g.resultWinnerSerial() == g.playerSerial() ? "Victory" : "The race is over")
                             .font(.largeTitle.bold())
-                        Text(g.resultWinnerSerial() == "tie" ? "Electoral College tied. No candidate reaches 270." : "\(g.resultWinnerName()) wins the presidency").font(.title3)
+                        Text(g.resultWinnerSerial() == "tie" ? "Electoral College tied. No candidate reaches \(g.evMajority())." : "\(g.resultWinnerName()) wins the presidency").font(.title3)
                         HStack {
                             Text("DEM \(Int(g.resultDemEv()))").foregroundStyle(CampaignStyle.democrat)
                             Spacer()
                             Text("\(Int(g.resultRepEv())) REP").foregroundStyle(CampaignStyle.republican)
                         }
                         .font(.title2.bold())
+                        Text("\(g.evMajority()) of \(g.evTotal()) electoral votes to win").font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
                         Text("\(g.ticketName(side: "dem")) popular vote \(String(format: "%.1f%%", g.resultDemPopularShare() * 100))")
                             .font(.caption).foregroundStyle(.secondary)
                         Text("\(g.ticketName(side: "rep")) popular vote \(String(format: "%.1f%%", (1 - g.resultDemPopularShare()) * 100))")
@@ -56,7 +57,7 @@ struct ResultsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             if summary.score >= 0 {
                                 Text("CAMPAIGN SCORE \(summary.score) / 1000").font(.headline).foregroundStyle(CampaignStyle.gold)
-                                Text("\(summary.difficulty.capitalized) difficulty · EV margin \(summary.unitMargin)")
+                                Text("\(summary.difficulty.capitalized) difficulty · Electoral vote margin \(summary.unitMargin > 0 ? "+" : "")\(summary.unitMargin)")
                             } else {
                                 Text("Score unavailable for this older save").font(.subheadline)
                             }

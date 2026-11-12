@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const web = resolve(root, "../..");
 const channel = process.argv[2] ?? "desktop-direct";
-if (!["web", "desktop-direct", "steam"].includes(channel)) {
+if (!["web", "desktop-direct", "steam", "desktop-preview"].includes(channel)) {
   throw new Error(`Unknown channel: ${channel}`);
 }
 if (process.argv.slice(3).includes("--no-build")) {

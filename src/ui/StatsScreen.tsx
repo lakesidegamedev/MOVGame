@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useGameStore } from "@store/gameStore";
-import type { CandidateId, TurnPoint } from "@engine/index";
+import { electoralRule, type CandidateId, type TurnPoint } from "@engine/index";
 import { money } from "./format";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, X } from "lucide-react";
 
 // ── Inline SVG line chart ──────────────────────────────────────────────
 interface Series {
@@ -114,6 +114,7 @@ export function StatsScreen({ onClose }: { onClose: () => void }) {
   const dem = cands.dem;
   const rep = cands.rep;
   const tl: TurnPoint[] = game.timeline ?? [];
+  const college = electoralRule(game.states);
 
   const player: CandidateId = game.playerCandidate;
 
@@ -152,13 +153,9 @@ export function StatsScreen({ onClose }: { onClose: () => void }) {
     <div className="overlay" onClick={onClose}>
       <div className="modal stats" onClick={(e) => e.stopPropagation()}>
         <div className="head">
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <div className="tag"><BarChart3 size={12} style={{ verticalAlign: "-2px", marginRight: 6 }} />RACE STATS</div>
-              <h2>Campaign Trends</h2>
-            </div>
-            <button className="ghost" onClick={onClose}>Close</button>
-          </div>
+          <div className="tag"><BarChart3 size={12} aria-hidden="true" />RACE STATS</div>
+          <h2>Campaign Trends</h2>
+          <button className="modal-close" onClick={onClose} aria-label="Close" title="Close"><X size={16} /></button>
         </div>
 
         <div className="body">
@@ -207,9 +204,9 @@ export function StatsScreen({ onClose }: { onClose: () => void }) {
                     { color: rep.color, label: rep.shortName, values: tl.map((p) => p.repEV) },
                   ]}
                   yMin={0}
-                  yMax={538}
+                  yMax={college.total}
                   fmtY={(v) => v.toFixed(0)}
-                  refLines={[{ y: 270, label: "270 to win" }]}
+                  refLines={[{ y: college.majority, label: `${college.majority} to win` }]}
                 />
                 <Legend items={[{ color: dem.color, label: dem.shortName }, { color: rep.color, label: rep.shortName }]} />
               </div>

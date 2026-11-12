@@ -15,7 +15,7 @@ import type {
 } from "@engine/types";
 import { ISSUE_IDS } from "@content/issues";
 import { BLOC_IDS } from "@content/blocs";
-import { SCENARIOS, type Scenario, type ScenarioTicket } from "@content/scenarios";
+import { SCENARIOS, issueTemplateFor, type Scenario, type ScenarioTicket } from "@content/scenarios";
 import { blocPartyShares } from "@engine/multiparty";
 import {
   createUkGame,
@@ -32,7 +32,8 @@ import {
 import { UK_ELECTIONS } from "@content/uk/elections";
 import { PARTY_BY_ID } from "@content/uk/parties";
 import { UK_LEADERS } from "@content/uk/leaders";
-import { COUNTRIES } from "@content/countries";
+import { countryModuleFor, loadedCountries, loadedCountry } from "@content/countries";
+import { isCustomScenarioId } from "@content/customIds";
 
 // Bump when the shape changes in a breaking way. Version-1 docs still validate:
 // they are migrated to version 2 as the "us" engine (see migrateToV2). Anything
@@ -92,7 +93,7 @@ export interface CustomPartyInput {
 }
 
 export interface CustomMultipartyConfig {
-  countryId?: string;   // required for engine "country" (a COUNTRIES key)
+  countryId?: string;   // required for engine "country" (a registered country code)
   baseElection: string; // election id in the chosen engine's set
   parties: CustomPartyInput[];
 }
@@ -248,19 +249,35 @@ export function makeDefaultMultiparty(engine: "uk" | "country", countryId?: stri
     return base;
   }
 
-  const country = (countryId && COUNTRIES[countryId]) || Object.values(COUNTRIES)[0];
+  const country = baseCountry(countryId);
   const election = newestElection(Object.keys(country.elections), (id) => country.elections[id].year);
   base.year = country.elections[election]?.year ?? 2024;
   base.mp = { countryId: country.id, baseElection: election, parties: defaultCountryParties(country, election) };
   return base;
 }
 
+// Country custom scenarios build on a country's bundle, which the web client
+// loads on demand: callers load it first (the editor loads every bundle, the
+// custom scenario store loads the ones its rows name).
+function requireCountry(countryId: string): CountryBundle {
+  const country = loadedCountry(countryId);
+  if (!country) throw new Error(`Country ${countryId} is not loaded yet; await loadCountry("${countryId}") first.`);
+  return country;
+}
+
+// The chosen country, or the first registered one when none is chosen.
+function baseCountry(countryId: string | undefined): CountryBundle {
+  if (countryId && countryModuleFor(countryId)?.engine === "country") return requireCountry(countryId);
+  const first = loadedCountries()[0];
+  if (!first) throw new Error("No country bundle is loaded yet; await loadAllCountries() first.");
+  return first;
+}
+
 // Re-seed a config's party list when the base election (or country) changes, so
 // the editor always shows the parties that contest the newly chosen race.
 export function multipartyPartiesFor(engine: "uk" | "country", countryId: string | undefined, electionId: string): CustomPartyInput[] {
   if (engine === "uk") return defaultUkParties(electionId);
-  const country = (countryId && COUNTRIES[countryId]) || Object.values(COUNTRIES)[0];
-  return defaultCountryParties(country, electionId);
+  return defaultCountryParties(baseCountry(countryId), electionId);
 }
 
 export function newCustomId(): string {
@@ -271,9 +288,7 @@ export function newCustomId(): string {
   return `custom-${rand}`;
 }
 
-export function isCustomScenarioId(id: string | undefined): boolean {
-  return !!id && id.startsWith("custom-");
-}
+export { isCustomScenarioId };
 
 // The registry scenarioId of the base election a custom scenario builds on, or
 // null when the base is free-to-everyone. US customs run on the generic map
@@ -400,10 +415,10 @@ function validateMultipartyConfig(
 
   let country: CountryBundle | undefined;
   if (engine === "country") {
-    if (typeof raw.countryId !== "string" || !COUNTRIES[raw.countryId]) {
+    if (typeof raw.countryId !== "string" || countryModuleFor(raw.countryId)?.engine !== "country") {
       errors.push("Pick a country to build on.");
     } else {
-      country = COUNTRIES[raw.countryId];
+      country = requireCountry(raw.countryId);
     }
   }
 
@@ -586,8 +601,11 @@ function toTicket(side: "dem" | "rep", t: CustomTicketInput): ScenarioTicket {
 
 // Adapt a validated custom scenario to the engine's Scenario record. State
 // priors and EV apportionment are left to the engine defaults (2020 map), so a
-// custom race plays on the standard board without touching election math.
+// custom race plays on the standard board without touching election math. Its
+// issues and their salience are those of the built-in election nearest its year
+// (issueTemplateFor), so a custom 1968 race argues about 1968.
 export function toScenario(cs: CustomScenario): Scenario {
+  const template = issueTemplateFor(cs.year);
   return {
     id: cs.id,
     year: cs.year,
@@ -595,6 +613,8 @@ export function toScenario(cs: CustomScenario): Scenario {
     tagline: cs.tagline,
     dem: toTicket("dem", cs.dem),
     rep: toTicket("rep", cs.rep),
+    ...(template.issueSalience ? { issueSalience: { ...template.issueSalience } } : {}),
+    ...(template.issues ? { issues: template.issues.map((i) => ({ ...i })) } : {}),
   };
 }
 
@@ -701,13 +721,13 @@ export function buildUkCustomGame(cs: CustomScenario): UkGameState {
 // Build a playable country game from a country custom doc. Here the whole
 // bundle is cloned with the player's party labels/colors and leaders, so the
 // country shell shows the custom names throughout. The clone is keyed by the
-// custom id and never entered into COUNTRIES.
+// custom id and never entered into the country registry.
 export function buildCountryCustomGame(cs: CustomScenario): { country: CountryBundle; game: CountryGameState } {
   if (cs.engine !== "country" || !cs.mp || !cs.mp.countryId) throw new Error("Not a country custom scenario.");
   const mp = cs.mp;
   const countryId = cs.mp.countryId;
-  const base = COUNTRIES[countryId];
-  if (!base) throw new Error(`Unknown country "${mp.countryId}".`);
+  if (countryModuleFor(countryId)?.engine !== "country") throw new Error(`Unknown country "${mp.countryId}".`);
+  const base = requireCountry(countryId);
   const overrides = new Map(mp.parties.map((p) => [p.partyId, p]));
 
   const parties = base.system.parties.map((pd) => {

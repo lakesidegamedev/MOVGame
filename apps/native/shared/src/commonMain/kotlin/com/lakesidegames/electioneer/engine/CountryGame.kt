@@ -1,5 +1,7 @@
 package com.lakesidegames.electioneer.engine
 
+import com.lakesidegames.electioneer.content.CountryIssueDef
+import com.lakesidegames.electioneer.content.compatible
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -108,6 +110,28 @@ data class CountryGameState(
     var result: CountryResult? = null,
 )
 
+/** The issues an election runs on: its own list, or else the country's. */
+fun countryElectionIssues(country: com.lakesidegames.electioneer.content.CountryBundle, electionId: String): List<CountryIssueDef> =
+    country.elections[electionId]?.issues ?: country.issues
+
+/**
+ * A game's issues for display and the pickers, in salience-table order (TS
+ * countryGameIssues). Saves made before per-election lists keep their old ids,
+ * named from the country's list.
+ */
+fun countryGameIssues(country: com.lakesidegames.electioneer.content.CountryBundle, electionId: String, salience: Map<String, Double>): List<NativeIssue> =
+    liveIssuesOf(salience, country.issues + countryElectionIssues(country, electionId))
+
+internal fun liveIssuesOf(salience: Map<String, Double>, defs: List<CountryIssueDef>): List<NativeIssue> {
+    val byId = defs.associateBy { it.id }
+    return salience.map { (id, value) -> NativeIssue(id, byId[id]?.name ?: id, byId[id]?.blurb ?: "", value) }
+}
+
+// Opening salience: the election's values for its declared issues only (an
+// election without a list keeps its whole salience table).
+internal fun electionSalience(salience: Map<String, Double>, issues: List<CountryIssueDef>?): MutableMap<String, Double> =
+    issues?.associate { it.id to (salience[it.id] ?: 0.0) }?.toMutableMap() ?: salience.toMutableMap()
+
 fun majorityFor(
     g: CountryGameState,
     country: com.lakesidegames.electioneer.content.CountryBundle,
@@ -115,7 +139,7 @@ fun majorityFor(
     val m = g.majority
         ?: country.elections[g.electionId]?.majority?.let { MajorityRule(total = it.total, threshold = it.threshold) }
         ?: country.system.majority
-    return m
+    return if (country.plurality) m.copy(plurality = true) else m
 }
 
 private fun activeParties(
@@ -152,25 +176,33 @@ private fun leaderForCountry(
     )
 }
 
+// Underdog handicap (web COUNTRY_HANDICAP). persuasion scales the player's
+// campaigning, aiPersuasion the chief rival's only, funds/actions are one-time
+// bonuses, and gapShare/gapResidual size the easy-mode climate tilt as a share
+// of levelingTilt (climateTilt). Normal changes only the player's side; normal
+// and hard never tilt the opening map.
 @Serializable
 data class CountryHandicap(
     val funds: Double,
     val actions: Int,
     val persuasion: Double,
     val aiPersuasion: Double,
-    val environment: Double,
+    val gapShare: Double,
+    val gapResidual: Double,
 )
 
 val COUNTRY_HANDICAP: Map<String, CountryHandicap> = mapOf(
-    "easy" to CountryHandicap(funds = 6.0, actions = 2, persuasion = 1.5, aiPersuasion = 0.5, environment = 0.9),
-    "normal" to CountryHandicap(funds = 0.0, actions = 0, persuasion = 1.0, aiPersuasion = 1.0, environment = 0.0),
-    "hard" to CountryHandicap(funds = 0.0, actions = 0, persuasion = 0.85, aiPersuasion = 1.1, environment = 0.0),
+    "easy" to CountryHandicap(funds = 6.0, actions = 2, persuasion = 1.5, aiPersuasion = 0.5, gapShare = 0.6, gapResidual = 0.15),
+    "normal" to CountryHandicap(funds = 2.0, actions = 1, persuasion = 1.4, aiPersuasion = 1.0, gapShare = 0.0, gapResidual = 0.0),
+    "hard" to CountryHandicap(funds = 0.0, actions = 0, persuasion = 0.9, aiPersuasion = 1.05, gapShare = 0.0, gapResidual = 0.0),
 )
 
 // One-time favorable-climate tilt, then refresh live support. No-op at 0.
 private fun applyCountryEnvironment(regions: List<StateContest>, player: PartyId, env: Double) {
     if (env == 0.0) return
     for (region in regions) {
+        // Only where the player stands (web applyCountryEnvironment).
+        if (region.baselineShare?.get(player) == null) continue
         for (bloc in region.blocs) {
             val appeal = bloc.appeal ?: continue
             appeal[player] = (appeal[player] ?: 0.0) + env
@@ -229,7 +261,7 @@ fun createCountryGame(
     }
 
     val regions = buildCountryRegions(country, election)
-    applyCountryEnvironment(regions, playerParty, hc.environment)
+    applyCountryEnvironment(regions, playerParty, climateTilt(hc.gapShare, hc.gapResidual, levelingTilt(regions, playerParty)))
 
     return CountryGameState(
         countryId = country.id,
@@ -244,7 +276,7 @@ fun createCountryGame(
         playerParty = playerParty,
         parties = parties,
         leaders = leaders,
-        salience = election.salience.toMutableMap(),
+        salience = electionSalience(election.salience, election.issues),
         campaignPower = election.campaignPower,
         regions = regions,
         resources = resources,
@@ -271,11 +303,15 @@ private fun saturate(bloc: StateBloc, party: PartyId, raw: Double): Double {
     return raw * room
 }
 
-private fun addAppeal(g: CountryGameState, region: StateContest, party: PartyId, cause: String, delta: Double) {
-    // Difficulty scales campaigning: the player's own effort by `persuasion`,
-    // every rival's by `aiPersuasion`. Both are 1.0 on normal (identity).
+// `actor` is the party whose action this is (the attacker on a contrast
+// broadcast or dossier, where `party` is the target).
+private fun addAppeal(g: CountryGameState, region: StateContest, party: PartyId, cause: String, delta: Double,
+                      actor: PartyId = party) {
+    // Difficulty scales campaigning by who campaigns: the player's effort by
+    // `persuasion`, the chief rival's by `aiPersuasion` (web COUNTRY_HANDICAP).
     val hc = COUNTRY_HANDICAP[g.difficulty ?: "normal"] ?: COUNTRY_HANDICAP.getValue("normal")
-    val scaled = delta * (if (party == g.playerParty) hc.persuasion else hc.aiPersuasion) * (g.campaignPower?.get(party) ?: 1.0)
+    val scaled = delta * handicapMultiplier(hc.persuasion, hc.aiPersuasion, g.regions, g.playerParty, actor) *
+        (g.campaignPower?.get(party) ?: 1.0)
     for (bloc in region.blocs) {
         val camp = bloc.campaignAppeal ?: mutableMapOf<String, Double>().also { bloc.campaignAppeal = it }
         camp[party] = (camp[party] ?: 0.0) + saturate(bloc, party, scaled)
@@ -295,7 +331,8 @@ private fun topRivalIn(region: StateContest, party: PartyId): PartyId? {
 }
 
 private fun applyCountryAction(g: CountryGameState, a: CountryAction, rng: Rng,
-                               planMultiplier: Double = 1.0, planBonuses: List<PlanBonus> = emptyList()) {
+                               planMultiplier: Double = 1.0, planBonuses: List<PlanBonus> = emptyList(),
+                               prepFactor: Double = 1.0) {
     val res = g.resources[a.party] ?: return
     if (res.actions < 1) return
     val leader = g.leaders.getValue(a.party)
@@ -355,7 +392,7 @@ private fun applyCountryAction(g: CountryGameState, a: CountryAction, rng: Rng,
             } else if (mode == CountryAdMode.CONTRAST) {
                 for (t in targets) {
                     val foe = a.targetParty ?: topRivalIn(t, a.party)
-                    if (foe != null) addAppeal(g, t, foe, "${leader.name} contrast broadcast", -per * 0.9)
+                    if (foe != null) addAppeal(g, t, foe, "${leader.name} contrast broadcast", -per * 0.9, actor = a.party)
                 }
             } else {
                 for (t in targets) addAppeal(g, t, a.party, "${leader.name} broadcast", per)
@@ -369,23 +406,23 @@ private fun applyCountryAction(g: CountryGameState, a: CountryAction, rng: Rng,
             for (t in scope) {
                 val foe = a.targetParty ?: topRivalIn(t, a.party)
                 // Self-targeted dirt (a gaffe) lands on the author.
-                if (foe != null) addAppeal(g, t, if (a.party == foe) a.party else foe, "${leader.name}'s team releases dossier on ${foe.uppercase()}", -0.05 * compSkill)
+                if (foe != null) addAppeal(g, t, if (a.party == foe) a.party else foe, "${leader.name}'s team releases dossier on ${foe.uppercase()}", -0.05 * compSkill, actor = a.party)
             }
         }
         CountryActionType.DEBATE_PREP -> {
             res.actions -= 1
-            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} debate performance", 0.012 * compSkill)
+            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} debate performance", 0.012 * compSkill * prepFactor)
             res.momentum = clamp(res.momentum + 4, -100.0, 100.0)
         }
         CountryActionType.POLICY_PREP -> {
             res.actions -= 1
-            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} platform launch", 0.014 * compSkill)
+            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} platform launch", 0.014 * compSkill * prepFactor)
             res.momentum = clamp(res.momentum + 2, -100.0, 100.0)
         }
         CountryActionType.ISSUE_PIVOT -> {
             res.actions -= 1
             if (a.issueId != null) g.salience[a.issueId] = clamp((g.salience[a.issueId] ?: 0.4) + 0.08 * planMultiplier, 0.0, 1.0)
-            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} pivots the campaign", 0.008 * skill * planMultiplier)
+            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} pivots the campaign", 0.008 * skill * planMultiplier * prepFactor)
         }
         CountryActionType.FUNDRAISE -> {
             res.actions -= 1
@@ -482,7 +519,7 @@ private fun applyCountryEventEffects(
         res.momentum = clamp(res.momentum + ev.momentum, -100.0, 100.0)
     }
     val short = country.system.parties.find { it.id == target }?.shortName ?: target.uppercase()
-    g.news = (listOf(NewsItem(turn = g.turn, text = ev.headline.replace("{party}", short))) + g.news).take(12)
+    g.news = (listOf(NewsItem(turn = g.turn, text = ev.headline.replaceFirst("{party}", short))) + g.news).take(12)
 }
 
 private fun resolveCountryEventTarget(
@@ -492,7 +529,7 @@ private fun resolveCountryEventTarget(
     rng: Rng,
 ): PartyId? {
     val proj = computeSeatsResult(g.regions, majorityFor(g, country), g.abstaining)
-    val majors = g.parties.filter { country.playable.contains(it) }
+    val majors = g.parties.filter { country.playable.contains(it) && !country.regional.contains(it) }
     return if (ev.party != null && g.parties.contains(ev.party)) {
         ev.party
     } else {
@@ -511,7 +548,7 @@ private fun applyCountryEvent(
     if (ev.choices != null && ev.choices.isNotEmpty() && target == g.playerParty && g.pendingEvent == null) {
         g.pendingEvent = CountryPendingEvent(eventId = ev.id, targetParty = target)
         val short = country.system.parties.find { it.id == target }?.shortName ?: target.uppercase()
-        g.news = (listOf(NewsItem(turn = g.turn, text = ev.headline.replace("{party}", short))) + g.news).take(12)
+        g.news = (listOf(NewsItem(turn = g.turn, text = ev.headline.replaceFirst("{party}", short))) + g.news).take(12)
         return
     }
     applyCountryEventEffects(g, country, ev, target)
@@ -548,7 +585,7 @@ fun resolveCountryPlayerEvent(
     next.lastRecap = (
         listOf(
             RecapItem(
-                label = ev.headline.replace("{party}", short),
+                label = ev.headline.replaceFirst("{party}", short),
                 detail = choice.resultText,
                 marginDelta = choice.appeal,
             ),
@@ -578,11 +615,13 @@ private fun fireCountryEvent(
 
     if (g.pendingEvent != null) return
 
-    val pool = deck.filter { it.turn == null && !firedList.contains(it.id) } + country.events
+    val firedNow = firedList.toSet()
+    val pool = deck.filter { it.turn == null && it.id !in firedNow } +
+        unfiredGenericEvents(country.events, firedNow, { it.id }, { !it.choices.isNullOrEmpty() })
     if (pool.isEmpty() || !rng.chance(country.eventChance)) return
     val ev = rng.weightedPick(pool, pool.map { it.weight })
     applyCountryEvent(g, country, ev, rng)
-    if (deck.any { it.id == ev.id }) firedList.add(ev.id)
+    if (ev.id !in firedNow) firedList.add(ev.id)
 }
 
 private fun buildCountryRecap(
@@ -667,8 +706,8 @@ fun countryAdvanceTurn(
     val seatsBefore = computeCountryResult(next, country).seats[next.playerParty] ?: 0
     val turn = next.turn
 
-    resolvePlan(next.queuedActions, { it.planMove() }, { next.causes.size }) { action, mult, bonuses ->
-        applyCountryAction(next, action, rng, mult, bonuses)
+    resolveMpPlan(next.queuedActions, { it.planMove() }, { next.causes.size }) { action, mult, bonuses, prep ->
+        applyCountryAction(next, action, rng, mult, bonuses, prep)
     }
     next.queuedActions = emptyList()
 
@@ -727,8 +766,8 @@ fun projectCountryPreview(
     if (g.queuedActions.isEmpty()) return computeCountryResult(g, country)
     val clone = g.deepCopyCountry()
     val rng = Rng.createRng(clone.rngState)
-    resolvePlan(clone.queuedActions, { it.planMove() }, { clone.causes.size }) { action, mult, bonuses ->
-        applyCountryAction(clone, action, rng, mult, bonuses)
+    resolveMpPlan(clone.queuedActions, { it.planMove() }, { clone.causes.size }) { action, mult, bonuses, prep ->
+        applyCountryAction(clone, action, rng, mult, bonuses, prep)
     }
     for (region in clone.regions) {
         for (bloc in region.blocs) bloc.support = blocPartyShares(bloc)
@@ -840,6 +879,7 @@ private fun buildRegionContest(
         baselineSeats = res.s.toMap(),
         baselineShare = target,
         seatElasticity = meta.seatElasticity ?: country.defaultSeatElasticity,
+        proportional = if (country.runoff || country.plurality) true else null,
     )
 }
 

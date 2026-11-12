@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
+import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "@lib/distribution";
+import { partyFill, partyInk } from "@ui/colors";
 import { useUkStore } from "@store/ukStore";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { api } from "@lib/api";
 import { computeScoreFromFacts, multipartyScoreFacts } from "@engine/scoring";
 import { majorityForUk, playablePartiesIn } from "@engine/ukGame";
@@ -11,7 +14,7 @@ import { partyName, partyShort, sortBySeats, partyColor } from "./parties";
 import { ElectionNight, hasSeenReveal, revealSupported } from "../electionNight/ElectionNight";
 import { ElectionNightShell } from "../electionNight/ElectionNightShell";
 import { MultipartySeatPanel } from "../electionNight/MultipartySeatPanel";
-import { ukReveal } from "../electionNight/adapters";
+import { ukReveal } from "../electionNight/ukReveal";
 import { DailyResultPanel } from "../DailyResultPanel";
 import { WhyReport } from "../WhyReport";
 import { TimelineView } from "../TimelineView";
@@ -32,7 +35,7 @@ function govText(g: Government): string {
 function UkMiniMap({ seats }: { seats: Record<string, number> }) {
   // Color a handful of regions by the national largest party as a preview cue.
   const largest = sortBySeats(seats)[0];
-  const color = largest ? partyColor(largest) : "var(--navy-500)";
+  const color = largest ? partyFill(partyColor(largest)) : "var(--navy-500)";
   const ids = Object.keys(REGION_PATHS).slice(0, 12);
   return (
     <svg viewBox={UK_VIEWBOX} preserveAspectRatio="xMidYMid meet">
@@ -120,16 +123,16 @@ export function UkResults() {
         ? "HUNG PARLIAMENT"
         : "NO OVERALL MAJORITY";
 
-  const headline =
+  // The headline names one party; its color is always that party's.
+  const headlineParty =
     r.government.kind === "majority"
-      ? partyName(r.government.party)
+      ? r.government.party
       : r.government.kind === "hung"
-        ? partyName(r.government.largest)
+        ? r.government.largest
         : inGov
-          ? partyName(game.playerParty)
-          : largest
-            ? partyName(largest)
-            : "Hung parliament";
+          ? game.playerParty
+          : largest;
+  const headline = headlineParty ? partyName(headlineParty) : "Hung parliament";
 
   const replayDaily = () => {
     const today = dailyAssignment(utcDateString());
@@ -142,11 +145,7 @@ export function UkResults() {
       <ElectionNightShell
         eyebrow={eyebrow}
         headline={headline}
-        headlineColor={
-          r.government.kind === "majority"
-            ? partyColor(r.government.party)
-            : partyColor(game.playerParty)
-        }
+        headlineColor={headlineParty ? partyColor(headlineParty) : undefined}
         subhead={
           won
             ? "You won a majority."
@@ -172,6 +171,7 @@ export function UkResults() {
           leftColor: partyColor(leftParty),
           rightColor: partyColor(rightParty),
           unitLabel: "vs maj.",
+          words: { ahead: "over", behind: "short", level: "exactly on" },
           caption: "Seats vs majority threshold",
         }}
         nextScenario={
@@ -181,9 +181,9 @@ export function UkResults() {
                 blurb: next.blurb,
                 unlocked,
                 ctaLabel: `Play ${nextData.year} →`,
-                lockLabel: `🔒 Unlock ${nextData.year}`,
+                lockLabel: `Unlock ${nextData.year}`,
                 onPlay: () => newGame(next.id, nextParty, String(Date.now()), difficulty),
-                onUnlock: () => openModal("activate", `uk-${next.id}`),
+                onUnlock: () => openStoreForScenario(`uk-${next.id}`),
                 mapPreview: <UkMiniMap seats={r.seats} />,
               }
             : null
@@ -203,11 +203,11 @@ export function UkResults() {
               onReplay={replayDaily}
             />
             <div className="card">
-              <div className="row" style={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+              <div className="score-row">
                 <div>
-                  <div className="tag muted small" style={{ color: "var(--gold)", letterSpacing: "2px" }}>CAMPAIGN SCORE</div>
-                  <div style={{ fontSize: 34, fontWeight: 800 }}>
-                    {score}<span className="muted" style={{ fontSize: 15, fontWeight: 600 }}> / 1000</span>
+                  <div className="eyebrow score-eyebrow">Campaign score</div>
+                  <div className="score-value num">
+                    {score}<span className="score-max"> / 1000</span>
                   </div>
                   <div className="muted small">
                     Seat margin {facts.unitMargin >= 0 ? "+" : ""}{Math.round(facts.unitMargin)} vs {maj.threshold}
@@ -216,6 +216,8 @@ export function UkResults() {
                 <div style={{ textAlign: "right" }}>
                   {game.custom ? (
                     <span className="muted small">Custom campaigns are casual only and don't post to the leaderboard</span>
+                  ) : DISTRIBUTION.preview ? (
+                    <span className="muted small">{PREVIEW_SCORE_NOTE}</span>
                   ) : user ? (
                     <button className="primary" disabled={postState === "busy" || postState === "done" || serverDown} onClick={post}>
                       {postState === "done" ? "Posted ✓" : postState === "busy" ? "Posting…" : serverDown ? "Offline" : "Post to Leaderboard"}
@@ -274,12 +276,12 @@ export function UkResults() {
           <h3>Final standings</h3>
           {order.map((p) => (
             <div className="bloc" key={p}>
-              <span className="name" style={{ color: p === game.playerParty ? partyColor(p) : undefined }}>
-                <span style={{ display: "inline-block", width: 10, height: 10, background: partyColor(p), borderRadius: 2, marginRight: 6 }} />
+              <span className="name" style={{ color: p === game.playerParty ? partyInk(partyColor(p)) : undefined }}>
+                <span className="swatch" style={{ "--party": partyFill(partyColor(p)) } as React.CSSProperties} />
                 {partyShort(p)}
               </span>
-              <span className="meta">{r.seats[p]} seats · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
-              <div className="suppbar"><div style={{ width: `${(r.seats[p] / maj.total) * 100 * 1.6}%`, background: partyColor(p) }} /></div>
+              <span className="meta">{r.seats[p]} {r.seats[p] === 1 ? "seat" : "seats"} · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
+              <div className="suppbar"><div style={{ width: `${(r.seats[p] / maj.total) * 100 * 1.6}%`, background: partyFill(partyColor(p)) }} /></div>
             </div>
           ))}
         </div>

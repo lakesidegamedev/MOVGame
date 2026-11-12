@@ -26,9 +26,10 @@ class NativeCustomScenarioTest {
             }
         }
     }
-    @Test fun validationMatches446WebCasesAndNormalization() {
+    @Test fun validationMatchesEveryWebCaseAndNormalization() {
         val fixtures = vectors.getValue("validations").jsonArray
-        assertEquals(446, fixtures.size)
+        // 446 before New Zealand; each registered country adds its own cases.
+        assertTrue(fixtures.size >= 446)
         for ((index, value) in fixtures.withIndex()) {
             val fixture = value.jsonObject
             val expected = fixture.getValue("result").jsonObject

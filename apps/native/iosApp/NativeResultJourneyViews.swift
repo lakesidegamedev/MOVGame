@@ -39,19 +39,31 @@ struct ResultJourneyCard: View {
 struct AccountBoardsView: View {
     @ObservedObject var account: CampaignAccount
     @State private var selected = "champions"
+    @State private var boardCountry = "US"
+    private var kind: Binding<String> {
+        Binding(get: { ["champions", "daily"].contains(selected) ? selected : "election" },
+                set: { value in
+                    selected = value == "election" ? (MobileCampaign.companion.elections(countryId: boardCountry).first?.scenarioId ?? "daily") : value
+                })
+    }
     @State private var date = nativeUTCDay()
     private var dateValid: Bool { date.range(of: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", options: .regularExpression) != nil }
-    private var elections: [NativeElection] {
-        MobileCampaign.companion.countries().flatMap { MobileCampaign.companion.elections(countryId: $0.id) }
-    }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Picker("Board", selection: $selected) {
+                Picker("Board", selection: kind) {
                     Text("Daily champions").tag("champions")
                     Text("Daily challenge").tag("daily")
-                    ForEach(elections, id: \.scenarioId) { election in Text("\(election.flag) \(election.label)").tag(election.scenarioId) }
+                    Text("One election").tag("election")
                 }.pickerStyle(.menu)
+                if kind.wrappedValue == "election" {
+                    Picker("Country", selection: $boardCountry) {
+                        ForEach(MobileCampaign.companion.countries(), id: \.id) { Text("\($0.flag) \($0.name)").tag($0.id) }
+                    }.pickerStyle(.menu)
+                    Picker("Election", selection: $selected) {
+                        ForEach(MobileCampaign.companion.elections(countryId: boardCountry), id: \.scenarioId) { Text($0.label).tag($0.scenarioId) }
+                    }.pickerStyle(.menu)
+                }
                 if selected == "daily" {
                     TextField("Daily date (YYYY-MM-DD, UTC)", text: $date).textInputAutocapitalization(.never).textFieldStyle(.roundedBorder)
                     if !dateValid { Text("Enter a UTC date as YYYY-MM-DD.").font(.caption).foregroundStyle(CampaignStyle.coral) }
@@ -91,6 +103,9 @@ struct AccountBoardsView: View {
             }.padding(20).frame(maxWidth: .infinity, alignment: .leading)
         }
         .task(id: "\(selected):\(date):\(account.user?.id ?? "guest")") { await refresh() }
+        .onChange(of: boardCountry) { country in
+            if kind.wrappedValue == "election" { selected = MobileCampaign.companion.elections(countryId: country).first?.scenarioId ?? "daily" }
+        }
         .background(CampaignStyle.background).preferredColorScheme(.dark)
     }
     private func refresh() async {

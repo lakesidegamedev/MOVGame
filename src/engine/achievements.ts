@@ -7,6 +7,7 @@
 
 import type { CandidateId, GameResult, GameState } from "./types";
 import { OPPONENT_OF } from "@content/candidates";
+import { evMajority, evTotalOf } from "./electoralCollege";
 
 export interface AchievementContext {
   result: GameResult;
@@ -73,7 +74,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "nailbiter", name: "Nailbiter", icon: "😰",
     description: "Win with fewer than 5 electoral votes to spare.",
-    check: (c) => playerWon(c) && (c.result.electoralVotes[c.player] ?? 0) - 270 < 5,
+    check: (c) => playerWon(c) && (c.result.electoralVotes[c.player] ?? 0) - evMajority(evTotalOf(c.result.stateResults)) < 5,
   },
   {
     id: "comeback", name: "Comeback Kid", icon: "🔄",

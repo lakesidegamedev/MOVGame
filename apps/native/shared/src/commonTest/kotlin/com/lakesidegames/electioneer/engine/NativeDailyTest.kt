@@ -10,28 +10,47 @@ import kotlin.test.assertTrue
 class NativeDailyTest {
     @Test
     fun utcAssignmentsMatchWebAcrossEveryCountry() {
-        // Independently evaluated with src/lib/daily.ts.
-        val vectors = listOf(
+        // Two years of dates evaluated by src/lib/daily.ts (export-daily-percentiles.ts).
+        val vectors = EngineJson.decodeFromString<List<List<String>>>(DAILY_ASSIGNMENT_WEB_VECTORS)
+        assertEquals(730, vectors.size)
+        for ((date, scenario, role) in vectors) {
+            val assignment = NativeDaily.assignment(date)
+            assertEquals(scenario, assignment.scenarioId, date)
+            assertEquals(role, assignment.role, date)
+            assertEquals("daily-$date", assignment.seed)
+            assertTrue(NativeDaily.matches(date, scenario, Rng.hashSeed(assignment.seed), role))
+            assertFalse(NativeDaily.matches(date, scenario, Rng.hashSeed("other-seed"), role))
+            assertFalse(NativeDaily.matches(date, scenario, Rng.hashSeed(assignment.seed), "other-party"))
+        }
+        // Every registered country comes up in the rotation.
+        assertEquals(MobileCampaign.countries().map { it.id }.toSet(),
+            vectors.map { v -> nativeElections.first { it.scenarioId == v[1] }.country }.toSet())
+    }
+
+    @Test
+    fun classicDaysKeepTheirOriginalScenario() {
+        // Pinned before New Zealand joined: these dates are classic days and
+        // must keep the scenario they always had.
+        val pinned = listOf(
             Triple("2026-01-01", "us-1968", "dem"), Triple("2026-01-02", "fr-2017", "rn"),
             Triple("2026-01-03", "uk-1992", "con"), Triple("2026-01-05", "de-2017", "spd"),
             Triple("2026-01-08", "ca-2015", "cpc"), Triple("2026-01-14", "au-2022", "alp"),
             Triple("2026-09-30", "us-2008", "dem"), Triple("2026-10-01", "uk-2005", "con"),
             Triple("2025-12-31", "fr-2027", "rn"),
         )
-        for ((date, scenario, role) in vectors) {
+        for ((date, scenario, role) in pinned) {
+            if (NativeDaily.isAddedDay(date, nativeElections.size, nativeElections.size - NativeDaily.CLASSIC_POOL_SIZE)) continue
             val assignment = NativeDaily.assignment(date)
-            assertEquals(scenario, assignment.scenarioId)
-            assertEquals(role, assignment.role)
-            assertEquals("daily-$date", assignment.seed)
-            assertTrue(NativeDaily.matches(date, scenario, Rng.hashSeed(assignment.seed), role))
-            assertFalse(NativeDaily.matches(date, scenario, Rng.hashSeed("other-seed"), role))
-            assertFalse(NativeDaily.matches(date, scenario, Rng.hashSeed(assignment.seed), "other-party"))
+            assertEquals(scenario, assignment.scenarioId, date)
+            assertEquals(role, assignment.role, date)
         }
     }
 
     @Test
     fun dailyIdentitySurvivesRestoringBothCampaignTypes() {
-        for (date in listOf("2026-09-30", "2026-01-02", "2026-01-03", "2026-01-05", "2026-01-08", "2026-01-14")) {
+        val added = EngineJson.decodeFromString<List<List<String>>>(DAILY_ASSIGNMENT_WEB_VECTORS)
+            .first { v -> nativeElections.indexOfFirst { it.scenarioId == v[1] } >= NativeDaily.CLASSIC_POOL_SIZE }[0]
+        for (date in listOf("2026-09-30", "2026-01-02", "2026-01-03", "2026-01-05", "2026-01-08", "2026-01-14", added)) {
             val day = NativeDaily.assignment(date)
             if (day.countryId == "US") {
                 val mate = MobileGame.mates(day.electionId, day.role).first { it.historical }
@@ -58,7 +77,7 @@ class NativeDailyTest {
         assertEquals(computeScoreFromFacts(submission.facts), submission.score)
         assertNull(NativeResults.submission(us, null))
         assertNull(NativeResults.submission(us.copy(totalTurns = 5), "normal"))
-        for (country in listOf("UK", "CA", "DE", "FR", "AU")) {
+        for (country in MobileCampaign.countries().map { it.id }.filter { it != "US" }) {
             val election = MobileCampaign.elections(country).first().nativeId
             val party = MobileCampaign.parties(country, election).first().id
             val game = MobileCampaign.start(country, election, party, "normal", "score-contract")
@@ -80,5 +99,13 @@ class NativeDailyTest {
         assertEquals(4, NativeDaily.nextStreak("2026-10-01", "2026-09-30", "2026-09-30", 3))
         assertEquals(4, NativeDaily.nextStreak("2026-10-01", "2026-09-30", "2026-10-01", 4))
         assertEquals(1, NativeDaily.nextStreak("2026-10-01", "2026-09-30", "2026-09-29", 3))
+    }
+
+    @Test
+    fun anElectionCanCarryItsOwnDailyPair() {
+        // Japan 2026: the CRA replaced the CDP, so the daily pairs the LDP with the CRA there.
+        assertEquals(listOf("ldp", "cra"), nativeElections.first { it.scenarioId == "jp-2026" }.dailyPair)
+        assertNull(nativeElections.first { it.scenarioId == "jp-2024" }.dailyPair)
+        assertEquals("the CRA", NativeDaily.roleName("cra"))
     }
 }

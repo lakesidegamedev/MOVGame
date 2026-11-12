@@ -7,6 +7,8 @@
 // server host explicitly. They stay best-effort: the game itself never depends
 // on the network.
 
+import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "./distribution";
+
 const TOKEN_KEY = "campaign_token";
 const USER_KEY = "campaign_user";
 const GUEST_KEY = "campaign_guest_id";
@@ -15,12 +17,22 @@ const GUEST_KEY = "campaign_guest_id";
 // in dev; the sim origin everywhere else.
 export function apiBase(): string {
   if (typeof window === "undefined") return "";
-  const { hostname } = window.location;
-  const sameOriginApi =
+  const { hostname, protocol } = window.location;
+  // The packaged desktop shell serves its bundle from tauri://localhost (macOS,
+  // Linux) or http://tauri.localhost (Windows). "localhost" there is the app
+  // itself, not a dev server, and has no /api.
+  const packaged = protocol === "tauri:" || hostname === "tauri.localhost";
+  const sameOriginApi = !packaged && (
     hostname === "sim.ahousedividedgame.com" ||
     hostname === "localhost" ||
-    hostname === "127.0.0.1";
+    hostname === "127.0.0.1");
   return sameOriginApi ? "" : "https://sim.ahousedividedgame.com";
+}
+
+// The preview build runs unreleased balance: its scores and achievements never
+// reach the public boards, whatever the interface does.
+function previewGuard(): Promise<never> | null {
+  return DISTRIBUTION.preview ? Promise.reject(new Error(PREVIEW_SCORE_NOTE)) : null;
 }
 
 export interface ApiUser {
@@ -40,6 +52,19 @@ export interface Purchase {
   currency: string | null;
   status: "paid" | "refunded";
   createdAt: number;
+}
+
+export interface CatalogProduct {
+  id: string;
+  name: string;
+  priceCents: number;
+  scenarios: string[];
+  listed?: boolean;
+}
+
+export interface CatalogResponse {
+  source?: "platform" | "bundled";
+  products: CatalogProduct[];
 }
 
 export interface Unlocked {
@@ -142,14 +167,25 @@ export const api = {
 
   // Product catalog with platform prices (single source of truth on the
   // platform; the server falls back to bundled prices if it is unreachable).
-  catalog: () => call<{ products: { id: string; name: string; priceCents: number; scenarios: string[] }[] }>("/api/catalog"),
+  // `source` says whether the platform answered ("platform") or the bundled
+  // fallback was served ("bundled"); `listed` is true only for products the
+  // platform actually sells.
+  catalog: () => call<CatalogResponse>("/api/catalog"),
 
   // ── Purchases + Lakeside ID ──
   // Commerce is owned by the Lakeside platform now. The Buy button links out to
   // the platform checkout (see lakesideCheckoutUrl); the account view lists the
   // current user's purchases via this same-origin proxy so INTERNAL_TOKEN stays
   // server-side.
-  myEntitlements: () => call<{ purchases: Purchase[] }>("/api/my-entitlements").then((r) => ({ purchases: Array.isArray(r.purchases) ? r.purchases : [] })),
+  myEntitlements: () => call<{ purchases: Purchase[]; verified?: boolean }>("/api/my-entitlements")
+    .then((r) => ({ purchases: Array.isArray(r.purchases) ? r.purchases : [], verified: r.verified !== false })),
+
+  // Ask the platform again what this account owns, bypassing the server's short
+  // entitlement cache. `verified: false` means the platform could not be
+  // reached, so `unlocked` must not be read as "owns nothing".
+  refreshEntitlements: () =>
+    call<{ verified?: boolean; unlocked: Unlocked }>("/api/auth/entitlements/refresh", { method: "POST" })
+      .then((r) => ({ verified: r.verified === true, unlocked: normalizeUnlocked(r.unlocked) })),
 
   lakesideExchange: (code: string) =>
     call<{ token: string; user: ApiUser; unlocked: Unlocked }>(
@@ -161,19 +197,19 @@ export const api = {
       `/api/leaderboard?scenario=${encodeURIComponent(scenarioId)}${difficulty ? `&difficulty=${difficulty}` : ""}&limit=${limit}`),
 
   postScore: (submission: unknown) =>
-    call<{ posted: boolean; personalBest: number; rank: number }>(
+    previewGuard() ?? call<{ posted: boolean; personalBest: number; rank: number }>(
       "/api/leaderboard", { method: "POST", body: JSON.stringify(submission) }),
 
   myRankings: () => call<{ rankings: MyRanking[] }>("/api/leaderboard/me"),
 
   syncAchievements: (scenarioId: string, achievementIds: string[]) =>
-    call<{ added: number }>("/api/achievements", { method: "POST", body: JSON.stringify({ scenarioId, achievementIds }) }),
+    previewGuard() ?? call<{ added: number }>("/api/achievements", { method: "POST", body: JSON.stringify({ scenarioId, achievementIds }) }),
 
   // ── Daily Challenge ──
   daily: () => call<DailyInfo>("/api/daily"),
 
   postDaily: (submission: unknown) =>
-    call<{ posted: boolean; personalBest: number; rank: number; date: string }>(
+    previewGuard() ?? call<{ posted: boolean; personalBest: number; rank: number; date: string }>(
       "/api/daily", { method: "POST", body: JSON.stringify(submission) }),
 
   dailyBoard: (date: string) =>

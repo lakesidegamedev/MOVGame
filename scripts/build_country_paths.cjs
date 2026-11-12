@@ -1,6 +1,7 @@
-// Generates real-geography SVG map shape files for Canada, Germany, France and
-// Australia (src/content/countries/paths/{ca,de,fr,au}.ts), following the UK
-// pipeline in scripts/build_uk_paths.cjs:
+// Generates real-geography SVG map shape files for Canada, Germany, France,
+// Australia, New Zealand, Brazil, India, Japan, Italy and Mexico
+// (src/content/countries/paths/*.ts), following the UK pipeline in
+// scripts/build_uk_paths.cjs:
 //   source geo data -> (optional group union) -> equirectangular lat-corrected
 //   projection -> Douglas-Peucker simplify -> viewBox fit -> TS emit.
 //
@@ -11,18 +12,26 @@
 //          https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/3_mittel.geo.json
 //   FR:    gregoiredavid/france-geojson regions.geojson (post-2016 régions)
 //          https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/regions.geojson
+//   NZ/IN/IE/IT: Natural Earth ne_10m_admin_1_states_provinces.geojson (saved as ne10_admin1.geojson)
+//          https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson
+//   BR:    the same Natural Earth ne10_admin1.geojson (states of Brazil, adm0_a3 BRA)
 //
 // Merged groups (CA NORTH, DE NORTH/NE/EAST/WEST) are geometrically unioned by
 // edge cancellation: shared borders in these datasets carry identical vertex
 // sequences, so interior edges appear twice (opposite directions) and are
 // dropped, then the remaining boundary edges are stitched back into rings.
 //
-// Usage: node scripts/build_country_paths.cjs [srcDir]
+// Usage: node scripts/build_country_paths.cjs [srcDir] [--only=NZ,CA]
+// --only rebuilds just the listed countries and needs only their sources;
+// the other generated files are left untouched.
 
 const fs = require("fs");
 const path = require("path");
 
-const SRC_DIR = process.argv[2] || "/tmp/claude-0/-root/1bb8134f-b1af-4382-9ecf-16d0bbdddf08/scratchpad";
+const ARGS = process.argv.slice(2);
+const SRC_DIR = ARGS.find((a) => !a.startsWith("--")) || "/tmp/claude-0/-root/1bb8134f-b1af-4382-9ecf-16d0bbdddf08/scratchpad";
+const ONLY = (ARGS.find((a) => a.startsWith("--only=")) || "").slice("--only=".length).split(",").filter(Boolean);
+const wants = (code) => ONLY.length === 0 || ONLY.includes(code);
 const OUT_DIR = path.join(__dirname, "..", "src", "content", "countries", "paths");
 
 // ---------------------------------------------------------------- geo input
@@ -83,6 +92,42 @@ function unionByEdgeCancellation(polygons) {
   return rings;
 }
 
+// --------------------------------------------- half-plane clip (lon/lat space)
+// Sutherland-Hodgman against one half-plane: keeps the side of the directed
+// line a->b where cross((b-a),(p-a)) has the sign `side` (+1 left, -1 right).
+// Used to split one administrative region along a straight cut line.
+function clipRing(ring, a, b, side) {
+  const val = (p) => side * ((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]));
+  const pts = ring.slice(0, -1);
+  const out = [];
+  for (let i = 0; i < pts.length; i++) {
+    const cur = pts[i], prev = pts[(i + pts.length - 1) % pts.length];
+    const vc = val(cur), vp = val(prev);
+    if (vc >= 0) {
+      if (vp < 0) out.push(intersect(prev, cur, vp, vc));
+      out.push(cur);
+    } else if (vp >= 0) out.push(intersect(prev, cur, vp, vc));
+  }
+  if (out.length < 3) return null;
+  out.push(out[0]);
+  return out;
+}
+function intersect(p, q, vp, vq) {
+  const t = vp / (vp - vq);
+  return [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t];
+}
+// Clip every outer ring of every polygon (holes dropped: the sources used
+// with this have none that survive simplification).
+function clipPolygons(polys, cuts) {
+  const out = [];
+  for (const poly of polys) {
+    let ring = poly[0];
+    for (const [a, b, side] of cuts) { if (ring) ring = clipRing(ring, a, b, side); }
+    if (ring) out.push([ring]);
+  }
+  return out;
+}
+
 // -------------------------------------------------------- simplify (px space)
 function rdp(points, eps) {
   if (points.length < 3) return points;
@@ -122,7 +167,16 @@ function simplifyRing(ring, eps) {
 
 // ------------------------------------------------------------ build country
 // cfg: { name, constName, sourceNote, lat0, eps, minIslandPx, clip?, order,
-//        regions: id -> array of polygons (lon/lat), labelNudge?: id -> [dx,dy] }
+//        regions: id -> array of polygons (lon/lat), labelNudge?: id -> [dx,dy],
+//        labelAt?: id -> [x,y], padRight?: number }
+// `padRight` adds open sea to the right of the fitted country, in output units
+// (the country keeps its 560-unit fit). A tall map drawn in a wide frame loses
+// no scale, and small coastal regions get room for their labels.
+// Label anchors default to the centroid of a region's largest ring, moved by
+// `labelNudge`. `labelAt` replaces the anchor outright, in output (viewBox)
+// units: use it for small or crowded regions whose label reads better in open
+// sea next to the shape. Check the result on the geo map at phone and desktop
+// widths (scripts/ui-screenshots.mjs, countries section).
 function buildCountry(cfg) {
   const k = Math.cos((cfg.lat0 * Math.PI) / 180);
   const project = ([lon, lat]) => [lon * k, lat];
@@ -148,8 +202,9 @@ function buildCountry(cfg) {
       if (y < minY) minY = y; if (y > maxY) maxY = y;
     }
 
-  const PAD = 8, W = 560;
-  const sx = (W - PAD * 2) / (maxX - minX);
+  const PAD = 8, FIT = 560;
+  const W = FIT + (cfg.padRight || 0);
+  const sx = (FIT - PAD * 2) / (maxX - minX);
   const H = Math.round((maxY - minY) * sx + PAD * 2);
   const tx = (x) => PAD + (x - minX) * sx;
   const ty = (y) => PAD + (maxY - y) * sx; // flip vertical
@@ -188,21 +243,42 @@ function buildCountry(cfg) {
     }
     if (!d) throw new Error(`${cfg.name}: region ${id} produced an empty path`);
     const nudge = (cfg.labelNudge && cfg.labelNudge[id]) || [0, 0];
+    const at = cfg.labelAt && cfg.labelAt[id];
     shapes[id] = {
       d,
-      label: bestCentroid
-        ? [round(bestCentroid[0] + nudge[0]), round(bestCentroid[1] + nudge[1])]
-        : [W / 2, H / 2],
+      ...(cfg.insets && cfg.insets.includes(id) ? { inset: true } : {}),
+      label: at
+        ? [at[0], at[1]]
+        : bestCentroid
+          ? [round(bestCentroid[0] + nudge[0]), round(bestCentroid[1] + nudge[1])]
+          : [W / 2, H / 2],
     };
   }
-  return { viewBox: `0 0 ${W} ${H}`, W, H, shapes, cfg };
+  // Inert land: geography that votes in no region of this election (Northern
+  // Ireland on the Dail map). Same projection and frame; it never moves the
+  // bounds, so adding it leaves every region exactly where it was.
+  const inert = (cfg.inert || []).map((polys) => {
+    let d = "";
+    for (const poly of polys) {
+      for (const rawRing of poly) {
+        if (!rawRing.some(inClip)) continue;
+        let ring = rawRing.map((pt) => { const [x, y] = project(pt); return [tx(x), ty(y)]; });
+        ring = simplifyRing(ring, cfg.eps);
+        if (ring.length < 4) continue;
+        d += "M" + ring.map(([x, y]) => `${round(x)},${round(y)}`).join("L") + "Z";
+      }
+    }
+    if (!d) throw new Error(`${cfg.name}: an inert shape produced an empty path`);
+    return d;
+  });
+  return { viewBox: `0 0 ${W} ${H}`, W, H, shapes, inert, cfg };
 }
 
 // ------------------------------------------------------------------- emit TS
 function emit(built, file) {
-  const { cfg, viewBox, shapes } = built;
+  const { cfg, viewBox, shapes, inert } = built;
   let out = `// AUTO-GENERATED by scripts/build_country_paths.cjs from ${cfg.sourceNote}.\n`;
-  out += `// Do not hand-edit — regenerate with: node scripts/build_country_paths.cjs\n`;
+  out += `// Do not hand-edit. Regenerate with: node scripts/build_country_paths.cjs\n`;
   out += `// Equirectangular projection (cos(${cfg.lat0}°) lat correction), Douglas-Peucker simplified.\n`;
   if (cfg.extraNote) out += `// ${cfg.extraNote}\n`;
   out += `\nimport type { CountryMapShapes } from "@engine/countryGame";\n\n`;
@@ -211,21 +287,26 @@ function emit(built, file) {
   out += `  shapes: {\n`;
   for (const id of cfg.order) {
     const s = shapes[id];
-    out += `    ${id}: { d: "${s.d}", label: [${s.label[0]}, ${s.label[1]}] },\n`;
+    out += `    ${id}: { d: "${s.d}", ${s.inset ? "inset: true, " : ""}label: [${s.label[0]}, ${s.label[1]}] },\n`;
   }
-  out += `  },\n};\n`;
+  out += `  },\n`;
+  if (inert.length) out += `  inert: [\n${inert.map((d) => `    "${d}",\n`).join("")}  ],\n`;
+  out += `};\n`;
   fs.writeFileSync(file, out);
   return out.length;
 }
 
 // -------------------------------------------------------------- load sources
-const ne50 = JSON.parse(fs.readFileSync(path.join(SRC_DIR, "ne50_admin1.geojson")));
-const deSrc = JSON.parse(fs.readFileSync(path.join(SRC_DIR, "de_laender.geojson")));
-const frSrc = JSON.parse(fs.readFileSync(path.join(SRC_DIR, "fr_regions.geojson")));
+const readSrc = (name) => JSON.parse(fs.readFileSync(path.join(SRC_DIR, name)));
+const ne50 = wants("CA") || wants("AU") ? readSrc("ne50_admin1.geojson") : null;
+const deSrc = wants("DE") ? readSrc("de_laender.geojson") : null;
+const frSrc = wants("FR") ? readSrc("fr_regions.geojson") : null;
+// Natural Earth 10m admin-1, shared by every country built from it.
+const ne10 = readSrc("ne10_admin1.geojson");
 
-function neCountry(a3) {
+function neCountry(a3, source = ne50) {
   const m = {};
-  for (const f of ne50.features) {
+  for (const f of source.features) {
     if (f.properties.adm0_a3 !== a3) continue;
     m[f.properties.name] = featurePolygons(f.geometry);
   }
@@ -255,14 +336,13 @@ function groupRegions(byName, groups, countryLabel) {
 }
 
 // --------------------------------------------------------------------- CA
-const caNames = neCountry("CAN");
-const CA = buildCountry({
+const CA = wants("CA") && buildCountry({
   name: "Canada", constName: "CA_MAP",
   sourceNote: "Natural Earth ne_50m_admin_1_states_provinces (CAN)",
   extraNote: "NORTH = Yukon + Northwest Territories + Nunavut merged (arc-cancellation union).",
   lat0: 60, eps: 1.1, minIslandPx: 7,
   order: ["BC", "AB", "SK", "MB", "ON", "QC", "NB", "NS", "PE", "NL", "NORTH"],
-  regions: groupRegions(caNames, {
+  regions: groupRegions(neCountry("CAN"), {
     BC: ["British Columbia"], AB: ["Alberta"], SK: ["Saskatchewan"], MB: ["Manitoba"],
     ON: ["Ontario"], QC: ["Québec"], NB: ["New Brunswick"], NS: ["Nova Scotia"],
     PE: ["Prince Edward Island"], NL: ["Newfoundland and Labrador"],
@@ -271,12 +351,18 @@ const CA = buildCountry({
   // NORTH's largest ring is the merged mainland; nudge the label toward the
   // NWT/Nunavut mainland's visual middle if the centroid drifts.
   labelNudge: { NORTH: [0, 20] },
+  // The Maritimes are three small shapes: Prince Edward Island is labelled in
+  // the Gulf of St. Lawrence and Nova Scotia in the Atlantic, leaving New
+  // Brunswick's label on land.
+  // The narrow Prairie provinces alternate high and low so each keeps its
+  // second line next to a neighbour's.
+  labelAt: { NB: [462, 462], PE: [505, 434], NS: [514, 496], BC: [102, 382], AB: [171, 332], SK: [224, 382], MB: [276, 336] },
 });
 
 // --------------------------------------------------------------------- DE
 const deNames = {};
-for (const f of deSrc.features) deNames[f.properties.name] = featurePolygons(f.geometry);
-const DE = buildCountry({
+if (deSrc) for (const f of deSrc.features) deNames[f.properties.name] = featurePolygons(f.geometry);
+const DE = wants("DE") && buildCountry({
   name: "Germany", constName: "DE_MAP",
   sourceNote: "isellsoap/deutschlandGeoJSON 2_bundeslaender/3_mittel.geo.json",
   extraNote: "Grouped Länder (NORTH/NE/EAST/WEST) merged via arc-cancellation union.",
@@ -300,11 +386,11 @@ const FR_CODE2ID = {
   94: "COM", // Corse stands in for the bundle's "Corse & Outre-mer" unit
 };
 const frRegions = {};
-for (const f of frSrc.features) {
+if (frSrc) for (const f of frSrc.features) {
   const id = FR_CODE2ID[Number(f.properties.code)];
   if (id) frRegions[id] = featurePolygons(f.geometry);
 }
-const FR = buildCountry({
+const FR = wants("FR") && buildCountry({
   name: "France", constName: "FR_MAP",
   sourceNote: "gregoiredavid/france-geojson regions.geojson (post-2016 régions)",
   extraNote: "COM = Corse shape standing in for the bundle's \"Corse & Outre-mer\" unit.",
@@ -314,26 +400,404 @@ const FR = buildCountry({
 });
 
 // --------------------------------------------------------------------- AU
-const auNames = neCountry("AUS"); // includes Jervis Bay Territory (excluded below)
-const AU = buildCountry({
+// neCountry("AUS") includes Jervis Bay Territory (excluded below)
+const AU = wants("AU") && buildCountry({
   name: "Australia", constName: "AU_MAP",
   sourceNote: "Natural Earth ne_50m_admin_1_states_provinces (AUS)",
   extraNote: "Clipped to the mainland + Tasmania box (drops Macquarie, Lord Howe etc.); ACT drawn last so the enclave sits above NSW.",
   lat0: -25, eps: 1.0, minIslandPx: 5,
   clip: [111.5, -44.5, 155.5, -9.0], // lonMin, latMin, lonMax, latMax
   order: ["WA", "NT", "SA", "QLD", "NSW", "VIC", "TAS", "ACT"],
-  regions: groupRegions(auNames, {
+  regions: groupRegions(neCountry("AUS"), {
     NSW: ["New South Wales"], VIC: ["Victoria"], QLD: ["Queensland"],
     WA: ["Western Australia"], SA: ["South Australia"], TAS: ["Tasmania"],
     NT: ["Northern Territory"], ACT: ["Australian Capital Territory"],
   }, "AU"),
 });
 
+// --------------------------------------------------------------------- NZ
+// Ten units: nine groups of regional councils (Auckland split in three along
+// straight cut lines that follow the Waitematā Harbour and the Ōtāhuhu
+// isthmus) plus the Māori electorates, which cover the whole country and are
+// drawn as an inset box in the Tasman Sea.
+function nzRegions() {
+  const nz = neCountry("NZL", ne10);
+  const auckland = nz["Auckland"];
+  // Directed cut lines in lon/lat; side +1 keeps the left of a->b.
+  const harbour = [[174.40, -36.88], [174.90, -36.84]];   // west -> east
+  const isthmus = [[174.55, -36.99], [175.00, -36.87]];   // west -> east
+  const north = clipPolygons(auckland, [[...harbour, +1]]);
+  const middle = clipPolygons(auckland, [[...harbour, -1], [...isthmus, +1]]);
+  const south = clipPolygons(auckland, [[...isthmus, -1]]);
+  const box = (lon0, lat0, lon1, lat1) => [[[[lon0, lat0], [lon1, lat0], [lon1, lat1], [lon0, lat1], [lon0, lat0]]]];
+  const merged = groupRegions(nz, {
+    WBP: ["Waikato", "Bay of Plenty"],
+    CNI: ["Taranaki", "Manawatu-Wanganui", "Hawke's Bay", "Gisborne District"],
+    WGN: ["Wellington"],
+    UPS: ["Tasman District", "Nelson City", "Marlborough District", "West Coast"],
+    CAN: ["Canterbury"],
+    OTS: ["Otago", "Southland"],
+  }, "NZ");
+  return {
+    NTH: [...nz["Northland"], ...north],
+    AKC: middle,
+    AKS: south,
+    ...merged,
+    MAO: box(167.2, -35.6, 170.6, -37.4),
+  };
+}
+const NZ = wants("NZ") && buildCountry({
+  name: "New Zealand", constName: "NZ_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (NZL)",
+  extraNote: "Auckland split along straight cut lines; MAO (Māori electorates) is an inset box, not a place.",
+  lat0: -41, eps: 0.9, minIslandPx: 5,
+  clip: [166.0, -47.5, 179.0, -34.0], // mainland + Stewart Island; drops Chathams and the subantarctic islands
+  order: ["NTH", "AKC", "AKS", "WBP", "CNI", "WGN", "UPS", "CAN", "OTS", "MAO"],
+  regions: nzRegions(),
+  insets: ["MAO"],
+  // The two Auckland cuts are too small for two labels: central and west
+  // Auckland is labelled in the Tasman Sea, south and east in the Hauraki Gulf.
+  labelAt: { AKC: [318, 172], AKS: [484, 138] },
+});
+
+// --------------------------------------------------------------------- BR
+// Twelve units built from the 27 states: São Paulo, Minas Gerais, Rio de
+// Janeiro, Bahia, Espírito Santo and Rio Grande do Sul on their own; the rest are contiguous
+// groups of states (Paraná and Santa Catarina; Ceará, Piauí and Maranhão;
+// Pernambuco and the eastern Northeast; the Centre-West with the Federal
+// District; Pará, Amapá and Tocantins; the western Amazon). The clip box
+// drops Fernando de Noronha, Trindade and the other ocean islands.
+const BR = wants("BR") && buildCountry({
+  name: "Brazil", constName: "BR_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (BRA)",
+  extraNote: "Twelve units: six states alone, six contiguous groups of states (arc-cancellation union). Ocean islands clipped.",
+  lat0: -15, eps: 1.0, minIslandPx: 5,
+  clip: [-75.0, -34.5, -33.0, 5.5], // lonMin, latMin, lonMax, latMax
+  order: ["AMZ", "NOR", "CPM", "PNE", "CW", "BA", "MG", "ES", "PRSC", "SP", "RJ", "RS"],
+  regions: groupRegions(neCountry("BRA", ne10), {
+    AMZ: ["Amazonas", "Acre", "Rondônia", "Roraima"],
+    NOR: ["Pará", "Amapá", "Tocantins"],
+    CPM: ["Ceará", "Piauí", "Maranhão"],
+    PNE: ["Pernambuco", "Paraíba", "Rio Grande do Norte", "Alagoas", "Sergipe"],
+    CW: ["Goiás", "Distrito Federal", "Mato Grosso", "Mato Grosso do Sul"],
+    BA: ["Bahia"], MG: ["Minas Gerais"], ES: ["Espírito Santo"],
+    PRSC: ["Paraná", "Santa Catarina"], SP: ["São Paulo"], RJ: ["Rio de Janeiro"],
+    RS: ["Rio Grande do Sul"],
+  }, "BR"),
+  // Espírito Santo and Rio de Janeiro are thin coastal states: label both in
+  // the Atlantic, clear of Minas Gerais.
+  labelAt: { ES: [510, 378], RJ: [480, 424] },
+});
+
+// --------------------------------------------------------------------- IN
+// Fifteen groups of states and union territories. The Andaman and Nicobar and
+// Lakshadweep island groups vote with West Bengal and Kerala but are not drawn.
+const inRegionPolys = () => {
+  const ind = neCountry("IND", ne10);
+  const merged = groupRegions(ind, {
+    BJ: ["Bihar", "Jharkhand"],
+    MP: ["Madhya Pradesh", "Chhattisgarh"],
+    GR: ["Gujarat", "Rajasthan", "Dadra and Nagar Haveli and Daman and Diu"],
+    MH: ["Maharashtra", "Goa"],
+    DH: ["Delhi", "Haryana", "Chandigarh"],
+    HM: ["Himachal Pradesh", "Uttarakhand", "Jammu and Kashmir", "Ladakh"],
+    TN: ["Tamil Nadu", "Puducherry"],
+    AT: ["Andhra Pradesh", "Telangana"],
+    NE: ["Assam", "Arunachal Pradesh", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Sikkim", "Tripura"],
+  }, "IN");
+  return {
+    UP: ind["Uttar Pradesh"],
+    ...merged,
+    PB: ind["Punjab"], KA: ind["Karnataka"], KL: ind["Kerala"],
+    WB: ind["West Bengal"], OD: ind["Odisha"],
+  };
+};
+const IN = wants("IN") && buildCountry({
+  name: "India", constName: "IN_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (IND)",
+  extraNote: "Island territories (Andaman and Nicobar, Lakshadweep) vote with West Bengal and Kerala and are not drawn.",
+  lat0: 22, eps: 0.9, minIslandPx: 4,
+  order: ["UP", "BJ", "MP", "GR", "MH", "DH", "PB", "HM", "KA", "KL", "TN", "AT", "WB", "OD", "NE"],
+  regions: inRegionPolys(),
+  // Kerala is a thin coastal strip next to Tamil Nadu: its label sits in the
+  // Arabian Sea. Bengal's label sits in the Bay of Bengal, clear of Bihar.
+  labelAt: { KL: [120, 524], TN: [224, 492], WB: [405, 300] },
+});
+
+// --------------------------------------------------------------------- ES
+// Fourteen units: the autonomous communities, with the small ones merged
+// (Castilla-La Mancha with Extremadura, Navarre with La Rioja, Asturias with
+// Cantabria). Source features are provinces, grouped by community. Ceuta and
+// Melilla are under a pixel across at this scale and are dropped from the
+// drawing; their seats are counted with Andalusia. The Canary Islands are
+// shifted north-east into an inset in the sea off Cadiz, as on any map of Spain.
+function esRegions() {
+  const es = neCountry("ESP", ne10);
+  const shift = (polys, dLon, dLat) => polys.map((poly) => poly.map((ring) => ring.map(([lon, lat]) => [lon + dLon, lat + dLat])));
+  const merged = groupRegions(es, {
+    AND: ["Huelva", "Cádiz", "Sevilla", "Córdoba", "Jaén", "Málaga", "Granada", "Almería"],
+    CAT: ["Lérida", "Gerona", "Barcelona", "Tarragona"],
+    VAL: ["Castellón", "Valencia", "Alicante"],
+    GAL: ["La Coruña", "Lugo", "Orense", "Pontevedra"],
+    PV: ["Álava", "Bizkaia", "Gipuzkoa"],
+    CYL: ["León", "Zamora", "Salamanca", "Ávila", "Segovia", "Valladolid", "Palencia", "Burgos", "Soria"],
+    CLE: ["Cáceres", "Badajoz", "Toledo", "Ciudad Real", "Cuenca", "Albacete", "Guadalajara"],
+    ARA: ["Huesca", "Zaragoza", "Teruel"],
+    NAV: ["Navarra", "La Rioja"],
+    AST: ["Asturias", "Cantabria"],
+    CAN: ["Santa Cruz de Tenerife", "Las Palmas"],
+  }, "ES");
+  return {
+    ...merged,
+    MAD: es["Madrid"],
+    MUR: es["Murcia"],
+    BAL: es["Baleares"],
+    CAN: shift(merged.CAN, 8.2, 6.4),
+  };
+}
+const ES = wants("ES") && buildCountry({
+  name: "Spain", constName: "ES_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (ESP, provinces grouped by community)",
+  extraNote: "Ceuta and Melilla are not drawn (counted with Andalusia); CAN (Canary Islands) is shifted into an inset off the Andalusian coast.",
+  lat0: 40, eps: 0.8, minIslandPx: 3.5,
+  order: ["AND", "CAT", "MAD", "VAL", "GAL", "PV", "CYL", "CLE", "ARA", "NAV", "MUR", "AST", "BAL", "CAN"],
+  regions: esRegions(),
+  // Aragon's centroid sits level with the Catalonia label: move it south.
+  labelAt: { ARA: [356, 152] },
+});
+
+// --------------------------------------------------------------------- IE
+// Ten units built from the 26 county-level features (Natural Earth lists Cork,
+// Galway, Limerick and Waterford as a city and a county each). Dublin is cut
+// three ways to match the bundle: DNO (Fingal and the city north of the
+// Liffey), DSO (Dun Laoghaire-Rathdown and the city south of the Liffey) and
+// DWE (South Dublin plus the Castleknock and Blanchardstown corner of Fingal).
+// Northern Ireland has no Dail seats: it is drawn as inert land, never a region.
+const ie10 = wants("IE") ? readSrc("ne10_admin1.geojson") : null;
+function ieRegions() {
+  const by = {};
+  for (const f of ie10.features) {
+    if (f.properties.adm0_a3 !== "IRL") continue;
+    const key = f.properties.name.startsWith("D\u00fan Laoghaire") ? "DLR" : f.properties.name;
+    (by[key] ||= []).push(...featurePolygons(f.geometry));
+  }
+  // Directed cut lines in lon/lat; side +1 keeps the left of a->b.
+  const liffey = [[-6.60, 53.356], [-6.10, 53.346]];     // west -> east
+  const westEdge = [[-6.29, 53.20], [-6.29, 53.60]];     // south -> north, west is left
+  const northEdge = [[-6.60, 53.43], [-6.00, 53.43]];    // west -> east, south is right
+  const dublinN = clipPolygons(by["Dublin"], [[...liffey, +1]]);
+  const dublinS = clipPolygons(by["Dublin"], [[...liffey, -1]]);
+  const fingalWest = clipPolygons(by["Fingal"], [[...westEdge, +1], [...northEdge, -1]]);
+  const fingalRest = [
+    ...clipPolygons(by["Fingal"], [[...westEdge, -1]]),
+    ...clipPolygons(by["Fingal"], [[...westEdge, +1], [...northEdge, +1]]),
+  ];
+  const merged = groupRegions(by, {
+    CMB: ["Meath", "Kildare", "Wicklow"],
+    SEA: ["Carlow", "Kilkenny", "Waterford", "Wexford"],
+    MID: ["Longford", "Westmeath", "Laoighis", "Offaly"],
+    COR: ["Cork"],
+    MUN: ["Kerry", "Limerick", "Clare", "North Tipperary", "South Tipperary"],
+    WES: ["Mayo", "Galway", "Roscommon"],
+    BOR: ["Donegal", "Cavan", "Monaghan", "Louth", "Sligo", "Leitrim"],
+  }, "IE");
+  return {
+    DNO: [...dublinN, ...fingalRest],
+    DSO: [...dublinS, ...by["DLR"]],
+    DWE: [...by["South Dublin"], ...fingalWest],
+    ...merged,
+  };
+}
+// Northern Ireland's districts (GBR in Natural Earth), unioned into one outline.
+function ieNorthernIreland() {
+  const ni = {};
+  for (const f of ie10.features) {
+    if (f.properties.adm0_a3 !== "GBR" || f.properties.region !== "Northern Ireland") continue;
+    ni[f.properties.name] = featurePolygons(f.geometry);
+  }
+  if (Object.keys(ni).length < 20) throw new Error("IE: Northern Ireland districts missing from the source");
+  return groupRegions(ni, { NI: Object.keys(ni) }, "IE").NI;
+}
+const IE = wants("IE") && buildCountry({
+  name: "Ireland", constName: "IE_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (IRL)",
+  extraNote: "Dublin cut three ways along straight lines (the Liffey, and Castleknock for the west); Northern Ireland is inert land, not a region.",
+  lat0: 53.4, eps: 0.8, minIslandPx: 4,
+  clip: [-10.8, 51.3, -5.9, 55.5], // drops nothing but stray rocks
+  order: ["BOR", "WES", "MID", "CMB", "DNO", "DSO", "DWE", "SEA", "MUN", "COR"],
+  regions: ieRegions(),
+  inert: [ieNorthernIreland()],
+  // The three Dublin shapes are tiny: their labels stack in the Irish Sea,
+  // which the extra frame on the right provides at no cost in scale (the map
+  // is height-bound on every screen). The commuter belt label moves south to
+  // Wicklow so it clears the Midlands.
+  padRight: 150,
+  labelAt: { DNO: [622, 376], DWE: [622, 420], DSO: [622, 464], CMB: [488, 505] },
+});
+
+// --------------------------------------------------------------------- JP
+// Eleven units: the proportional blocks of the House of Representatives, each
+// a group of prefectures. Okinawa belongs to the Kyushu block and is drawn as
+// an inset shifted north so it sits west of Kyushu; Tokyo also gets a 2.4x
+// magnified copy in the Pacific; the far southern island chains (Amami, Tokara, Izu,
+// Ogasawara) are dropped.
+function jpRegions() {
+  const jp = neCountry("JPN", ne10);
+  const ringMinLat = (ring) => Math.min(...ring.map((p) => p[1]));
+  // Keep only polygons whose outer ring lies north of a latitude.
+  const northOf = (polys, lat) => polys.filter((poly) => ringMinLat(poly[0]) >= lat);
+  const shift = (polys, dlon, dlat) => polys.map((poly) => poly.map((ring) => ring.map(([x, y]) => [x + dlon, y + dlat])));
+  jp["Kagoshima"] = northOf(jp["Kagoshima"], 30.0);
+  // Tokyo is a speck at map scale. Keep its true outline and add a magnified
+  // copy in the Pacific off Chiba (a lens) so the block can be read and
+  // tapped. Both pieces belong to the one TKY shape.
+  const scaleAbout = (polys, cx, cy, k) => polys.map((poly) => poly.map((ring) => ring.map(([x, y]) => [cx + (x - cx) * k, cy + (y - cy) * k])));
+  const tokyo = northOf(jp["Tokyo"], 35.3);
+  const lens = shift(scaleAbout(tokyo, 139.5, 35.7, 2.4), 3.4, 0.2);
+  jp["Tokyo"] = [...tokyo, ...lens];
+  const okinawa = shift(jp["Okinawa"], 0, 4.2);
+  const merged = groupRegions(jp, {
+    HKD: ["Hokkaidō"],
+    TOH: ["Aomori", "Iwate", "Miyagi", "Akita", "Yamagata", "Fukushima"],
+    NKT: ["Ibaraki", "Tochigi", "Gunma", "Saitama"],
+    SKT: ["Chiba", "Kanagawa", "Yamanashi"],
+    TKY: ["Tokyo"],
+    HSN: ["Niigata", "Toyama", "Ishikawa", "Fukui", "Nagano"],
+    TKI: ["Gifu", "Shizuoka", "Aichi", "Mie"],
+    KNK: ["Shiga", "Kyōto", "Ōsaka", "Hyōgo", "Nara", "Wakayama"],
+    CHG: ["Tottori", "Shimane", "Okayama", "Hiroshima", "Yamaguchi"],
+    SHK: ["Tokushima", "Kagawa", "Ehime", "Kōchi"],
+  }, "JP");
+  const kyushu = groupRegions(jp, { KYU: ["Fukuoka", "Saga", "Nagasaki", "Kumamoto", "Ōita", "Miyazaki", "Kagoshima"] }, "JP");
+  kyushu.KYU = [...kyushu.KYU, ...okinawa];
+  return { ...merged, ...kyushu };
+}
+const JP = wants("JP") && buildCountry({
+  name: "Japan", constName: "JP_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (JPN)",
+  extraNote: "Regions are the 11 proportional blocks. Okinawa (Kyushu block) is an inset shifted north; Tokyo carries a 2.4x magnified lens copy in the Pacific so it can be tapped; Amami, Tokara, Izu and Ogasawara are dropped.",
+  labelNudge: { KYU: [10, -14], NKT: [-2, -4] },
+  // Central Honshu is too narrow for five labels: Hokuriku and Chugoku sit in
+  // the Sea of Japan, Tokai, Southern Kanto and Shikoku in the Pacific.
+  labelAt: { HSN: [335, 238], CHG: [238, 296], TKI: [345, 366], SKT: [414, 340], SHK: [262, 384] },
+  lat0: 36, eps: 0.8, minIslandPx: 4,
+  clip: [122.5, 27.8, 145.9, 45.9],
+  order: ["HKD", "TOH", "NKT", "SKT", "HSN", "TKI", "KNK", "CHG", "SHK", "KYU", "TKY"],
+  regions: jpRegions(),
+});
+
+// --------------------------------------------------------------------- IT
+// Fifteen units built from the 110 provinces of Natural Earth, grouped by
+// their region: Piedmont with the Aosta Valley, Lombardy, Veneto, Trentino-Alto
+// Adige with Friuli-Venezia Giulia, Tuscany with Liguria, Emilia-Romagna,
+// Umbria with the Marche, Lazio, Abruzzo with Molise, Campania, Apulia,
+// Basilicata with Calabria, Sicily and Sardinia. EST (the overseas
+// constituency) covers voters who live abroad and is drawn as an inset box in
+// the Ionian Sea. The clip box drops Lampedusa and Linosa.
+function itRegions() {
+  const prov = {};
+  const regionOf = {};
+  for (const f of ne10.features) {
+    if (f.properties.adm0_a3 !== "ITA") continue;
+    prov[f.properties.name] = featurePolygons(f.geometry);
+    (regionOf[f.properties.region] = regionOf[f.properties.region] || []).push(f.properties.name);
+  }
+  const members = (...regs) => regs.flatMap((r) => {
+    if (!regionOf[r]) throw new Error(`IT: no provinces for region ${r}`);
+    return regionOf[r];
+  });
+  const box = (lon0, lat0, lon1, lat1) => [[[[lon0, lat0], [lon1, lat0], [lon1, lat1], [lon0, lat1], [lon0, lat0]]]];
+  const merged = groupRegions(prov, {
+    PIE: members("Piemonte", "Valle d'Aosta"),
+    LOM: members("Lombardia"),
+    VEN: members("Veneto"),
+    NEA: members("Trentino-Alto Adige", "Friuli-Venezia Giulia"),
+    TOS: members("Toscana", "Liguria"),
+    EMR: members("Emilia-Romagna"),
+    UMA: members("Umbria", "Marche"),
+    LAZ: members("Lazio"),
+    ABM: members("Abruzzo", "Molise"),
+    CAM: members("Campania"),
+    PUG: members("Apulia"),
+    BAC: members("Basilicata", "Calabria"),
+    SIC: members("Sicily"),
+    SAR: members("Sardegna"),
+  }, "IT");
+  return { ...merged, EST: box(17.9, 36.7, 19.4, 38.1) };
+}
+const IT = wants("IT") && buildCountry({
+  name: "Italy", constName: "IT_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (ITA)",
+  extraNote: "Regions are groups of the 110 provinces (arc-cancellation union). EST (Italians abroad) is an inset box in the Ionian Sea, not a place. Lampedusa and Linosa are clipped.",
+  lat0: 42, eps: 0.8, minIslandPx: 4,
+  clip: [6.0, 36.2, 19.6, 47.3],
+  order: ["PIE", "LOM", "VEN", "NEA", "TOS", "EMR", "UMA", "LAZ", "ABM", "CAM", "PUG", "BAC", "SIC", "SAR", "EST"],
+  regions: itRegions(),
+  insets: ["EST"],
+  // Veneto and Abruzzo-Molise are labelled in the Adriatic, Apulia on its
+  // northern coast, so the central and southern labels do not collide.
+  labelAt: { VEN: [282, 118], ABM: [380, 280], PUG: [468, 345] },
+});
+
+// --------------------------------------------------------------------- MX
+// Eleven units from the 32 states: the State of Mexico, Mexico City and
+// Veracruz alone, the rest contiguous groups (the Northwest, the North, the
+// Northeast, the West around Jalisco with Aguascalientes, Guanajuato and
+// Querétaro as the Bajío, the Centre around Puebla, the
+// Pacific South with Michoacán, and the Gulf and Yucatán Peninsula). Mexico
+// City is a speck at map scale, so it keeps its true outline and gains a 5x
+// magnified lens copy in the Gulf of Mexico. The clip box drops the
+// Revillagigedo Islands and other far offshore islands.
+function mxRegions() {
+  const mx = neCountry("MEX", ne10);
+  const scaleAbout = (polys, cx, cy, k) => polys.map((poly) => poly.map((ring) => ring.map(([x, y]) => [cx + (x - cx) * k, cy + (y - cy) * k])));
+  const shift = (polys, dlon, dlat) => polys.map((poly) => poly.map((ring) => ring.map(([x, y]) => [x + dlon, y + dlat])));
+  const city = mx["Distrito Federal"];
+  mx["Distrito Federal"] = [...city, ...shift(scaleAbout(city, -99.13, 19.32, 5), 4.4, 3.6)];
+  return groupRegions(mx, {
+    NW: ["Baja California", "Baja California Sur", "Sonora", "Sinaloa"],
+    NOR: ["Chihuahua", "Coahuila", "Durango", "Zacatecas"],
+    NE: ["Nuevo León", "Tamaulipas", "San Luis Potosí"],
+    WES: ["Jalisco", "Nayarit", "Colima", "Aguascalientes"],
+    BAJ: ["Guanajuato", "Querétaro"],
+    MEX: ["México"],
+    CDMX: ["Distrito Federal"],
+    CEN: ["Puebla", "Hidalgo", "Tlaxcala", "Morelos"],
+    VER: ["Veracruz"],
+    SUR: ["Michoacán", "Guerrero", "Oaxaca", "Chiapas"],
+    PEN: ["Tabasco", "Campeche", "Yucatán", "Quintana Roo"],
+  }, "MX");
+}
+const MX = wants("MX") && buildCountry({
+  name: "Mexico", constName: "MX_MAP",
+  sourceNote: "Natural Earth ne_10m_admin_1_states_provinces (MEX)",
+  extraNote: "Eleven units: two states and Mexico City alone, eight contiguous groups (arc-cancellation union). Mexico City carries a 5x magnified lens copy in the Gulf of Mexico so it can be tapped; far offshore islands clipped.",
+  lat0: 23, eps: 0.9, minIslandPx: 4,
+  clip: [-117.6, 14.3, -86.5, 32.8], // drops Guadalupe and other far Pacific islands
+  order: ["NW", "NOR", "NE", "WES", "BAJ", "MEX", "CDMX", "CEN", "VER", "SUR", "PEN"],
+  regions: mxRegions(),
+  // The central units are small and crowded: push their labels apart, and
+  // put the West, Veracruz and Pacific South labels on or past their coasts.
+  labelNudge: { MEX: [-12, 10] },
+  labelAt: { WES: [222, 262], BAJ: [285, 222], CEN: [352, 248], VER: [430, 286], SUR: [340, 332], PEN: [496, 240] },
+});
+
 // ------------------------------------------------------------------- write
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const files = [
-  [CA, "ca.ts"], [DE, "de.ts"], [FR, "fr.ts"], [AU, "au.ts"],
-];
+  [CA, "ca.ts"],
+  [DE, "de.ts"],
+  [FR, "fr.ts"],
+  [AU, "au.ts"],
+  [NZ, "nz.ts"],
+  [BR, "br.ts"],
+  [IN, "in.ts"],
+  [ES, "es.ts"],
+  [IE, "ie.ts"],
+  [JP, "jp.ts"],
+  [IT, "it.ts"],
+  [MX, "mx.ts"],
+].filter(([built]) => built);
 for (const [built, name] of files) {
   const bytes = emit(built, path.join(OUT_DIR, name));
   console.log(`${name}: ${(bytes / 1024).toFixed(1)} KB, viewBox ${built.viewBox}`);
@@ -363,8 +827,16 @@ function assertCountry(built, expectIds, aspectMin, aspectMax) {
     }
   }
 }
-assertCountry(CA, ["BC", "AB", "SK", "MB", "ON", "QC", "NB", "NS", "PE", "NL", "NORTH"], 0.75, 1.6); // wide-ish
-assertCountry(DE, ["NORTH", "NE", "NRW", "EAST", "WEST", "BW", "BAV"], 0.55, 0.95); // tall
-assertCountry(FR, ["HDF", "NOR", "GE", "BRE", "PDL", "IDF", "BFC", "CVL", "NAQ", "ARA", "OCC", "PACA", "COM"], 0.8, 1.3); // squarish
-assertCountry(AU, ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"], 1.0, 1.6); // wide
+if (CA) assertCountry(CA, ["BC", "AB", "SK", "MB", "ON", "QC", "NB", "NS", "PE", "NL", "NORTH"], 0.75, 1.6); // wide-ish
+if (DE) assertCountry(DE, ["NORTH", "NE", "NRW", "EAST", "WEST", "BW", "BAV"], 0.55, 0.95); // tall
+if (FR) assertCountry(FR, ["HDF", "NOR", "GE", "BRE", "PDL", "IDF", "BFC", "CVL", "NAQ", "ARA", "OCC", "PACA", "COM"], 0.8, 1.3); // squarish
+if (AU) assertCountry(AU, ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"], 1.0, 1.6); // wide
+if (NZ) assertCountry(NZ, ["NTH", "AKC", "AKS", "WBP", "CNI", "WGN", "UPS", "CAN", "OTS", "MAO"], 0.55, 0.95); // tall
+if (BR) assertCountry(BR, ["AMZ", "NOR", "CPM", "PNE", "CW", "BA", "MG", "ES", "PRSC", "SP", "RJ", "RS"], 0.85, 1.25); // squarish
+if (IN) assertCountry(IN, ["UP", "BJ", "MP", "GR", "MH", "DH", "PB", "HM", "KA", "KL", "TN", "AT", "WB", "OD", "NE"], 0.8, 1.15); // squarish
+if (ES) assertCountry(ES, ["AND", "CAT", "MAD", "VAL", "GAL", "PV", "CYL", "CLE", "ARA", "NAV", "MUR", "AST", "BAL", "CAN"], 1.0, 1.9); // wide
+if (IE) assertCountry(IE, ["BOR", "WES", "MID", "CMB", "DNO", "DSO", "DWE", "SEA", "MUN", "COR"], 0.55, 0.95); // tall-ish
+if (JP) assertCountry(JP, ["HKD", "TOH", "NKT", "SKT", "TKY", "HSN", "TKI", "KNK", "CHG", "SHK", "KYU"], 0.8, 1.3); // squarish
+if (IT) assertCountry(IT, ["PIE", "LOM", "VEN", "NEA", "TOS", "EMR", "UMA", "LAZ", "ABM", "CAM", "PUG", "BAC", "SIC", "SAR", "EST"], 0.6, 1.2); // tall-ish
+if (MX) assertCountry(MX, ["NW", "NOR", "NE", "WES", "BAJ", "MEX", "CDMX", "CEN", "VER", "SUR", "PEN"], 1.2, 1.9); // wide
 console.log("All assertions passed.");

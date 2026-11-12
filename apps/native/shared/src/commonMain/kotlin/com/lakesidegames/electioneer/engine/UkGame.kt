@@ -6,6 +6,8 @@ import com.lakesidegames.electioneer.content.UK_ELECTIONS
 import com.lakesidegames.electioneer.content.UK_ELECTION_EVENTS
 import com.lakesidegames.electioneer.content.UK_EVENTS
 import com.lakesidegames.electioneer.content.UK_EVENT_CHANCE
+import com.lakesidegames.electioneer.content.UK_ISSUES
+import com.lakesidegames.electioneer.content.CountryIssueDef
 import com.lakesidegames.electioneer.content.UK_PLAYABLE
 import com.lakesidegames.electioneer.content.UkElectionData
 import com.lakesidegames.electioneer.content.UkEvent
@@ -138,6 +140,14 @@ data class UkGameState(
 )
 
 // Winning post for this election's boundary set (650/326 default).
+/** The issues a UK election runs on: its own list, or else the shared one. */
+fun ukElectionIssues(electionId: String): List<CountryIssueDef> =
+    UK_ELECTIONS[electionId]?.issues ?: UK_ISSUES.map { CountryIssueDef(it.id, it.name, it.blurb) }
+
+/** A UK game's issues for display and the pickers (see countryGameIssues). */
+fun ukGameIssues(electionId: String, salience: Map<String, Double>): List<NativeIssue> =
+    liveIssuesOf(salience, UK_ISSUES.map { CountryIssueDef(it.id, it.name, it.blurb) } + ukElectionIssues(electionId))
+
 fun majorityForUk(g: UkGameState): MajorityRule {
     val m = g.majority ?: majorityForElection(g.electionId).let {
         MajorityRule(total = it.total, threshold = it.threshold)
@@ -164,19 +174,21 @@ fun playablePartiesIn(electionId: String): List<PartyId> {
     return UK_PLAYABLE.filter { active.contains(it) }
 }
 
+// Underdog handicap: same levers and values as COUNTRY_HANDICAP (web UK_HANDICAP).
 @Serializable
 data class UkHandicap(
     val funds: Double,
     val actions: Int,
     val persuasion: Double,
     val aiPersuasion: Double,
-    val environment: Double,
+    val gapShare: Double,
+    val gapResidual: Double,
 )
 
 val UK_HANDICAP: Map<String, UkHandicap> = mapOf(
-    "easy" to UkHandicap(funds = 6.0, actions = 2, persuasion = 1.5, aiPersuasion = 0.5, environment = 0.9),
-    "normal" to UkHandicap(funds = 0.0, actions = 0, persuasion = 1.0, aiPersuasion = 1.0, environment = 0.0),
-    "hard" to UkHandicap(funds = 0.0, actions = 0, persuasion = 0.85, aiPersuasion = 1.1, environment = 0.0),
+    "easy" to UkHandicap(funds = 6.0, actions = 2, persuasion = 1.5, aiPersuasion = 0.5, gapShare = 0.6, gapResidual = 0.15),
+    "normal" to UkHandicap(funds = 2.0, actions = 1, persuasion = 1.4, aiPersuasion = 1.0, gapShare = 0.0, gapResidual = 0.0),
+    "hard" to UkHandicap(funds = 0.0, actions = 0, persuasion = 0.9, aiPersuasion = 1.05, gapShare = 0.0, gapResidual = 0.0),
 )
 
 // One-time favorable-climate tilt toward the player, then refresh live support.
@@ -236,7 +248,7 @@ fun createUkGame(opts: NewUkGameOptions = NewUkGameOptions()): UkGameState {
     }
 
     val regions = buildUkRegions(election)
-    applyUkEnvironment(regions, playerParty, hc.environment)
+    applyUkEnvironment(regions, playerParty, climateTilt(hc.gapShare, hc.gapResidual, levelingTilt(regions, playerParty)))
 
     return UkGameState(
         seed = seed,
@@ -250,7 +262,7 @@ fun createUkGame(opts: NewUkGameOptions = NewUkGameOptions()): UkGameState {
         playerParty = playerParty,
         parties = parties,
         leaders = leaders,
-        salience = election.salience.toMutableMap(),
+        salience = electionSalience(election.salience, election.issues),
         regions = regions,
         resources = resources,
         causes = mutableListOf(),
@@ -278,11 +290,14 @@ private fun saturate(bloc: StateBloc, party: PartyId, raw: Double): Double {
     return raw * room
 }
 
-private fun addAppeal(g: UkGameState, region: StateContest, party: PartyId, cause: String, delta: Double) {
-    // Difficulty scales campaigning: player effort by `persuasion`, rivals by
-    // `aiPersuasion`. Both 1.0 on normal (identity).
+// `actor` is the party whose action this is (the attacker on a contrast
+// broadcast or dossier, where `party` is the target).
+private fun addAppeal(g: UkGameState, region: StateContest, party: PartyId, cause: String, delta: Double,
+                      actor: PartyId = party) {
+    // Difficulty scales campaigning by who campaigns: player effort by
+    // `persuasion`, the chief rival's by `aiPersuasion` (web UK_HANDICAP).
     val hc = UK_HANDICAP[g.difficulty ?: "normal"] ?: UK_HANDICAP.getValue("normal")
-    val scaled = delta * (if (party == g.playerParty) hc.persuasion else hc.aiPersuasion)
+    val scaled = delta * handicapMultiplier(hc.persuasion, hc.aiPersuasion, g.regions, g.playerParty, actor)
     for (bloc in region.blocs) {
         val camp = bloc.campaignAppeal ?: mutableMapOf<String, Double>().also { bloc.campaignAppeal = it }
         camp[party] = (camp[party] ?: 0.0) + saturate(bloc, party, scaled)
@@ -305,7 +320,8 @@ private fun topRivalIn(region: StateContest, party: PartyId): PartyId? {
 }
 
 private fun applyUkAction(g: UkGameState, a: UkAction, rng: Rng,
-                               planMultiplier: Double = 1.0, planBonuses: List<PlanBonus> = emptyList()) {
+                               planMultiplier: Double = 1.0, planBonuses: List<PlanBonus> = emptyList(),
+                               prepFactor: Double = 1.0) {
     val res = g.resources.getValue(a.party)
     if (res.actions < 1) return
     val leader = g.leaders.getValue(a.party)
@@ -366,7 +382,7 @@ private fun applyUkAction(g: UkGameState, a: UkAction, rng: Rng,
                 val scope = if (region != null) listOf(region) else targets
                 for (t in scope) {
                     val foe = a.targetParty ?: topRivalIn(t, a.party)
-                    if (foe != null) addAppeal(g, t, foe, "${leader.name} contrast broadcast", -per * 0.9)
+                    if (foe != null) addAppeal(g, t, foe, "${leader.name} contrast broadcast", -per * 0.9, actor = a.party)
                 }
             } else {
                 for (t in targets) addAppeal(g, t, a.party, "${leader.name} broadcast", per)
@@ -379,23 +395,23 @@ private fun applyUkAction(g: UkGameState, a: UkAction, rng: Rng,
             val scope = if (region != null) listOf(region) else standsIn(g, a.party)
             for (t in scope) {
                 val foe = a.targetParty ?: topRivalIn(t, a.party)
-                if (foe != null) addAppeal(g, t, foe, "${leader.name}'s team releases dossier on ${foe.uppercase()}", -0.05 * compSkill)
+                if (foe != null) addAppeal(g, t, foe, "${leader.name}'s team releases dossier on ${foe.uppercase()}", -0.05 * compSkill, actor = a.party)
             }
         }
         UkActionType.DEBATE_PREP -> {
             res.actions -= 1
-            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} debate performance", 0.012 * compSkill)
+            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} debate performance", 0.012 * compSkill * prepFactor)
             res.momentum = clamp(res.momentum + 4, -100.0, 100.0)
         }
         UkActionType.POLICY_PREP -> {
             res.actions -= 1
-            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} manifesto launch", 0.014 * compSkill)
+            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} manifesto launch", 0.014 * compSkill * prepFactor)
             res.momentum = clamp(res.momentum + 2, -100.0, 100.0)
         }
         UkActionType.ISSUE_PIVOT -> {
             res.actions -= 1
             if (a.issueId != null) g.salience[a.issueId] = clamp((g.salience[a.issueId] ?: 0.4) + 0.08 * planMultiplier, 0.0, 1.0)
-            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} pivots the campaign", 0.008 * skill * planMultiplier)
+            for (t in standsIn(g, a.party)) addAppeal(g, t, a.party, "${leader.name} pivots the campaign", 0.008 * skill * planMultiplier * prepFactor)
         }
         UkActionType.FUNDRAISE -> {
             res.actions -= 1
@@ -518,7 +534,7 @@ fun resolveUkPlayerEvent(g: UkGameState, choiceId: String): UkGameState {
     next.lastRecap = (
         listOf(
             RecapItem(
-                label = ev.headline.replace("{party}", PARTY_BY_ID[target]?.shortName ?: target),
+                label = ev.headline.replaceFirst("{party}", PARTY_BY_ID[target]?.shortName ?: target),
                 detail = choice.resultText,
                 marginDelta = choice.appeal,
             ),
@@ -547,11 +563,13 @@ private fun fireUkEvent(g: UkGameState, rng: Rng) {
     // Skip the random draw if a player decision is already pending this week.
     if (g.pendingEvent != null) return
 
-    val pool = deck.filter { it.turn == null && !firedList.contains(it.id) } + UK_EVENTS
+    val firedNow = firedList.toSet()
+    val pool = deck.filter { it.turn == null && it.id !in firedNow } +
+        unfiredGenericEvents(UK_EVENTS, firedNow, { it.id }, { !it.choices.isNullOrEmpty() })
     if (pool.isEmpty() || !rng.chance(UK_EVENT_CHANCE)) return
     val ev = rng.weightedPick(pool, pool.map { it.weight })
     applyUkEvent(g, ev, rng)
-    if (deck.any { it.id == ev.id }) firedList.add(ev.id)
+    if (ev.id !in firedNow) firedList.add(ev.id)
 }
 
 private fun buildUkRecap(g: UkGameState, turn: Int, seatsBefore: Int): List<RecapItem> {
@@ -630,8 +648,8 @@ fun ukAdvanceTurn(g: UkGameState, opts: UkAdvanceOptions = UkAdvanceOptions()): 
     val turn = next.turn
 
     // 1. Player's queued actions.
-    resolvePlan(next.queuedActions, { it.planMove() }, { next.causes.size }) { action, mult, bonuses ->
-        applyUkAction(next, action, rng, mult, bonuses)
+    resolveMpPlan(next.queuedActions, { it.planMove() }, { next.causes.size }) { action, mult, bonuses, prep ->
+        applyUkAction(next, action, rng, mult, bonuses, prep)
     }
     next.queuedActions = emptyList()
 
@@ -698,8 +716,8 @@ fun projectUkPreview(g: UkGameState): UkResult {
     if (g.queuedActions.isEmpty()) return computeUkResult(g)
     val clone = g.deepCopyUk()
     val rng = Rng.createRng(clone.rngState)
-    resolvePlan(clone.queuedActions, { it.planMove() }, { clone.causes.size }) { action, mult, bonuses ->
-        applyUkAction(clone, action, rng, mult, bonuses)
+    resolveMpPlan(clone.queuedActions, { it.planMove() }, { clone.causes.size }) { action, mult, bonuses, prep ->
+        applyUkAction(clone, action, rng, mult, bonuses, prep)
     }
     for (region in clone.regions) {
         for (bloc in region.blocs) bloc.support = blocPartyShares(bloc)

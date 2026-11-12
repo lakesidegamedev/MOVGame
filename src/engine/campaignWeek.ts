@@ -2,6 +2,7 @@ import { advanceTurn } from "./turn";
 import { DIFFICULTY } from "./ai";
 import { projectElection } from "./voteModel";
 import { createRng } from "./rng";
+import { evTotalOf, STANDARD_EV_TOTAL } from "./electoralCollege";
 import { STAFF_BY_ID, staffEffects } from "../content/staff";
 import type { GameState } from "./types";
 
@@ -25,7 +26,8 @@ export function advanceCampaignWeek(game: GameState, difficulty: "easy" | "norma
 
     const proj = projectElection(next);
     const playerEV = player === "dem" ? proj.ev.dem : proj.ev.rep;
-    if (playerEV < 195) {
+    // 195 of the modern 538, scaled to the scenario's college.
+    if (playerEV * STANDARD_EV_TOTAL < 195 * evTotalOf(next.states)) {
       const remaining: string[] = [];
       for (const id of hires) {
         const def = STAFF_BY_ID[id];

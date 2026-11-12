@@ -5,8 +5,9 @@
 **Run the campaign. Change the result.**
 
 Margin of Victory is a turn-based election strategy game about scarce time,
-money, staff, momentum, and hard choices. It covers 49 campaigns across six
-countries, from 1951 to 2027. The base game and daily challenge are free.
+money, staff, momentum, and hard choices. It covers historical campaigns in
+democracies around the world, from the 1950s to today (the landing page and
+index.html carry the live counts). The base game and daily challenge are free.
 Optional packs add historical campaigns through one-time purchases.
 
 ## Best first audience
@@ -20,13 +21,13 @@ campaign and discovering whether a different strategy could change history.
 
 ### Short description
 
-Take command of 49 election campaigns across six countries. Spend scarce time
+Take command of historic election campaigns around the world. Spend scarce time
 and money, react to debates and scandals, and find out whether your strategy
 can change history.
 
 ### Feature bullets
 
-- Run campaigns in the US, UK, France, Germany, Canada, and Australia.
+- Run campaigns from Washington and Westminster to Brasília, Delhi and Tokyo.
 - Make consequential choices about advertising, rallies, fundraising, field
   operations, policy, opposition research, and debate preparation.
 - Learn a different electoral system and strategic puzzle in each country.
@@ -38,7 +39,7 @@ can change history.
 ### Calls to action
 
 - Primary: Play free
-- Secondary: See all 49 campaigns
+- Secondary: See every campaign
 - Store: Unlock more elections
 
 ## Promotion sequence

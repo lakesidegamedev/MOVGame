@@ -1,9 +1,13 @@
 import { useMemo, useState } from "react";
+import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "@lib/distribution";
+import { InertLand, InsetFrames } from "@ui/mapExtras";
+import { partyFill, partyInk } from "@ui/colors";
 import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { api } from "@lib/api";
-import { computeScoreFromFacts, multipartyScoreFacts } from "@engine/scoring";
-import { majorityFor, playablePartiesIn } from "@engine/countryGame";
+import { computeScoreFromFacts, multipartyScoreFacts, multipartyUnitMargin } from "@engine/scoring";
+import { countryGovernmentText, majorityFor, playablePartiesIn, regionalReach } from "@engine/countryGame";
 import type { Government } from "@engine/types";
 import { countryNextScenario } from "@content/nextScenario";
 import { partyColor, partyName, partyShort, sortBySeats } from "./helpers";
@@ -11,15 +15,15 @@ import { Trophy, Lock } from "lucide-react";
 import { ElectionNight, hasSeenReveal, revealSupported } from "../electionNight/ElectionNight";
 import { ElectionNightShell } from "../electionNight/ElectionNightShell";
 import { MultipartySeatPanel } from "../electionNight/MultipartySeatPanel";
-import { countryReveal } from "../electionNight/adapters";
+import { countryReveal } from "../electionNight/countryReveal";
 import { DailyResultPanel } from "../DailyResultPanel";
 import { WhyReport } from "../WhyReport";
 import { TimelineView } from "../TimelineView";
 import { dailyAssignment, utcDateString } from "@lib/daily";
 
-function defaultGovText(g: Government, name: (p: string) => string): string {
+function defaultGovText(g: Government, name: (p: string) => string, plurality = false, unit = "seats"): string {
   switch (g.kind) {
-    case "majority": return `${name(g.party)} wins a majority with ${g.seats} seats.`;
+    case "majority": return plurality ? `${name(g.party)} finishes first with ${g.seats} ${unit}.` : `${name(g.party)} wins a majority with ${g.seats} seats.`;
     case "minority": return `${name(g.party)} forms a minority government on ${g.seats} seats.`;
     case "coalition": return `A ${g.parties.map(name).join("-")} coalition reaches ${g.seats} seats.`;
     case "confidence_supply": return `${name(g.lead)} governs with ${name(g.partner)} confidence-and-supply (${g.seats}).`;
@@ -42,11 +46,12 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
 
   const scenarioId = `${country.id.toLowerCase()}-${game.electionId}`;
   const majority = majorityFor(game, country);
+  const plurality = majority.plurality === true;
   const difficulty = game.difficulty ?? "normal";
 
   const facts = useMemo(
-    () => multipartyScoreFacts(r, game.playerParty, majority.threshold, majority.total, difficulty),
-    [r, game.playerParty, majority, difficulty],
+    () => multipartyScoreFacts(r, game.playerParty, majority.threshold, majority.total, difficulty, plurality),
+    [r, game.playerParty, majority, difficulty, plurality],
   );
   const score = computeScoreFromFacts(facts);
 
@@ -84,7 +89,8 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
     (r.government.kind === "coalition" && r.government.parties.includes(game.playerParty));
 
   const name = (p: string) => partyName(country, p);
-  const govText = country.governmentText?.(r.government, name) ?? defaultGovText(r.government, name);
+  const govText = countryGovernmentText(country, r.government, name) ??
+    defaultGovText(r.government, name, plurality, country.unitNamePlural);
 
   const reveal = useMemo(() => countryReveal(country, game), [country, game]);
   const [nightDone, setNightDone] = useState(() => !revealSupported() || hasSeenReveal(reveal.storageKey ?? ""));
@@ -99,8 +105,11 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
   const playableNext = next ? playablePartiesIn(country, next.id) : [];
   const nextParty = playableNext.includes(game.playerParty) ? game.playerParty : playableNext[0];
 
+  // A regional party cannot win; it is measured against its real result.
+  const regional = regionalReach(country, game.electionId, game.playerParty);
   const largest = order[0];
-  const seatMargin = playerSeats - majority.threshold;
+  // Plurality: the margin is the lead over the strongest rival, not a line.
+  const seatMargin = multipartyUnitMargin(r.seats, game.playerParty, majority.threshold, plurality);
   const popShare = (r.voteShare[game.playerParty] ?? 0) * 100;
   const leftParty = largest ?? game.playerParty;
   const rightParty = order.find((p) => p !== leftParty) ?? game.playerParty;
@@ -119,16 +128,16 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
         ? "HUNG PARLIAMENT"
         : "NO OVERALL MAJORITY";
 
-  const headline =
+  // The headline names one party; its color is always that party's.
+  const headlineParty =
     r.government.kind === "majority"
-      ? name(r.government.party)
+      ? r.government.party
       : r.government.kind === "hung"
-        ? name(r.government.largest)
+        ? r.government.largest
         : inGov
-          ? name(game.playerParty)
-          : largest
-            ? name(largest)
-            : "No majority";
+          ? game.playerParty
+          : largest;
+  const headline = headlineParty ? name(headlineParty) : "No majority";
 
   const replayDaily = () => {
     const today = dailyAssignment(utcDateString());
@@ -138,15 +147,17 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
 
   const mapPreview = country.map ? (
     <svg viewBox={country.map.viewBox} preserveAspectRatio="xMidYMid meet">
-      {Object.entries(country.map.shapes).slice(0, 14).map(([id, shape]) => (
+      <InertLand paths={country.map.inert} />
+      {Object.entries(country.map.shapes).map(([id, shape]) => (
         <path
           key={id}
           d={shape.d}
-          fill={partyColor(country, game.playerParty)}
+          fill={partyFill(partyColor(country, game.playerParty))}
           stroke="#0b1120"
           strokeWidth={0.8}
         />
       ))}
+      <InsetFrames shapes={country.map.shapes} />
     </svg>
   ) : undefined;
 
@@ -155,19 +166,17 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
       <ElectionNightShell
         eyebrow={eyebrow}
         headline={headline}
-        headlineColor={
-          r.government.kind === "majority"
-            ? partyColor(country, r.government.party)
-            : partyColor(country, game.playerParty)
-        }
+        headlineColor={headlineParty ? partyColor(country, headlineParty) : undefined}
         subhead={
           won
             ? `You won ${country.label}.`
             : inGov
               ? "You're in government."
-              : "You came up short."
+              : regional
+                ? `${playerSeats} ${country.unitNamePlural} against ${regional.historical} in the real election.`
+                : "You came up short."
         }
-        subheadTone={won ? "win" : inGov ? "neutral" : "loss"}
+        subheadTone={won ? "win" : inGov ? "neutral" : regional ? (playerSeats > regional.historical ? "win" : playerSeats === regional.historical ? "neutral" : "loss") : "loss"}
         counterValue={playerSeats}
         counterLabel={`Your ${country.unitNamePlural}`}
         counterColor={partyColor(country, game.playerParty)}
@@ -184,8 +193,11 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
           rightLabel: partyShort(country, rightParty),
           leftColor: partyColor(country, leftParty),
           rightColor: partyColor(country, rightParty),
-          unitLabel: "vs maj.",
-          caption: `${country.unitNamePlural} vs majority`,
+          unitLabel: plurality ? "vs rival" : "vs maj.",
+          words: plurality
+            ? { ahead: "ahead", behind: "behind", level: "level" }
+            : { ahead: "over", behind: "short", level: "exactly on" },
+          caption: plurality ? `${country.unitNamePlural} vs top rival` : `${country.unitNamePlural} vs majority`,
         }}
         nextScenario={
           next && nextData
@@ -194,9 +206,9 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
                 blurb: next.blurb,
                 unlocked,
                 ctaLabel: `Play ${nextData.year} →`,
-                lockLabel: `🔒 Unlock ${nextData.year}`,
+                lockLabel: `Unlock ${nextData.year}`,
                 onPlay: () => newGame(country.id, next.id, nextParty, String(Date.now()), difficulty),
-                onUnlock: () => openModal("activate", packId),
+                onUnlock: () => openStoreForScenario(packId),
                 mapPreview,
               }
             : null
@@ -215,23 +227,23 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
               popularVoteMargin={facts.popularMargin}
               onReplay={replayDaily}
             />
-            <div className="card" style={{ background: "var(--navy-600)" }}>
-              <div className="row" style={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+            <div className="card score-card">
+              <div className="score-row">
                 <div>
-                  <div className="tag muted small" style={{ color: "var(--gold)" }}>
-                    <Trophy size={12} style={{ verticalAlign: "-2px" }} /> CAMPAIGN SCORE
-                  </div>
-                  <div style={{ fontSize: 34, fontWeight: 800 }}>
-                    {score}<span className="muted" style={{ fontSize: 15, fontWeight: 600 }}> / 1000</span>
+                  <div className="eyebrow score-eyebrow"><Trophy size={12} aria-hidden="true" /> Campaign score</div>
+                  <div className="score-value num">
+                    {score}<span className="score-max"> / 1000</span>
                   </div>
                   <div className="muted small">
-                    {country.unitName} margin {facts.unitMargin >= 0 ? "+" : ""}{Math.round(facts.unitMargin)} · popular{" "}
+                    {country.unitName} margin {facts.unitMargin >= 0 ? "+" : ""}{Math.round(facts.unitMargin)}{plurality ? " vs top rival" : ""} · popular{" "}
                     {facts.popularMargin >= 0 ? "+" : ""}{facts.popularMargin.toFixed(1)} pts
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   {game.custom ? (
                     <span className="muted small">Custom campaigns are casual only and don't post to the leaderboard</span>
+                  ) : DISTRIBUTION.preview ? (
+                    <span className="muted small">{PREVIEW_SCORE_NOTE}</span>
                   ) : user ? (
                     <button className="primary" disabled={postState === "busy" || postState === "done" || serverDown} onClick={postScore}>
                       {postState === "done" ? "Posted ✓" : postState === "busy" ? "Posting…" : serverDown ? "Offline" : "Post to Leaderboard"}
@@ -282,22 +294,23 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
           segments={segments}
           total={majority.total}
           threshold={majority.threshold}
+          plurality={plurality}
           government={r.government}
           nameOf={name}
           unitPlural={country.unitNamePlural}
-          mathLabel={country.id === "FR" ? "RUNOFF RESULT" : undefined}
+          mathLabel={country.runoff ? "RUNOFF RESULT" : plurality ? "MOST VOTES WINS" : undefined}
         />
 
         <div className="card">
           <h3>Final standings</h3>
           {order.map((p) => (
             <div className="bloc" key={p}>
-              <span className="name" style={{ color: p === game.playerParty ? partyColor(country, p) : undefined }}>
-                <span style={{ display: "inline-block", width: 10, height: 10, background: partyColor(country, p), borderRadius: 2, marginRight: 6 }} />
+              <span className="name" style={{ color: p === game.playerParty ? partyInk(partyColor(country, p)) : undefined }}>
+                <span className="swatch" style={{ "--party": partyFill(partyColor(country, p)) } as React.CSSProperties} />
                 {partyShort(country, p)}
               </span>
-              <span className="meta">{r.seats[p]} {country.unitNamePlural} · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
-              <div className="suppbar"><div style={{ width: `${(r.seats[p] / majority.total) * 100 * 1.6}%`, background: partyColor(country, p) }} /></div>
+              <span className="meta">{r.seats[p]} {r.seats[p] === 1 ? country.unitName : country.unitNamePlural} · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>
+              <div className="suppbar"><div style={{ width: `${(r.seats[p] / majority.total) * 100 * 1.6}%`, background: partyFill(partyColor(country, p)) }} /></div>
             </div>
           ))}
         </div>

@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
+// Country bundles load on demand in the web client; tests need them all now.
+import "@content/countries/all";
 import {
   makeDefaultCustomScenario,
   makeDefaultMultiparty,
@@ -8,7 +10,7 @@ import {
   parseCustomScenario,
 } from "@content/customScenario";
 import { packForScenario } from "@content/packs";
-import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
+import { PAYWALL_ENABLED, SCENARIOS_BY_ID } from "@content/scenarioRegistry";
 import { dailyAssignment, utcDateString } from "@lib/daily";
 import { useAuthStore } from "@store/authStore";
 
@@ -31,17 +33,27 @@ describe("custom base-election entitlement mapping", () => {
 
   it("maps a UK custom to its real base election id", () => {
     const cs = makeDefaultMultiparty("uk");
+    cs.mp!.baseElection = "2019";
     const id = baseScenarioIdForCustom(cs);
-    expect(id).toBe(`uk-${cs.mp!.baseElection}`);
+    expect(id).toBe("uk-2019");
     // That base is a real, paid registry scenario in a pack.
     expect(packForScenario(id!)?.id).toBe("uk-elections");
   });
 
   it("maps a country custom to its lowercased country base election id", () => {
     const cs = makeDefaultMultiparty("country", "DE");
+    cs.mp!.baseElection = "2021";
     const id = baseScenarioIdForCustom(cs);
-    expect(id).toBe(`de-${cs.mp!.baseElection}`);
+    expect(id).toBe("de-2021");
     expect(packForScenario(id!)?.id).toBe("germany");
+  });
+
+  it("a default custom builds on the country's free election, so it plays signed out", () => {
+    for (const [engine, code] of [["uk", undefined], ["country", "DE"], ["country", "CA"]] as const) {
+      const id = baseScenarioIdForCustom(makeDefaultMultiparty(engine, code))!;
+      expect(SCENARIOS_BY_ID[id]?.free, id).toBe(true);
+      expect(useAuthStore.getState().canPlay(id), id).toBe(true);
+    }
   });
 
   it("baseScenarioId handles missing parts safely", () => {
@@ -61,12 +73,14 @@ describe("canPlay gate on custom base elections", () => {
 
   it("paid UK base gate follows the paywall flag when signed out", () => {
     const cs = makeDefaultMultiparty("uk");
+    cs.mp!.baseElection = "2019";
     const id = baseScenarioIdForCustom(cs)!;
     expect(useAuthStore.getState().canPlay(id)).toBe(guestCanPlay(id));
   });
 
   it("paid UK base is allowed once the scenario is unlocked", () => {
     const cs = makeDefaultMultiparty("uk");
+    cs.mp!.baseElection = "2019";
     const id = baseScenarioIdForCustom(cs)!;
     useAuthStore.setState({ unlocked: { scenarioIds: [id], packIds: ["uk-elections"] } });
     expect(useAuthStore.getState().canPlay(id)).toBe(true);
@@ -76,6 +90,7 @@ describe("canPlay gate on custom base elections", () => {
 describe("import of a paid-base custom", () => {
   it("loads without crashing and reports locked state signed out", () => {
     const cs = makeDefaultMultiparty("country", "CA");
+    cs.mp!.baseElection = "2021";
     const restored = parseCustomScenario(serializeCustomScenario(cs));
     const id = baseScenarioIdForCustom(restored)!;
     // The doc is valid and imports fine...
@@ -87,12 +102,17 @@ describe("import of a paid-base custom", () => {
 });
 
 describe("release bundles", () => {
-  it("sells six $0.99 country bundles and a $3.99 Complete Collection", async () => {
+  it("sells a $0.99 bundle per country and a $3.99 Complete Collection", async () => {
     const { STORE_PACKS, ALL_PAID } = await import("@content/packs");
+    const { COUNTRY_MODULES } = await import("@content/countries");
     const prices = Object.fromEntries(STORE_PACKS.map((p) => [p.id, p.price]));
     expect(prices).toEqual({
-      "us-historical": 99, "uk-elections": 99, canada: 99, germany: 99, france: 99, australia: 99, complete: 399,
+      ...Object.fromEntries(COUNTRY_MODULES.map((m) => [m.pack.id, 99])),
+      complete: 399,
     });
+    for (const id of ["us-historical", "uk-elections", "canada", "germany", "france", "australia", "new-zealand"]) {
+      expect(prices[id], id).toBe(99);
+    }
     const countryTotal = STORE_PACKS.filter((p) => p.id !== "complete").reduce((n, p) => n + p.price, 0);
     expect(countryTotal).toBeGreaterThan(prices.complete);
     // Every paid scenario sits in exactly one country bundle.
@@ -105,7 +125,13 @@ describe("release bundles", () => {
     const { PACKS_BY_ID, STORE_PACKS, packCovered } = await import("@content/packs");
     expect(STORE_PACKS.some((p) => p.id === "global")).toBe(false);
     expect(PACKS_BY_ID.global.scenarios).toContain("de-2025");
-    for (const id of ["canada", "germany", "france", "australia"]) expect(packCovered(id, ["global"])).toBe(true);
+    // Global is frozen: it covers a country pack only while that pack holds
+    // nothing added after Global was retired.
+    for (const id of ["canada", "germany", "france", "australia"]) {
+      const frozen = PACKS_BY_ID[id].scenarios.every((s) => PACKS_BY_ID.global.scenarios.includes(s));
+      expect(packCovered(id, ["global"]), id).toBe(frozen);
+    }
+    expect(packCovered("new-zealand", ["global"])).toBe(false);
     expect(packCovered("us-historical", ["global"])).toBe(false);
     expect(packCovered("france", ["complete"])).toBe(true);
   });

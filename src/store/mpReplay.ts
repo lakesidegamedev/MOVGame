@@ -37,6 +37,8 @@ export interface MpConfig {
   unitLabel: string; // "seats"
   unitTotal: number;
   majority: number;
+  // Plurality countries: most units wins, `majority` is not the goal.
+  plurality?: boolean;
   mode: ReplayMode;
   partyName: (id: PartyId) => string;
   partyColor: (id: PartyId) => string;
@@ -99,6 +101,7 @@ export function initMpReplayLog(
     mode: cfg.mode,
     parties,
     contestNames: cfg.contestNames,
+    ...(cfg.plurality ? { plurality: true } : {}),
   });
   return appendSnapshot(log, buildSnapshot(game, proj, [], []));
 }

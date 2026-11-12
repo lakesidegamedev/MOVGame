@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "@lib/distribution";
 import { useGameStore } from "@store/gameStore";
 import { useAuthStore } from "@store/authStore";
+import { openStoreForScenario } from "@store/storeNav";
 import { GRID, SPLIT_UNITS, GRID_COLS, GRID_ROWS } from "@content/mapLayout";
 import { STATE_PATHS } from "@content/statePaths";
-import { isCustomScenarioId } from "@content/customScenario";
+import { isCustomScenarioId } from "@content/customIds";
 import { SCENARIOS } from "@content/scenarios";
 import { US_NEXT_SCENARIO } from "@content/nextScenario";
-import type { Projection } from "@engine/index";
+import { electoralRule, noMajorityTally, type Projection } from "@engine/index";
 import { computeScoreFromFacts, usOpponentEvMargin, usScoreFacts } from "@engine/scoring";
 import { checkAchievements, recordLocalAchievements } from "@engine/achievements";
 import { api } from "@lib/api";
@@ -16,11 +18,11 @@ import { StatsScreen } from "./StatsScreen";
 import { WhyReport } from "./WhyReport";
 import { TimelineView } from "./TimelineView";
 import { pct, votes } from "./format";
-import { Trophy, Lock } from "lucide-react";
+import { Trophy, Lock, Award, BarChart3 } from "lucide-react";
 import { ElectionNight, hasSeenReveal, revealSupported } from "./electionNight/ElectionNight";
 import { ElectionNightShell } from "./electionNight/ElectionNightShell";
 import { StateCallGrid } from "./electionNight/StateCallGrid";
-import { usReveal } from "./electionNight/adapters";
+import { usReveal } from "./electionNight/usReveal";
 import { DailyResultPanel } from "./DailyResultPanel";
 import { dailyAssignment, utcDateString } from "@lib/daily";
 import type { CandidateId } from "@engine/types";
@@ -36,6 +38,7 @@ export function ResultsScreen() {
 
   const byState = useMemo(() => new Map(result.stateResults.map((s) => [s.stateId, s])), [result]);
   const evOf = (id: string) => game.states.find((s) => s.id === id)?.electoralVotes ?? 0;
+  const college = electoralRule(game.states);
 
   // Call order: safe states first, the closest battlegrounds last — for drama.
   const calls = useMemo(
@@ -67,10 +70,10 @@ export function ResultsScreen() {
     if (c.winner === "dem") demEV += evOf(c.stateId);
     else repEV += evOf(c.stateId);
   }
-  const tossupEV = Math.max(0, 538 - demEV - repEV);
+  const tossupEV = Math.max(0, college.total - demEV - repEV);
   const lastCalled = revealed > 0 ? game.states.find((s) => s.id === calls[revealed - 1].stateId) : null;
 
-  const winnerName = result.winner === "tie" ? "No one: 269-269" : cands[result.winner].name;
+  const winnerName = result.winner === "tie" ? `No one: ${noMajorityTally(result.electoralVotes)}` : cands[result.winner].name;
   const playerWon = result.winner === game.playerCandidate;
 
   // The win/lose sting plays once the state-by-state calls have all landed.
@@ -87,7 +90,6 @@ export function ResultsScreen() {
   const popMarginPts = (result.popularShare.dem - result.popularShare.rep) * 100;
 
   const canPlay = useAuthStore((s) => s.canPlay);
-  const openModal = useAuthStore((s) => s.openModal);
 
   // ── Election Night reveal — plays instead of the results until done ──
   const reveal = useMemo(() => usReveal(game), [game]);
@@ -119,7 +121,7 @@ export function ResultsScreen() {
   const nextMeta = next ? SCENARIOS[next.id] : null;
   const unlocked = next ? canPlay(`us-${next.id}`) : false;
   const winnerEv =
-    result.winner === "tie" ? 269 : result.electoralVotes[result.winner];
+    result.winner === "tie" ? Math.max(result.electoralVotes.dem, result.electoralVotes.rep) : result.electoralVotes[result.winner];
   const winnerPopShare =
     result.winner === "tie"
       ? result.popularShare[game.playerCandidate]
@@ -142,16 +144,16 @@ export function ResultsScreen() {
           headlineColor={!done ? "var(--text-strong)" : winnerColor}
           subhead={
             !done
-              ? `270 to win · ${tossupEV} EV still out`
+              ? `${college.majority} to win · ${tossupEV} EV still out`
               : result.winner === "tie"
-                ? "Neither ticket reached 270. The House decides."
+                ? `Neither ticket reached ${college.majority}. The House decides.`
                 : playerWon
                   ? "You won the campaign."
                   : "You came up short."
           }
           subheadTone={!done ? "neutral" : result.winner === "tie" ? "neutral" : playerWon ? "win" : "loss"}
           counterValue={done ? winnerEv : Math.max(demEV, repEV)}
-          counterLabel={done ? (result.winner === "tie" ? "EV apiece" : "Electoral votes") : "Leading EV"}
+          counterLabel={done ? (result.winner === "tie" ? (result.electoralVotes.dem === result.electoralVotes.rep ? "EV apiece" : "Leading EV") : "Electoral votes") : "Leading EV"}
           counterColor={done && result.winner !== "tie" ? cands[result.winner].color : undefined}
           secondaryCounter={
             done
@@ -180,7 +182,7 @@ export function ResultsScreen() {
                   blurb: `${next.blurb}${!unlocked ? " · part of the United States bundle" : ""}`,
                   unlocked,
                   ctaLabel: `Play ${nextMeta.year} →`,
-                  lockLabel: `🔒 Unlock ${nextMeta.year}`,
+                  lockLabel: `Unlock ${nextMeta.year}`,
                   onPlay: () =>
                     newGame({
                       seed: String(Date.now()),
@@ -189,7 +191,7 @@ export function ResultsScreen() {
                       eventMode: game.eventMode,
                       difficulty,
                     }),
-                  onUnlock: () => openModal("activate", `us-${next.id}`),
+                  onUnlock: () => openStoreForScenario(`us-${next.id}`),
                   mapPreview: <UsMiniMapPreview byState={byState} cands={cands} />,
                 }
               : null
@@ -217,7 +219,7 @@ export function ResultsScreen() {
                 </div>
                 <div className="row" style={{ gap: 8, marginTop: 4 }}>
                   <button className="ghost" style={{ flex: "0 0 auto", padding: "12px 18px" }} onClick={() => setStatsOpen(true)}>
-                    📊 Race Stats
+                    <BarChart3 size={15} aria-hidden="true" style={{ verticalAlign: "-3px", marginRight: 6 }} />Race Stats
                   </button>
                   {replay && (
                     <button className="ghost" style={{ flex: "0 0 auto", padding: "12px 18px" }} onClick={() => setTimelineOpen(true)}>
@@ -258,21 +260,22 @@ export function ResultsScreen() {
           )}
 
           <div className="card">
-            <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-              <h3 style={{ margin: 0 }}>{done ? "Final Map" : "Election Night"}</h3>
-              <div className="row" style={{ gap: 6 }}>
-                <button className={`ghost small${mapMode === "geo" ? " active" : ""}`} onClick={() => setMapMode("geo")}>Geo</button>
-                <button className={`ghost small${mapMode === "square" ? " active" : ""}`} onClick={() => setMapMode("square")}>Square</button>
-                {!done && <button className="ghost small" onClick={() => setRevealed(calls.length)}>Skip ⏭</button>}
+            <div className="mapcontrols">
+              <h3>{done ? "Final Map" : "Election Night"}</h3>
+              <div className="segmented" role="group" aria-label="Map view">
+                <button aria-pressed={mapMode === "geo"} onClick={() => setMapMode("geo")}>Geo</button>
+                <button aria-pressed={mapMode === "square"} onClick={() => setMapMode("square")}>Square</button>
               </div>
+              {!done && <button className="ghost small" onClick={() => setRevealed(calls.length)}>Skip</button>}
             </div>
 
             {mapMode === "geo" ? (
-              <svg viewBox="0 0 1000 650" className="geo-map" preserveAspectRatio="xMidYMid meet" style={{ maxWidth: 640, margin: "10px auto 0" }}>
+              <svg viewBox="0 0 1000 650" className="geo-map results-map" preserveAspectRatio="xMidYMid meet">
                 {[...GRID.map((t) => t.id), ...SPLIT_UNITS.map((g) => g.ids.find((id) => id.endsWith("-AL"))).filter(Boolean) as string[]].map((id) => {
                   const sr = byState.get(id);
                   const path = STATE_PATHS[id] ?? STATE_PATHS[id.split("-")[0]];
-                  if (!sr || !path) return null;
+                  if (!path) return null;
+                  if (!sr) return <path key={id} d={path} fill="#1b2740" opacity={0.4} stroke="#0b1120" strokeWidth={0.6} aria-hidden="true" />;
                   const called = calledIds.has(id);
                   const st = game.states.find((s) => s.id === id);
                   return (
@@ -287,7 +290,7 @@ export function ResultsScreen() {
               </svg>
             ) : (
               <>
-                <div className="tilegrid" style={{ gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`, gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`, aspectRatio: `${GRID_COLS} / ${GRID_ROWS}`, maxWidth: 560, margin: "10px auto 0" }}>
+                <div className="tilegrid" style={{ gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`, gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)`, aspectRatio: `${GRID_COLS} / ${GRID_ROWS}`, "--grid-aspect": GRID_COLS / GRID_ROWS, marginTop: 10 } as React.CSSProperties}>
                   {GRID.map((t) => (
                     <div key={t.id} style={{ gridColumn: t.col + 1, gridRow: t.row + 1 }}>{tile(t.id)}</div>
                   ))}
@@ -422,13 +425,13 @@ function ScoreAndAchievements() {
         onReplay={replayDaily}
       />
       <div className="card">
-        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+        <div className="score-row">
           <div>
-            <div className="tag muted small" style={{ color: "var(--gold)", letterSpacing: "2px" }}>
-              <Trophy size={12} style={{ verticalAlign: "-2px" }} /> CAMPAIGN SCORE
+            <div className="eyebrow score-eyebrow">
+              <Trophy size={12} aria-hidden="true" /> Campaign score
             </div>
-            <div style={{ fontSize: 38, fontWeight: 800, lineHeight: 1.1 }}>
-              {score}<span className="muted" style={{ fontSize: 16, fontWeight: 600 }}> / 1000</span>
+            <div className="score-value num">
+              {score}<span className="score-max"> / 1000</span>
             </div>
             <div className="muted small">
               EV margin {evMargin >= 0 ? "+" : ""}{evMargin} · popular{" "}
@@ -439,6 +442,8 @@ function ScoreAndAchievements() {
           <div style={{ textAlign: "right" }}>
             {!standardLength ? (
               <span className="muted small">{custom ? "Custom scenarios are casual only and do not post scores or earn ranked achievements" : "Short and Long games are casual only and do not post to the leaderboard"}</span>
+            ) : DISTRIBUTION.preview ? (
+              <span className="muted small">{PREVIEW_SCORE_NOTE}</span>
             ) : user ? (
               <button className="primary" disabled={postState === "busy" || postState === "done" || serverDown} onClick={post}>
                 {postState === "done" ? "Posted ✓" : postState === "busy" ? "Posting…" : serverDown ? "Offline" : "Post to Leaderboard"}
@@ -456,14 +461,14 @@ function ScoreAndAchievements() {
       </div>
 
       <div className="card">
-        <h3>🏆 Achievements: {earned.length} earned</h3>
+        <h3 className="card-title-icon"><Trophy size={12} aria-hidden="true" /> Achievements: {earned.length} earned</h3>
         {earned.length === 0 ? (
           <p className="muted small">None this run. Landslides, comebacks, and debate sweeps all leave trophies.</p>
         ) : (
           <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
             {earned.map((a) => (
               <span key={a.id} className="chip up" title={a.description} style={{ fontSize: 12, padding: "6px 10px" }}>
-                {a.icon} {a.name}
+                <Award size={12} aria-hidden="true" /> {a.name}
               </span>
             ))}
           </div>

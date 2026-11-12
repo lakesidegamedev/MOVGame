@@ -28,7 +28,7 @@ export const UK_ELECTION_EVENTS: Record<string, UkEvent[]> = {
   // ── 2019: Get Brexit Done ─────────────────────────────────────────────────
   "2019": [
     { id: "2019_get_brexit_done", headline: "'Get Brexit Done': Johnson's three-word drumbeat sets the terms of the campaign", role: "any", weight: 3, party: "con", turn: 0, appeal: 0.04, momentum: 10 },
-    { id: "2019_chief_rabbi", headline: "The Chief Rabbi's unprecedented intervention over Labour antisemitism", role: "any", weight: 3, party: "lab", turn: 1, appeal: -0.035, momentum: -8 },
+    { id: "2019_chief_rabbi", headline: "The Chief Rabbi's unprecedented intervention over Labour antisemitism", role: "any", weight: 3, party: "lab", turn: 3, appeal: -0.035, momentum: -8 },
     { id: "2019_neutral_brexit", headline: "Corbyn declares he'd stay neutral in his own second referendum", role: "any", weight: 3, party: "lab", turn: 3, appeal: -0.03, momentum: -7 },
     { id: "2019_fridge", headline: "Johnson retreats into a fridge to dodge a breakfast-TV ambush", role: "any", weight: 3, party: "con", turn: 5, appeal: -0.035, momentum: -8 },
     { id: "2019_nhs_dossier", headline: "Corbyn brandishes 451 unredacted pages: 'proof the NHS is on the table'", role: "any", weight: 3, party: "lab", appeal: 0.03, momentum: 8 },
@@ -40,9 +40,9 @@ export const UK_ELECTION_EVENTS: Record<string, UkEvent[]> = {
   // ── 2017: the coronation that wasn't ──────────────────────────────────────
   "2017": [
     { id: "2017_strong_stable", headline: "'Strong and stable': May's twenty-point lead looks unassailable", role: "any", weight: 3, party: "con", turn: 0, appeal: 0.035, momentum: 8 },
-    { id: "2017_dementia_tax", headline: "'Nothing has changed!' The dementia-tax U-turn detonates the manifesto", role: "any", weight: 3, party: "con", turn: 1, appeal: -0.045, momentum: -12 },
+    { id: "2017_dementia_tax", headline: "'Nothing has changed!' The dementia-tax U-turn detonates the manifesto", role: "any", weight: 3, party: "con", turn: 4, appeal: -0.045, momentum: -12 },
     { id: "2017_corbyn_rallies", headline: "Corbyn packs seafronts and stadiums; the youthquake stirs", role: "any", weight: 3, party: "lab", turn: 2, appeal: 0.035, momentum: 10 },
-    { id: "2017_security_row", headline: "Campaigns pause after the attacks; May's record on police cuts comes under fire", role: "any", weight: 3, party: "con", turn: 3, appeal: -0.025, momentum: -6 },
+    { id: "2017_security_row", headline: "Campaigns pause after the attacks; May's record on police cuts comes under fire", role: "any", weight: 3, party: "con", turn: 5, appeal: -0.025, momentum: -6 },
     { id: "2017_ira_ads", headline: "Crosby's attack ads on Corbyn's IRA past finally start to bite", role: "any", weight: 2, party: "con", appeal: 0.03, momentum: 6 },
     { id: "2017_abbott_lbc", headline: "Diane Abbott's LBC car-crash: 250,000 police officers for £300,000", role: "any", weight: 3, party: "lab", appeal: -0.035, momentum: -7 },
     { id: "2017_yougov_model", headline: "YouGov's seat model says hung parliament; everyone laughs, nervously", role: "any", weight: 3, party: "lab", appeal: 0.025, momentum: 8 },
@@ -52,8 +52,8 @@ export const UK_ELECTION_EVENTS: Record<string, UkEvent[]> = {
   "2015": [
     { id: "2015_hell_yes", headline: "'Hell yes, I'm tough enough': Miliband surprises Paxman, and himself", role: "any", weight: 3, party: "lab", turn: 0, appeal: 0.03, momentum: 7 },
     { id: "2015_snp_scare", headline: "Miliband in Salmond's pocket: the SNP-coalition scare posters bite", role: "any", weight: 3, party: "lab", turn: 1, appeal: -0.035, momentum: -8 },
-    { id: "2015_sturgeon_debate", headline: "Sturgeon walks off with the seven-way debate", role: "any", weight: 3, party: "snp", turn: 2, appeal: 0.03, momentum: 8 },
-    { id: "2015_ed_stone", headline: "The Ed Stone: eight pledges, two tonnes of limestone, zero mercy from the press", role: "any", weight: 3, party: "lab", turn: 4, appeal: -0.03, momentum: -7 },
+    { id: "2015_sturgeon_debate", headline: "Sturgeon walks off with the seven-way debate", role: "any", weight: 3, party: "snp", turn: 0, appeal: 0.03, momentum: 8 },
+    { id: "2015_ed_stone", headline: "The Ed Stone: six pledges carved in limestone, zero mercy from the press", role: "any", weight: 3, party: "lab", turn: 5, appeal: -0.03, momentum: -7 },
     { id: "2015_milifandom", headline: "Milifandom blooms: the internet decides Ed is unexpectedly cool", role: "any", weight: 2, party: "lab", appeal: 0.035, momentum: 6 },
     { id: "2015_farage_thanet", headline: "Farage's siege of Thanet South pulls the cameras, and Tory votes", role: "any", weight: 2, party: "ref", appeal: 0.03, momentum: 7 },
     { id: "2015_ukip_gaffes", headline: "Another UKIP candidate suspended; the purple vetting operation creaks", role: "any", weight: 2, party: "ref", appeal: -0.03, momentum: -6 },
@@ -88,7 +88,7 @@ export const UK_ELECTION_EVENTS: Record<string, UkEvent[]> = {
   "2001": [
     { id: "2001_foot_and_mouth", headline: "Foot-and-mouth pyres force the election back a month, a queasy start", role: "any", weight: 3, party: "lab", turn: 0, appeal: -0.02, momentum: -5 },
     { id: "2001_prescott_punch", headline: "Prescott decks an egg-thrower in Rhyl; the country, oddly, approves", role: "any", weight: 3, party: "lab", turn: 1, appeal: 0.02, momentum: 6 },
-    { id: "2001_save_the_pound", headline: "'Ten days to save the pound': Hague bets what's left on Europe", role: "any", weight: 3, party: "con", turn: 2, appeal: 0.025, momentum: 5 },
+    { id: "2001_save_the_pound", headline: "'Twelve days to save the pound': Hague bets what's left on Europe", role: "any", weight: 3, party: "con", turn: 3, appeal: 0.025, momentum: 5 },
     { id: "2001_apathy", headline: "Apathy stalks the campaign: turnout forecasts fall off a cliff, and {party} feels it most", role: "leader", weight: 3, turn: 4, appeal: -0.02, momentum: -6 },
     { id: "2001_storer_ambush", headline: "Sharron Storer ambushes Blair over the NHS outside a Birmingham hospital", role: "any", weight: 2, party: "lab", appeal: -0.025, momentum: -6 },
     { id: "2001_economy_record", headline: "Steady growth, low inflation: Labour's economic record goes unanswered", role: "any", weight: 3, party: "lab", appeal: 0.03, momentum: 5 },
@@ -122,8 +122,8 @@ export const UK_ELECTION_EVENTS: Record<string, UkEvent[]> = {
   "1987": [
     { id: "1987_kinnock_broadcast", headline: "'Why am I the first Kinnock in a thousand generations…' The Hudson broadcast lands", role: "any", weight: 3, party: "lab", turn: 0, appeal: 0.04, momentum: 10 },
     { id: "1987_two_davids", headline: "The two Davids contradict each other live on air; the Alliance muddles", role: "any", weight: 3, party: "ld", turn: 1, appeal: -0.035, momentum: -7 },
-    { id: "1987_wobbly_thursday", headline: "Wobbly Thursday: a rogue poll panics Conservative Central Office", role: "any", weight: 3, party: "con", turn: 2, appeal: -0.03, momentum: -7 },
-    { id: "1987_thatcher_steadies", headline: "Thatcher steadies the ship: tax cuts, home ownership, and a booming South", role: "any", weight: 3, party: "con", turn: 3, appeal: 0.03, momentum: 7 },
+    { id: "1987_wobbly_thursday", headline: "Wobbly Thursday: a rogue poll panics Conservative Central Office", role: "any", weight: 3, party: "con", turn: 4, appeal: -0.03, momentum: -7 },
+    { id: "1987_thatcher_steadies", headline: "Thatcher steadies the ship: tax cuts, home ownership, and a booming South", role: "any", weight: 3, party: "con", turn: 5, appeal: 0.03, momentum: 7 },
     { id: "1987_defence_row", headline: "Kinnock's 'occupation' answer on defence hands the Tories a week of headlines", role: "any", weight: 3, party: "lab", appeal: -0.04, momentum: -8 },
     { id: "1987_jobless_marches", headline: "Three million unemployed: the North marches while the South shops", role: "any", weight: 2, party: "con", appeal: -0.025, momentum: -5 },
     { id: "1987_southern_boom", headline: "Loadsamoney Britain: the boom is the Tories' best canvasser", role: "any", weight: 2, party: "con", appeal: 0.025, momentum: 5 },
@@ -168,7 +168,7 @@ export const UK_ELECTION_EVENTS: Record<string, UkEvent[]> = {
   "1974feb": [
     { id: "1974feb_who_governs", headline: "'Who governs Britain?' Heath calls the election on the miners and the three-day week", role: "any", weight: 3, party: "con", turn: 0, appeal: 0.025, momentum: 6 },
     { id: "1974feb_three_day_week", headline: "The three-day week: factories dark, televisions off at 10:30, and no clear villain", role: "any", weight: 3, party: "con", turn: 1, appeal: -0.03, momentum: -7 },
-    { id: "1974feb_powell_defects", headline: "Enoch Powell refuses to stand and tells his followers to vote Labour over Europe", role: "any", weight: 3, party: "con", turn: 2, appeal: -0.03, momentum: -7 },
+    { id: "1974feb_powell_defects", headline: "Enoch Powell refuses to stand and tells his followers to vote Labour over Europe", role: "any", weight: 3, party: "con", turn: 4, appeal: -0.03, momentum: -7 },
     { id: "1974feb_liberal_surge", headline: "Thorpe's Liberals surge towards a fifth of the vote; the two-party lock rattles", role: "any", weight: 3, party: "ld", turn: 3, appeal: 0.04, momentum: 10 },
     { id: "1974feb_pay_board", headline: "The Pay Board reports the miners were underpaid all along; Heath's case wobbles", role: "any", weight: 3, party: "con", turn: 4, appeal: -0.025, momentum: -6 },
     { id: "1974feb_wilson_calm", headline: "Wilson offers calm and a deal with the unions after the confrontation", role: "any", weight: 2, party: "lab", appeal: 0.025, momentum: 6 },
@@ -179,8 +179,8 @@ export const UK_ELECTION_EVENTS: Record<string, UkEvent[]> = {
   "1970": [
     { id: "1970_wilson_cruising", headline: "Wilson campaigns like a man who has already won; the polls agree", role: "any", weight: 3, party: "lab", turn: 0, appeal: 0.025, momentum: 6 },
     { id: "1970_selsdon_man", headline: "'Selsdon Man': Labour paints Heath's free-market turn as a throwback to the 1930s", role: "any", weight: 3, party: "con", turn: 1, appeal: -0.025, momentum: -6 },
-    { id: "1970_world_cup_out", headline: "England crash out in Leon; a flat national mood settles over the long weekend", role: "any", weight: 3, party: "lab", turn: 3, appeal: -0.025, momentum: -6 },
-    { id: "1970_trade_figures", headline: "A shock set of trade figures lands three days out; the recovery story cracks", role: "any", weight: 3, party: "lab", turn: 4, appeal: -0.035, momentum: -9 },
+    { id: "1970_world_cup_out", headline: "England crash out in Leon; a flat national mood settles over the long weekend", role: "any", weight: 3, party: "lab", turn: 5, appeal: -0.025, momentum: -6 },
+    { id: "1970_trade_figures", headline: "A shock set of trade figures lands three days out; the recovery story cracks", role: "any", weight: 3, party: "lab", turn: 5, appeal: -0.035, momentum: -9 },
     { id: "1970_heath_steady", headline: "Heath grinds on, unglamorous and unmoved, promising to cut prices 'at a stroke'", role: "any", weight: 2, party: "con", appeal: 0.03, momentum: 7 },
     { id: "1970_powell_shadow", headline: "Powell's shadow hangs over the Tory right and the marginals both", role: "any", weight: 2, party: "con", appeal: 0.02, momentum: 4 },
     { id: "1970_wilson_pipe", headline: "The pipe, the mac, the walkabouts: Wilson's easy style briefly looks like complacency", role: "any", weight: 2, party: "lab", appeal: -0.02, momentum: -5 },
@@ -210,7 +210,7 @@ export const UK_ELECTION_EVENTS: Record<string, UkEvent[]> = {
   // ── 1951: one more heave ──────────────────────────────────────────────────
   "1951": [
     { id: "1951_one_more_heave", headline: "Churchill, 76, pitches one more heave: 'set the people free'", role: "any", weight: 3, party: "con", turn: 0, appeal: 0.03, momentum: 7 },
-    { id: "1951_whose_finger", headline: "'Whose finger on the trigger?' The Daily Mirror paints Churchill a warmonger", role: "any", weight: 3, party: "con", turn: 1, appeal: -0.04, momentum: -9 },
+    { id: "1951_whose_finger", headline: "'Whose finger on the trigger?' The Daily Mirror paints Churchill a warmonger", role: "any", weight: 3, party: "con", turn: 5, appeal: -0.04, momentum: -9 },
     { id: "1951_exhausted_ministers", headline: "Attlee's front bench runs on fumes: Bevin gone, Cripps gone, the rest worn thin", role: "any", weight: 3, party: "lab", turn: 2, appeal: -0.03, momentum: -7 },
     { id: "1951_rationing_fatigue", headline: "Six years on, the ration books are still out, and patience is thinner", role: "any", weight: 3, party: "lab", turn: 4, appeal: -0.025, momentum: -6 },
     { id: "1951_violet_drives", headline: "Attlee tours the country in the family car, Violet at the wheel. Modesty as message", role: "any", weight: 2, party: "lab", appeal: 0.035, momentum: 7 },

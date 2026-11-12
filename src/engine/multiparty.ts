@@ -121,6 +121,14 @@ export function allocateRegionSeats(region: StateContest, shareByParty: Record<P
 
   const ids = new Set<PartyId>([...Object.keys(baseSeats), ...Object.keys(shareByParty)]);
   const raw: Record<PartyId, number> = {};
+  if (region.proportional) {
+    // Presidential points: a straight proportional split of the pool. The
+    // swing curve below is sticky in small pools (a region's points only move
+    // once the swing is worth half a point there), which let a candidate win
+    // the runoff vote and still trail on points.
+    for (const p of ids) raw[p] = Math.max(0, shareByParty[p] ?? 0) * seats;
+    return largestRemainder(raw, seats);
+  }
   for (const p of ids) {
     const swing = (shareByParty[p] ?? 0) - (baseShare[p] ?? 0);
     // Seat delta = elasticity · swing · poolSize. Clamp at zero (a party can't
@@ -128,6 +136,21 @@ export function allocateRegionSeats(region: StateContest, shareByParty: Record<P
     raw[p] = Math.max(0, (baseSeats[p] ?? 0) + elasticity * swing * seats);
   }
   return largestRemainder(raw, seats);
+}
+
+// Every seat-bearing region uses presidential points (see StateContest.proportional).
+function isPresidency(regions: StateContest[]): boolean {
+  const pools = regions.filter((r) => r.seats && r.blocs.length > 0);
+  return pools.length > 0 && pools.every((r) => r.proportional === true);
+}
+
+// Replace `units` in place with the national largest-remainder split of the
+// same total, keyed like the regional tally.
+function presidentialUnits(nationalVotes: Record<PartyId, number>, units: Record<PartyId, number>) {
+  const total = Object.values(units).reduce((a, b) => a + b, 0);
+  const split = largestRemainder(nationalVotes, total);
+  for (const p of Object.keys(units)) units[p] = split[p] ?? 0;
+  for (const p of Object.keys(split)) units[p] = split[p];
 }
 
 // Run the full multiparty election: every region's vote shares → seats, summed
@@ -178,11 +201,20 @@ export function computeSeatsResult(
   const voteShare: Record<PartyId, number> = {};
   for (const p of Object.keys(nationalVotes)) voteShare[p] = nationalTotal > 0 ? nationalVotes[p] / nationalTotal : 0;
 
-  // Largest party by seats.
+  // A presidency's points are the national vote split (largest remainder over
+  // the whole pool), so per-region rounding in small pools cannot turn a vote
+  // lead into a tie. The regional points above stay as the map's breakdown.
+  if (isPresidency(regions)) presidentialUnits(nationalVotes, seats);
+
+  // Largest party by seats. Under plurality a tie on units goes to the higher
+  // national vote share; an exact tie on both keeps the earlier party.
   let largestParty = "";
   let mostSeats = -1;
   for (const p of Object.keys(seats)) {
     if (seats[p] > mostSeats) { mostSeats = seats[p]; largestParty = p; }
+    else if (majority.plurality && seats[p] === mostSeats && (voteShare[p] ?? 0) > (voteShare[largestParty] ?? 0)) {
+      largestParty = p;
+    }
   }
 
   const government = formGovernment(seats, majority, abstainingParties, largestParty, compatible);
@@ -201,6 +233,12 @@ export function formGovernment(
   largestParty: PartyId,
   compatible: (lead: PartyId, partner: PartyId) => boolean = () => true,
 ): Government {
+  // Plurality: the largest party wins outright, whatever its share.
+  if (majority.plurality) {
+    const top = seats[largestParty] ?? 0;
+    return top > 0 ? { kind: "majority", party: largestParty, seats: top } : { kind: "hung", largest: largestParty };
+  }
+
   const abstainSeats = abstainingParties.reduce((s, p) => s + (seats[p] ?? 0), 0);
   // Effective Commons size after abstentions; majority is half of that + 1.
   const effectiveTotal = majority.total - abstainSeats;
@@ -230,4 +268,121 @@ export function formGovernment(
   // a genuinely hung parliament if it's nowhere close.
   if (lead >= threshold * 0.85) return { kind: "minority", party: largestParty, seats: lead };
   return { kind: "hung", largest: largestParty };
+}
+
+// ── Difficulty helpers (shared by the UK and country engines) ──────────────
+// Both read only the election's fixed opening data (baselineSeats and
+// baselineShare never change during play), so they return the same answer on
+// every turn and for a resumed save without storing anything new.
+
+// Opening national strength of each party: real seats summed over regions,
+// plus the seat-weighted opening vote share (the tie-break).
+function openingStrength(regions: StateContest[]): { seats: Record<PartyId, number>; share: Record<PartyId, number> } {
+  const seats: Record<PartyId, number> = {};
+  const share: Record<PartyId, number> = {};
+  let pool = 0;
+  for (const region of regions) {
+    const n = region.seats ?? 0;
+    pool += n;
+    for (const [p, s] of Object.entries(region.baselineSeats ?? {})) seats[p] = (seats[p] ?? 0) + s;
+    for (const [p, v] of Object.entries(region.baselineShare ?? {})) share[p] = (share[p] ?? 0) + v * n;
+  }
+  if (pool > 0) for (const p of Object.keys(share)) share[p] /= pool;
+  return { seats, share };
+}
+
+// The player's chief rival: the strongest other party at the opening (most
+// real seats, then the higher opening vote share, then the earlier id). The
+// difficulty setting scales this party's campaigning only, so a harder setting
+// never strengthens a third party that splits the front-runner's vote.
+export function chiefRival(regions: StateContest[], player: PartyId): PartyId | undefined {
+  const { seats, share } = openingStrength(regions);
+  let best: PartyId | undefined;
+  for (const p of Object.keys(share).sort()) {
+    if (p === player) continue;
+    if (
+      best === undefined ||
+      (seats[p] ?? 0) > (seats[best] ?? 0) ||
+      ((seats[p] ?? 0) === (seats[best] ?? 0) && share[p] > share[best])
+    ) best = p;
+  }
+  return best;
+}
+
+// Units (seats or points) each party would win if `tilt` logits were added to
+// the player's appeal in every bloc where the player stands. Pure: reads the
+// regions, never writes them.
+function unitsWithTilt(regions: StateContest[], player: PartyId, tilt: number): Record<PartyId, number> {
+  const units: Record<PartyId, number> = {};
+  const national: Record<PartyId, number> = {};
+  for (const region of regions) {
+    if (!region.seats || region.blocs.length === 0) continue;
+    const stands = region.baselineShare?.[player] !== undefined;
+    const votes: Record<PartyId, number> = {};
+    let total = 0;
+    for (const bloc of region.blocs) {
+      const weight = bloc.size * bloc.turnoutPropensity * bloc.enthusiasm;
+      const appeal = bloc.appeal ?? {};
+      const camp = bloc.campaignAppeal ?? {};
+      const combined: Record<PartyId, number> = {};
+      for (const p of Object.keys(appeal)) combined[p] = appeal[p] + (camp[p] ?? 0) + (stands && p === player ? tilt : 0);
+      const shares = softmax(combined);
+      for (const p of Object.keys(shares)) votes[p] = (votes[p] ?? 0) + weight * shares[p];
+      total += weight;
+    }
+    const share: Record<PartyId, number> = {};
+    for (const p of Object.keys(votes)) share[p] = total > 0 ? votes[p] / total : 0;
+    const seats = allocateRegionSeats(region, share);
+    for (const p of Object.keys(seats)) units[p] = (units[p] ?? 0) + seats[p];
+    for (const p of Object.keys(votes)) national[p] = (national[p] ?? 0) + votes[p];
+  }
+  if (isPresidency(regions)) presidentialUnits(national, units);
+  return units;
+}
+
+const leads = (units: Record<PartyId, number>, player: PartyId) =>
+  Object.keys(units).every((p) => p === player || (units[p] ?? 0) < (units[player] ?? 0));
+
+// The climate tilt that would make the player the largest party: the smallest
+// uniform boost (logits on the player's appeal, wherever the player stands)
+// after which the player holds more seats or points than every other party.
+// Measured on the real seat curve, so it sees first-past-the-post bias and
+// runoff points, not just the vote gap. Zero when the player already leads;
+// MAX_LEVELING_TILT when even that would not do it (a regional party that
+// cannot win nationally). Bisection with a fixed step count, so the web and
+// native engines take identical steps.
+export const MAX_LEVELING_TILT = 1.5;
+export function levelingTilt(regions: StateContest[], player: PartyId): number {
+  if (leads(unitsWithTilt(regions, player, 0), player)) return 0;
+  if (!leads(unitsWithTilt(regions, player, MAX_LEVELING_TILT), player)) return MAX_LEVELING_TILT;
+  let lo = 0;
+  let hi = MAX_LEVELING_TILT;
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+    if (leads(unitsWithTilt(regions, player, mid), player)) hi = mid;
+    else lo = mid;
+  }
+  return hi;
+}
+
+// The easy-mode climate tilt for a race whose leveling tilt is `level`: close
+// `gapShare` of the gap, and never leave more than `gapResidual` for the
+// campaign to make up, so a landslide on easy plays like a clear-cut race
+// rather than a lost cause. Zero when gapShare is 0 (normal and hard). Shared
+// by every engine (the U.S. passes usLevelingTilt).
+export function climateTilt(hc: { gapShare: number; gapResidual: number }, level: number): number {
+  if (hc.gapShare <= 0 || level <= 0) return 0;
+  return Math.max(hc.gapShare * level, level - hc.gapResidual);
+}
+
+// Campaign multiplier for `party` under a difficulty handicap: the player's
+// `persuasion`, the chief rival's `aiPersuasion`, 1.0 for every other party.
+export function handicapMultiplier(
+  hc: { persuasion: number; aiPersuasion: number },
+  regions: StateContest[],
+  player: PartyId,
+  party: PartyId,
+): number {
+  if (party === player) return hc.persuasion;
+  return party === chiefRival(regions, player) ? hc.aiPersuasion : 1;
 }
