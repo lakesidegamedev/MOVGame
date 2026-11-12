@@ -325,7 +325,7 @@ export const NEW_ZEALAND_MODULE = countryModule(NEW_ZEALAND, {
   art: { a: "#0b1f3a", b: "#1d6b5c", glow: "rgba(236,240,245,0.2)" },
   freeElections: ["2023"],
   scenarios: [
-    { electionId: "2023", difficulty: "medium",
+    { electionId: "2023", difficulty: "hard",
       description: "Ardern has gone, the cost of living has not. Six parties in the House, an overhang, and Winston Peters back as kingmaker." },
     { electionId: "2020", difficulty: "hard",
       description: "The COVID election. An outbreak delays the vote, National churns through leaders, and Labour wins the first majority under MMP." },
