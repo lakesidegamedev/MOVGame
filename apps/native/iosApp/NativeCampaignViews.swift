@@ -250,7 +250,10 @@ struct NativeCampaignLibrary: View {
             if arguments.contains("--mov-capture-library") { expanded = ["US"] }
             if arguments.contains("--mov-capture-locked-library") { expanded = ["UK"] }
             if arguments.contains("--mov-capture-locked-uk") {
-                DispatchQueue.main.async { pick = LibraryPick(countryId: "UK", electionId: "1997") }
+                // Today's daily always opens, so pick a paid election that is not it.
+                let daily = session.dailyAssignment().scenarioId
+                let election = MobileCampaign.companion.elections(countryId: "UK").first { !$0.free && $0.scenarioId != daily }?.nativeId ?? "2019"
+                DispatchQueue.main.async { pick = LibraryPick(countryId: "UK", electionId: election) }
             }
             for (argument, countryId, party) in [("--mov-capture-briefing-es", "ES", "erc"), ("--mov-capture-briefing-in", "IN", ""), ("--mov-capture-briefing-us1948", "US", "")]
                 where arguments.contains(argument) {
