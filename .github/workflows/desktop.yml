@@ -9,8 +9,9 @@ name: Desktop builds
 # - Windows: the full player lifecycle on desktop-direct installers (install an
 #   older build, play to week two, upgrade, resume the save, Buy opens checkout
 #   in the system browser and the purchase is picked up, uninstall keeps saves,
-#   reinstall), then the preview installer next to it. Driven over WebView2's
-#   debugging port by apps/native/scripts/desktop-smoke.mjs.
+#   reinstall), then a preview installer next to it. Driven over WebView2's
+#   debugging port by apps/native/scripts/desktop-smoke.mjs, on CI test builds
+#   of the same commit that open that port.
 # - Linux: the AppImage and the .deb (install, run, remove).
 # - macOS: open the .app, check its window, and record what Gatekeeper does
 #   with a downloaded copy.
@@ -85,25 +86,30 @@ jobs:
       - name: Smoke test (portable exe)
         shell: pwsh
         run: ./apps/native/scripts/smoke-windows.ps1 -Exe "out/margin-of-victory-$env:CHANNEL-portable.exe" -Shot windows-smoke.png
-      - name: Build lifecycle installers (desktop-direct 1.9.0 and current)
+      # CI test installers: the same code with WebView2's debugging port open so
+      # desktop-smoke.mjs can drive the game (WebView2 ignores the environment
+      # variable for that, because wry always sets its own browser arguments).
+      # They are never uploaded.
+      - name: Build lifecycle installers (desktop-direct 1.9.0 and current, preview)
         if: ${{ !cancelled() && env.LIFECYCLE == 'true' }}
         shell: bash
         working-directory: apps/native
         run: |
           set -e
           version=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          nsis=src-tauri/target/release/bundle/nsis
           mkdir -p ../../lifecycle
-          node scripts/desktop-build.mjs desktop-direct --app-version 1.9.0 --bundles nsis
-          cp "src-tauri/target/release/bundle/nsis/Margin of Victory_1.9.0_x64-setup.exe" ../../lifecycle/old-setup.exe
-          node scripts/desktop-build.mjs desktop-direct --bundles nsis
-          cp "src-tauri/target/release/bundle/nsis/Margin of Victory_${version}_x64-setup.exe" ../../lifecycle/new-setup.exe
+          node scripts/desktop-build.mjs desktop-direct --app-version 1.9.0 --ci-debug-port 9222 --bundles nsis
+          cp "$nsis/Margin of Victory_1.9.0_x64-setup.exe" ../../lifecycle/old-setup.exe
+          node scripts/desktop-build.mjs desktop-direct --ci-debug-port 9222 --bundles nsis
+          cp "$nsis/Margin of Victory_${version}_x64-setup.exe" ../../lifecycle/new-setup.exe
+          node scripts/desktop-build.mjs desktop-preview --ci-debug-port 9222 --bundles nsis
+          cp "$nsis/Margin of Victory Preview_${version}_x64-setup.exe" ../../lifecycle/preview-setup.exe
           ls -la ../../lifecycle
       - name: Install, upgrade, play, buy, uninstall
         if: ${{ !cancelled() && env.LIFECYCLE == 'true' }}
         shell: pwsh
-        run: |
-          $preview = if ($env:CHANNEL -eq 'desktop-preview') { (Get-ChildItem out/*-setup.exe | Select-Object -First 1).FullName } else { '' }
-          ./apps/native/scripts/smoke-windows-lifecycle.ps1 -OldSetup lifecycle/old-setup.exe -NewSetup lifecycle/new-setup.exe -PreviewSetup $preview -Out smoke
+        run: ./apps/native/scripts/smoke-windows-lifecycle.ps1 -OldSetup lifecycle/old-setup.exe -NewSetup lifecycle/new-setup.exe -PreviewSetup lifecycle/preview-setup.exe -Out smoke
       - uses: actions/upload-artifact@v4
         if: always()
         with:

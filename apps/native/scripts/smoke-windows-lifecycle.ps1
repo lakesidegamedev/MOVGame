@@ -4,9 +4,9 @@
 #   smoke-windows-lifecycle.ps1 -OldSetup <direct 1.x setup.exe> -NewSetup <direct setup.exe>
 #                               [-PreviewSetup <preview setup.exe>] -Out <dir>
 #
-# The app is driven through WebView2's remote debugging port
-# (WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS), so the build under test is exactly
-# the one shipped. Clicks come from desktop-smoke.mjs. Writes
+# The installers must be CI test builds (desktop-build.mjs --ci-debug-port 9222):
+# the same code as the shipped build with WebView2's remote debugging port
+# open. Clicks come from desktop-smoke.mjs over that port. Writes
 # <Out>/lifecycle.json and screenshots, and exits non-zero if any check failed.
 #
 #   smoke-windows-lifecycle.ps1 -BlurPid <pid> -Out <dir>
@@ -119,9 +119,7 @@ function Uninstall([string]$Product, [string]$Label) {
 }
 
 function Launch([string]$Exe, [string]$Label) {
-  $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=$cdpPort"
   $p = Start-Process -FilePath $Exe -PassThru
-  Remove-Item Env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS
   $deadline = (Get-Date).AddSeconds(60)
   $cdp = $false
   while ((Get-Date) -lt $deadline) {
@@ -133,7 +131,9 @@ function Launch([string]$Exe, [string]$Label) {
   }
   $alive = -not $p.HasExited
   Check "$Label launched with a window" ($alive -and $p.MainWindowHandle -ne [IntPtr]::Zero) "title='$($p.MainWindowTitle)'"
-  Check "$Label debugging port open" $cdp "port $cdpPort"
+  $browser = Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Where-Object { $_.CommandLine -notmatch '--type=' } | Select-Object -First 1
+  $portArg = if ($browser -and $browser.CommandLine -match '--remote-debugging-port=\d+') { $Matches[0] } else { 'none' }
+  Check "$Label debugging port open" $cdp "port $cdpPort; WebView2 browser process argument: $portArg"
   if ($alive) {
     [MovWin]::ShowWindow($p.MainWindowHandle, 3) | Out-Null
     [MovWin]::SetForegroundWindow($p.MainWindowHandle) | Out-Null
