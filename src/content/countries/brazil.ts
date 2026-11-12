@@ -59,7 +59,8 @@
 // documents for France. The guide entry says so.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { BR_ELECTION_ISSUES } from "./issues/br";
 import { BR_MAP } from "./paths/br";
 
 // The debate win is a one-off beat: it fires at most once a campaign.
@@ -161,7 +162,7 @@ export const BRAZIL: CountryBundle = oncePerCampaign({
       year: 2022,
       label: "2022 · Lula v. Bolsonaro",
       tagline: "October 30, 2022. A former president whose convictions were annulled against an incumbent who spent the year doubting the voting machines. Lula led the first round by five points and the polls missed Bolsonaro's strength. Minas Gerais, a record Northeast turnout and the 7 percent who backed Tebet or Ciro Gomes decide it.",
-      salience: { economy_jobs: 0.9, social: 0.85, democracy: 0.75, values: 0.65, corruption: 0.55, security: 0.55, environment: 0.5 },
+      salience: { economy_jobs: 0.9, social: 0.85, democracy: 0.75, values: 0.65, corruption: 0.55, security: 0.55, environment: 0.5, pandemic: 0.5 },
       regions: {
         SP:  { v: { pt: 0.448, dir: 0.552 }, s: { pt: 10, dir: 12 } },
         MG:  { v: { pt: 0.502, dir: 0.498 }, s: { pt: 5, dir: 5 } },
@@ -196,7 +197,7 @@ export const BRAZIL: CountryBundle = oncePerCampaign({
       year: 2018,
       label: "2018 · Haddad v. Bolsonaro",
       tagline: "October 28, 2018. Lula is in prison and barred, his stand-in has had seven weeks to introduce himself, and the front-runner was stabbed in a crowd and has skipped every debate since. Fear of the PT and fear of Bolsonaro are both at record highs. Ciro Gomes holds 13 million votes and has flown to Europe.",
-      salience: { security: 0.9, corruption: 0.85, economy_jobs: 0.75, democracy: 0.7, values: 0.65, social: 0.5, environment: 0.3 },
+      salience: { security: 0.9, corruption: 0.85, economy_jobs: 0.75, democracy: 0.7, values: 0.65, social: 0.5, environment: 0.3, public_finances: 0.45 },
       regions: {
         SP:  { v: { pt: 0.320, dir: 0.680 }, s: { pt: 7, dir: 14 } },
         MG:  { v: { pt: 0.418, dir: 0.582 }, s: { pt: 4, dir: 6 } },
@@ -231,7 +232,7 @@ export const BRAZIL: CountryBundle = oncePerCampaign({
       year: 2014,
       label: "2014 · Rousseff v. Neves",
       tagline: "October 26, 2014. Marina Silva surged past Rousseff in runoff polls for weeks after Eduardo Campos died in a plane crash, until the PT's advertising and Aécio Neves's late climb pushed her to third. Now the PT's fourth term is on the line: slow growth, the Petrobras investigation, and a country that votes by region.",
-      salience: { corruption: 0.85, economy_jobs: 0.8, social: 0.7, public_finances: 0.55, security: 0.5, state: 0.5 },
+      salience: { corruption: 0.85, economy_jobs: 0.8, social: 0.7, public_finances: 0.55, security: 0.5, state: 0.5, public_services: 0.5, water: 0.35 },
       regions: {
         SP:  { v: { pt: 0.357, dir: 0.643 }, s: { pt: 8, dir: 15 } },
         MG:  { v: { pt: 0.524, dir: 0.476 }, s: { pt: 6, dir: 5 } },
@@ -265,7 +266,7 @@ export const BRAZIL: CountryBundle = oncePerCampaign({
       year: 2010,
       label: "2010 · Rousseff v. Serra",
       tagline: "October 31, 2010. Lula leaves office with approval near 80 percent and hands the ticket to a chief of staff who has never won an election. Marina Silva's 20 million votes forced a second round, and the last three weeks turn on abortion and religion more than the economy.",
-      salience: { economy_jobs: 0.65, values: 0.8, social: 0.65, corruption: 0.55, state: 0.5, security: 0.45 },
+      salience: { economy_jobs: 0.65, values: 0.8, social: 0.65, corruption: 0.55, state: 0.5, security: 0.45, health: 0.55 },
       regions: {
         SP:  { v: { pt: 0.459, dir: 0.541 }, s: { pt: 11, dir: 12 } },
         MG:  { v: { pt: 0.584, dir: 0.416 }, s: { pt: 6, dir: 5 } },
@@ -299,7 +300,7 @@ export const BRAZIL: CountryBundle = oncePerCampaign({
       year: 2006,
       label: "2006 · Lula v. Alckmin",
       tagline: "October 29, 2006. Lula survived the mensalão and the dossier scandal, missed an outright win by 1.4 points, and now meets Geraldo Alckmin in a runoff about corruption on one side and privatisation on the other. The poor North and East are with him. São Paulo is not.",
-      salience: { corruption: 0.9, state: 0.8, social: 0.75, economy_jobs: 0.6, security: 0.45 },
+      salience: { corruption: 0.9, state: 0.8, social: 0.75, economy_jobs: 0.6, security: 0.45, public_finances: 0.45 },
       regions: {
         SP:  { v: { pt: 0.477, dir: 0.523 }, s: { pt: 11, dir: 12 } },
         MG:  { v: { pt: 0.652, dir: 0.348 }, s: { pt: 7, dir: 4 } },
@@ -452,6 +453,7 @@ export const BRAZIL: CountryBundle = oncePerCampaign({
     },
   ],
 }, ["debate_globo_br"]);
+attachElectionIssues(BRAZIL, BR_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const BRAZIL_MODULE = countryModule(BRAZIL, {

@@ -13,6 +13,7 @@
 // are exact and English regions track the real English total.
 
 import type { UkElectionIssue } from "./issues";
+import { UK_ELECTION_ISSUES } from "./electionIssues";
 
 export interface RegionResult {
   v: Record<string, number>; // vote share per party
@@ -423,7 +424,7 @@ export const UK_ELECTIONS: Record<string, UkElectionData> = {
     id: "1951", year: 1951,
     label: "1951 · Churchill v. Attlee",
     tagline: "October 1951. Six years of Labour austerity, rationing still on the shelves, and Churchill promising to set the people free. Can Attlee hold on, or does the old lion get one last roar?",
-    salience: { economy: 0.90, cost_of_living: 0.80, housing: 0.80, nhs: 0.70, defence: 0.70, taxation: 0.60, crime: 0.30, europe: 0.20, scottish_independence: 0.10, immigration: 0.10, climate: 0.00 },
+    salience: { economy: 0.90, cost_of_living: 0.80, housing: 0.80, nhs: 0.70, defence: 0.70, taxation: 0.60, crime: 0.30, europe: 0.20, scottish_independence: 0.10, immigration: 0.10, climate: 0.00, nationalisation: 0.55 },
     majority: { total: 625, threshold: 313 },
     goalText: "313 of 625 seats",
     regions: RESULT_1951,
@@ -450,7 +451,7 @@ export const UK_ELECTIONS: Record<string, UkElectionData> = {
     id: "2017", year: 2017,
     label: "2017 · May v. Corbyn",
     tagline: "June 2017. A snap election called from a commanding lead, but a manifesto wobble and a surging opposition turn a coronation into a knife-edge.",
-    salience: { europe: 0.85, nhs: 0.8, economy: 0.78, taxation: 0.6, immigration: 0.55, crime: 0.55, defence: 0.5, cost_of_living: 0.5, housing: 0.5, climate: 0.4, scottish_independence: 0.45 },
+    salience: { europe: 0.85, nhs: 0.8, economy: 0.78, taxation: 0.6, immigration: 0.55, crime: 0.55, defence: 0.5, cost_of_living: 0.5, housing: 0.5, climate: 0.4, scottish_independence: 0.45, education: 0.5 },
     majority: { total: 650, threshold: 326 },
     goalText: "326 of 650 seats",
     regions: RESULT_2017,
@@ -459,7 +460,7 @@ export const UK_ELECTIONS: Record<string, UkElectionData> = {
     id: "2010", year: 2010,
     label: "2010 · Brown v. Cameron v. Clegg",
     tagline: "May 2010. A banking crash, an expenses scandal, and the first TV debates of the age. 'I agree with Nick', and nobody wins outright.",
-    salience: { economy: 0.95, nhs: 0.7, taxation: 0.65, immigration: 0.6, crime: 0.55, europe: 0.4, housing: 0.5, climate: 0.45, defence: 0.45, cost_of_living: 0.6, scottish_independence: 0.3 },
+    salience: { economy: 0.95, nhs: 0.7, taxation: 0.65, immigration: 0.6, crime: 0.55, europe: 0.4, housing: 0.5, climate: 0.45, defence: 0.45, cost_of_living: 0.6, scottish_independence: 0.3, trust: 0.6 },
     majority: { total: 650, threshold: 326 },
     goalText: "326 of 650 seats",
     regions: RESULT_2010,
@@ -477,7 +478,7 @@ export const UK_ELECTIONS: Record<string, UkElectionData> = {
     id: "1997", year: 1997,
     label: "1997 · Blair v. Major",
     tagline: "May 1997. Eighteen years of Conservative rule, a tired government, and a rebranded opposition. Things can only get better. Can you finish the job?",
-    salience: { economy: 0.85, nhs: 0.78, taxation: 0.6, crime: 0.6, europe: 0.5, immigration: 0.4, defence: 0.45, housing: 0.5, climate: 0.25, cost_of_living: 0.55, scottish_independence: 0.35 },
+    salience: { economy: 0.85, nhs: 0.78, taxation: 0.6, crime: 0.6, europe: 0.5, immigration: 0.4, defence: 0.45, housing: 0.5, climate: 0.25, cost_of_living: 0.55, scottish_independence: 0.35, sleaze: 0.7, education: 0.6 },
     majority: { total: 659, threshold: 330 },
     goalText: "330 of 659 seats",
     regions: RESULT_1997,
@@ -495,7 +496,7 @@ export const UK_ELECTIONS: Record<string, UkElectionData> = {
     id: "2001", year: 2001,
     label: "2001 · Blair v. Hague",
     tagline: "June 2001. Four years of New Labour, a becalmed economy, and a Conservative Party still in the wilderness. The quiet landslide.",
-    salience: { nhs: 0.8, economy: 0.72, europe: 0.55, taxation: 0.6, crime: 0.55, immigration: 0.5, housing: 0.45, defence: 0.4, climate: 0.3, cost_of_living: 0.5, scottish_independence: 0.3 },
+    salience: { nhs: 0.8, economy: 0.72, europe: 0.55, taxation: 0.6, crime: 0.55, immigration: 0.5, housing: 0.45, defence: 0.4, climate: 0.3, cost_of_living: 0.5, scottish_independence: 0.3, countryside: 0.4 },
     majority: { total: 659, threshold: 330 },
     goalText: "330 of 659 seats",
     regions: RESULT_2001,
@@ -531,7 +532,7 @@ export const UK_ELECTIONS: Record<string, UkElectionData> = {
     id: "1970", year: 1970,
     label: "1970 · Heath v. Wilson",
     tagline: "June 1970. Wilson is cruising, the polls call it for Labour, and then a bad set of trade figures and a heatwave weekend turn the whole thing over. Heath's upset nobody saw coming.",
-    salience: { economy: 0.9, cost_of_living: 0.78, taxation: 0.6, europe: 0.55, housing: 0.55, nhs: 0.6, immigration: 0.5, crime: 0.4, defence: 0.42, scottish_independence: 0.18, climate: 0.0 },
+    salience: { economy: 0.9, cost_of_living: 0.78, taxation: 0.6, europe: 0.55, housing: 0.55, nhs: 0.6, immigration: 0.5, crime: 0.4, defence: 0.42, scottish_independence: 0.18, climate: 0.0, unions: 0.6 },
     majority: { total: 630, threshold: 316 },
     goalText: "316 of 630 seats",
     regions: RESULT_1970,
@@ -558,7 +559,7 @@ export const UK_ELECTIONS: Record<string, UkElectionData> = {
     id: "1974feb", year: 1974,
     label: "1974 (Feb) · Heath v. Wilson",
     tagline: "February 1974. The miners are out, the lights go off three days a week, and Heath asks the country a straight question: who governs Britain? The answer is nobody, cleanly. A hung parliament.",
-    salience: { economy: 0.94, cost_of_living: 0.9, europe: 0.6, taxation: 0.58, housing: 0.55, nhs: 0.6, defence: 0.42, immigration: 0.45, crime: 0.4, scottish_independence: 0.35, climate: 0.05 },
+    salience: { economy: 0.94, cost_of_living: 0.9, europe: 0.6, taxation: 0.58, housing: 0.55, nhs: 0.6, defence: 0.42, immigration: 0.45, crime: 0.4, scottish_independence: 0.35, climate: 0.05, unions: 0.95 },
     majority: { total: 635, threshold: 318 },
     goalText: "318 of 635 seats (or the best hand in a hung parliament)",
     regions: RESULT_1974feb,
@@ -567,7 +568,7 @@ export const UK_ELECTIONS: Record<string, UkElectionData> = {
     id: "1974oct", year: 1974,
     label: "1974 (Oct) · Wilson v. Heath",
     tagline: "October 1974. Eight months of minority government, and Wilson goes back for the working majority he needs. He gets one of three, and it will melt away seat by seat.",
-    salience: { economy: 0.93, cost_of_living: 0.9, europe: 0.55, taxation: 0.58, housing: 0.55, nhs: 0.62, defence: 0.42, immigration: 0.45, crime: 0.4, scottish_independence: 0.42, climate: 0.05 },
+    salience: { economy: 0.93, cost_of_living: 0.9, europe: 0.55, taxation: 0.58, housing: 0.55, nhs: 0.62, defence: 0.42, immigration: 0.45, crime: 0.4, scottish_independence: 0.42, climate: 0.05, unions: 0.7 },
     majority: { total: 635, threshold: 318 },
     goalText: "318 of 635 seats",
     regions: RESULT_1974oct,
@@ -576,7 +577,7 @@ export const UK_ELECTIONS: Record<string, UkElectionData> = {
     id: "1979", year: 1979,
     label: "1979 · Thatcher v. Callaghan",
     tagline: "May 1979. The Winter of Discontent: strikes, the rubbish piled high, the dead unburied. A tired Labour government meets a new kind of Conservative. Labour isn't working.",
-    salience: { economy: 0.9, cost_of_living: 0.72, taxation: 0.62, defence: 0.52, nhs: 0.6, crime: 0.52, immigration: 0.42, housing: 0.5, europe: 0.3, climate: 0.1, scottish_independence: 0.3 },
+    salience: { economy: 0.9, cost_of_living: 0.72, taxation: 0.62, defence: 0.52, nhs: 0.6, crime: 0.52, immigration: 0.42, housing: 0.5, europe: 0.3, climate: 0.1, scottish_independence: 0.3, unions: 0.85 },
     majority: { total: 635, threshold: 318 },
     goalText: "318 of 635 seats",
     regions: RESULT_1979,
@@ -584,3 +585,13 @@ export const UK_ELECTIONS: Record<string, UkElectionData> = {
 };
 
 export const UK_ELECTION_IDS = Object.keys(UK_ELECTIONS);
+
+// Each election's own issues (electionIssues.ts). Every listed id must have
+// a salience entry in that election.
+for (const [id, issues] of Object.entries(UK_ELECTION_ISSUES)) {
+  const election = UK_ELECTIONS[id];
+  if (!election) throw new Error(`UK issues for unknown election ${id}`);
+  const missing = issues.filter((i) => election.salience[i.id] === undefined).map((i) => i.id);
+  if (missing.length) throw new Error(`UK ${id}: no salience for ${missing.join(", ")}`);
+  election.issues = issues;
+}

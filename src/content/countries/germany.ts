@@ -53,8 +53,9 @@
 // the 735-seat chamber lives beside the 630-seat one.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
 import { DE_MAP } from "./paths/de";
+import { DE_ELECTION_ISSUES } from "./issues/de";
 
 // The debate win is a one-off beat: it fires at most once a campaign.
 export const GERMANY: CountryBundle = oncePerCampaign({
@@ -138,7 +139,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
       year: 2025,
       label: "2025 · Merz v. Scholz",
       tagline: "Winter 2025. The traffic-light coalition has collapsed, the economy is in its second year of recession, and the AfD polls second. Hold the centre, or ride the revolt.",
-      salience: { migration: 0.9, economy: 0.88, ukraine_security: 0.65, pensions: 0.55, energy_climate: 0.5, housing: 0.5 },
+      salience: { migration: 0.9, economy: 0.88, ukraine_security: 0.65, pensions: 0.55, energy_climate: 0.5, housing: 0.5, tax: 0.55 },
       regions: {
         NORTH: { v: { cdu: 0.28, spd: 0.21, afd: 0.17, grn: 0.12, lnk: 0.07, oth: 0.15 }, s: { cdu: 33, spd: 25, afd: 20, grn: 12, lnk: 4, oth: 1 } },
         NE:    { v: { afd: 0.25, spd: 0.16, lnk: 0.17, grn: 0.14, cdu: 0.15, oth: 0.13 }, s: { afd: 17, lnk: 19, grn: 18, spd: 17, cdu: 9 } },
@@ -170,7 +171,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
       // 735 seats with overhang and leveling mandates; the winning post moves.
       majority: { total: 735, threshold: 368 },
       goalText: "368 of 735 seats",
-      salience: { energy_climate: 0.85, economy: 0.72, pensions: 0.62, housing: 0.6, migration: 0.3 },
+      salience: { energy_climate: 0.85, economy: 0.72, pensions: 0.62, housing: 0.6, migration: 0.3, pandemic: 0.55, wages: 0.55 },
       regions: {
         NORTH: { v: { spd: 0.31, cdu: 0.22, grn: 0.18, fdp: 0.11, afd: 0.07, lnk: 0.04, oth: 0.07 }, s: { spd: 37, cdu: 27, grn: 22, fdp: 13, afd: 8, lnk: 4 } },
         NE:    { v: { spd: 0.265, cdu: 0.16, grn: 0.155, afd: 0.13, lnk: 0.105, fdp: 0.09, oth: 0.095 }, s: { spd: 26, cdu: 17, grn: 16, afd: 13, lnk: 11, fdp: 10 } },
@@ -202,7 +203,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
       // The 19th Bundestag: 709 seats with overhang and leveling mandates.
       majority: { total: 709, threshold: 355 },
       goalText: "355 of 709 seats",
-      salience: { migration: 0.85, economy: 0.6, pensions: 0.6, ukraine_security: 0.4, energy_climate: 0.45, housing: 0.45 },
+      salience: { migration: 0.85, economy: 0.6, pensions: 0.6, ukraine_security: 0.4, energy_climate: 0.45, housing: 0.45, wages: 0.55 },
       regions: {
         NORTH: { v: { cdu: 0.345, spd: 0.27,  afd: 0.10,  fdp: 0.105, grn: 0.10,  lnk: 0.08  }, s: { cdu: 37, spd: 29, afd: 11, fdp: 11, grn: 11, lnk: 8 } },
         NE:    { v: { cdu: 0.245, spd: 0.185, afd: 0.19,  fdp: 0.085, lnk: 0.185, grn: 0.11  }, s: { cdu: 22, spd: 16, afd: 17, lnk: 16, grn: 10, fdp: 8 } },
@@ -234,7 +235,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
       tagline: "Autumn 2013. Merkel is the most trusted politician in the country and the euro crisis has made her Europe's safest pair of hands. The FDP is polling on the threshold, a new anti-euro party has appeared from nowhere, and everyone below the Union is fighting for second place or for survival.",
       majority: { total: 631, threshold: 316 },
       goalText: "316 of 631 seats",
-      salience: { economy: 0.8, pensions: 0.6, energy_climate: 0.55, housing: 0.5, ukraine_security: 0.35, migration: 0.25 },
+      salience: { economy: 0.8, pensions: 0.6, energy_climate: 0.55, housing: 0.5, ukraine_security: 0.35, migration: 0.25, europe: 0.75, wages: 0.6, tax: 0.55, digital: 0.4 },
       regions: {
         NORTH: { v: { cdu: 0.39, spd: 0.328, grn: 0.096, lnk: 0.058, fdp: 0.045, afd: 0.039, oth: 0.044 }, s: { cdu: 48, spd: 41, grn: 12, lnk: 7 } },
         NE:    { v: { cdu: 0.338, spd: 0.225, lnk: 0.205, grn: 0.08, afd: 0.054, fdp: 0.029, oth: 0.069 }, s: { cdu: 24, spd: 16, lnk: 14, grn: 5 } },
@@ -266,7 +267,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
       tagline: "Autumn 2009. A grand coalition that worked its way through the financial crash is ending, and nobody in it wants to say so. Merkel runs as the crisis manager, Steinmeier as the man who would like to be, and the smaller parties see the biggest opening in a generation.",
       majority: { total: 622, threshold: 312 },
       goalText: "312 of 622 seats",
-      salience: { economy: 0.9, pensions: 0.55, energy_climate: 0.55, ukraine_security: 0.45, housing: 0.25, migration: 0.2 },
+      salience: { economy: 0.9, pensions: 0.55, energy_climate: 0.55, ukraine_security: 0.45, housing: 0.25, migration: 0.2, tax: 0.6, wages: 0.5, digital: 0.3 },
       regions: {
         NORTH: { v: { cdu: 0.318, spd: 0.286, fdp: 0.138, grn: 0.12, lnk: 0.091, oth: 0.047 }, s: { cdu: 37, spd: 30, fdp: 15, grn: 13, lnk: 9 } },
         NE:    { v: { cdu: 0.255, lnk: 0.25, spd: 0.21, grn: 0.108, fdp: 0.104, oth: 0.073 }, s: { cdu: 17, lnk: 15, spd: 13, grn: 7, fdp: 6 } },
@@ -297,7 +298,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
       tagline: "Autumn 2005. The chancellor has called an election a year early after losing North Rhine-Westphalia, and he starts far behind. Five million Germans are out of work, the Union is waiting to win, and a new left party under Lafontaine and Gysi has been put together in a hurry.",
       majority: { total: 614, threshold: 308 },
       goalText: "308 of 614 seats",
-      salience: { economy: 0.95, pensions: 0.7, migration: 0.3, energy_climate: 0.4, ukraine_security: 0.3, housing: 0.15 },
+      salience: { economy: 0.95, pensions: 0.7, migration: 0.3, energy_climate: 0.4, ukraine_security: 0.3, housing: 0.15, tax: 0.7, health: 0.5, europe: 0.35 },
       regions: {
         NORTH: { v: { spd: 0.415, cdu: 0.331, fdp: 0.091, grn: 0.089, lnk: 0.048, oth: 0.025 }, s: { spd: 44, cdu: 35, fdp: 9, grn: 9, lnk: 5 } },
         NE:    { v: { spd: 0.342, cdu: 0.233, lnk: 0.216, grn: 0.085, fdp: 0.073, oth: 0.051 }, s: { spd: 21, cdu: 14, lnk: 13, fdp: 5, grn: 5 } },
@@ -328,7 +329,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
       tagline: "Autumn 2002. Stoiber led all summer, and then the Elbe flooded. Schröder has nearly four million unemployed and a government that has run out of reform, but he also has a war in Iraq he has promised to keep Germany out of. Two televised debates, and nobody is sure of anything until the last week.",
       majority: { total: 603, threshold: 302 },
       goalText: "302 of 603 seats",
-      salience: { economy: 0.85, ukraine_security: 0.75, energy_climate: 0.5, pensions: 0.45, migration: 0.4, housing: 0.1 },
+      salience: { economy: 0.85, ukraine_security: 0.75, energy_climate: 0.5, pensions: 0.45, migration: 0.4, housing: 0.1, flood: 0.6, europe: 0.35 },
       regions: {
         NORTH: { v: { spd: 0.46, cdu: 0.335, grn: 0.093, fdp: 0.072, lnk: 0.013, oth: 0.027 }, s: { spd: 49, cdu: 35, grn: 10, fdp: 7 } },
         NE:    { v: { spd: 0.411, cdu: 0.257, lnk: 0.145, grn: 0.086, fdp: 0.061, oth: 0.04 }, s: { spd: 28, cdu: 18, grn: 6, fdp: 4, lnk: 2 } },
@@ -359,7 +360,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
       tagline: "Autumn 1998. After sixteen years, Kohl is asking for another term with unemployment that peaked near five million that winter and an economy that will not move. The SPD has a charismatic candidate from Lower Saxony and a party chairman who does not agree with him on everything. No sitting chancellor has ever been voted out at the ballot box.",
       majority: { total: 669, threshold: 335 },
       goalText: "335 of 669 seats",
-      salience: { economy: 0.95, pensions: 0.7, energy_climate: 0.5, migration: 0.4, ukraine_security: 0.25, housing: 0.2 },
+      salience: { economy: 0.95, pensions: 0.7, energy_climate: 0.5, migration: 0.4, ukraine_security: 0.25, housing: 0.2, tax: 0.6, unity: 0.5, europe: 0.35 },
       regions: {
         NORTH: { v: { spd: 0.481, cdu: 0.335, grn: 0.069, fdp: 0.066, lnk: 0.013, oth: 0.035 }, s: { spd: 57, cdu: 38, grn: 8, fdp: 8 } },
         NE:    { v: { spd: 0.393, cdu: 0.24, lnk: 0.182, grn: 0.066, fdp: 0.035, oth: 0.084 }, s: { spd: 27, cdu: 16, lnk: 15, grn: 4, fdp: 2 } },
@@ -390,7 +391,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
       tagline: "Autumn 1994. Nineteen elections in one year, and Kohl has come back from far behind in the polls. The economy is turning, the East is recovering unevenly, and the SPD has a candidate it has not made up its mind about, flanked by Lafontaine and Schröder. The PDS needs only three direct seats to stay in the Bundestag.",
       majority: { total: 672, threshold: 337 },
       goalText: "337 of 672 seats",
-      salience: { economy: 0.8, migration: 0.5, pensions: 0.5, energy_climate: 0.45, ukraine_security: 0.3, housing: 0.25 },
+      salience: { economy: 0.8, migration: 0.5, pensions: 0.5, energy_climate: 0.45, ukraine_security: 0.3, housing: 0.25, unity: 0.6 },
       regions: {
         NORTH: { v: { spd: 0.405, cdu: 0.4, grn: 0.083, fdp: 0.075, lnk: 0.013, oth: 0.024 }, s: { cdu: 47, spd: 47, grn: 9, fdp: 9 } },
         NE:    { v: { spd: 0.365, cdu: 0.32, lnk: 0.184, grn: 0.062, fdp: 0.039, oth: 0.031 }, s: { spd: 23, cdu: 21, lnk: 14, grn: 4, fdp: 2 } },
@@ -421,7 +422,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
       tagline: "December 2, 1990. The first free all-German election since 1932, two months after unification. Kohl has the credit for unity, and Lafontaine is the candidate who asked what it would cost. East and West have separate 5 percent thresholds, so the PDS and the East's civil rights alliance need only their own half to get in.",
       majority: { total: 662, threshold: 332 },
       goalText: "332 of 662 seats",
-      salience: { economy: 0.9, pensions: 0.5, housing: 0.4, energy_climate: 0.4, ukraine_security: 0.35, migration: 0.35 },
+      salience: { economy: 0.9, pensions: 0.5, housing: 0.4, energy_climate: 0.4, ukraine_security: 0.35, migration: 0.35, unity: 0.92 },
       regions: {
         NORTH: { v: { cdu: 0.425, spd: 0.39, fdp: 0.109, grn: 0.047, lnk: 0.004, oth: 0.025 }, s: { cdu: 50, spd: 46, fdp: 13 } },
         NE:    { v: { cdu: 0.388, spd: 0.304, lnk: 0.112, fdp: 0.093, grn: 0.067, oth: 0.036 }, s: { cdu: 27, spd: 21, lnk: 9, fdp: 6, grn: 4 } },
@@ -571,6 +572,7 @@ export const GERMANY: CountryBundle = oncePerCampaign({
     },
   ],
 }, ["tv_duell"]);
+attachElectionIssues(GERMANY, DE_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const GERMANY_MODULE = countryModule(GERMANY, {

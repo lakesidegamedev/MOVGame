@@ -29,7 +29,8 @@
 // 1996 (March 2): LNP 94, ALP 49, crossbench 5.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { AU_ELECTION_ISSUES } from "./issues/au";
 import { AU_MAP } from "./paths/au";
 
 // The debate win is a one-off beat: it fires at most once a campaign.
@@ -136,7 +137,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       year: 2025,
       label: "2025 · Albanese v. Dutton",
       tagline: "May 2025. Cost of living bites, Washington upends the world order mid-campaign, and Peter Dutton's year-long polling lead is gone by Easter. Five weeks to hold the middle.",
-      salience: { cost_of_living: 0.92, housing: 0.78, medicare: 0.72, trump_security: 0.65, energy_climate: 0.60, immigration: 0.45 },
+      salience: { cost_of_living: 0.92, housing: 0.78, medicare: 0.72, trump_security: 0.65, energy_climate: 0.60, immigration: 0.45, public_service: 0.4 },
       majority: { total: 150, threshold: 76 },
       goalText: "76 of 150 seats",
       regions: {
@@ -186,7 +187,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       // Pre-redistribution chamber: 151 seats (NSW 47 / VIC 39 / WA 15).
       majority: { total: 151, threshold: 76 },
       goalText: "76 of 151 seats",
-      salience: { energy_climate: 0.88, cost_of_living: 0.78, medicare: 0.55, trump_security: 0.35, housing: 0.50, immigration: 0.40 },
+      salience: { energy_climate: 0.88, cost_of_living: 0.78, medicare: 0.55, trump_security: 0.35, housing: 0.50, immigration: 0.40, integrity: 0.55 },
       regions: {
         // AEC first-preference flavours; seats are the real 2022 state outcomes.
         // Crossbench = teals/independents + KAP (QLD) + Centre Alliance (SA).
@@ -231,7 +232,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       // Pre-redistribution chamber: 151 seats (NSW 47 / VIC 38 / WA 16).
       majority: { total: 151, threshold: 76 },
       goalText: "76 of 151 seats",
-      salience: { cost_of_living: 0.85, energy_climate: 0.7, housing: 0.55, medicare: 0.5, immigration: 0.35, trump_security: 0.25 },
+      salience: { cost_of_living: 0.85, energy_climate: 0.7, housing: 0.55, medicare: 0.5, immigration: 0.35, trump_security: 0.25, taxes: 0.8, budget_debt: 0.5 },
       regions: {
         // AEC first-preference flavours; seats are the real 2019 state outcomes.
         // Crossbench = independents (Steggall, Wilkie…) + KAP (QLD) + Centre
@@ -274,7 +275,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       tagline: "May 2016. A double dissolution, a $50 billion company tax cut and a leader who promised to be a different kind of prime minister. An eight-week campaign for a one-seat majority.",
       majority: { total: 150, threshold: 76 },
       goalText: "76 of 150 seats",
-      salience: { economy_jobs: 0.85, medicare: 0.75, taxes: 0.6, housing: 0.5, budget_debt: 0.5, energy_climate: 0.35, border_security: 0.3 },
+      salience: { economy_jobs: 0.85, medicare: 0.75, taxes: 0.6, housing: 0.5, budget_debt: 0.5, energy_climate: 0.35, border_security: 0.3, education: 0.45, industrial_relations: 0.4 },
       regions: {
         NSW:  { v: { lnp: 0.42, alp: 0.37, grn: 0.09, oth: 0.07, ind: 0.04, onp: 0.01 }, s: { alp: 24, lnp: 23 } },
         VIC:  { v: { lnp: 0.42, alp: 0.36, grn: 0.13, oth: 0.06, ind: 0.03 }, s: { alp: 18, lnp: 17, grn: 1, ind: 1 } },
@@ -306,7 +307,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       tagline: "August 2013. Labor has swapped its leader again and brought back the man it dumped three years ago. The Coalition has three-word slogans and a big lead. Five weeks to decide whether the party that could not govern itself can govern the country.",
       majority: { total: 150, threshold: 76 },
       goalText: "76 of 150 seats",
-      salience: { border_security: 0.75, economy_jobs: 0.7, energy_climate: 0.6, cost_of_living: 0.55, budget_debt: 0.55, education: 0.4 },
+      salience: { border_security: 0.75, economy_jobs: 0.7, energy_climate: 0.6, cost_of_living: 0.55, budget_debt: 0.55, education: 0.4, broadband: 0.4 },
       regions: {
         NSW:  { v: { lnp: 0.47, alp: 0.35, oth: 0.08, grn: 0.08, ind: 0.02 }, s: { lnp: 30, alp: 18 } },
         VIC:  { v: { lnp: 0.42, alp: 0.35, grn: 0.11, oth: 0.10, ind: 0.02 }, s: { alp: 19, lnp: 16, grn: 1, ind: 1 } },
@@ -339,7 +340,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       tagline: "July 2010. A first-term prime minister has been replaced overnight by his deputy, the mining tax is hot and the climate bill is dead. Five weeks to decide, and nobody is sure the result will be a majority.",
       majority: { total: 150, threshold: 76 },
       goalText: "76 of 150 seats",
-      salience: { economy_jobs: 0.7, border_security: 0.6, energy_climate: 0.55, cost_of_living: 0.5, medicare: 0.4, budget_debt: 0.4, education: 0.3 },
+      salience: { economy_jobs: 0.7, border_security: 0.6, energy_climate: 0.55, cost_of_living: 0.5, medicare: 0.4, budget_debt: 0.4, education: 0.3, taxes: 0.5, broadband: 0.4, immigration: 0.35 },
       regions: {
         NSW:  { v: { lnp: 0.45, alp: 0.37, grn: 0.10, ind: 0.04, oth: 0.04 }, s: { alp: 26, lnp: 20, ind: 2 } },
         VIC:  { v: { alp: 0.42, lnp: 0.40, grn: 0.13, oth: 0.04, ind: 0.01 }, s: { alp: 22, lnp: 14, grn: 1 } },
@@ -371,7 +372,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       tagline: "October 2007. Eleven years of Howard government, a booming economy, and a new Labor leader who promises to be a conservative on money and a reformer on everything else. Six weeks to decide whether it is time.",
       majority: { total: 150, threshold: 76 },
       goalText: "76 of 150 seats",
-      salience: { industrial_relations: 0.85, energy_climate: 0.7, economy_jobs: 0.6, education: 0.5, cost_of_living: 0.5, border_security: 0.3, housing: 0.3 },
+      salience: { industrial_relations: 0.85, energy_climate: 0.7, economy_jobs: 0.6, education: 0.5, cost_of_living: 0.5, border_security: 0.3, housing: 0.3, medicare: 0.4 },
       regions: {
         NSW:  { v: { alp: 0.44, lnp: 0.41, grn: 0.08, oth: 0.04, ind: 0.03 }, s: { alp: 28, lnp: 20, ind: 1 } },
         VIC:  { v: { alp: 0.45, lnp: 0.41, grn: 0.08, oth: 0.05, ind: 0.01 }, s: { alp: 21, lnp: 16 } },
@@ -435,7 +436,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       tagline: "October 2001. A freighter full of asylum seekers, the September 11 attacks, and an airline collapsed into administration. A government that was behind all year goes to the polls ahead.",
       majority: { total: 150, threshold: 76 },
       goalText: "76 of 150 seats",
-      salience: { border_security: 0.95, economy_jobs: 0.5, taxes: 0.55, medicare: 0.45, education: 0.3, immigration: 0.45 },
+      salience: { border_security: 0.95, economy_jobs: 0.5, taxes: 0.55, medicare: 0.45, education: 0.3, immigration: 0.45, terrorism: 0.6 },
       regions: {
         NSW:  { v: { lnp: 0.42, alp: 0.37, oth: 0.07, onp: 0.05, grn: 0.05, ind: 0.04 }, s: { lnp: 28, alp: 20, ind: 2 } },
         VIC:  { v: { lnp: 0.42, alp: 0.42, oth: 0.07, grn: 0.06, ind: 0.02, onp: 0.01 }, s: { alp: 20, lnp: 17 } },
@@ -467,7 +468,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       tagline: "August 1998. A government that wants a ten percent consumption tax, an opposition that wants to stop it, and a new right-wing party that is winning seats in Queensland. Five weeks to decide.",
       majority: { total: 148, threshold: 75 },
       goalText: "75 of 148 seats",
-      salience: { taxes: 0.9, economy_jobs: 0.6, medicare: 0.45, education: 0.3, border_security: 0.25, immigration: 0.3 },
+      salience: { taxes: 0.9, economy_jobs: 0.6, medicare: 0.45, education: 0.3, border_security: 0.25, immigration: 0.45, industrial_relations: 0.35, native_title: 0.3 },
       regions: {
         NSW:  { v: { alp: 0.40, lnp: 0.38, onp: 0.09, oth: 0.07, grn: 0.03, ind: 0.03 }, s: { lnp: 27, alp: 22, ind: 1 } },
         VIC:  { v: { alp: 0.44, lnp: 0.40, oth: 0.09, onp: 0.04, grn: 0.02, ind: 0.01 }, s: { alp: 19, lnp: 18 } },
@@ -499,7 +500,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
       tagline: "January 1996. Thirteen years of Labor government, a prime minister who says he is the better economic manager, and a Liberal leader who says he will be relaxed and comfortable. Five weeks to decide whether it is time.",
       majority: { total: 148, threshold: 75 },
       goalText: "75 of 148 seats",
-      salience: { economy_jobs: 0.8, medicare: 0.6, taxes: 0.5, budget_debt: 0.5, education: 0.3, immigration: 0.3 },
+      salience: { economy_jobs: 0.8, medicare: 0.6, taxes: 0.5, budget_debt: 0.5, education: 0.3, immigration: 0.3, privatisation: 0.4, industrial_relations: 0.4, republic: 0.3 },
       regions: {
         NSW:  { v: { lnp: 0.45, alp: 0.40, oth: 0.10, grn: 0.03, ind: 0.02 }, s: { lnp: 29, alp: 20, ind: 1 } },
         VIC:  { v: { lnp: 0.44, alp: 0.43, oth: 0.09, grn: 0.02, ind: 0.02 }, s: { lnp: 21, alp: 16 } },
@@ -634,6 +635,7 @@ export const AUSTRALIA: CountryBundle = oncePerCampaign({
     },
   ],
 }, ["debate_win"]);
+attachElectionIssues(AUSTRALIA, AU_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {

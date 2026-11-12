@@ -62,7 +62,8 @@
 //   Points 43, 37, 17, 3. The first defeat of the PRI in 71 years.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { MX_ELECTION_ISSUES } from "./issues/mx";
 import { MX_MAP } from "./paths/mx";
 
 // The debate win is a one-off beat: it fires at most once a campaign.
@@ -163,7 +164,7 @@ export const MEXICO: CountryBundle = oncePerCampaign({
       year: 2024,
       label: "2024 · Sheinbaum v. Gálvez",
       tagline: "June 2, 2024. López Obrador cannot run again, his approval is near 60 percent, and his chosen successor carries Morena, the PT and the Greens. The PAN, the PRI and the PRD, old enemies, unite behind Xóchitl Gálvez. Movimiento Ciudadano runs alone and courts the young.",
-      salience: { poverty: 0.9, security: 0.85, corruption: 0.6, economy_jobs: 0.6, democracy: 0.55, energy: 0.35, us_relations: 0.3 },
+      salience: { poverty: 0.9, security: 0.85, corruption: 0.6, economy_jobs: 0.6, democracy: 0.55, energy: 0.35, us_relations: 0.3, health: 0.5 },
       regions: {
         NW:   { v: { izq: 0.665, pan: 0.243, mc: 0.092 }, s: { izq: 4, pan: 2, mc: 1 } },
         NOR:  { v: { izq: 0.553, pan: 0.355, mc: 0.092 }, s: { izq: 4, pan: 3, mc: 1 } },
@@ -397,6 +398,7 @@ export const MEXICO: CountryBundle = oncePerCampaign({
     },
   ],
 }, ["debate_mx"]);
+attachElectionIssues(MEXICO, MX_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const MEXICO_MODULE = countryModule(MEXICO, {

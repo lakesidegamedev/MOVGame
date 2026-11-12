@@ -56,7 +56,8 @@
 // two Telangana Rashtra Samithi seats apart.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { attachElectionIssues, countryModule } from "./types";
+import { IN_ELECTION_ISSUES } from "./issues/in";
 import { IN_MAP } from "./paths/in";
 
 export const INDIA: CountryBundle = {
@@ -193,7 +194,7 @@ export const INDIA: CountryBundle = {
       year: 2024,
       label: "2024 · Modi v. Rahul Gandhi",
       tagline: "April to June 2024. Modi is asking for a third term and 'ab ki baar 400 paar', the Ram temple is open, and the opposition has built an INDIA bloc out of old rivals. An opposition chief minister is in custody, and the Hindi belt will say whether the BJP still wins without its allies.",
-      salience: { jobs: 0.9, identity: 0.8, institutions: 0.75, inflation: 0.75, welfare: 0.7, corruption: 0.55, growth: 0.5, federalism: 0.35 },
+      salience: { jobs: 0.9, identity: 0.8, institutions: 0.75, inflation: 0.75, welfare: 0.7, corruption: 0.55, growth: 0.5, federalism: 0.35, caste: 0.55 },
       regions: {
         UP: { v: { nda: 0.436, upa: 0.432, tmc: 0.005, bsp: 0.094, oth: 0.033 }, s: { nda: 36, upa: 43, oth: 1 } },
         BJ: { v: { nda: 0.468, upa: 0.374, bsp: 0.015, oth: 0.143 }, s: { nda: 39, upa: 14, oth: 1 } },
@@ -320,7 +321,7 @@ export const INDIA: CountryBundle = {
       year: 2009,
       label: "2009 · Singh v. Advani",
       tagline: "April to May 2009. Manmohan Singh seeks a second term after the nuclear deal, the farm loan waiver and a global slump, and L. K. Advani makes his last run at the top job. The Left has withdrawn its support from the government, the Third Front is hunting for a leader, and Congress is fighting alone in Uttar Pradesh and Bihar.",
-      salience: { welfare: 0.8, security: 0.75, inflation: 0.6, growth: 0.6, identity: 0.45, corruption: 0.35, federalism: 0.3 },
+      salience: { welfare: 0.8, security: 0.75, inflation: 0.6, growth: 0.6, identity: 0.45, corruption: 0.35, federalism: 0.3, nuclear_deal: 0.4 },
       regions: {
         UP: { v: { nda: 0.211, upa: 0.185, sp: 0.233, bsp: 0.274, oth: 0.097 }, s: { nda: 15, upa: 21, sp: 23, bsp: 20, oth: 1 } },
         BJ: { v: { nda: 0.358, upa: 0.16, left: 0.041, bsp: 0.042, oth: 0.399 }, s: { nda: 40, upa: 5, oth: 9 } },
@@ -457,6 +458,7 @@ export const INDIA: CountryBundle = {
     },
   ],
 };
+attachElectionIssues(INDIA, IN_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const INDIA_MODULE = countryModule(INDIA, {

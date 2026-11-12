@@ -296,7 +296,9 @@ describe.each(multiparty.map((m) => [m.code, m.bundle!] as const))("%s content",
 
       it("has salience, a story-beat deck and leaders for every playable party", () => {
         expect(Object.keys(election.salience).length, "salience").toBeGreaterThan(0);
-        for (const i of Object.keys(election.salience)) expect(issueIds.has(i), `salience issue ${i}`).toBe(true);
+        // Every salience id names an issue: the country's or the election's own.
+        const named = new Set([...issueIds, ...(election.issues ?? []).map((i) => i.id)]);
+        for (const i of Object.keys(election.salience)) expect(named.has(i), `salience issue ${i}`).toBe(true);
         for (const p of Object.keys(election.campaignPower ?? {})) expect(parties.has(p), `campaignPower ${p}`).toBe(true);
         const deck = election.events ?? [];
         expect(deck.length, "deck size").toBeGreaterThanOrEqual(5);

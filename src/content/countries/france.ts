@@ -43,8 +43,9 @@
 
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
 import { FR_MAP } from "./paths/fr";
+import { FR_ELECTION_ISSUES } from "./issues/fr";
 import type { TransferMatrix, RoundShares } from "@engine/runoff";
 
 /** National first-round shares (real 2017/2022; polling-informed 2027). */
@@ -252,7 +253,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
       year: 2027,
       label: "2027 · The Republic's Runoff",
       tagline: "April 2027. Macron is term-limited, the first round is done, and for the first time the RN enters a runoff at parity. Two weeks. Every point counts.",
-      salience: { cost_of_living: 0.9, immigration_identity: 0.8, security: 0.65, pensions: 0.6, public_services: 0.55, europe: 0.5 },
+      salience: { cost_of_living: 0.9, immigration_identity: 0.8, security: 0.65, pensions: 0.6, public_services: 0.55, europe: 0.5, debt: 0.7 },
       regions: {
         HDF:  { v: { ens: 0.42, rn: 0.58 }, s: { ens: 4, rn: 5 } },
         NOR:  { v: { ens: 0.48, rn: 0.52 }, s: { ens: 2, rn: 3 } },
@@ -283,7 +284,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
       year: 2022,
       label: "2022 · Macron v. Le Pen",
       tagline: "April 24, 2022. The rematch nobody wanted twice: pouvoir d'achat against l'État McKinsey, war on the continent, and a much better-drilled Le Pen. Two weeks to hold the Republic's line.",
-      salience: { cost_of_living: 0.95, immigration_identity: 0.7, security: 0.55, pensions: 0.7, public_services: 0.5, europe: 0.6 },
+      salience: { cost_of_living: 0.95, immigration_identity: 0.7, security: 0.55, pensions: 0.7, public_services: 0.5, europe: 0.6, integrity: 0.45, climate: 0.4 },
       // The historical runoff still opens at 59-41. A disciplined RN operation
       // can convert its late cost-of-living message into a narrow upset, while
       // idle play keeps the historical favourite ahead.
@@ -321,7 +322,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
       year: 2017,
       label: "2017 · The Front Républicain",
       tagline: "May 7, 2017. A 39-year-old insurgent with a startup for a party against the FN's first runoff since 2002. The dam holds everywhere. The only question is by how much.",
-      salience: { cost_of_living: 0.6, immigration_identity: 0.7, security: 0.6, pensions: 0.35, public_services: 0.5, europe: 0.85 },
+      salience: { cost_of_living: 0.6, immigration_identity: 0.7, security: 0.6, pensions: 0.35, public_services: 0.5, europe: 0.85, unemployment: 0.6, industry: 0.55 },
       regions: {
         HDF:  { v: { ens: 0.529, rn: 0.471 }, s: { ens: 5, rn: 4 } },
         NOR:  { v: { ens: 0.630, rn: 0.370 }, s: { ens: 3, rn: 2 } },
@@ -356,7 +357,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
       // ens = Hollande (Parti socialiste); rn = Sarkozy (UMP). A left-vs-right
       // runoff mapped onto the bundle's two slots.
       tagline: "May 6, 2012. A one-term incumbent nobody warmed to against a Socialist who promised to be normal. 'Le changement, c'est maintenant' against a crisis president. Two weeks, and a narrow win either way.",
-      salience: { cost_of_living: 0.85, public_services: 0.6, europe: 0.6, security: 0.55, immigration_identity: 0.5, pensions: 0.55 },
+      salience: { cost_of_living: 0.85, public_services: 0.6, europe: 0.6, security: 0.55, immigration_identity: 0.5, pensions: 0.55, unemployment: 0.8, tax: 0.6 },
       regions: {
         HDF:  { v: { ens: 0.535, rn: 0.465 }, s: { ens: 5, rn: 4 } },
         NOR:  { v: { ens: 0.515, rn: 0.485 }, s: { ens: 3, rn: 2 } },
@@ -389,7 +390,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
       label: "2007 · Sarkozy v. Royal",
       // ens = Royal (Parti socialiste); rn = Sarkozy (UMP). A left-vs-right runoff mapped onto the bundle's two slots, as in 2012.
       tagline: "May 6, 2007. A former interior minister who promises a break with twelve years of Chirac against the first woman to reach a presidential runoff. Bayrou's eighteen percent has no home, Le Pen's voters are being courted openly, and one debate is the only head-to-head of the campaign.",
-      salience: { cost_of_living: 0.85, security: 0.7, immigration_identity: 0.65, public_services: 0.55, europe: 0.45, pensions: 0.45 },
+      salience: { cost_of_living: 0.85, security: 0.7, immigration_identity: 0.65, public_services: 0.55, europe: 0.45, pensions: 0.45, unemployment: 0.7, debt: 0.45 },
       regions: {
         HDF:  { v: { ens: 0.484, rn: 0.516 }, s: { ens: 4, rn: 5 } },
         NOR:  { v: { ens: 0.467, rn: 0.533 }, s: { ens: 2, rn: 3 } },
@@ -423,7 +424,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
       label: "2002 · Chirac v. Le Pen",
       // ens = Chirac (the outgoing president); rn = Jean-Marie Le Pen (Front National, the party that later became the Rassemblement National). The first-round shock is the opening event.
       tagline: "May 5, 2002. On April 21 Prime Minister Jospin finished third and was out, and for the first time a candidate of the Front National stands in a presidential runoff. Jean-Marie Le Pen's party wants sharply lower immigration and priority for French citizens in jobs and housing. Two weeks of street protest, a president who has to win big, and a vote that will not feel like a normal election.",
-      salience: { security: 0.95, immigration_identity: 0.7, cost_of_living: 0.45, public_services: 0.4, europe: 0.35, pensions: 0.3 },
+      salience: { security: 0.95, immigration_identity: 0.7, cost_of_living: 0.45, public_services: 0.4, europe: 0.35, pensions: 0.3, republic: 0.85, unemployment: 0.45, tax: 0.45 },
       regions: {
         HDF:  { v: { ens: 0.775, rn: 0.225 }, s: { ens: 7, rn: 2 } },
         NOR:  { v: { ens: 0.824, rn: 0.176 }, s: { ens: 4, rn: 1 } },
@@ -457,7 +458,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
       label: "1995 · Chirac v. Jospin",
       // ens = Jospin (Parti socialiste); rn = Chirac (RPR). A left-vs-right runoff mapped onto the bundle's two slots, as in 2012.
       tagline: "May 7, 1995. Mitterrand is leaving after fourteen years. The right split between Chirac and his own prime minister Balladur, and the Socialist Jospin topped round one with a party that expected to lose. Chirac, on his third try, promises to heal the 'social fracture'. Jospin promises to keep what worked under Mitterrand and drop the rest.",
-      salience: { public_services: 0.7, cost_of_living: 0.8, security: 0.5, immigration_identity: 0.45, europe: 0.45, pensions: 0.4 },
+      salience: { public_services: 0.7, cost_of_living: 0.8, security: 0.5, immigration_identity: 0.45, europe: 0.45, pensions: 0.4, unemployment: 0.85, social_fracture: 0.8, integrity: 0.45 },
       regions: {
         HDF:  { v: { ens: 0.541, rn: 0.459 }, s: { ens: 5, rn: 4 } },
         NOR:  { v: { ens: 0.483, rn: 0.517 }, s: { ens: 2, rn: 3 } },
@@ -492,7 +493,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
       label: "1988 · Mitterrand v. Chirac",
       // ens = Mitterrand (the incumbent Socialist president); rn = Chirac (RPR, the sitting prime minister under cohabitation). A left-vs-right runoff mapped onto the bundle's two slots, as in 2012.
       tagline: "May 8, 1988. Two years of cohabitation have left a Socialist president facing his own prime minister. Mitterrand runs above the parties with a letter to all the French; Chirac has a government record to defend and a rival on his own right. Le Pen's best score yet makes his voters the swing bloc.",
-      salience: { cost_of_living: 0.8, public_services: 0.55, security: 0.6, immigration_identity: 0.55, pensions: 0.4, europe: 0.35 },
+      salience: { cost_of_living: 0.8, public_services: 0.55, security: 0.6, immigration_identity: 0.55, pensions: 0.4, europe: 0.35, unemployment: 0.8, ownership: 0.55, tax: 0.5 },
       regions: {
         HDF:  { v: { ens: 0.614, rn: 0.386 }, s: { ens: 6, rn: 3 } },
         NOR:  { v: { ens: 0.56, rn: 0.44 }, s: { ens: 3, rn: 2 } },
@@ -527,7 +528,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
       label: "1981 · Mitterrand v. Giscard",
       // ens = Mitterrand (the Socialist challenger); rn = Giscard d'Estaing (the incumbent president). A left-vs-right runoff mapped onto the bundle's two slots, as in 2012.
       tagline: "May 10, 1981. Twenty-three years of the right, a second oil shock and more than a million and a half people out of work. Giscard, elected at 48, asks for a second term against the Socialist he beat by 1.6 points in 1974. Chirac's voters hold the key, and the Communists have not yet said what theirs will do.",
-      salience: { cost_of_living: 0.85, public_services: 0.5, security: 0.5, pensions: 0.4, immigration_identity: 0.4, europe: 0.3 },
+      salience: { cost_of_living: 0.85, public_services: 0.5, security: 0.5, pensions: 0.4, immigration_identity: 0.4, europe: 0.3, unemployment: 0.85, ownership: 0.6, integrity: 0.45 },
       regions: {
         HDF:  { v: { ens: 0.561, rn: 0.439 }, s: { ens: 5, rn: 4 } },
         NOR:  { v: { ens: 0.504, rn: 0.496 }, s: { ens: 3, rn: 2 } },
@@ -646,6 +647,7 @@ export const FRANCE: CountryBundle = oncePerCampaign({
     },
   ],
 }, ["debat_entre_deux"]);
+attachElectionIssues(FRANCE, FR_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const FRANCE_MODULE = countryModule(FRANCE, {

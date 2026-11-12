@@ -68,8 +68,9 @@
 // Coalition win one or two seats and stay in the results only.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
 import { ES_MAP } from "./paths/es";
+import { ES_ELECTION_ISSUES } from "./issues/es";
 
 // The debate win is a one-off beat: it fires at most once a campaign.
 export const SPAIN: CountryBundle = oncePerCampaign({
@@ -205,7 +206,7 @@ export const SPAIN: CountryBundle = oncePerCampaign({
       year: 2023,
       label: "2023 · Feijóo v. Sánchez",
       tagline: "July 2023. The PP has swept the May local elections and Sánchez has answered by calling a general election in the middle of the summer. Feijóo needs Vox to reach 176 and Sánchez needs a new left alliance and every nationalist in the Congress. Win the most seats, then count the investiture.",
-      salience: { prices: 0.8, housing: 0.7, services: 0.6, corruption: 0.55, pensions: 0.55, jobs: 0.5, catalonia: 0.45, immigration: 0.4 },
+      salience: { prices: 0.8, housing: 0.7, services: 0.6, corruption: 0.55, pensions: 0.55, jobs: 0.5, catalonia: 0.6, immigration: 0.4, alliances: 0.55, equality: 0.45 },
       regions: {
         AND: { v: { pp: 0.365, psoe: 0.334, pod: 0.119, vox: 0.154, oth: 0.028 }, s: { pp: 27, psoe: 21, pod: 6, vox: 9 } },
         CAT: { v: { pp: 0.134, psoe: 0.345, pod: 0.141, vox: 0.078, ciu: 0.112, erc: 0.132, oth: 0.058 }, s: { pp: 6, psoe: 19, pod: 7, vox: 2, ciu: 7, erc: 7 } },
@@ -247,7 +248,7 @@ export const SPAIN: CountryBundle = oncePerCampaign({
       tagline: "April 2019. The Catalan parties have voted down Sánchez's budget and he has called a spring election. The right has split three ways between the PP, Citizens and a Vox fresh from Andalusia, and the Catalan trial runs in the background. Win the most seats and find a majority.",
       majority: { total: 350, threshold: 176 },
       goalText: "176 of 350 seats",
-      salience: { catalonia: 0.95, jobs: 0.55, pensions: 0.5, housing: 0.5, immigration: 0.45, corruption: 0.4, services: 0.4 },
+      salience: { catalonia: 0.95, jobs: 0.55, pensions: 0.5, housing: 0.5, immigration: 0.45, corruption: 0.4, services: 0.4, equality: 0.45 },
       regions: {
         AND: { v: { pp: 0.173, psoe: 0.341, pod: 0.141, cs: 0.176, vox: 0.135, oth: 0.034 }, s: { pp: 12, psoe: 25, pod: 9, cs: 11, vox: 6 } },
         CAT: { v: { pp: 0.048, psoe: 0.232, pod: 0.148, cs: 0.116, vox: 0.036, ciu: 0.121, erc: 0.246, oth: 0.053 }, s: { pp: 1, psoe: 12, pod: 7, cs: 5, vox: 1, ciu: 7, erc: 15 } },
@@ -478,6 +479,7 @@ export const SPAIN: CountryBundle = oncePerCampaign({
     },
   ],
 }, ["leaders_debate"]);
+attachElectionIssues(SPAIN, ES_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const SPAIN_MODULE = countryModule(SPAIN, {

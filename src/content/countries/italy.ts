@@ -106,8 +106,9 @@
 // summarised on the Wikipedia articles for each election.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule } from "./types";
+import { attachElectionIssues, countryModule } from "./types";
 import { IT_MAP } from "./paths/it";
+import { IT_ELECTION_ISSUES } from "./issues/it";
 
 export const ITALY: CountryBundle = {
   id: "IT",
@@ -358,7 +359,7 @@ export const ITALY: CountryBundle = {
       tagline: "April 2008. Prodi's government has fallen after twenty months and Italy votes under the Porcellum, which gives the winning coalition at least 340 of 630 seats. Veltroni's new Democratic Party refuses allies on its left and runs a campaign borrowed from Obama, Berlusconi has merged his party with Fini's and is far ahead, and rubbish is piled in the streets of Naples.",
       majority: { total: 630, threshold: 316 },
       goalText: "316 of 630 seats",
-      salience: { tax: 0.8, economy: 0.75, services: 0.6, corruption: 0.55, migration: 0.5, south: 0.4, pensions: 0.4 },
+      salience: { tax: 0.8, economy: 0.75, services: 0.6, corruption: 0.55, migration: 0.5, south: 0.4, pensions: 0.4, industry: 0.4 },
       regions: {
         PIE: { v: { cdx: 0.463, csx: 0.365, cen: 0.051, rad: 0.033, oth: 0.088 }, s: { cdx: 27, csx: 18, cen: 2, oth: 1 } },
         LOM: { v: { cdx: 0.552, csx: 0.321, cen: 0.043, rad: 0.029, oth: 0.055 }, s: { cdx: 62, csx: 32, cen: 4 } },
@@ -472,6 +473,7 @@ export const ITALY: CountryBundle = {
     },
   ],
 };
+attachElectionIssues(ITALY, IT_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const ITALY_MODULE = countryModule(ITALY, {

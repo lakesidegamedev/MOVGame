@@ -131,6 +131,15 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Changed
 
+- Every election now has its own issues, named the way people talked about them that year: the
+  Depression and relief in 1932, the war in Europe in 1940, Korea and communism in 1952, the
+  miners' strike in February 1974, the cost of unity in Germany in 1990, free trade in Canada in
+  1988, and so on through all 121 elections. COVID no longer turns up before 2020, and Germany's
+  older elections no longer show issues from 2025. The issue pickers, the salience panels, the
+  Ask handoff and the apps all use the election's own list; an issue the election did not have
+  can no longer be raised by an ad, an event or a pivot. Custom US races use the issues of the
+  nearest earlier election, and Pandemic Mode adds a pandemic issue to any year. Saved campaigns
+  keep loading.
 - Canada's Bloc Québécois and India's state parties (Trinamool, the Samajwadi Party, the BJD,
   the YSRCP and the AIADMK) now play as regional parties, like Spain's Catalan and Basque
   parties: the setup shows where they stand and why they cannot win a majority, the results

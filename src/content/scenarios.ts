@@ -9,6 +9,7 @@ import type {
 import { STANDARD_EV_TOTAL, type ElectoralCollege } from "@engine/electoralCollege";
 import { CANDIDATES } from "./candidates";
 import { RUNNING_MATES } from "./runningMates";
+import { US_ELECTION_ISSUES } from "./usElectionIssues";
 
 // A scenario fills the engine's two neutral slots (dem / rep) with a specific
 // election's tickets, plus that year's state priors and electoral-vote
@@ -1634,6 +1635,13 @@ export const SCENARIOS: Record<string, Scenario> = {
     dem: ROOSEVELT_1932, rep: HOOVER_1932, statePriors: PRIORS_1932, evOverrides: EV_1930C, evNote: "1930-census apportionment: 48 states and 531 electoral votes, 266 to win. Alaska and Hawaii were territories and DC had no electors.", electoralCollege: EC_48_STATES, issueSalience: SAL_1932,
   },
 };
+
+// Each election's own issues (usElectionIssues.ts). Every built-in race
+// declares a list; only custom races fall back to the 2020 names.
+for (const [id, issues] of Object.entries(US_ELECTION_ISSUES)) {
+  if (!SCENARIOS[id]) throw new Error(`US issues for unknown election ${id}`);
+  SCENARIOS[id].issues = issues;
+}
 
 // Display order for the picker (newest first feels current; keep 2020 prominent).
 export const SCENARIO_IDS = ["2024", "2020", "2016", "2012", "2008", "2004", "2000", "1996", "1992", "1988", "1984", "1980", "1976", "1972", "1968", "1964", "1960", "1956", "1952", "1948", "1944", "1940", "1936", "1932"] as const;

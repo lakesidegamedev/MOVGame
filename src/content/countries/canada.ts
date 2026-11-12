@@ -27,7 +27,8 @@
 // The 2008 and 2006 independents (Casey, Arthur) and others are `oth`.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { CA_ELECTION_ISSUES } from "./issues/ca";
 import { CA_MAP } from "./paths/ca";
 
 // The debate win is a one-off beat: it fires at most once a campaign.
@@ -131,7 +132,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       year: 2025,
       label: "2025 · Carney v. Poilievre",
       tagline: "March 2025. A trade war with Washington, a new Liberal leader, and a 25-point Conservative lead evaporating by the week. Five weeks to decide who faces the tariffs.",
-      salience: { us_relations: 0.92, cost_of_living: 0.85, housing: 0.65, healthcare: 0.55, energy_climate: 0.45, immigration: 0.45 },
+      salience: { us_relations: 0.92, cost_of_living: 0.85, housing: 0.65, healthcare: 0.55, energy_climate: 0.45, immigration: 0.45, crime_security: 0.4 },
       regions: {
         BC:    { v: { lpc: 0.42, cpc: 0.41, ndp: 0.13, gpc: 0.03, oth: 0.01 }, s: { lpc: 20, cpc: 19, ndp: 3, gpc: 1 } },
         AB:    { v: { cpc: 0.63, lpc: 0.28, ndp: 0.06, gpc: 0.01, oth: 0.02 }, s: { cpc: 34, lpc: 2, ndp: 1 } },
@@ -168,7 +169,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       majority: { total: 338, threshold: 170 },
       goalText: "170 of 338 seats",
       // Pandemic management rides healthcare; childcare rides cost_of_living.
-      salience: { healthcare: 0.9, cost_of_living: 0.78, housing: 0.7, energy_climate: 0.6, reconciliation: 0.5, immigration: 0.3 },
+      salience: { healthcare: 0.9, cost_of_living: 0.78, housing: 0.7, energy_climate: 0.6, reconciliation: 0.5, immigration: 0.3, deficit: 0.4, crime_security: 0.35 },
       regions: {
         BC:    { v: { cpc: 0.33, ndp: 0.29, lpc: 0.27, gpc: 0.05, oth: 0.06 }, s: { lpc: 15, cpc: 13, ndp: 13, gpc: 1 } },
         AB:    { v: { cpc: 0.55, ndp: 0.19, lpc: 0.16, gpc: 0.01, oth: 0.09 }, s: { cpc: 30, lpc: 2, ndp: 2 } },
@@ -203,7 +204,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       tagline: "October 2019. Four years of Sunny Ways run into blackface photos and the SNC-Lavalin affair. The Liberals lose the popular vote but cling to power. Forty days to hold the minority.",
       majority: { total: 338, threshold: 170 },
       goalText: "170 of 338 seats",
-      salience: { energy_climate: 0.85, cost_of_living: 0.6, healthcare: 0.5, reconciliation: 0.45, housing: 0.4, immigration: 0.35, us_relations: 0.3 },
+      salience: { energy_climate: 0.85, cost_of_living: 0.6, healthcare: 0.5, reconciliation: 0.45, housing: 0.4, immigration: 0.35, us_relations: 0.3, ethics: 0.55, secularism: 0.4 },
       regions: {
         BC:    { v: { cpc: 0.34, lpc: 0.26, ndp: 0.24, gpc: 0.12, oth: 0.04 }, s: { cpc: 17, lpc: 11, ndp: 12, gpc: 2 } },
         AB:    { v: { cpc: 0.69, lpc: 0.14, ndp: 0.11, gpc: 0.03, oth: 0.03 }, s: { cpc: 33, ndp: 1 } },
@@ -238,7 +239,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       tagline: "October 2015. A decade of Harper, a 78-day marathon writ, and a third-place party that ends the night in a majority. Real change, or a safe pair of hands. Eleven weeks to decide.",
       majority: { total: 338, threshold: 170 },
       goalText: "170 of 338 seats",
-      salience: { cost_of_living: 0.8, energy_climate: 0.6, reconciliation: 0.55, healthcare: 0.55, immigration: 0.5, housing: 0.35 },
+      salience: { cost_of_living: 0.8, energy_climate: 0.6, reconciliation: 0.4, healthcare: 0.55, immigration: 0.5, housing: 0.35, economy: 0.85, deficit: 0.7, secularism: 0.5, ethics: 0.45 },
       regions: {
         BC:    { v: { lpc: 0.35, cpc: 0.30, ndp: 0.26, gpc: 0.08, oth: 0.01 }, s: { lpc: 17, cpc: 10, ndp: 14, gpc: 1 } },
         AB:    { v: { cpc: 0.60, lpc: 0.25, ndp: 0.12, gpc: 0.02, oth: 0.01 }, s: { cpc: 29, lpc: 4, ndp: 1 } },
@@ -273,7 +274,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       tagline: "March 2011. A government found in contempt of Parliament, a Liberal leader attacked as just visiting, and an NDP leader on a cane who is about to remake the map. Five weeks to decide whether the Conservatives get the majority they keep asking for.",
       majority: { total: 308, threshold: 155 },
       goalText: "155 of 308 seats",
-      salience: { us_relations: 0.2, economy: 0.8, ethics: 0.7, healthcare: 0.6, cost_of_living: 0.45, national_unity: 0.35, deficit: 0.5 },
+      salience: { us_relations: 0.2, economy: 0.8, ethics: 0.7, healthcare: 0.6, cost_of_living: 0.45, national_unity: 0.35, deficit: 0.5, coalition: 0.6 },
       regions: {
         // Seats and provincial vote as returned; the three territories merged.
         BC:    { v: { cpc: 0.45, ndp: 0.33, lpc: 0.13, gpc: 0.08, oth: 0.01 }, s: { cpc: 21, ndp: 12, lpc: 2, gpc: 1 } },
@@ -310,7 +311,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       tagline: "September 2008. A prime minister calls an early election despite his own fixed-date law, a Liberal leader sells a carbon tax, and the world's markets begin to crash in the closing weeks. Five weeks to ask for a majority.",
       majority: { total: 308, threshold: 155 },
       goalText: "155 of 308 seats",
-      salience: { economy: 0.85, energy_climate: 0.75, cost_of_living: 0.5, healthcare: 0.45, crime_security: 0.4, ethics: 0.2 },
+      salience: { economy: 0.85, energy_climate: 0.75, cost_of_living: 0.5, healthcare: 0.45, crime_security: 0.4, ethics: 0.2, arts_culture: 0.4 },
       regions: {
         BC:    { v: { cpc: 0.45, ndp: 0.26, lpc: 0.19, gpc: 0.09, oth: 0.01 }, s: { cpc: 22, ndp: 9, lpc: 5 } },
         AB:    { v: { cpc: 0.65, ndp: 0.13, lpc: 0.11, gpc: 0.09, oth: 0.02 }, s: { cpc: 27, ndp: 1 } },
@@ -345,7 +346,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       tagline: "November 2005. A sponsorship scandal, a government that falls on a confidence vote, and a winter campaign that runs eight weeks through Christmas. Can the Conservatives win without scaring anyone?",
       majority: { total: 308, threshold: 155 },
       goalText: "155 of 308 seats",
-      salience: { ethics: 0.9, healthcare: 0.6, cost_of_living: 0.5, crime_security: 0.55, national_unity: 0.3, taxes: 0.45 },
+      salience: { ethics: 0.9, healthcare: 0.6, cost_of_living: 0.5, crime_security: 0.55, national_unity: 0.3, taxes: 0.45, social_values: 0.3 },
       regions: {
         BC:    { v: { cpc: 0.37, ndp: 0.29, lpc: 0.28, gpc: 0.05, oth: 0.01 }, s: { cpc: 17, ndp: 10, lpc: 9 } },
         AB:    { v: { cpc: 0.64, lpc: 0.15, ndp: 0.12, gpc: 0.07, oth: 0.02 }, s: { cpc: 28 } },
@@ -380,7 +381,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       tagline: "May 2004. A new prime minister, a brand new merged Conservative Party and a sponsorship scandal that will not go away. Five weeks to decide how much to forgive.",
       majority: { total: 308, threshold: 155 },
       goalText: "155 of 308 seats",
-      salience: { ethics: 0.85, healthcare: 0.8, economy: 0.45, taxes: 0.4, national_unity: 0.35, crime_security: 0.3 },
+      salience: { ethics: 0.85, healthcare: 0.8, economy: 0.45, taxes: 0.4, national_unity: 0.35, crime_security: 0.3, social_values: 0.5 },
       regions: {
         BC:    { v: { cpc: 0.36, lpc: 0.29, ndp: 0.27, gpc: 0.06, oth: 0.02 }, s: { cpc: 22, lpc: 8, ndp: 5, oth: 1 } },
         AB:    { v: { cpc: 0.61, lpc: 0.22, ndp: 0.10, gpc: 0.06, oth: 0.01 }, s: { cpc: 26, lpc: 2 } },
@@ -415,7 +416,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       tagline: "October 2000. A prime minister calls a snap election three and a half years in, against a right that has only just reinvented itself as the Canadian Alliance under a new leader. Five weeks to stop a third Liberal majority or hand it over.",
       majority: { total: 301, threshold: 151 },
       goalText: "151 of 301 seats",
-      salience: { healthcare: 0.85, taxes: 0.75, national_unity: 0.5, economy: 0.5, crime_security: 0.3, ethics: 0.25 },
+      salience: { healthcare: 0.85, taxes: 0.75, national_unity: 0.5, economy: 0.5, crime_security: 0.3, ethics: 0.35, social_values: 0.4 },
       regions: {
         BC:    { v: { ref: 0.50, lpc: 0.28, ndp: 0.11, cpc: 0.07, oth: 0.02, gpc: 0.02 }, s: { ref: 27, lpc: 5, ndp: 2 } },
         AB:    { v: { ref: 0.58, lpc: 0.21, cpc: 0.14, ndp: 0.05, oth: 0.01, gpc: 0.01 }, s: { ref: 23, lpc: 2, cpc: 1 } },
@@ -485,7 +486,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       tagline: "October 1988. One question: free trade with the United States. A Liberal Senate has forced the vote, and a trailing Liberal leader is about to win the debate and briefly lead the polls. Seven weeks to decide what kind of country this is.",
       majority: { total: 295, threshold: 148 },
       goalText: "148 of 295 seats",
-      salience: { free_trade: 0.95, economy: 0.6, taxes: 0.4, healthcare: 0.4, national_unity: 0.35, deficit: 0.3 },
+      salience: { free_trade: 0.95, economy: 0.6, taxes: 0.4, healthcare: 0.55, national_unity: 0.35, deficit: 0.3, energy_climate: 0.3 },
       regions: {
         BC:    { v: { ndp: 0.38, cpc: 0.35, lpc: 0.20, oth: 0.07 }, s: { ndp: 19, cpc: 12, lpc: 1 } },
         AB:    { v: { cpc: 0.52, ndp: 0.17, oth: 0.17, lpc: 0.14 }, s: { cpc: 25, ndp: 1 } },
@@ -520,7 +521,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
       tagline: "July 1984. Trudeau is gone, a new Liberal leader has just come back after eight years away, and the Conservatives need Quebec. Eight weeks of summer campaign to decide whether the country wants a change.",
       majority: { total: 282, threshold: 142 },
       goalText: "142 of 282 seats",
-      salience: { economy: 0.9, deficit: 0.6, national_unity: 0.5, taxes: 0.4, healthcare: 0.3, ethics: 0.5 },
+      salience: { economy: 0.9, deficit: 0.6, national_unity: 0.5, taxes: 0.4, healthcare: 0.35, ethics: 0.7, energy_climate: 0.4, womens_issues: 0.3 },
       regions: {
         BC:    { v: { cpc: 0.47, ndp: 0.35, lpc: 0.16, oth: 0.02 }, s: { cpc: 19, ndp: 8, lpc: 1 } },
         AB:    { v: { cpc: 0.69, ndp: 0.14, lpc: 0.13, oth: 0.04 }, s: { cpc: 21 } },
@@ -682,6 +683,7 @@ export const CANADA: CountryBundle = oncePerCampaign({
     },
   ],
 }, ["debate_en", "debate_fr"]);
+attachElectionIssues(CANADA, CA_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const CANADA_MODULE = countryModule(CANADA, {

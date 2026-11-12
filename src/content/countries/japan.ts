@@ -96,7 +96,8 @@
 // they are already in the real seat totals.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { JP_ELECTION_ISSUES } from "./issues/jp";
 import { JP_MAP } from "./paths/jp";
 
 // The debate win is a one-off beat: it fires at most once a campaign.
@@ -233,7 +234,7 @@ export const JAPAN: CountryBundle = oncePerCampaign({
       year: 2026,
       label: "2026 · Takaichi v. Noda",
       tagline: "February 2026. Sanae Takaichi, Japan's first woman prime minister, has governed for three months in coalition with Ishin, after Komeito walked out of the old LDP coalition. She dissolves the House to ask for a mandate of her own in the shortest campaign since the war. Against her, the Constitutional Democrats and Komeito have merged into the Centrist Reform Alliance.",
-      salience: { economy: 0.85, security: 0.65, consumption_tax: 0.6, pensions: 0.45, childcare: 0.4, politics_money: 0.4 },
+      salience: { economy: 0.85, security: 0.65, consumption_tax: 0.6, pensions: 0.45, childcare: 0.4, politics_money: 0.4, foreigners: 0.5, diet_reform: 0.35 },
       regions: {
         HKD: { v: { ldp: 0.37, cra: 0.246, ishin: 0.038, jcp: 0.054, dpp: 0.089, sdp: 0.013, reiwa: 0.031, sansei: 0.066, cpj: 0.024, mirai: 0.055, oth: 0.013 }, s: { ldp: 15, cra: 4, dpp: 1 } },
         TOH: { v: { ldp: 0.412, cra: 0.212, ishin: 0.042, jcp: 0.04, dpp: 0.099, sdp: 0.014, reiwa: 0.031, sansei: 0.071, cpj: 0.019, mirai: 0.06 }, s: { ldp: 25, cra: 4, dpp: 2, sansei: 1, mirai: 1 } },
@@ -266,7 +267,7 @@ export const JAPAN: CountryBundle = oncePerCampaign({
       year: 2024,
       label: "2024 · Ishiba v. Noda",
       tagline: "October 2024. Ishiba called the election eight days after becoming prime minister, with the slush fund scandal still open and prices still rising. The LDP and Komeito could lose their majority for the first time since 2009. Take the government from them, or hold on with a weaker hand.",
-      salience: { politics_money: 0.95, economy: 0.85, childcare: 0.5, security: 0.45, pensions: 0.4, nuclear: 0.25 },
+      salience: { politics_money: 0.95, economy: 0.85, childcare: 0.5, security: 0.45, pensions: 0.4, nuclear: 0.25, reconstruction: 0.35 },
       regions: {
         HKD: { v: { ldp: 0.268, dpj: 0.29, kom: 0.106, ishin: 0.04, jcp: 0.071, dpp: 0.08, sdp: 0.013, reiwa: 0.074, sansei: 0.024, cpj: 0.026, oth: 0.008 }, s: { ldp: 6, dpj: 12, kom: 1, dpp: 1 } },
         TOH: { v: { ldp: 0.314, dpj: 0.263, kom: 0.097, ishin: 0.044, jcp: 0.059, dpp: 0.105, sdp: 0.021, reiwa: 0.072, sansei: 0.025 }, s: { ldp: 14, dpj: 15, kom: 1, dpp: 2, reiwa: 1 } },
@@ -344,7 +345,7 @@ export const JAPAN: CountryBundle = oncePerCampaign({
       tagline: "September 2017. Abe calls a snap election to catch a divided opposition, and Governor Koike launches a rival party the same evening. The Democrats split within days, North Korea is firing missiles overhead, and a two-thirds majority is on the table.",
       majority: { total: 465, threshold: 233 },
       goalText: "233 of 465 seats",
-      salience: { security: 0.85, consumption_tax: 0.65, economy: 0.6, politics_money: 0.55, childcare: 0.55, nuclear: 0.35 },
+      salience: { security: 0.85, consumption_tax: 0.65, economy: 0.6, politics_money: 0.55, childcare: 0.55, nuclear: 0.35, constitution: 0.5 },
       regions: {
         HKD: { v: { ldp: 0.288, dpj: 0.264, kom: 0.11, ishin: 0.028, jcp: 0.085, kibo: 0.122, sdp: 0.014, oth: 0.089 }, s: { ldp: 9, dpj: 8, kom: 2, kibo: 1 } },
         TOH: { v: { ldp: 0.347, dpj: 0.181, kom: 0.11, ishin: 0.03, jcp: 0.074, kibo: 0.217, sdp: 0.025, oth: 0.016 }, s: { ldp: 23, dpj: 3, kom: 1, jcp: 1, kibo: 4, oth: 4 } },
@@ -382,7 +383,7 @@ export const JAPAN: CountryBundle = oncePerCampaign({
       tagline: "December 2014. Japan has slipped into recession, Abe has put off the sales tax rise and called an election to ask whether Abenomics is working. The Democrats are weak, the Communists see a gap, and nobody expects a crowd at the polls.",
       majority: { total: 475, threshold: 238 },
       goalText: "238 of 475 seats",
-      salience: { economy: 0.9, consumption_tax: 0.75, security: 0.5, pensions: 0.45, nuclear: 0.4, trade: 0.35, reconstruction: 0.35 },
+      salience: { economy: 0.9, consumption_tax: 0.75, security: 0.5, pensions: 0.45, nuclear: 0.4, trade: 0.35, reconstruction: 0.35, okinawa: 0.35 },
       regions: {
         HKD: { v: { ldp: 0.298, dpj: 0.276, kom: 0.123, ishin: 0.099, jcp: 0.121, sdp: 0.021, oth: 0.062 }, s: { ldp: 11, dpj: 5, kom: 2, ishin: 1, jcp: 1 } },
         TOH: { v: { ldp: 0.33, dpj: 0.225, kom: 0.112, ishin: 0.13, jcp: 0.099, sdp: 0.034, oth: 0.07 }, s: { ldp: 24, dpj: 8, kom: 2, ishin: 3, jcp: 1, oth: 1 } },
@@ -605,6 +606,7 @@ export const JAPAN: CountryBundle = oncePerCampaign({
     },
   ],
 }, ["press_club_debate"]);
+attachElectionIssues(JAPAN, JP_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const JAPAN_MODULE = countryModule(JAPAN, {

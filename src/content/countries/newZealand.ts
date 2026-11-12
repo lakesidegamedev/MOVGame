@@ -26,7 +26,8 @@
 // Green 8, ACT 1. NZ First chose Labour; the Greens gave confidence and supply.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { NZ_ELECTION_ISSUES } from "./issues/nz";
 import { NZ_MAP } from "./paths/nz";
 
 // The debate win is a one-off beat: it fires at most once a campaign.
@@ -175,7 +176,7 @@ export const NEW_ZEALAND: CountryBundle = oncePerCampaign({
       tagline: "October 2020. A second Auckland outbreak has pushed the election back a month, Ardern's COVID response is the whole campaign, and National is on its third leader of the year. Win the first single-party majority under MMP, or stop it.",
       majority: { total: 120, threshold: 61 },
       goalText: "61 of 120 seats",
-      salience: { covid: 0.95, economy_tax: 0.75, housing: 0.6, health: 0.5, climate: 0.4 },
+      salience: { covid: 0.95, economy_tax: 0.75, housing: 0.6, health: 0.5, climate: 0.4, referendums: 0.4 },
       regions: {
         NTH: { v: { nat: 0.318, lab: 0.438, grn: 0.066, act: 0.092, nzf: 0.029, tpm: 0.003, oth: 0.054 }, s: { nat: 5, lab: 7, grn: 1, act: 1 } },
         AKC: { v: { nat: 0.25, lab: 0.499, grn: 0.115, act: 0.071, nzf: 0.02, tpm: 0.005, oth: 0.04 }, s: { nat: 4, lab: 8, grn: 2, act: 1 } },
@@ -211,7 +212,7 @@ export const NEW_ZEALAND: CountryBundle = oncePerCampaign({
       tagline: "September 2017. Seven weeks out, Labour swaps Andrew Little for Jacinda Ardern and the race resets overnight. National has nine years in government and a steady hand at the top. Winston Peters waits to be asked.",
       majority: { total: 120, threshold: 61 },
       goalText: "61 of 120 seats",
-      salience: { housing: 0.8, economy_tax: 0.75, child_poverty: 0.7, health: 0.6, climate: 0.55, crime: 0.3 },
+      salience: { housing: 0.8, economy_tax: 0.75, child_poverty: 0.7, health: 0.6, climate: 0.55, crime: 0.3, immigration: 0.45 },
       regions: {
         NTH: { v: { nat: 0.539, lab: 0.281, grn: 0.058, act: 0.005, nzf: 0.083, tpm: 0.003, oth: 0.031 }, s: { nat: 8, lab: 4, grn: 1, nzf: 1 } },
         AKC: { v: { nat: 0.438, lab: 0.39, grn: 0.081, act: 0.006, nzf: 0.048, tpm: 0.005, oth: 0.032 }, s: { nat: 7, lab: 6, grn: 1, act: 1, nzf: 1 } },
@@ -317,6 +318,7 @@ export const NEW_ZEALAND: CountryBundle = oncePerCampaign({
     },
   ],
 }, ["leaders_debate"]);
+attachElectionIssues(NEW_ZEALAND, NZ_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const NEW_ZEALAND_MODULE = countryModule(NEW_ZEALAND, {

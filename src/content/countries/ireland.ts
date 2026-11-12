@@ -69,7 +69,8 @@
 // Fine Gael and Labour, the actual coalition, are free to pair.
 
 import type { CountryBundle } from "@engine/countryGame";
-import { countryModule, oncePerCampaign } from "./types";
+import { attachElectionIssues, countryModule, oncePerCampaign } from "./types";
+import { IE_ELECTION_ISSUES } from "./issues/ie";
 import { IE_MAP } from "./paths/ie";
 
 // The debate win is a one-off beat: it fires at most once a campaign.
@@ -223,7 +224,7 @@ export const IRELAND: CountryBundle = oncePerCampaign({
       tagline: "February 2020. Fine Gael has governed for nine years on a recovering economy and a Brexit deal, and the voters on trolleys and on rent have noticed. Sinn Féin is rising on housing with too few candidates to turn it all into seats. A three-way split is coming and the Greens are in the mix.",
       majority: { total: 160, threshold: 81 },
       goalText: "81 of 160 seats",
-      salience: { housing: 0.95, health: 0.8, brexit_unity: 0.6, cost_of_living: 0.55, climate: 0.5, tax_spending: 0.4 },
+      salience: { housing: 0.95, health: 0.8, brexit_unity: 0.6, cost_of_living: 0.55, climate: 0.5, tax_spending: 0.4, pension_age: 0.65 },
       regions: {
         DNO: { v: { ff: 0.157, fg: 0.158, sf: 0.316, lab: 0.077, grn: 0.095, sd: 0.088, pbp: 0.028, aon: 0.008, ind: 0.066, oth: 0.009 }, s: { ff: 3, fg: 3, sf: 4, lab: 2, grn: 2, sd: 3 } },
         DSO: { v: { ff: 0.136, fg: 0.267, sf: 0.183, lab: 0.061, grn: 0.166, sd: 0.025, pbp: 0.090, aon: 0.014, ind: 0.048, oth: 0.009 }, s: { ff: 2, fg: 4, sf: 2, grn: 4, pbp: 2, ind: 1 } },
@@ -298,7 +299,7 @@ export const IRELAND: CountryBundle = oncePerCampaign({
       tagline: "February 2011. The Troika has arrived, Brian Cowen is gone, the Greens have walked out and Fianna Fáil is about to be wiped off the map. Fine Gael and Labour are fighting to be the senior partner in a coalition nobody doubts. Win 84 seats, or at least be in the room.",
       majority: { total: 166, threshold: 84 },
       goalText: "84 of 166 seats",
-      salience: { bailout: 0.95, tax_spending: 0.8, reform: 0.55, health: 0.45, cost_of_living: 0.35, housing: 0.3 },
+      salience: { bailout: 0.95, tax_spending: 0.8, reform: 0.55, health: 0.45, cost_of_living: 0.35, housing: 0.3, jobs: 0.6 },
       regions: {
         DNO: { v: { ff: 0.134, fg: 0.278, sf: 0.095, lab: 0.304, grn: 0.033, pbp: 0.055, ind: 0.097, oth: 0.003 }, s: { fg: 5, sf: 2, lab: 7, pbp: 1, ind: 2 } },
         DSO: { v: { ff: 0.113, fg: 0.327, sf: 0.046, lab: 0.266, grn: 0.049, pbp: 0.073, ind: 0.127, }, s: { fg: 8, sf: 1, lab: 6, pbp: 2, ind: 1 } },
@@ -419,6 +420,7 @@ export const IRELAND: CountryBundle = oncePerCampaign({
     },
   ],
 }, ["leaders_debate"]);
+attachElectionIssues(IRELAND, IE_ELECTION_ISSUES);
 
 // Registry rows, store pack, daily pairing and "play next" chain.
 export const IRELAND_MODULE = countryModule(IRELAND, {
