@@ -152,7 +152,7 @@ export function TimelineView({ log, onClose }: { log: ReplayLog; onClose: () => 
                     <li key={id}>
                       <span>{log.contestNames[id] ?? id}</span>{" "}
                       <span className={share >= 0.5 ? "up" : "down"}>
-                        {share >= 0.5 ? "lead" : "behind"} {pts((share - 0.5) * 100)}
+                        {share >= 0.5 ? "lead by" : "behind by"} {Math.abs((share - 0.5) * 100).toFixed(1)}
                       </span>
                     </li>
                   ))}
