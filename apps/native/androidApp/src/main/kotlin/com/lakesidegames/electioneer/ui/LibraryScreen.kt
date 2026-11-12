@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,8 +48,12 @@ fun CampaignLibraryScreen(session: GameSession) {
     val countries = remember { NativeCatalog.countries() }
     val all = remember { countries.flatMap { MobileCampaign.elections(it.id) } }
     val owned by session.owned.collectAsState()
-    val ownedScenarios = remember(owned) { NativeCatalog.ownedScenarios(owned.toList()) }
+    val unlocked by session.account.unlocked.collectAsState()
+    val gate by session.gate.collectAsState()
+    val ownedScenarios = remember(owned, unlocked) { NativeCatalog.ownedScenarios(owned.toList()) + unlocked }
     fun isOwned(e: NativeElection) = e.free || e.scenarioId in ownedScenarios || (e.packId != null && e.packId in owned)
+    val dailyId = remember { session.dailyAssignment().scenarioId }
+    fun lockOf(e: NativeElection) = gate.lockedPack(e.country, e.nativeId, owned, unlocked.toSet(), dailyId)
     val daily = remember { session.dailySetup }
     val pick = remember { session.libraryPick.also { session.libraryPick = null } }
     var picked by remember { mutableStateOf(
@@ -63,7 +69,7 @@ fun CampaignLibraryScreen(session: GameSession) {
     picked?.let { election ->
         BackHandler { picked = null }
         ElectionBriefing(session, election, daily?.takeIf { it.electionId == election.nativeId && it.countryId == election.country },
-            owned = isOwned(election), onBack = { picked = null })
+            owned = isOwned(election), locked = lockOf(election), onBack = { picked = null })
         return
     }
 
@@ -120,7 +126,9 @@ fun CampaignLibraryScreen(session: GameSession) {
                 }
             }
             items(elections, key = { it.scenarioId }) { e ->
-                MovCard(Modifier.padding(horizontal = MovSpace.gutter), tight = true, onClick = { picked = e }) {
+                val locked = lockOf(e)
+                MovCard(Modifier.padding(horizontal = MovSpace.gutter), tight = true, onClick = { picked = e },
+                    onClickLabel = if (locked != null) "Open the briefing and unlock" else null) {
                     Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
                         Text("${e.year}", Modifier.width(52.dp), style = MaterialTheme.typography.titleLarge.num, color = Mov.Text1, fontWeight = FontWeight.Bold)
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
@@ -129,8 +137,10 @@ fun CampaignLibraryScreen(session: GameSession) {
                             Row(horizontalArrangement = Arrangement.spacedBy(MovSpace.s1_5)) {
                                 Tag(e.difficulty, difficultyTag(e.difficulty))
                                 if (e.free) Tag("Free", TagKind.Positive) else if (isOwned(e)) Tag("Owned", TagKind.Positive)
+                                else if (locked != null) Tag("Unlock", TagKind.Warning)
                             }
                         }
+                        if (locked != null) Icon(Icons.Filled.Lock, contentDescription = "Locked", tint = Mov.Text3, modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -140,7 +150,7 @@ fun CampaignLibraryScreen(session: GameSession) {
 
 /** One election's briefing: blurb, side picker sized for ten parties, launch. */
 @Composable
-private fun ElectionBriefing(session: GameSession, election: NativeElection, daily: com.lakesidegames.electioneer.engine.NativeDailyAssignment?, owned: Boolean, onBack: () -> Unit) {
+private fun ElectionBriefing(session: GameSession, election: NativeElection, daily: com.lakesidegames.electioneer.engine.NativeDailyAssignment?, owned: Boolean, locked: String?, onBack: () -> Unit) {
     val us = election.country == "US"
     val parties = remember(election) { if (us) emptyList() else MobileCampaign.parties(election.country, election.nativeId) }
     var partyId by remember(election) { mutableStateOf(daily?.role?.takeIf { id -> parties.any { it.id == id } } ?: parties.firstOrNull()?.id ?: "") }
@@ -161,6 +171,10 @@ private fun ElectionBriefing(session: GameSession, election: NativeElection, dai
                         else Tag("${NativeCatalog.packName(election.packId)} pack", TagKind.Outline)
                     }
                 }
+            }
+            if (locked != null) item {
+                Callout("Locked", "This election is part of the ${NativeCatalog.packName(locked)} pack. Each country is a one-time purchase, or get every country with the Complete Collection.",
+                    kind = NoticeKind.Info)
             }
             if (!us) {
                 item { Eyebrow("Choose your side · ${parties.size} parties") }
@@ -197,7 +211,11 @@ private fun ElectionBriefing(session: GameSession, election: NativeElection, dai
             country?.guide?.let { guide -> item { Callout("How ${guide.title} works", guide.body, kind = NoticeKind.Info) } }
         }
         ActionBar {
-            if (us) PrimaryButton("Choose your presidential ticket", { session.setupScenarioId = election.nativeId; session.go(Screen.SETUP) }, Modifier.weight(1f))
+            if (locked != null) {
+                Icon(Icons.Filled.Lock, contentDescription = null, tint = Mov.Text2, modifier = Modifier.size(20.dp))
+                PrimaryButton("Unlock the ${NativeCatalog.packName(locked)} pack", { session.openStoreFor(locked) }, Modifier.weight(1f))
+            }
+            else if (us) PrimaryButton("Choose your presidential ticket", { session.setupScenarioId = election.nativeId; session.go(Screen.SETUP) }, Modifier.weight(1f))
             else PrimaryButton("Launch campaign", { session.startCampaign(election.country, election.nativeId, partyId, difficulty, seed) }, Modifier.weight(1f),
                 enabled = seed.isNotBlank() && partyId.isNotEmpty())
         }

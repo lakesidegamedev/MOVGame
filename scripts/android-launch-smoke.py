@@ -78,7 +78,7 @@ def wait_ask(marker, name):
     raise RuntimeError(f'{name} never reached {marker}')
 
 
-def tap_label(label, direction='down', suffix=False, prefix=False):
+def tap_label(label, direction='down', suffix=False, prefix=False, pinned=False):
     width, height = map(int, adb('shell', 'wm', 'size').strip().split()[-1].split('x'))
     for attempt in range(12):
         if not semantic_text(f'tap-{attempt}'):
@@ -93,7 +93,8 @@ def tap_label(label, direction='down', suffix=False, prefix=False):
             bounds = list(map(int, re.findall(r'\d+', node.get('bounds', ''))))
             if len(bounds) == 4 and bounds[2] > bounds[0] and bounds[3] > bounds[1]:
                 # Leave space below the button for the updated queue count.
-                if bounds[3] > height * 2 // 3:
+                # A pinned action bar never scrolls, so tap it where it is.
+                if bounds[3] > height * 2 // 3 and not pinned:
                     adb('shell', 'input', 'swipe', str(width // 2), str(height * 3 // 4), str(width // 2), str(height // 2), '300')
                     break
                 adb('shell', 'input', 'tap', str((bounds[0] + bounds[2]) // 2), str((bounds[1] + bounds[3]) // 2))
@@ -195,6 +196,25 @@ def route_flows():
     # A side picker per engine, including India's ten playable sides.
     for country in ('US', 'UK', 'IN', 'JP'):
         shot(f'library-{country}', 'Choose your presidential ticket' if country == 'US' else 'Launch campaign', 'ask')
+    # With Play sales and native gating pinned on, an unowned paid election
+    # shows a lock and Unlock, and Unlock opens its pack in the store.
+    try:
+        # The free U.S. elections come first; scroll to the paid ones.
+        launch('locked-library')
+        capture('locked-library-top', 'Choose your election', 'ask')
+        width, height = map(int, adb('shell', 'wm', 'size').strip().split()[-1].split('x'))
+        adb('shell', 'input', 'swipe', str(width // 2), str(height * 3 // 4), str(width // 2), str(height // 4), '600')
+        capture('locked-library', 'Unlock', 'ask')
+    except Exception as error:  # noqa: BLE001
+        print(f'FAIL locked-library: {error}', flush=True)
+        failures.append(f'locked-library: {error}')
+    shot('locked-UK', 'Unlock the United Kingdom pack', 'ask')
+    try:
+        tap_label('Unlock the United Kingdom pack', pinned=True)
+        capture('locked-UK-store', 'Unlocks the election you picked', 'ask')
+    except Exception as error:  # noqa: BLE001
+        print(f'FAIL locked-UK-store: {error}', flush=True)
+        failures.append(f'locked-UK-store: {error}')
     # Every new country's map renders and a tap on it selects a region.
     for country in ('UK', 'NZ', 'BR', 'IN', 'ES', 'IE', 'JP', 'IT', 'MX'):
         shot(f'map-{country}', 'Regional projections')

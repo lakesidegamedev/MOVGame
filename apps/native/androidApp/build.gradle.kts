@@ -49,6 +49,7 @@ kotlin {
 dependencies {
     testImplementation(kotlin("test-junit"))
     implementation(project(":shared"))
+    implementation(libs.kotlinx.serialization.json)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.tooling.preview)

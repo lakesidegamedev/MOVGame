@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.lakesidegames.electioneer.billing.PlayBilling
+import com.lakesidegames.electioneer.billing.PlayGate
 import com.lakesidegames.electioneer.billing.StoreProduct
 import com.lakesidegames.electioneer.content.CANDIDATES
 import com.lakesidegames.electioneer.content.EVENTS_BY_ID
@@ -380,6 +381,7 @@ class GameSession : ViewModel() {
     val campaignVersion: StateFlow<Int> = _campaignVersion
 
     fun startCampaign(countryId: String, electionId: String, party: String, difficulty: String, seed: String) {
+        lockedPack(countryId, electionId)?.let { openStoreFor(it); return }
         undoHistory.clear()
         beginAutosave()
         _screen.value = Screen.LOADING
@@ -436,10 +438,30 @@ class GameSession : ViewModel() {
     private val _storeNotice = MutableStateFlow<String?>(null)
     val storeNotice: StateFlow<String?> = _storeNotice
 
+    // Paid election locks. Open until billing proves Play can sell the pack
+    // and the server turns native gating on; debug captures may pin a gate.
+    private val _gate = MutableStateFlow(PlayGate.OPEN)
+    val gate: StateFlow<PlayGate> = _gate
+    private var pinnedGate: PlayGate? = null
+    internal fun pinGateForCapture(gate: PlayGate) { pinnedGate = gate; _gate.value = gate }
+    /** Pack the store opens at next, set by a locked launch or Unlock button. */
+    var storeFocus: String? = null
+
+    /** Pack a new campaign on [country]/[nativeId] needs, or null when it is playable. */
+    fun lockedPack(country: String, nativeId: String): String? = _gate.value.lockedPack(country, nativeId, _owned.value,
+        if (::account.isInitialized) account.unlocked.value.toSet() else emptySet(), dailyAssignment().scenarioId)
+
+    /** A locked election opens its pack in the store instead of starting. */
+    fun openStoreFor(packId: String) {
+        storeFocus = packId
+        _screen.value = Screen.STORE
+    }
+
     fun attachBilling(context: Context) {
         if (billing != null) return
         val b = PlayBilling(context, account, scope)
         billing = b
+        scope.launch { b.gate.collect { gate -> _gate.value = pinnedGate ?: gate } }
         b.setOnChangeListener {
             _owned.value = b.entitlements()
             b.lastNotice?.let { _storeNotice.value = it }
@@ -449,6 +471,7 @@ class GameSession : ViewModel() {
         scope.launch { account.storeOwned.collect { _owned.value = account.cachedStorePacks() } }
         scope.launch {
             account.user.collect {
+                b.refreshGate()
                 _products.value = emptyList()
                 _owned.value = account.cachedStorePacks()
                 if (it?.ahdLinked == true) {
@@ -521,6 +544,7 @@ class GameSession : ViewModel() {
     }
 
     fun newGame(scenarioId: String, player: CandidateId, mateId: String, staffIds: List<String>, difficulty: String, eventMode: EventMode, totalTurns: Int, seed: String, whatIfState: String, mirrorMatch: Boolean, pandemic: Boolean) {
+        lockedPack("US", scenarioId)?.let { openStoreFor(it); return }
         undoHistory.clear()
         require(MobileGame.campaigns().any { it.id == scenarioId })
         require(MobileGame.mates(scenarioId, player.serial).any { it.id == mateId })
