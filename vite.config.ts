@@ -48,8 +48,10 @@ export default defineConfig({
         manualChunks: (id) => {
           if (id.includes("node_modules")) return "vendor";
           if (/\/src\/content\/countries\/paths\//.test(id)) return "country-maps";
+          // Each election's issue list: text that keeps the countries chunk under 500 kB.
+          if (/\/src\/content\/countries\/issues\//.test(id)) return "country-issues";
           if (/\/src\/content\/countries\//.test(id)) return "countries";
-          if (/\/src\/content\/(historicalEvents|scenarios|statePaths|events|endorsements|states)\.ts$/.test(id)) return "us-content";
+          if (/\/src\/content\/(historicalEvents|scenarios|statePaths|events|endorsements|states|usElectionIssues)\.ts$/.test(id)) return "us-content";
           // UK region paths stay with the lazy screens that draw them.
           if (/\/src\/content\/uk\/(?!regionPaths)/.test(id)) return "uk-content";
           return undefined;
