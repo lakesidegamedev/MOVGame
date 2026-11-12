@@ -36,8 +36,9 @@ struct StoreView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Election packs").font(.title2.bold())
-                Text("\(countries.count) countries and \(all.count) elections. \(all.filter { $0.free }.count) elections, one in every country, are free for everyone.")
-                    .font(.subheadline).foregroundStyle(CampaignStyle.muted).fixedSize(horizontal: false, vertical: true)
+                (Text("\(countries.count) countries and \(all.count) elections. ").foregroundColor(CampaignStyle.muted)
+                    + Text("\(all.filter { $0.free }.count) elections, one in every country, are free for everyone.").foregroundColor(CampaignStyle.gold))
+                    .font(.subheadline).fixedSize(horizontal: false, vertical: true)
                 if !store.gating {
                     Text("Packs are not on sale in the app yet, so every election is open to play.")
                         .font(.caption).foregroundStyle(CampaignStyle.muted)
