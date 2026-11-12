@@ -119,6 +119,22 @@ export function getDb(): Database.Database {
       expires_at INTEGER NOT NULL,
       used INTEGER NOT NULL DEFAULT 0
     );
+
+    -- OIDC sign-in (MOV_LAKESIDE_SIGNIN): one row per in-flight authorization
+    -- request (state is the key, single use) and single-use local login codes.
+    CREATE TABLE IF NOT EXISTS oidc_flows (
+      state TEXT PRIMARY KEY,
+      nonce TEXT NOT NULL,
+      verifier TEXT NOT NULL,
+      return_url TEXT NOT NULL,
+      expires_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS lakeside_login_codes (
+      code TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id),
+      expires_at INTEGER NOT NULL,
+      used INTEGER NOT NULL DEFAULT 0
+    );
   `);
 
   // Lakeside account link: AHD userId attached to a local user. Additive column
@@ -127,6 +143,10 @@ export function getDb(): Database.Database {
   if (!userCols.some((c) => c.name === "ahd_user_id")) {
     db.exec("ALTER TABLE users ADD COLUMN ahd_user_id TEXT");
   }
+  if (!userCols.some((c) => c.name === "lakeside_sub")) {
+    db.exec("ALTER TABLE users ADD COLUMN lakeside_sub TEXT");
+  }
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS users_lakeside_sub ON users(lakeside_sub) WHERE lakeside_sub IS NOT NULL");
   db.exec("CREATE UNIQUE INDEX IF NOT EXISTS users_ahd_user_id ON users(ahd_user_id) WHERE ahd_user_id IS NOT NULL");
 
   return db;
@@ -139,6 +159,7 @@ export interface UserRow {
   password_hash: string;
   created_at: number;
   ahd_user_id: string | null;
+  lakeside_sub?: string | null;
 }
 
 export interface PurchaseRow {
