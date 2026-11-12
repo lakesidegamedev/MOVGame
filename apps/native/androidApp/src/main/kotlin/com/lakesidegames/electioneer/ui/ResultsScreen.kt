@@ -13,6 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lakesidegames.electioneer.engine.CandidateId
 import com.lakesidegames.electioneer.engine.NativeResults
+import com.lakesidegames.electioneer.engine.electoralRule
 
 // U.S. results: outcome, electoral and popular totals, score, state table,
 // what decided it, and the next campaign.
@@ -30,6 +31,7 @@ fun ResultsScreen(session: GameSession) {
         return
     }
 
+    val college = remember(result) { result.electoralRule() }
     val demEv = result.electoralVotes[CandidateId.DEM.serial] ?: 0
     val repEv = result.electoralVotes[CandidateId.REP.serial] ?: 0
     val summary = remember(g, session.campaignDifficulty) { NativeResults.us(g, session.campaignDifficulty) }
@@ -54,19 +56,19 @@ fun ResultsScreen(session: GameSession) {
         MovCard(color = Mov.Surface2, accent = won) {
             Eyebrow("Election result", color = if (won) Mov.Positive else Mov.Negative)
             Text(if (won) "Victory" else "Defeat", style = MaterialTheme.typography.displayMedium, color = Mov.Text1)
-            Text(if (result.winner == "tie") "Electoral College tied. No candidate reaches 270." else "$winnerName wins the presidency",
+            Text(if (result.winner == "tie") "Electoral College tied. No candidate reaches ${college.majority}." else "$winnerName wins the presidency",
                 style = MaterialTheme.typography.titleMedium, color = Mov.Text2)
             Row(verticalAlignment = Alignment.Bottom) {
                 BigNumber("$demEv", dem?.shortName ?: "Dem", Mov.DemText)
                 Spacer(Modifier.weight(1f))
-                Text("270 TO WIN", color = Mov.Text3, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(bottom = 6.dp))
+                Text("${college.majority} TO WIN", color = Mov.Text3, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(bottom = 6.dp))
                 Spacer(Modifier.weight(1f))
                 Column(horizontalAlignment = Alignment.End) {
                     Text("$repEv", style = MaterialTheme.typography.displayMedium.num, color = Mov.GopText, fontWeight = FontWeight.ExtraBold)
                     Text((rep?.shortName ?: "Rep").uppercase(), style = MaterialTheme.typography.labelSmall, color = Mov.Text3)
                 }
             }
-            SeatBar(listOf(Mov.Dem to demEv, Mov.Gop to repEv), 538, 270, description = "$demEv to $repEv electoral votes")
+            SeatBar(listOf(Mov.Dem to demEv, Mov.Gop to repEv), college.total, college.majority, description = "$demEv to $repEv electoral votes. ${college.majority} to win.")
             Row {
                 Text("Popular vote ${percent(demPop)}", Modifier.weight(1f), color = Mov.DemText, style = MaterialTheme.typography.bodyMedium.num)
                 Text(percent(1 - demPop), color = Mov.GopText, style = MaterialTheme.typography.bodyMedium.num)

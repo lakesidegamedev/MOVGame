@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lakesidegames.electioneer.engine.CandidateId
+import com.lakesidegames.electioneer.engine.electoralRule
 
 // U.S. campaign desk: scoreboard, state tile map, seven-day plan, events and recap.
 @Composable
@@ -28,6 +29,8 @@ fun GameScreen(session: GameSession) {
     val eventResult by session.eventResult.collectAsState()
     val recap by session.recap.collectAsState()
     val g = game.state ?: return
+    // Older elections have smaller colleges (531 votes, 266 to win in 1932).
+    val college = remember(g.scenarioId, g.customScenario) { g.electoralRule() }
     var confirmEmptyWeek by remember { mutableStateOf(false) }
     fun requestEndWeek() { if (pending == null && recap == null) { if (g.queuedActions.isEmpty()) confirmEmptyWeek = true else session.endTurn() } }
     var lastShortcut by remember { mutableIntStateOf(session.shortcutSequence) }
@@ -62,7 +65,7 @@ fun GameScreen(session: GameSession) {
     }
 
     Column(Modifier.fillMaxSize()) {
-      NativeCampaignCoach(session, "US", "Win 270 electoral votes in ${g.totalTurns} weeks.", g.turn, selectedId, g.queuedActions.size)
+      NativeCampaignCoach(session, "US", "Win ${college.majority} electoral votes in ${g.totalTurns} weeks.", g.turn, selectedId, g.queuedActions.size)
       Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(MovSpace.gutter), verticalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
         Column(verticalArrangement = Arrangement.spacedBy(MovSpace.s1)) {
             Eyebrow("Campaign desk · Week ${g.turn + 1}/${g.totalTurns}", color = Mov.Warning)
@@ -72,13 +75,13 @@ fun GameScreen(session: GameSession) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Metric("$demEv", dem.shortName, color = Mov.DemText)
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("270 TO WIN", color = Mov.Text2, style = MaterialTheme.typography.labelSmall)
+                    Text("${college.majority} TO WIN", color = Mov.Text2, style = MaterialTheme.typography.labelSmall)
                     Text("$tossEv tossup", color = Mov.Text3, style = MaterialTheme.typography.labelMedium.num)
                 }
                 Metric("$repEv", rep.shortName, color = Mov.GopText, alignEnd = true)
             }
-            SeatBar(listOf(Mov.Dem to demEv, Mov.Tossup to tossEv, Mov.Gop to repEv), 538, 270,
-                description = "${dem.shortName} $demEv, tossup $tossEv, ${rep.shortName} $repEv electoral votes. 270 to win.")
+            SeatBar(listOf(Mov.Dem to demEv, Mov.Tossup to tossEv, Mov.Gop to repEv), college.total, college.majority,
+                description = "${dem.shortName} $demEv, tossup $tossEv, ${rep.shortName} $repEv electoral votes. ${college.majority} to win.")
             StatRow {
                 Metric("\$${"%.1f".format((res?.cash ?: 0.0) / 1_000_000)}M", "Cash")
                 Metric("${session.slotsLeft()}", "Actions left")
