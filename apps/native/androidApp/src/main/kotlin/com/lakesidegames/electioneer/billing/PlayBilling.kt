@@ -12,6 +12,7 @@ import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
+import com.lakesidegames.electioneer.engine.StoreGate
 import com.lakesidegames.electioneer.ui.CampaignAccount
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -99,9 +100,9 @@ class PlayBilling(
         })
     }
 
-    private val _gate = MutableStateFlow(PlayGate.OPEN)
+    private val _gate = MutableStateFlow(StoreGate.OPEN)
     /** Which paid elections lock on this device. Open until proven otherwise. */
-    val gate: StateFlow<PlayGate> = _gate
+    val gate: StateFlow<StoreGate> = _gate
     @Volatile private var gateGeneration = 0
 
     /**
@@ -112,9 +113,9 @@ class PlayBilling(
      */
     fun refreshGate() {
         val generation = ++gateGeneration
-        _gate.value = PlayGate.OPEN
+        _gate.value = StoreGate.OPEN
         scope.launch {
-            val server = try { PlayGate.fromServer(account.storeCatalog().toString()) } catch (_: Exception) { return@launch }
+            val server = try { StoreGate.fromServer(account.storeCatalog().toString(), StoreGate.GOOGLE) } catch (_: Exception) { return@launch }
             if (generation != gateGeneration || !server.gate.gating) return@launch
             ensureConnected {
                 val params = QueryProductDetailsParams.newBuilder().setProductList(server.skus.keys.map { sku ->

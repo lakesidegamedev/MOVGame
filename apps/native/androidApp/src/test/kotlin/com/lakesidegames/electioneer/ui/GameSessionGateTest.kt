@@ -1,6 +1,6 @@
 package com.lakesidegames.electioneer.ui
 
-import com.lakesidegames.electioneer.billing.PlayGate
+import com.lakesidegames.electioneer.engine.StoreGate
 import com.lakesidegames.electioneer.engine.CandidateId
 import com.lakesidegames.electioneer.engine.EventMode
 import com.lakesidegames.electioneer.engine.NativeCatalog
@@ -17,7 +17,7 @@ class GameSessionGateTest {
 
     @Test fun aLockedLaunchOpensItsPackInTheStoreInsteadOfStarting() {
         val session = GameSession()
-        session.pinGateForCapture(PlayGate(true, NativeCatalog.packIds()))
+        session.pinGateForCapture(StoreGate(true, NativeCatalog.packIds()))
         val daily = session.dailyAssignment().scenarioId
         if (daily != "uk-1997") {
             session.startCampaign("UK", "1997", "lab", "normal", "seed")
@@ -38,7 +38,7 @@ class GameSessionGateTest {
 
     @Test fun anElectionPlayCannotSellStaysPlayable() {
         val session = GameSession()
-        session.pinGateForCapture(PlayGate(true, setOf("canada")))
+        session.pinGateForCapture(StoreGate(true, setOf("canada")))
         assertNull(session.lockedPack("UK", "1997"))
         if (session.dailyAssignment().scenarioId != "ca-2021") assertEquals("canada", session.lockedPack("CA", "2021"))
     }

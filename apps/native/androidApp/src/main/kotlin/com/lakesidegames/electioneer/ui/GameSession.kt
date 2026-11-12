@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.lakesidegames.electioneer.billing.PlayBilling
-import com.lakesidegames.electioneer.billing.PlayGate
+import com.lakesidegames.electioneer.engine.StoreGate
 import com.lakesidegames.electioneer.billing.StoreProduct
 import com.lakesidegames.electioneer.content.CANDIDATES
 import com.lakesidegames.electioneer.content.EVENTS_BY_ID
@@ -440,10 +440,10 @@ class GameSession : ViewModel() {
 
     // Paid election locks. Open until billing proves Play can sell the pack
     // and the server turns native gating on; debug captures may pin a gate.
-    private val _gate = MutableStateFlow(PlayGate.OPEN)
-    val gate: StateFlow<PlayGate> = _gate
-    private var pinnedGate: PlayGate? = null
-    internal fun pinGateForCapture(gate: PlayGate) { pinnedGate = gate; _gate.value = gate }
+    private val _gate = MutableStateFlow(StoreGate.OPEN)
+    val gate: StateFlow<StoreGate> = _gate
+    private var pinnedGate: StoreGate? = null
+    internal fun pinGateForCapture(gate: StoreGate) { pinnedGate = gate; _gate.value = gate }
     /** Pack the store opens at next, set by a locked launch or Unlock button. */
     var storeFocus: String? = null
 

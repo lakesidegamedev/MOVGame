@@ -13,12 +13,6 @@ struct StoreProduct: Identifiable {
 }
 private struct StoreMapping: Decodable { let packId: String; let appleSku: String? }
 private struct StoreAvailability: Decodable { let apple: Bool? }
-/// Public catalog: the same switches the binding carries, readable signed out.
-private struct StoreCatalog: Decodable {
-    let purchasesEnabled: Bool
-    let stores: StoreAvailability?
-    let nativeGating: Bool?
-}
 private struct StoreBinding: Decodable {
     let owner: String
     let appAccountToken: String
@@ -26,9 +20,6 @@ private struct StoreBinding: Decodable {
     let products: [StoreMapping]
     // Per-store readiness; older servers only send purchasesEnabled.
     let stores: StoreAvailability?
-    // Server switch that turns scenario locks on once a native purchase has
-    // been proven to unlock a pack. Absent or false keeps every election open.
-    let nativeGating: Bool?
     var applePurchasable: Bool { stores?.apple ?? purchasesEnabled }
 }
 private struct StoreDelivery: Decodable { let verified: Bool; let status: String; let environment: String }
@@ -39,13 +30,26 @@ final class StoreKitAdapter: ObservableObject {
     @Published var products: [StoreProduct] = []
     @Published var owned: Set<String> = []
     @Published var notice: String?
-    /// Locks apply only while App Store purchases are live and the server has
-    /// enabled native gating. Any failure leaves this false (everything open).
-    @Published private(set) var gating = false
+    /// Which paid elections lock on this device, decided by the shared
+    /// StoreGate rule Android also uses: the server has native gating on, the
+    /// App Store is ready, and the election's own pack is listed there and
+    /// loaded on this device. Any failure leaves it open (nothing locks).
+    @Published private(set) var gate = StoreGate.companion.OPEN
+    var gating: Bool { gate.gating }
+    /// Scenarios unlocked on the game account (activation codes and web
+    /// unlocks, also on accounts not linked to Lakeside). They never lock.
+    @Published private(set) var accountScenarios: Set<String> = []
+    private var gateGeneration = 0
+    #if targetEnvironment(simulator)
+    private var pinnedGate: StoreGate?
+    /// Simulator captures only: show the locked state without a live store.
+    func pinGateForCapture(_ value: StoreGate) { pinnedGate = value; gate = value }
+    #endif
     private let account: CampaignAccount
     private let wallet: NativeStoreWallet
     private var updatesTask: Task<Void, Never>?
     private var accountChanges: AnyCancellable?
+    private var unlockChanges: AnyCancellable?
     private var skuToPack: [String: String] = [:]
     private var binding: StoreBinding?
     private var bindingSession: String?
@@ -64,25 +68,18 @@ final class StoreKitAdapter: ObservableObject {
         accountChanges = account.$user.sink { [weak self] _ in
             // @Published sends before assignment. Clear displayed products and
             // rights immediately, then read the new authenticated session.
-            self?.products = []; self?.owned = []; self?.gating = false
+            self?.products = []; self?.owned = []; self?.setGate(nil)
             Task { [weak self] in await self?.refreshAll() }
         }
+        unlockChanges = account.$unlocked.sink { [weak self] ids in self?.accountScenarios = Set(ids) }
     }
     deinit { updatesTask?.cancel() }
     private static func now() -> Int64 { Int64(Date().timeIntervalSince1970 * 1000) }
     func refresh() { Task { await refreshAll() } }
     private func refreshAll() async {
         owned = Set(wallet.packs(sessionKey: account.storeSessionKey(), nowMillis: Self.now()))
-        guard account.user?.ahdLinked == true else {
-            products = []
-            // Signed-out and unlinked players follow the same server switch, so
-            // a lock never depends on whether someone happens to be signed in.
-            if let data = try? await account.call(path: "/api/store/catalog"),
-               let catalog = try? JSONDecoder().decode(StoreCatalog.self, from: data), account.user?.ahdLinked != true {
-                gating = (catalog.stores?.apple ?? catalog.purchasesEnabled) && catalog.nativeGating == true
-            } else { gating = false }
-            return
-        }
+        Task { [weak self] in await self?.refreshGate() }
+        guard account.user?.ahdLinked == true else { products = []; return }
         do {
             try await configure()
             try await refreshOwnership()
@@ -100,8 +97,31 @@ final class StoreKitAdapter: ObservableObject {
         guard value.owner == owner, account.user?.id == owner, session == account.storeSessionKey(),
               UUID(uuidString: value.appAccountToken) != nil else { throw AccountError("Shared account setup could not be verified.") }
         binding = value; bindingSession = session
-        gating = value.applePurchasable && value.nativeGating == true
         skuToPack = Dictionary(uniqueKeysWithValues: value.products.compactMap { p in p.appleSku.map { ($0, p.packId) } })
+    }
+    /// Nil opens everything; a pinned simulator capture gate always wins.
+    private func setGate(_ value: StoreGate?) {
+        gateGeneration += 1
+        #if targetEnvironment(simulator)
+        if let pinnedGate { gate = pinnedGate; return }
+        #endif
+        gate = value ?? StoreGate.companion.OPEN
+    }
+    /// Re-reads the lock switch from the public catalog. Signed-out, unlinked
+    /// and linked players follow the same switch, so a lock never depends on
+    /// sign-in. A pack locks only once the App Store returns its product here.
+    private func refreshGate() async {
+        gateGeneration += 1
+        let generation = gateGeneration
+        var next = StoreGate.companion.OPEN
+        if let data = try? await account.call(path: "/api/store/catalog"), let json = String(data: data, encoding: .utf8) {
+            let server = StoreGate.companion.fromServer(json: json, store: StoreGate.companion.APPLE)
+            if server.gate.gating, let found = try? await Product.products(for: Array(server.skus.keys)) {
+                next = server.gate.onDevice(loadedPacks: Set(found.compactMap { server.skus[$0.id] }))
+            }
+        }
+        guard generation == gateGeneration else { return }
+        setGate(next)
     }
     private func loadProducts() async {
         guard binding?.applePurchasable == true, !skuToPack.isEmpty else { products = []; return }

@@ -24,7 +24,7 @@ internal fun captureDebugFlow(session: GameSession, flow: String) {
     if (flow.startsWith("locked")) {
         // As if Play sales and native gating were live with nothing owned:
         // the library shows locks, and locked-<country> opens a paid briefing.
-        session.pinGateForCapture(com.lakesidegames.electioneer.billing.PlayGate(true, NativeCatalog.packIds()))
+        session.pinGateForCapture(com.lakesidegames.electioneer.engine.StoreGate(true, NativeCatalog.packIds()))
         val country = flow.substringAfter('-', "").takeIf { it in NativeCatalog.countryIds() }
         if (country != null) session.libraryPick = MobileCampaign.elections(country)
             .filter { !it.free && it.scenarioId != session.dailyAssignment().scenarioId }.maxBy { it.year }.scenarioId

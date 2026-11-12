@@ -132,6 +132,8 @@ try:
             ('briefing-es', '--mov-capture-briefing-es', 8),
             ('briefing-in', '--mov-capture-briefing-in', 8),
             ('briefing-us1948', '--mov-capture-briefing-us1948', 8),
+            ('locked-library', '--mov-capture-locked-library', 8),
+            ('locked-uk', '--mov-capture-locked-uk', 8),
             ('world-mx', '--mov-capture-world-mx', 20),
             ('world-results-mx', '--mov-capture-world-results-mx', 25),
             ('world-reveal-mx', '--mov-capture-world-reveal-mx', 25),
