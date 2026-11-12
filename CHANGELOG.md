@@ -136,6 +136,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   briefing and the U.S. setup, and Unlock opens its pack in the Store. Free elections, the daily
   challenge and anything you own through your Lakeside account, Google Play, the App Store, the
   Complete Collection, the Global Elections Pack or the Supporter perk always open.
+- iPhone now follows the same rule as Android: a paid election locks only once the App Store
+  can sell that election's own pack, so a new country pack that is not on sale there yet stays
+  playable. Elections unlocked on your account with a code always open on iPhone, also when
+  the account is not linked to Lakeside, and count under Owned in the library.
 - Every election now has its own issues, named the way people talked about them that year: the
   Depression and relief in 1932, the war in Europe in 1940, Korea and communism in 1952, the
   miners' strike in February 1974, the cost of unity in Germany in 1990, free trade in Canada in

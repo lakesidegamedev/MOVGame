@@ -167,7 +167,9 @@ struct NativeCampaignLibrary: View {
     }
 
     private var filtering: Bool { !query.trimmingCharacters(in: .whitespaces).isEmpty || access != "all" || challenge != "any" || era != .any }
-    private var ownedScenarios: Set<String> { NativeCatalog.shared.ownedScenarios(ownedPacks: Array(store.owned)) }
+    private var ownedScenarios: Set<String> {
+        NativeCatalog.shared.ownedScenarios(ownedPacks: Array(store.owned)).union(store.accountScenarios)
+    }
 
     private func matches(_ election: NativeElection, country: NativeCountry) -> Bool {
         if access == "free" && !election.free { return false }
@@ -203,8 +205,8 @@ struct NativeCampaignLibrary: View {
                 }
                 if groups.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(access == "owned" && store.owned.isEmpty ? "You do not own a pack yet" : "No elections match").font(.headline)
-                        Text(access == "owned" && store.owned.isEmpty ? "Packs you buy on your Lakeside account show here. Every country has a free election under Free." : "Try another search or clear the filters.")
+                        Text(access == "owned" && ownedScenarios.isEmpty ? "You do not own a pack yet" : "No elections match").font(.headline)
+                        Text(access == "owned" && ownedScenarios.isEmpty ? "Packs you buy on your Lakeside account show here. Every country has a free election under Free." : "Try another search or clear the filters.")
                             .font(.subheadline).foregroundStyle(CampaignStyle.muted)
                         Button("Clear filters") { query = ""; access = "all"; challenge = "any"; era = .any }
                             .font(.subheadline.bold()).foregroundStyle(CampaignStyle.gold)
@@ -246,6 +248,10 @@ struct NativeCampaignLibrary: View {
             if arguments.contains("--mov-capture-library-free") { access = "free" }
             if arguments.contains("--mov-capture-library-search") { query = "1948" }
             if arguments.contains("--mov-capture-library") { expanded = ["US"] }
+            if arguments.contains("--mov-capture-locked-library") { expanded = ["UK"] }
+            if arguments.contains("--mov-capture-locked-uk") {
+                DispatchQueue.main.async { pick = LibraryPick(countryId: "UK", electionId: "1997") }
+            }
             for (argument, countryId, party) in [("--mov-capture-briefing-es", "ES", "erc"), ("--mov-capture-briefing-in", "IN", ""), ("--mov-capture-briefing-us1948", "US", "")]
                 where arguments.contains(argument) {
                 let election = countryId == "US" ? "1948" : MobileCampaign.companion.elections(countryId: countryId).first?.nativeId ?? ""

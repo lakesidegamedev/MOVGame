@@ -70,11 +70,13 @@ final class GameSession: ObservableObject {
     /// The bundle a blocked launch needs; ContentView turns it into an Unlock prompt.
     @Published var paywallPack: String?
 
-    /// Pack a new campaign needs, or nil when it is playable. Locks follow the
-    /// server's native gating switch, so with gating off this is always nil.
+    /// Pack a new campaign needs, or nil when it is playable. The shared
+    /// StoreGate rule (the same one Android uses) locks only what the App
+    /// Store can sell here, so with gating off this is always nil. Packs in
+    /// the shared wallet and scenarios unlocked on the account stay open.
     func lockedPack(country: String, nativeId: String) -> String? {
-        NativeAccess.shared.lockedPack(country: country, nativeId: nativeId, ownedPacks: Array(store.owned),
-                                       gating: store.gating, dailyScenarioId: dailyAssignment().scenarioId)
+        store.gate.lockedPack(country: country, nativeId: nativeId, ownedPacks: store.owned,
+                              accountScenarios: store.accountScenarios, dailyScenarioId: dailyAssignment().scenarioId)
     }
     let settings = NativePreferences()
     @Published var shortcutSequence = 0
@@ -323,7 +325,11 @@ final class GameSession: ObservableObject {
         guard !didPrepareSimulatorCapture else { return }
         didPrepareSimulatorCapture = true
         let arguments = ProcessInfo.processInfo.arguments
-        if arguments.contains(where: { $0.hasPrefix("--mov-capture-library") || $0.hasPrefix("--mov-capture-briefing") }) {
+        if arguments.contains(where: { $0.hasPrefix("--mov-capture-locked") }) {
+            // Every pack sellable and nothing owned, so paid elections show locked.
+            store.pinGateForCapture(StoreGate(gating: true, sellable: Set(NativeCatalog.shared.packIds())))
+        }
+        if arguments.contains(where: { $0.hasPrefix("--mov-capture-library") || $0.hasPrefix("--mov-capture-briefing") || $0.hasPrefix("--mov-capture-locked") }) {
             playScreen = .library
         } else if let us = [("--mov-capture-us1948", "1948"), ("--mov-capture-us1948-results", "1948"), ("--mov-capture-us1948-reveal", "1948")]
                     .first(where: { arguments.contains($0.0) }) {
