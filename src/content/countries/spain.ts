@@ -226,8 +226,8 @@ export const SPAIN: CountryBundle = {
       events: [
         { id: "snap_vote", headline: "The PP sweeps the May local elections and Sánchez calls a general election for 23 July the next morning. The gamble catches {party}'s rivals without lists or a plan", role: "any", party: "psoe", weight: 3, appeal: 0.01, momentum: 3, turn: 0 },
         { id: "vox_pacts", headline: "The PP signs coalition deals with Vox in Valencia and Extremadura. Sánchez says this is what Feijóo's government would look like, and {party} has to answer for it", role: "any", party: "pp", weight: 3, appeal: -0.02, momentum: -5, turn: 1 },
-        { id: "sumar_deal", headline: "After a week of vetoes, Yolanda Díaz and Podemos agree a joint list at the deadline, with Irene Montero left off it. {party} is a single ticket again", role: "any", party: "pod", weight: 3, appeal: 0.025, momentum: 6, turn: 2 },
-        { id: "derogar_sanchismo", headline: "Feijóo promises to 'repeal Sánchez-ism', starting with the Democratic Memory law and the Trans law. It sets {party}'s base alight and worries the centre", role: "any", party: "pp", weight: 3, appeal: 0.01, momentum: 3, turn: 3 },
+        { id: "sumar_deal", headline: "After a week of vetoes, Yolanda Díaz and Podemos agree a joint list at the deadline, with Irene Montero left off it. {party} is a single ticket again", role: "any", party: "pod", weight: 3, appeal: 0.025, momentum: 6, turn: 1 },
+        { id: "derogar_sanchismo", headline: "Feijóo promises to 'repeal Sánchez-ism', starting with the Democratic Memory law and the Trans law. It sets {party}'s base alight and worries the centre", role: "any", party: "pp", weight: 3, appeal: 0.01, momentum: 3, turn: 1 },
         { id: "atresmedia_debate", headline: "Sánchez and Feijóo meet for the only head-to-head debate, on 10 July. Sánchez presses on the pacts with Vox, but most snap polls give the night to Feijóo, and {party} gets a lift", role: "any", party: "pp", weight: 3, appeal: 0.02, momentum: 6, turn: 4 },
         { id: "postal_votes", headline: "Over two million Spaniards request a postal vote for a July election in the holidays. {party}'s provincial machine, the strongest in the country, sets about getting its older voters to the post office", role: "any", party: "pp", weight: 3, appeal: 0.01, momentum: 3, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
@@ -267,10 +267,10 @@ export const SPAIN: CountryBundle = {
       // The real story beats of the April 2019 campaign, in order.
       events: [
         { id: "budget_defeated", headline: "ERC and PDeCAT join the right to vote down the budget. Sánchez answers by calling a general election for 28 April, and {party} takes the field as the party of the minimum wage and the pension rise", role: "any", party: "psoe", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
-        { id: "catalan_trial", headline: "Twelve Catalan independence leaders go on trial in the Supreme Court, with Vox as a private prosecutor. {party} makes the trial its campaign", role: "any", party: "vox", weight: 3, appeal: 0.025, momentum: 7, turn: 1 },
-        { id: "cs_no_sanchez", headline: "Rivera rules out any deal with Sánchez and promises Citizens will be the opposition's leader. It firms up {party}'s right flank and shuts a door", role: "any", party: "cs", weight: 3, appeal: 0.01, momentum: 3, turn: 2 },
-        { id: "two_debates", headline: "Two televised debates in two nights, on 22 and 23 April. Rivera goes on the attack and wins the first night in several snap polls, and {party} gets the best of the overnight numbers", role: "any", party: "cs", weight: 3, appeal: 0.02, momentum: 7, turn: 3 },
-        { id: "right_three_ways", headline: "Casado warns that a vote for Citizens or Vox is a vote that helps Sánchez, and {party} makes a last push for the tactical vote of the right", role: "any", party: "pp", weight: 3, appeal: 0.02, momentum: 5, turn: 4 },
+        { id: "catalan_trial", headline: "Twelve Catalan independence leaders go on trial in the Supreme Court, with Vox as a private prosecutor. {party} makes the trial its campaign", role: "any", party: "vox", weight: 3, appeal: 0.025, momentum: 7, turn: 0 },
+        { id: "cs_no_sanchez", headline: "Rivera rules out any deal with Sánchez and promises Citizens will be the opposition's leader. It firms up {party}'s right flank and shuts a door", role: "any", party: "cs", weight: 3, appeal: 0.01, momentum: 3, turn: 0 },
+        { id: "two_debates", headline: "Two televised debates in two nights, on 22 and 23 April. Rivera goes on the attack and wins the first night in several snap polls, and {party} gets the best of the overnight numbers", role: "any", party: "cs", weight: 3, appeal: 0.02, momentum: 7, turn: 5 },
+        { id: "right_three_ways", headline: "Casado warns that a vote for Citizens or Vox is a vote that helps Sánchez, and {party} makes a last push for the tactical vote of the right", role: "any", party: "pp", weight: 3, appeal: 0.02, momentum: 5, turn: 5 },
         { id: "andalusia_warning", headline: "PSOE warns that the PP, Citizens and Vox will govern Spain as they now govern Andalusia, and {party} sees its own supporters come home", role: "any", party: "psoe", weight: 3, appeal: 0.025, momentum: 7, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
         { id: "pnv_delivers", headline: "The PNV, whose votes passed Rajoy's last budget and then helped remove him in the June 2018 censure motion, campaigns as the party that gets results for the Basque Country, and {party} gains", role: "any", party: "pnv", weight: 2, appeal: 0.02, momentum: 5 },
@@ -311,9 +311,9 @@ export const SPAIN: CountryBundle = {
       events: [
         { id: "recovery_pitch", headline: "Rajoy calls the vote for 20 December with Spain growing at 3% and still more than one in five out of work. {party} runs on the recovery and on 'stability'", role: "any", party: "pp", weight: 3, appeal: 0.015, momentum: 4, turn: 0 },
         { id: "cs_surge", headline: "Rivera's Citizens, fresh from a strong Catalan result and a run of friendly polls, surges toward second place nationally, and {party} fills the gap in the polls the old parties left behind", role: "any", party: "cs", weight: 3, appeal: 0.03, momentum: 8, turn: 1 },
-        { id: "four_way_debate", headline: "Rajoy skips the four-way debate on 7 December and sends his deputy, Soraya Sáenz de Santamaría. {party}'s empty chair becomes the debate's best line", role: "any", party: "pp", weight: 3, appeal: -0.015, momentum: -4, turn: 2 },
-        { id: "not_decent", headline: "In the head-to-head on 14 December, Sánchez tells Rajoy a prime minister must be decent and that Rajoy is not. {party} gets its best day of the campaign", role: "any", party: "psoe", weight: 3, appeal: 0.02, momentum: 6, turn: 3 },
-        { id: "punch", headline: "A teenager punches Rajoy in the face on a walkabout in Pontevedra, a few days from the vote. {party}'s leader walks away unhurt and the footage runs all night", role: "any", party: "pp", weight: 3, appeal: 0.01, momentum: 3, turn: 4 },
+        { id: "four_way_debate", headline: "Rajoy skips the four-way debate on 7 December and sends his deputy, Soraya Sáenz de Santamaría. {party}'s empty chair becomes the debate's best line", role: "any", party: "pp", weight: 3, appeal: -0.015, momentum: -4, turn: 4 },
+        { id: "not_decent", headline: "In the head-to-head on 14 December, Sánchez tells Rajoy a prime minister must be decent and that Rajoy is not. {party} gets its best day of the campaign", role: "any", party: "psoe", weight: 3, appeal: 0.02, momentum: 6, turn: 5 },
+        { id: "punch", headline: "A teenager punches Rajoy in the face on a walkabout in Pontevedra, a few days from the vote. {party}'s leader walks away unhurt and the footage runs all night", role: "any", party: "pp", weight: 3, appeal: 0.01, momentum: 3, turn: 5 },
         { id: "confluences", headline: "Podemos and its local allies, En Comú Podem, Compromís and En Marea, close the campaign with a packed arena in Valencia and 2,000 more outside. {party} finishes with its best crowds", role: "any", party: "pod", weight: 3, appeal: 0.02, momentum: 6, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
         { id: "gurtel_trial", headline: "The Gürtel and Bárcenas papers are back in the papers and on the television, and {party} has to answer for money again", role: "any", party: "pp", weight: 2, appeal: -0.03, momentum: -7 },
@@ -354,7 +354,7 @@ export const SPAIN: CountryBundle = {
       events: [
         { id: "zapatero_steps_aside", headline: "Zapatero brings the election forward and will not stand again. {party} enters the campaign behind a new leader and the worst unemployment in Europe", role: "any", party: "psoe", weight: 3, appeal: -0.035, momentum: -9, turn: 0 },
         { id: "eta_ends", headline: "ETA announces the definitive end of its armed activity. The Basque left has its legal list and {party} says peace is on its side", role: "any", party: "bil", weight: 3, appeal: 0.03, momentum: 8, turn: 1 },
-        { id: "bond_markets", headline: "Borrowing costs climb as the Italian crisis spreads and the bond markets look at Spain. {party} says the numbers prove the government has to go", role: "any", party: "pp", weight: 3, appeal: 0.02, momentum: 5, turn: 2 },
+        { id: "bond_markets", headline: "Borrowing costs climb as the Italian crisis spreads and the bond markets look at Spain. {party} says the numbers prove the government has to go", role: "any", party: "pp", weight: 3, appeal: 0.02, momentum: 5, turn: 4 },
         { id: "rubalcaba_rajoy_debate", headline: "Rubalcaba and Rajoy meet in the only head-to-head debate, on 7 November. Rubalcaba presses on the cuts, but every snap poll gives the night to Rajoy, and {party} gets a small lift that does not move the vote", role: "any", party: "pp", weight: 3, appeal: 0.015, momentum: 4, turn: 3 },
         { id: "rajoy_vague", headline: "Rajoy runs a cautious campaign and refuses to say where the cuts will fall. {party}'s short manifesto draws fire but no real damage", role: "any", party: "pp", weight: 3, appeal: 0.01, momentum: 3, turn: 4 },
         { id: "indignados_vote", headline: "The 15-M indignados say that no party represents them and urge a vote for anyone but the two big parties. {party} and UPyD pick up the anger", role: "any", party: "iu", weight: 3, appeal: 0.02, momentum: 6, turn: 5 },
@@ -487,7 +487,7 @@ export const SPAIN_MODULE = countryModule(SPAIN, {
   art: { a: "#5a0f1c", b: "#c8860a", glow: "rgba(255,226,140,0.22)" },
   freeElections: ["2023"],
   scenarios: [
-    { electionId: "2023", difficulty: "hard",
+    { electionId: "2023", difficulty: "medium",
       description: "Sánchez calls a July vote after losing the May local elections. Feijóo needs Vox to reach 176, and Junts and the Basque parties hold the keys to any investiture." },
     { electionId: "2019", difficulty: "hard",
       description: "The Catalan parties sink Sánchez's budget and he calls an April vote. The right splits three ways between the PP, Citizens and a rising Vox." },

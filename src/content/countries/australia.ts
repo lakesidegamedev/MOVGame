@@ -156,14 +156,14 @@ export const AUSTRALIA: CountryBundle = {
       // entries fire deterministically that week; the rest join the weekly draw.
       events: [
         { id: "au25_cyclone_alfred", turn: 0, party: "lnp", role: "any", weight: 1,
-          headline: "Cyclone Alfred delays the election call and forces a budget nobody planned. {party} loses its opening week", momentum: -6 },
+          headline: "Cyclone Alfred pushes the election call back until after the budget, the budget lands three days before the writ, and {party} starts the campaign on the back foot", momentum: -6 },
         { id: "au25_wfh_backflip", turn: 1, party: "lnp", role: "any", weight: 1,
           headline: "{party} dumps its end-work-from-home policy mid-campaign: 'we got it wrong'", appeal: -0.03, momentum: -8 },
-        { id: "au25_liberation_day", turn: 2, party: "lnp", role: "any", weight: 1,
+        { id: "au25_liberation_day", turn: 1, party: "lnp", role: "any", weight: 1,
           headline: "Trump's 'Liberation Day' tariffs land mid-campaign. Voters recoil from anything that rhymes with MAGA, and {party} wears it", appeal: -0.035, momentum: -9 },
-        { id: "au25_stage_fall", turn: 3, party: "alp", role: "any", weight: 1,
+        { id: "au25_stage_fall", turn: 1, party: "alp", role: "any", weight: 1,
           headline: "The {party} leader tumbles off the stage at a rally: 'I stepped back one step, I didn't fall'", appeal: -0.02, momentum: -5 },
-        { id: "au25_debate_worm", turn: 4, party: "alp", role: "any", weight: 1,
+        { id: "au25_debate_worm", turn: 5, party: "alp", role: "any", weight: 1,
           headline: "The worm turns: {party}'s leader takes the final debate on every network verdict", appeal: 0.03, momentum: 8 },
         { id: "au25_doge_scare", party: "lnp", role: "any", weight: 3,
           headline: "The 41,000 public-service-cuts scare sticks, and 'DOGE-style slashing' dogs {party} at every stop", appeal: -0.025, momentum: -6 },
@@ -201,7 +201,7 @@ export const AUSTRALIA: CountryBundle = {
       },
       events: [
         { id: "au22_hose", turn: 0, party: "lnp", role: "any", weight: 1,
-          headline: "'I don't hold a hose, mate': the flood-week clip dogs {party} from day one", appeal: -0.03, momentum: -8 },
+          headline: "'I don't hold a hose, mate': the clip from the bushfire summer and the slow flood response in northern New South Wales dog {party} from day one", appeal: -0.03, momentum: -8 },
         { id: "au22_teal_wave", turn: 1, party: "lnp", role: "any", weight: 1,
           headline: "The teal wave breaks: climate independents surge in {party}'s harbourside heartland", appeal: -0.035, momentum: -10 },
         { id: "au22_aukus_row", turn: 2, party: "lnp", role: "any", weight: 1,
@@ -290,8 +290,8 @@ export const AUSTRALIA: CountryBundle = {
         { id: "au16_budget", headline: "The budget's $50 billion company tax cut becomes the argument of the first week, and {party} pitches 'jobs and growth' to voters who want relief at home", role: "any", party: "lnp", weight: 1, appeal: -0.015, momentum: -4, turn: 0 },
         { id: "au16_negative_gearing", headline: "Labor's plan to limit negative gearing and capital gains discounts sparks a property-owner backlash against {party}", role: "any", party: "alp", weight: 1, appeal: -0.02, momentum: -5, turn: 1 },
         { id: "au16_super_changes", headline: "The budget's superannuation changes anger the Liberal base, and {party} pays for its own measures in the older suburbs", role: "any", party: "lnp", weight: 1, appeal: -0.02, momentum: -5, turn: 2 },
-        { id: "au16_brexit", headline: "Britain votes to leave the European Union with a week to go, and {party} leans on a steady-hand argument as markets lurch", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 5, turn: 3 },
-        { id: "au16_mediscare", headline: "Text messages claim the Coalition will privatise Medicare, and {party}'s 'Mediscare' becomes the most effective week of the trail", role: "any", party: "alp", weight: 1, appeal: 0.04, momentum: 12, turn: 4 },
+        { id: "au16_brexit", headline: "Britain votes to leave the European Union with a week to go, and {party} leans on a steady-hand argument as markets lurch", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 5, turn: 5 },
+        { id: "au16_mediscare", headline: "Text messages claim the Coalition will privatise Medicare, and {party}'s 'Mediscare' becomes the most effective week of the trail", role: "any", party: "alp", weight: 1, appeal: 0.04, momentum: 12, turn: 5 },
         // Unscheduled flavor: joins the weekly draw, fires at most once.
         { id: "au16_double_dissolution", headline: "The Senate standoff over the building industry watchdog gives {party} its reason for an early election: jobs against union power", role: "any", party: "lnp", weight: 2, appeal: 0.015, momentum: 4 },
         { id: "au16_nbn_raid", headline: "Federal police raid Labor staff over NBN leaks in mid-campaign, and {party} paints it as a political stunt", role: "any", party: "alp", weight: 2, appeal: 0.015, momentum: 4 },
@@ -323,7 +323,7 @@ export const AUSTRALIA: CountryBundle = {
         { id: "au13_png", headline: "The PNG deal: no asylum seeker arriving by boat will ever settle in Australia, and {party} tries to close the gap on border control", role: "any", party: "alp", weight: 1, appeal: 0.01, momentum: 3, turn: 1 },
         { id: "au13_suppository", headline: "Abbott's 'suppository of wisdom' slip and an awkward remark about a candidate hand {party} two days of bad headlines", role: "any", party: "lnp", weight: 1, appeal: -0.025, momentum: -7, turn: 2 },
         { id: "au13_paid_parental", headline: "{party}'s generous paid parental leave scheme, funded by a levy on big companies, splits its own supporters", role: "any", party: "lnp", weight: 1, appeal: -0.015, momentum: -4, turn: 3 },
-        { id: "au13_costings", headline: "The Coalition releases the rest of its costings two days before the poll, and Labor says there is a hole in {party}'s budget plans", role: "any", party: "lnp", weight: 1, appeal: -0.02, momentum: -5, turn: 4 },
+        { id: "au13_costings", headline: "The Coalition releases the rest of its costings two days before the poll, and Labor says there is a hole in {party}'s budget plans", role: "any", party: "lnp", weight: 1, appeal: -0.02, momentum: -5, turn: 5 },
         { id: "au13_feud", headline: "Six years of leadership feuding hang over {party}'s final week and no policy can outrun it", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -9, turn: 5 },
         // Unscheduled flavor: joins the weekly draw, fires at most once.
         { id: "au13_axe_the_tax", headline: "'Axe the tax': {party}'s three-word slogan on the carbon price needs no explaining", role: "any", party: "lnp", weight: 3, appeal: 0.03, momentum: 9 },
@@ -449,11 +449,11 @@ export const AUSTRALIA: CountryBundle = {
       events: [
         // Scheduled beats, in order.
         { id: "au01_tampa", headline: "The government refuses entry to a Norwegian freighter carrying 433 rescued asylum seekers, and {party} owns the border protection argument", role: "any", party: "lnp", weight: 1, appeal: 0.035, momentum: 11, turn: 0 },
-        { id: "au01_children_overboard", headline: "Ministers claim asylum seekers threw their children overboard, and {party} turns the Navy's story into a campaign weapon", role: "any", party: "lnp", weight: 1, appeal: 0.025, momentum: 8, turn: 2 },
+        { id: "au01_children_overboard", headline: "Ministers claim asylum seekers threw their children overboard, and {party} turns the Navy's story into a campaign weapon", role: "any", party: "lnp", weight: 1, appeal: 0.025, momentum: 8, turn: 0 },
         { id: "au01_security", headline: "September 11 reshapes the campaign: {party} offers steady hands and a war-on-terror consensus", role: "any", party: "lnp", weight: 1, appeal: 0.02, momentum: 6, turn: 1 },
         { id: "au01_labor_me_too", headline: "Labor backs the border laws and the troop commitment to Afghanistan, and {party}'s leader struggles to define a difference", role: "any", party: "alp", weight: 1, appeal: -0.03, momentum: -8, turn: 3 },
-        { id: "au01_ansett_gst", headline: "The Ansett collapse and GST paperwork give {party} a hearing among small business in the outer suburbs", role: "any", party: "alp", weight: 1, appeal: 0.02, momentum: 5, turn: 4 },
-        { id: "au01_launch", headline: "At the campaign launch, the prime minister says 'we will decide who comes to this country', and {party}'s base roars", role: "any", party: "lnp", weight: 1, appeal: 0.03, momentum: 9, turn: 5 },
+        { id: "au01_ansett_gst", headline: "The Ansett collapse and GST paperwork give {party} a hearing among small business in the outer suburbs", role: "any", party: "alp", weight: 1, appeal: 0.02, momentum: 5, turn: 1 },
+        { id: "au01_launch", headline: "At the campaign launch, the prime minister says 'we will decide who comes to this country', and {party}'s base roars", role: "any", party: "lnp", weight: 1, appeal: 0.03, momentum: 9, turn: 3 },
         // Unscheduled flavor: joins the weekly draw, fires at most once.
         { id: "au01_greens_tampa", headline: "The Greens oppose the Tampa policy and reach their best vote yet, and {party} picks up disaffected Labor voters", role: "any", party: "grn", weight: 2, appeal: 0.02, momentum: 6 },
         { id: "au01_telstra_bush", headline: "Telstra's sale and bush services become a country-seat issue, and {party} loses ground in the regions", role: "any", party: "lnp", weight: 2, appeal: -0.015, momentum: -4 },

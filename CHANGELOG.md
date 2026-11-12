@@ -249,6 +249,19 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   Windows drew two boxed letters (US, GB, DE) wherever a flag appeared, on the landing page,
   the library, setup, the store and the campaign desk. The game now carries a 4 KB flag font for
   the 14 countries it uses.
+- Scheduled campaign events now land in the week they really happened. Across the United States,
+  United Kingdom, Canada, Australia, Germany, France, Spain, Italy, Ireland, New Zealand, Japan,
+  Brazil, India and Mexico, dozens of story beats moved to the right part of their campaign: the
+  1996 Hartford debate and Chico fall, the 2004 CBS memos, the 2012 and 2000 debates, the 2020
+  Trump diagnosis, the 1968 bombing halt, the 2016 Brexit vote in Australia, the 2019 Triells in
+  Germany and the 2019 debates in Spain, among others. Events that really belong to an earlier
+  round or year were reworded or replaced: France 2012 no longer opens its runoff with the
+  Toulouse killings, Germany 2017 no longer treats Gauland's election-night remark as a closing
+  pitch, Mexico 2024 now opens Gálvez's campaign where it began, and the 2024 US race now places
+  the July Butler shooting as the backdrop it was. Several headlines were corrected to match the
+  record: New Zealand 2020's Green School apology was James Shaw's own, Australia 2025's Cyclone
+  Alfred moved the election call rather than forcing a budget, and the 2024 US tagline now says
+  sixty-four days to find 270.
 - A general campaign event, such as a gaffe, a newspaper endorsement or a debate win, now runs at
   most once a campaign in every country, so the same headline never comes round twice. Decision
   events such as a debate invitation can still return.

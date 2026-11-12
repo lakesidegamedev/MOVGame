@@ -1,6 +1,6 @@
 {
-  "webHead": "b8fb8eb500a917cf746409d6055a302d8432d41c",
-  "exportedAt": "2026-11-12T04:04:10.775Z",
+  "webHead": "d55ba702253b208925e65223d9623b757713b78f",
+  "exportedAt": "2026-11-12T14:33:18.260Z",
   "bundles": {
     "editor-defaults": {
       "bytes": 196599
@@ -9,7 +9,7 @@
       "bytes": 779
     },
     "scenario-registry": {
-      "bytes": 38409
+      "bytes": 38413
     },
     "next-campaigns": {
       "bytes": 16468
@@ -30,49 +30,49 @@
       "bytes": 2028
     },
     "us-events": {
-      "bytes": 233616
+      "bytes": 233770
     },
     "us-setup": {
-      "bytes": 148840
+      "bytes": 148844
     },
     "uk": {
-      "bytes": 86632
+      "bytes": 86628
     },
     "countries/ca": {
-      "bytes": 69833
+      "bytes": 69826
     },
     "countries/de": {
-      "bytes": 59323
+      "bytes": 59402
     },
     "countries/fr": {
-      "bytes": 47790
+      "bytes": 47688
     },
     "countries/au": {
-      "bytes": 60245
+      "bytes": 60370
     },
     "countries/nz": {
-      "bytes": 26552
+      "bytes": 26606
     },
     "countries/br": {
-      "bytes": 41251
+      "bytes": 41287
     },
     "countries/in": {
-      "bytes": 42050
+      "bytes": 42056
     },
     "countries/es": {
       "bytes": 43153
     },
     "countries/ie": {
-      "bytes": 38444
+      "bytes": 38420
     },
     "countries/jp": {
-      "bytes": 60591
+      "bytes": 60604
     },
     "countries/it": {
-      "bytes": 38639
+      "bytes": 38644
     },
     "countries/mx": {
-      "bytes": 33883
+      "bytes": 33997
     }
   }
 }

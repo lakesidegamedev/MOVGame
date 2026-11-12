@@ -184,7 +184,7 @@ export const GERMANY: CountryBundle = {
       events: [
         { id: "flutkatastrophe_lachen", headline: "Cameras catch Laschet laughing behind the President in the flood zone, and the clip is everywhere", role: "any", party: "cdu", weight: 3, appeal: -0.04, momentum: -10, turn: 0 },
         { id: "lebenslauf_sommer", headline: "The CV-and-plagiarism summer catches up with Baerbock again", role: "any", party: "grn", weight: 3, appeal: -0.035, momentum: -8, turn: 1 },
-        { id: "triell_sieger", headline: "Scholz wins the third Triell in a row. Who else?", role: "any", party: "spd", weight: 3, appeal: 0.035, momentum: 10, turn: 3 },
+        { id: "triell_sieger", headline: "Scholz wins the third Triell in a row. Who else?", role: "any", party: "spd", weight: 3, appeal: 0.035, momentum: 10, turn: 5 },
         { id: "ampel_oder_jamaika", headline: "Ampel or Jamaika? Final-week coalition arithmetic pulls tactical voters toward {party}", role: "challenger", weight: 3, appeal: 0.025, momentum: 6, turn: 5 },
         { id: "scholzomat", headline: "The 'Scholzomat' steady-hand surge: boring is the new electable for {party}", role: "any", party: "spd", weight: 2, appeal: 0.025, momentum: 8 },
         { id: "cumex_wirecard", headline: "Cum-ex and Wirecard questions dog {party}'s candidate, but never quite land", role: "any", party: "spd", weight: 2, appeal: -0.03, momentum: -7 },
@@ -214,11 +214,11 @@ export const GERMANY: CountryBundle = {
       },
       // The real story beats of autumn 2017, in campaign order.
       events: [
-        { id: "schulz_zug_entgleist", headline: "The Schulz train derails: the SPD candidate's spring surge fades into a summer of state-election defeats, and {party} can't find a second wind", role: "any", party: "spd", weight: 1, appeal: -0.03, momentum: -8, turn: 0 },
+        { id: "schulz_zug_entgleist", headline: "The Schulz train derails: the SPD candidate's spring surge fades into a spring of state-election defeats, and {party} can't find a second wind", role: "any", party: "spd", weight: 1, appeal: -0.03, momentum: -8, turn: 0 },
         { id: "koeln_silvester_nachhall", headline: "'Merkel muss weg': the migration backlash after 2015 hardens into votes, and {party} owns the anger", role: "any", party: "afd", weight: 1, appeal: 0.03, momentum: 8, turn: 1 },
         { id: "tv_duell_einziges", headline: "The one and only TV-Duell: a cautious, consensual night that changes almost nothing, and {party}'s challenger fails to land a blow", role: "any", party: "spd", weight: 1, appeal: -0.025, momentum: -6, turn: 2 },
         { id: "fdp_comeback_lindner", headline: "Back from the dead: Lindner's slick, yellow-and-magenta relaunch puts {party} over the 5% line and then some", role: "any", party: "fdp", weight: 1, appeal: 0.03, momentum: 8, turn: 3 },
-        { id: "gauland_grenzen", headline: "'Wir werden sie jagen': a deliberately provocative closing pitch rallies {party}'s base and clears the way to third place", role: "any", party: "afd", weight: 1, appeal: 0.025, momentum: 7, turn: 4 },
+        { id: "gauland_grenzen", headline: "Gauland tells a party meeting that Germans may be proud of the achievements of German soldiers in two world wars. The row rallies {party}'s base and clears the way to third place", role: "any", party: "afd", weight: 1, appeal: 0.025, momentum: 7, turn: 4 },
         { id: "linke_ostwahl", headline: "The eastern fight for the protest vote turns brutal, and {party} loses ground to the newcomers on its old home turf", role: "any", party: "lnk", weight: 1, appeal: -0.025, momentum: -6, turn: 5 },
         // Unscheduled flavor — joins the weekly draw, fires at most once.
         { id: "merkel_ruhe", headline: "'Sie kennen mich': the steady-hand incumbency pitch reassures the middle, and {party} coasts", role: "any", party: "cdu", weight: 2, appeal: 0.02, momentum: 5 },
@@ -249,7 +249,7 @@ export const GERMANY: CountryBundle = {
         { id: "elbe_flut_2013", headline: "Floods on the Elbe and the Danube put the chancellor in the disaster zone, and her calm crisis management earns {party} the week", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 6, turn: 0 },
         { id: "nsa_affaere_2013", headline: "Snowden's NSA files dominate the summer, and the claim that the affair is over leaves {party}'s government on the defensive", role: "any", party: "cdu", weight: 3, appeal: -0.015, momentum: -4, turn: 1 },
         { id: "veggie_day_2013", headline: "The Greens' plan for a weekly meat-free day in canteens becomes the campaign's favourite punchline, and {party} spends August explaining it", role: "any", party: "grn", weight: 3, appeal: -0.03, momentum: -7, turn: 2 },
-        { id: "tv_duell_2013", headline: "Merkel and Steinbrück meet in the only TV-Duell. The chancellor keeps her cool and {party} takes a narrow win on points", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 6, turn: 3 },
+        { id: "tv_duell_2013", headline: "Merkel and Steinbrück meet in the only TV-Duell. Snap polls disagree on who won, but the chancellor keeps her cool and {party} holds its lead", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 6, turn: 3 },
         { id: "stinkefinger_2013", headline: "A magazine cover shows Steinbrück with his middle finger raised, and the image follows {party}'s candidate for days", role: "any", party: "spd", weight: 3, appeal: -0.025, momentum: -6, turn: 4 },
         { id: "bayern_wahl_2013", headline: "Bavaria votes a week early. The CSU wins an absolute majority and the FDP drops out of the Landtag, so the threshold panic reaches {party}", role: "any", party: "fdp", weight: 3, appeal: -0.03, momentum: -8, turn: 5 },
         { id: "afd_euro_2013", headline: "A party founded this year campaigns against the bailouts and the euro, and {party} collects the protest vote from both flanks", role: "any", party: "afd", weight: 2, appeal: 0.025, momentum: 7 },
@@ -372,8 +372,8 @@ export const GERMANY: CountryBundle = {
       // The real story beats of the 1998 campaign, in order.
       events: [
         { id: "niedersachsen_1998", headline: "Schröder wins Lower Saxony in March with 47.9 percent and becomes the SPD's chancellor candidate that night, and {party} has its man", role: "any", party: "spd", weight: 3, appeal: 0.03, momentum: 8, turn: 0 },
-        { id: "arbeitslosigkeit_1998", headline: "Unemployment tops 4.8 million, a postwar record, and Kohl's talk of recovery rings hollow for {party}", role: "any", party: "cdu", weight: 3, appeal: -0.03, momentum: -7, turn: 1 },
-        { id: "spritpreis_1998", headline: "The Greens' conference votes for five marks a litre of petrol, and {party}'s opponents have their campaign gift", role: "any", party: "grn", weight: 3, appeal: -0.035, momentum: -8, turn: 2 },
+        { id: "arbeitslosigkeit_1998", headline: "Unemployment tops 4.8 million, a postwar record, and Kohl's talk of recovery rings hollow for {party}", role: "any", party: "cdu", weight: 3, appeal: -0.03, momentum: -7, turn: 0 },
+        { id: "spritpreis_1998", headline: "The Greens' conference votes for five marks a litre of petrol, and {party}'s opponents have their campaign gift", role: "any", party: "grn", weight: 3, appeal: -0.035, momentum: -8, turn: 0 },
         { id: "neue_mitte_1998", headline: "Schröder's 'new centre' courts business and the middle class, and {party} wins voters it has not had in years", role: "any", party: "spd", weight: 3, appeal: 0.025, momentum: 7, turn: 3 },
         { id: "pds_osten_1998", headline: "Gysi's PDS climbs toward 5 percent in the polls on eastern discontent, and {party}'s talk-show turns pay off", role: "any", party: "lnk", weight: 3, appeal: 0.03, momentum: 8, turn: 4 },
         { id: "letzte_woche_1998", headline: "In the last week the polls put the SPD ahead and the Union scrambles. Schröder tells Germans it is time for change, and {party} holds on", role: "any", party: "spd", weight: 3, appeal: 0.02, momentum: 6, turn: 5 },
@@ -434,11 +434,11 @@ export const GERMANY: CountryBundle = {
       // The real story beats of 1990, in order.
       events: [
         { id: "waehrungsunion_1990", headline: "Monetary union on July 1 swaps East German marks for Deutschmarks one to one for wages and small savings, and {party} takes the credit", role: "any", party: "cdu", weight: 3, appeal: 0.03, momentum: 8, turn: 0 },
-        { id: "bluehende_landschaften_1990", headline: "Kohl promises unity without tax rises and 'blooming landscapes' in the East within a few years, and {party} rides the optimism", role: "any", party: "cdu", weight: 3, appeal: 0.03, momentum: 7, turn: 1 },
-        { id: "lafontaine_warnung_1990", headline: "Lafontaine warns that unity will cost far more than the government admits. He is right, the voters are not listening, and {party} pays", role: "any", party: "spd", weight: 3, appeal: -0.035, momentum: -9, turn: 2 },
-        { id: "zwei_plus_vier_1990", headline: "The Two Plus Four treaty settles Germany's borders and sovereignty, and Genscher's diplomacy is {party}'s strongest card", role: "any", party: "fdp", weight: 3, appeal: 0.03, momentum: 8, turn: 3 },
-        { id: "fuenfprozent_urteil_1990", headline: "The Constitutional Court rules that the 5 percent threshold applies separately in East and West, a lifeline for {party}", role: "any", party: "lnk", weight: 3, appeal: 0.03, momentum: 8, turn: 4 },
-        { id: "ost_landtage_1990", headline: "In the East's state elections on October 14 the CDU wins four of the five new states, and {party} arrives at the federal vote with momentum", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 5, turn: 5 },
+        { id: "bluehende_landschaften_1990", headline: "Kohl promises unity without tax rises and 'blooming landscapes' in the East within a few years, and {party} rides the optimism", role: "any", party: "cdu", weight: 3, appeal: 0.03, momentum: 7, turn: 0 },
+        { id: "lafontaine_warnung_1990", headline: "Lafontaine warns that unity will cost far more than the government admits. He is right, the voters are not listening, and {party} pays", role: "any", party: "spd", weight: 3, appeal: -0.035, momentum: -9, turn: 1 },
+        { id: "zwei_plus_vier_1990", headline: "The Two Plus Four treaty settles Germany's borders and sovereignty, and Genscher's diplomacy is {party}'s strongest card", role: "any", party: "fdp", weight: 3, appeal: 0.03, momentum: 8, turn: 2 },
+        { id: "fuenfprozent_urteil_1990", headline: "The Constitutional Court rules that the 5 percent threshold applies separately in East and West, a lifeline for {party}", role: "any", party: "lnk", weight: 3, appeal: 0.03, momentum: 8, turn: 3 },
+        { id: "ost_landtage_1990", headline: "In the East's state elections on October 14 the CDU wins four of the five new states, and {party} arrives at the federal vote with momentum", role: "any", party: "cdu", weight: 3, appeal: 0.02, momentum: 5, turn: 4 },
         { id: "gruene_wetter_1990", headline: "'Everyone is talking about Germany, we are talking about the weather': the West Greens campaign on climate while the country talks unity, and {party} pays", role: "any", party: "grn", weight: 2, appeal: -0.04, momentum: -9 },
         { id: "treuhand_1990", headline: "Eastern factories begin to close as the new currency prices out their exports, and voters in the East look for a party that speaks for them, such as {party}", role: "any", party: "lnk", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "golfkrise_1990", headline: "Iraq's invasion of Kuwait and the Gulf crisis raise fuel prices and security questions, and the debate favours {party}'s steadiness", role: "any", party: "fdp", weight: 2, appeal: 0.015, momentum: 4 },
