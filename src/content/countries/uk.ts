@@ -27,17 +27,17 @@ export const UK_MODULE: CountryModule = {
     { electionId: "1983", year: 1983, label: "1983 · The Falklands election", description: "Thatcher rampant, Labour's longest suicide note, the Alliance splitting the left.", difficulty: "hard" },
     { electionId: "1979", year: 1979, label: "1979 · Winter of Discontent", description: "Callaghan limps to the polls; Thatcher offers a revolution.", difficulty: "hard" },
     {
-      electionId: "1974feb", year: 1974, label: "1974 (Feb) · Who governs Britain?", difficulty: "easy",
+      electionId: "1974feb", year: 1974, label: "1974 (Feb) · Who governs Britain?", difficulty: "medium",
       description: "The miners' strike and the three-day week. Heath asks who governs, and the answer is a hung parliament.",
     },
     {
-      electionId: "1974oct", year: 1974, label: "1974 (Oct) · Wilson's slim majority", difficulty: "medium",
+      electionId: "1974oct", year: 1974, label: "1974 (Oct) · Wilson's slim majority", difficulty: "hard",
       description: "Eight months of minority rule, then back to the country for a working majority of three.",
     },
-    { electionId: "1970", year: 1970, label: "1970 · Heath's upset", description: "Wilson is cruising, the polls are wrong, and Heath wins the election nobody expected.", difficulty: "medium" },
+    { electionId: "1970", year: 1970, label: "1970 · Heath's upset", description: "Wilson is cruising, the polls are wrong, and Heath wins the election nobody expected.", difficulty: "easy" },
     { electionId: "1966", year: 1966, label: "1966 · Wilson's landslide", description: "A majority of four becomes a mandate of ninety-eight. The white heat year.", difficulty: "hard" },
-    { electionId: "1964", year: 1964, label: "1964 · Wilson v. Douglas-Home", description: "Thirteen years of Tory rule against the Profumo hangover. The narrowest of wins.", difficulty: "easy" },
-    { electionId: "1951", year: 1951, label: "1951 · Churchill's comeback", description: "Attlee's exhausted majority against Churchill's last campaign.", difficulty: "hard" },
+    { electionId: "1964", year: 1964, label: "1964 · Wilson v. Douglas-Home", description: "Thirteen years of Tory rule against the Profumo hangover. The narrowest of wins.", difficulty: "hard" },
+    { electionId: "1951", year: 1951, label: "1951 · Churchill's comeback", description: "Attlee's exhausted majority against Churchill's last campaign.", difficulty: "easy" },
   ],
   systemLabel: "First past the post",
   pack: {

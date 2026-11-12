@@ -644,7 +644,7 @@ export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {
   scenarios: [
     { electionId: "2025", difficulty: "hard",
       description: "Preferential voting, a cyclone-delayed budget, and a Trump-shaped shadow over 150 seats." },
-    { electionId: "2022", difficulty: "medium",
+    { electionId: "2022", difficulty: "hard",
       description: "Nine years of Coalition rule, a teal wave on the harbourside, and a PM who doesn't hold a hose." },
     { electionId: "2019", difficulty: "hard",
       description: "The unlosable election. A big-target Labor agenda, a wall of yellow ads, and a daggy-dad miracle. 151 seats under preferences." },
@@ -660,7 +660,7 @@ export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {
       description: "'Who do you trust?' on interest rates, a handshake that went wrong, and a fourth term for Howard. 150 seats." },
     { electionId: "2001", addedLater: true, difficulty: "hard",
       description: "The Tampa, September 11 and 'we will decide who comes to this country'. 150 seats and a government that wins on security." },
-    { electionId: "1998", addedLater: true, difficulty: "medium",
+    { electionId: "1998", addedLater: true, difficulty: "easy",
       description: "The GST election. Labor wins more votes but not enough seats, and One Nation splits the right. 148 seats." },
     { electionId: "1996", addedLater: true, difficulty: "hard",
       description: "Thirteen years of Labor end. A weary electorate meets 'never, ever' a GST, and the Coalition wins big. 148 seats." },

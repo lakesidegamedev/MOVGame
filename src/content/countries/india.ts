@@ -471,7 +471,7 @@ export const INDIA_MODULE = countryModule(INDIA, {
       description: "Pulwama and Balakot turn a farm distress election into a security election. Congress offers NYAY, and Uttar Pradesh bets on a feud that ended." },
     { electionId: "2014", difficulty: "hard",
       description: "The Modi wave against a decade of UPA scandal and price rises. The BJP aims for the first single-party majority in thirty years." },
-    { electionId: "2009", difficulty: "medium",
+    { electionId: "2009", difficulty: "easy",
       description: "The UPA seeks a second term after the nuclear deal and the farm loan waiver. Advani's last run, a fourth front, and the Left withdrawn from the government's support." },
   ],
   systemLabel: "First past the post, 543 seats",

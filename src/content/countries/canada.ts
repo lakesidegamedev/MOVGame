@@ -694,7 +694,7 @@ export const CANADA_MODULE = countryModule(CANADA, {
       description: "A tariff war with the neighbour, a Liberal comeback for the ages, and 343 seats from coast to coast to coast." },
     { electionId: "2021", difficulty: "easy",
       description: "A pandemic snap election nobody asked for. Gravel on the trail, a fourth wave rising, and 338 seats in play." },
-    { electionId: "2019", difficulty: "hard",
+    { electionId: "2019", difficulty: "easy",
       description: "SNC-Lavalin, the blackface photos, and a Liberal government that loses the popular vote but keeps the keys. A minority, 338 seats." },
     { electionId: "2015", difficulty: "hard",
       description: "A decade of Harper, a 78-day marathon, and a third-place party that wakes up in a majority. Sunny ways over a tired throne." },

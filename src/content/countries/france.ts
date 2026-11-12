@@ -654,7 +654,7 @@ export const FRANCE_MODULE = countryModule(FRANCE, {
   art: { a: "#142a59", b: "#a82b42", glow: "rgba(245,245,245,0.18)" },
   freeElections: ["2022"],
   scenarios: [
-    { electionId: "2027", label: "2027 · The Republic's runoff", difficulty: "hard",
+    { electionId: "2027", label: "2027 · The Republic's runoff", difficulty: "easy",
       description: "Macron is term-limited. The centre defends the Élysée against the RN in a two-round fight for France." },
     { electionId: "2022", difficulty: "hard",
       description: "The rematch. Pouvoir d'achat against the front républicain, and a far narrower runoff than last time." },
@@ -666,7 +666,7 @@ export const FRANCE_MODULE = countryModule(FRANCE, {
       description: "A break with twelve years of Chirac against the first woman in a presidential runoff. Bayrou's voters and Le Pen's voters decide a left-right fight." },
     { electionId: "2002", difficulty: "hard", addedLater: true,
       description: "Jospin is eliminated and Le Pen reaches the runoff for the first time. Chirac has to win by a margin that counts, with the whole country watching." },
-    { electionId: "1995", difficulty: "hard", addedLater: true,
+    { electionId: "1995", difficulty: "medium", addedLater: true,
       description: "Chirac on his third try against a Socialist who topped round one. The social fracture, the Mitterrand inheritance and a narrow left-right runoff." },
     { electionId: "1988", difficulty: "hard", addedLater: true,
       description: "A Socialist president against his own prime minister, two years into cohabitation. Le Pen's voters are the swing bloc, and the last week brings the hostages and Ouvéa." },

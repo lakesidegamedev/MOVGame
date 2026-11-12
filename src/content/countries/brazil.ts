@@ -460,11 +460,11 @@ export const BRAZIL_MODULE = countryModule(BRAZIL, {
   art: { a: "#0b4a3a", b: "#c9a400", glow: "rgba(255,244,200,0.22)" },
   freeElections: ["2022"],
   scenarios: [
-    { electionId: "2022", difficulty: "hard",
+    { electionId: "2022", difficulty: "easy",
       description: "A former president against the incumbent who doubted the voting machines. The closest runoff in the democratic era, decided by Minas Gerais and the Northeast." },
     { electionId: "2018", difficulty: "hard",
       description: "Lula is in prison, his stand-in has had seven weeks, and the front-runner was stabbed in a crowd. Ciro Gomes has flown to Europe." },
-    { electionId: "2014", difficulty: "hard",
+    { electionId: "2014", difficulty: "easy",
       description: "Marina Silva rose and fell. The PT's fourth term meets the Petrobras scandal in a runoff that splits the country by region." },
     { electionId: "2010", difficulty: "hard",
       description: "Lula's chosen successor has never won an election. Marina Silva's 20 million votes force a runoff, and the fight turns on religion." },

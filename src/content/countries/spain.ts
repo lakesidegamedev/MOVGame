@@ -490,7 +490,7 @@ export const SPAIN_MODULE = countryModule(SPAIN, {
       description: "Sánchez calls a July vote after losing the May local elections. Feijóo needs Vox to reach 176, and Junts and the Basque parties hold the keys to any investiture." },
     { electionId: "2019", difficulty: "hard",
       description: "The Catalan parties sink Sánchez's budget and he calls an April vote. The right splits three ways between the PP, Citizens and a rising Vox." },
-    { electionId: "2015", difficulty: "medium",
+    { electionId: "2015", difficulty: "easy",
       description: "Four parties in one race for the first time. Rajoy defends a recovery and a corruption record against Sánchez, Podemos and Citizens." },
     { electionId: "2011", difficulty: "hard",
       description: "The crash election. Zapatero steps aside, unemployment is above 21%, and Rajoy needs only to avoid mistakes. The question is how large his majority will be." },

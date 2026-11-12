@@ -429,9 +429,9 @@ export const IRELAND_MODULE = countryModule(IRELAND, {
   scenarios: [
     { electionId: "2024", difficulty: "hard",
       description: "A new Taoiseach, a giveaway budget and a housing crisis that will not go away. The old rivals need partners, and Sinn Féin needs the transfers." },
-    { electionId: "2020", difficulty: "hard",
+    { electionId: "2020", difficulty: "easy",
       description: "Sinn Féin tops the poll with too few candidates. A three-way split leaves nobody near 81 seats without crossing a line." },
-    { electionId: "2016", difficulty: "medium",
+    { electionId: "2016", difficulty: "easy",
       description: "The recovery election nobody felt. Fine Gael and Labour lose a combined 56 seats and independents multiply." },
     { electionId: "2011", difficulty: "hard",
       description: "The Troika election. Fianna Fáil falls from 78 seats to 20 and Fine Gael and Labour take 113 between them." },
