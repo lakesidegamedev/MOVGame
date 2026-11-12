@@ -188,6 +188,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   beats that were misdated, misattributed or could not be sourced were corrected or replaced (for
   example the German Greens' 1990 leaders, the 1993 Campbell line in Canada, and the 1944 US
   campaign's Pearl Harbor wording), and unverifiable quotes were removed.
+- Landing page: the opening paragraph no longer says "across 14 countries" twice, the country
+  bundle cards line up their prices and buttons, and the Complete Collection card counts every
+  election.
 - Store: the country pack tiles show their cover photo, flag and country name again (they had
   collapsed to text only). The free base game lists one election per cell, so the two free US
   elections no longer stretch a row, and on phones each free election is one line with its

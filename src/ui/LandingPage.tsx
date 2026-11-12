@@ -10,7 +10,7 @@ import {
 import { useAuthStore } from "@store/authStore";
 import { useStoreNav } from "@store/storeNav";
 import { usePackPrices } from "@lib/usePackPrices";
-import { packFacts } from "@lib/storeModel";
+import { packFacts, COMPLETE_ID } from "@lib/storeModel";
 import { DISTRIBUTION } from "@lib/distribution";
 import { UserMenu } from "@ui/auth/UserMenu";
 import { DailyCard } from "@ui/DailyCard";
@@ -34,6 +34,11 @@ const VOTING_SYSTEMS_LINE = `${COUNTRY_COUNT} countries, ${VOTING_SYSTEM_COUNT} 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 // "13 full elections across 12 countries": every country has a free election.
 const FREE_LINE = `${FREE_ELECTION_COUNT} full elections across ${FREE_COUNTRY_COUNT} countries`;
+// The hero has just named the totals, so it says "15 of them, at least one in
+// every country" rather than repeating "across 14 countries".
+const HERO_FREE_LINE = FREE_COUNTRY_COUNT === COUNTRY_COUNT
+  ? `${FREE_ELECTION_COUNT} of them, at least one in every country`
+  : FREE_LINE;
 
 export type LandingDestination =
   | { kind: "us"; scenarioId: string }   // native id, e.g. "2024"
@@ -255,7 +260,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
               Run a real campaign turn by turn: allocate a budget, target battlegrounds, survive debates,
               and watch the map move. {ELECTION_COUNT} elections across {COUNTRY_COUNT} countries.
               {PAYWALL_ENABLED
-                ? ` ${FREE_LINE}, and the daily challenge are free forever. The rest of each country is ${money(packPrices["us-historical"] ?? 99)}, or ${money(packPrices.complete ?? 399)} for everything.`
+                ? ` ${HERO_FREE_LINE}, and the daily challenge are free forever. The rest of each country is ${money(packPrices["us-historical"] ?? 99)}, or ${money(packPrices.complete ?? 399)} for everything.`
                 : " All of them are free to play right now."}
             </p>
             <div className="landing-hero-actions">
@@ -382,8 +387,8 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
                   <span className="scenario-year" style={{ fontSize: 14 }}>
                     {p.name} {owned && <Check size={13} style={{ verticalAlign: "-2px", color: "var(--green)" }} />}
                   </span>
-                  <span className="scenario-match">{packFacts(p).countLabel}</span>
-                  <span className="muted small" style={{ fontSize: 11 }}>{p.description}</span>
+                  <span className="scenario-match">{p.id === COMPLETE_ID ? `${ELECTION_COUNT} elections, every country` : packFacts(p).countLabel}</span>
+                  <span className="muted small pack-desc" title={p.description}>{p.description}</span>
                   <span className="pack-foot">
                     <span className="pack-price">
                       {PAYWALL_ENABLED ? (

@@ -9,7 +9,13 @@
 .pack-card:hover { border-color: var(--navy-350); }
 .pack-foot {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  width: 100%; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+  width: 100%; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border);
+}
+/* Descriptions differ a lot in length: clamp them so every card in a row has
+   its price and button on the same line. */
+.pack-desc {
+  font-size: 11px; line-height: 1.45; margin-bottom: 8px;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
 }
 .pack-price { font-weight: 800; font-variant-numeric: tabular-nums; font-size: var(--fs-base); }
 .pack-beta-note { font-size: var(--fs-xs); color: var(--green); }
