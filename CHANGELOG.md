@@ -26,6 +26,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- On iPhone, iPad and Android, "Continue with Apple" on the Lakeside sign-in page now opens Apple's
+  sign-in instead of saying the page cannot be opened.
 - The United States setup screen no longer says "Locked years are part of the United States
   pack" when you own every year, and years you buy while the screen is open unlock straight away.
 - The iPhone Store now describes the Complete Collection the way Android and the web do: every

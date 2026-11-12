@@ -329,6 +329,16 @@ final class GameSession: ObservableObject {
             // Every pack sellable and nothing owned, so paid elections show locked.
             store.pinGateForCapture(StoreGate(gating: true, sellable: Set(NativeCatalog.shared.packIds())))
         }
+        if arguments.contains("--mov-capture-store-priced") {
+            // The store as it reads once the App Store sells every pack: prices
+            // listed, Buy buttons shown, paid elections locked.
+            store.pinGateForCapture(StoreGate(gating: true, sellable: Set(NativeCatalog.shared.packIds())))
+            store.pinProductsForCapture(NativeCatalog.shared.packs().filter { !$0.legacy }.map { pack in
+                StoreProduct(packId: pack.id,
+                             sku: "com.lakesidegames.electioneer." + pack.id.replacingOccurrences(of: "-", with: "_"),
+                             title: pack.name, price: pack.id == "complete" ? "$3.99" : "$0.99")
+            })
+        }
         if arguments.contains(where: { $0.hasPrefix("--mov-capture-library") || $0.hasPrefix("--mov-capture-briefing") || $0.hasPrefix("--mov-capture-locked") }) {
             playScreen = .library
         } else if let us = [("--mov-capture-us1948", "1948"), ("--mov-capture-us1948-results", "1948"), ("--mov-capture-us1948-reveal", "1948")]

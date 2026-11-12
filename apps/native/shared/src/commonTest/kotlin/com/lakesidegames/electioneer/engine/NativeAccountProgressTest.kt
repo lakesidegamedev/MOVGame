@@ -69,6 +69,9 @@ class NativeAccountProgressTest {
         assertTrue(flow.startUrl().endsWith("%2Fnative-login%3Fstate%3D$nonce"))
         assertTrue(flow.allows("https", "auth.lakesidegames.net", -1))
         assertFalse(flow.allows("http", "auth.lakesidegames.net", -1))
+        assertTrue(flow.allows("https", "appleid.apple.com", -1), "Continue with Apple must open")
+        assertTrue(flow.allows("https", "idmsa.apple.com", -1))
+        assertFalse(flow.allows("https", "apple.com.attacker.test", -1))
         assertFalse(flow.allows("https", "auth.lakesidegames.net.attacker.test", -1))
         assertFalse(flow.allows("https", "auth.lakesidegames.net", 444))
         fun take(scheme: String = "https", host: String = "sim.ahousedividedgame.com", port: Int = -1,
