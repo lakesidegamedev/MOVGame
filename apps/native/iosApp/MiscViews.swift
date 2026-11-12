@@ -35,7 +35,6 @@ struct StoreView: View {
         let linked = session.account.user?.ahdLinked == true
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text("STORE").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
                 Text("Election packs").font(.title2.bold())
                 Text("\(countries.count) countries and \(all.count) elections. \(all.filter { $0.free }.count) elections, one in every country, are free for everyone.")
                     .font(.subheadline).foregroundStyle(CampaignStyle.muted).fixedSize(horizontal: false, vertical: true)

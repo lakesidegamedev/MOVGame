@@ -70,6 +70,11 @@ private struct NativeCountryMapView: View {
 }
 
 /// Election title without the leading "2024 · " year prefix.
+/// "1 seat", "2 seats": singular when the count is one.
+func nativeUnits(_ count: Int, _ plural: String) -> String {
+    "\(count) \(count == 1 && plural.hasSuffix("s") ? String(plural.dropLast()) : plural)"
+}
+
 func nativeElectionTitle(_ label: String) -> String {
     guard let range = label.range(of: " · ") else { return label }
     return String(label[range.upperBound...])
@@ -140,6 +145,7 @@ struct NativeCampaignLibrary: View {
     @State private var era = LibraryEra.any
     @State private var expanded: Set<String> = []
     @State private var pick: LibraryPick?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     private let pendingPick: LibraryPick?
     private let catalog: [LibraryGroup] =
         MobileCampaign.companion.countries().map { LibraryGroup(country: $0, elections: MobileCampaign.companion.elections(countryId: $0.id)) }
@@ -175,12 +181,14 @@ struct NativeCampaignLibrary: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 12) {
                 Text("CAMPAIGN LIBRARY").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
-                Text("Choose your election").font(.largeTitle.bold())
+                Text("Choose your election").font(dynamicTypeSize.isAccessibilitySize ? .title2.bold() : .largeTitle.bold())
                 Text("\(catalog.count) countries · \(total) elections · \(freeCount) free")
                     .font(.subheadline).foregroundStyle(CampaignStyle.muted)
                 filters
-                Text(filtering ? "\(shownCount) of \(total) elections match" : "Tap a country to see its elections")
-                    .font(.caption).foregroundStyle(CampaignStyle.muted)
+                if filtering || !dynamicTypeSize.isAccessibilitySize {
+                    Text(filtering ? "\(shownCount) of \(total) elections match" : "Tap a country to see its elections")
+                        .font(.caption).foregroundStyle(CampaignStyle.muted)
+                }
                 if groups.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(access == "owned" && store.owned.isEmpty ? "You do not own a pack yet" : "No elections match").font(.headline)
@@ -255,9 +263,24 @@ struct NativeCampaignLibrary: View {
             }
             .pickerStyle(.segmented)
             .accessibilityLabel("Show elections")
-            ViewThatFits(in: .horizontal) {
+            if dynamicTypeSize.isAccessibilitySize {
+                Menu {
+                    Picker("Challenge", selection: $challenge) {
+                        Text("Any challenge").tag("any")
+                        Text("Easy").tag("easy")
+                        Text("Medium").tag("medium")
+                        Text("Hard").tag("hard")
+                    }
+                    Picker("Era", selection: $era) {
+                        ForEach(LibraryEra.allCases, id: \.self) { Text($0.title).tag($0) }
+                    }
+                } label: {
+                    filterLabel(challenge == "any" && era == .any ? "Filters" : "Filters on", active: challenge != "any" || era != .any)
+                }
+                .accessibilityLabel("Challenge and era filters")
+                .accessibilityValue("\(challenge == "any" ? "Any challenge" : challenge.capitalized), \(era.title)")
+            } else {
                 HStack(spacing: 8) { challengeMenu; eraMenu; Spacer(minLength: 0) }
-                VStack(alignment: .leading, spacing: 8) { challengeMenu; eraMenu }
             }
         }
     }
@@ -409,7 +432,7 @@ struct NativeElectionBriefing: View {
                     Text(election.label).font(.title2.bold()).fixedSize(horizontal: false, vertical: true)
                     HStack(spacing: 6) {
                         if election.free { NativeBadge(text: "Free", color: Color(red: 0.37, green: 0.80, blue: 0.55)) }
-                        else { NativeBadge(text: nativePackName(election.packId), color: CampaignStyle.muted) }
+                        else { NativeBadge(text: "\(nativePackName(election.packId)) pack", color: CampaignStyle.muted) }
                         NativeBadge(text: "\(election.difficulty.capitalized) challenge", color: nativeChallengeColor(election.difficulty))
                     }
                     Text(election.blurb).font(.subheadline).foregroundStyle(CampaignStyle.muted)
@@ -544,7 +567,7 @@ private struct NativeStandingRows: View {
                 RoundedRectangle(cornerRadius: 3).fill(nativePartyColor(row.color)).frame(width: 14, height: 14)
                 Text(row.name).font(.subheadline.bold())
                 Spacer(minLength: 4)
-                Text("\(row.units) \(units) · \(String(format: "%.1f", row.voteShare * 100))%")
+                Text("\(nativeUnits(Int(row.units), units)) · \(String(format: "%.1f", row.voteShare * 100))%")
                     .font(.caption).monospacedDigit()
             }
             .padding(.vertical, 4)
@@ -601,7 +624,7 @@ struct NativeWorldCampaign: View {
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text(region.name).font(.subheadline.bold()).foregroundStyle(.white)
                                     Text("\(region.winner) leads").font(.caption.bold()).foregroundStyle(nativePartyColor(region.color))
-                                    Text("\(region.totalUnits) \(game.unitName()) in region").font(.caption)
+                                    Text("\(nativeUnits(Int(region.totalUnits), game.unitName())) in region").font(.caption)
                                     Text("You: \(region.playerUnits) · \(String(format: "%.1f", region.playerShare * 100))%")
                                         .font(.caption).monospacedDigit()
                                 }
