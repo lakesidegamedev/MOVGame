@@ -5,8 +5,10 @@ The Tauri 2 desktop shell lives here. It wraps the web edition from this same ch
 ## Status (November 2026)
 
 Checked on GitHub Actions by `.github/workflows/desktop.yml` on every push to
-`build/desktop*`. Last full run: 43299800492 on commit 23718c0, Windows, Linux
-and macOS all green. How each test works is under "Smoke tests" below.
+`build/desktop*`. Last all-green run: 43299800492 on commit 23718c0. Run
+43313314086 on commit 6b85f8e added the launcher sign-in check (passed) and a
+2 second limit on the purchase pickup after the window comes back (failed,
+see below); Linux passed. How each test works is under "Smoke tests" below.
 
 **Windows** (`windows-latest` runner, WebView2), verified by driving the
 installed game with real clicks:
@@ -27,12 +29,20 @@ installed game with real clicks:
   pack as owned, the Store shows "United States unlocked" (3.3 seconds after
   the window came back in run 43299800492). The game server was mocked for
   this step; no payment is made.
-- Known gap: bringing the game window back does not reach the page's `focus`
-  or `visibilitychange` handlers inside WebView2, so the immediate re-check on
-  return does not happen on Windows. The purchase is still picked up by the
-  timed check, which runs every 4 to 12 seconds for ten minutes after Buy
-  (`DESKTOP_WATCH` in `src/store/storeFlow.ts`), and the "I've paid, check now"
-  button works at any time.
+- Bringing the game window back should check for the purchase at once.
+  WebView2 does not pass the window's focus on to the page, so the shell
+  reports it itself (see "Checkout and sign in"). Not yet verified on a
+  runner: in run 43313314086 Tauri's `Focused(true)` event did not arrive on
+  Windows either, so the shell now watches the native window's focus state
+  there instead. Until a run confirms it, the purchase is still picked up by
+  the timed check (every 4 to 12 seconds for ten minutes after Buy) and by
+  "I've paid, check now".
+- Started the way the Lakeside launcher starts it, with a sign-in code in
+  `LAKESIDE_HANDOFF_CODE`, the game redeems the code once and the player is
+  signed in. The game server was faked for this step. Verified in run
+  43313314086: one redeem call with the right code, the player signed in, the
+  code absent from the address bar and web storage, and a second request for
+  it answered with nothing.
 - The opener plugin refuses URLs outside its allow list
   (`https://example.com/` is rejected with "Not allowed to open url").
 - Uninstalling removes the program, the Apps & Features entry and the
@@ -123,7 +133,9 @@ about 8.
   `desktop-direct` build silently, plays it to week two, upgrades to the
   current version, resumes the save, presses Buy, checks the checkout URL
   reached the opener and Edge, checks the unlock after a minimise and restore,
-  checks the opener's allow list, uninstalls, checks the
+  checks the unlock arrives within 2 seconds of the window coming back,
+  checks the opener's allow list, starts the app the way the Lakeside
+  launcher does and checks the sign-in, uninstalls, checks the
   saves are kept, reinstalls and resumes again, then installs the preview next
   to it and plays a paid election to week two. It also launches the tester
   artifact's portable .exe (`scripts/smoke-windows.ps1`).
@@ -136,7 +148,9 @@ about 8.
   (keeping wry's defaults), add "(CI test build)" to the window title and are
   never uploaded. The checkout step answers the game server's API with a
   signed-in, linked test account; nothing reaches the real server and nothing
-  is paid.
+  is paid. The launcher step runs `scripts/fake-api.mjs` on the runner,
+  points the API host at it in the hosts file and trusts a throwaway
+  certificate for it, then removes all three.
 - `desktop-smoke.mjs --local <url>` runs the same steps against a built web
   bundle in Chromium, with a stand-in for the Tauri bridge, for working on the
   script without Windows.
@@ -247,13 +261,39 @@ window. The shell registers the Tauri opener plugin (`src-tauri/src/lib.rs`) and
 `src-tauri/capabilities/default.json` allows it to open only `lakesidegames.net` and
 `sim.ahousedividedgame.com` URLs. The web code calls it through
 `src/lib/externalLink.ts`. After Buy the game checks for the purchase every 4 to 12
-seconds for ten minutes, and again when the page sees the window come back (see
-`src/store/storeFlow.ts`; on Windows that second trigger does not fire yet, see Status). Sign in with Lakeside Games is not offered in
+seconds for ten minutes, and again when the window comes back (see
+`src/store/storeFlow.ts` and `src/ui/store/StoreScreen.tsx`). On Windows the
+page gets no `focus` or `visibilitychange` when the window is restored, so the
+shell dispatches a `mov-shell-focus` event on `window` whenever the native
+window gains focus, and the Store treats it like `focus`. On macOS and Linux
+the shell forwards Tauri's `WindowEvent::Focused(true)`. On Windows, with a
+single webview, Tauri reports focus only when the WebView2 control itself
+takes focus, which a taskbar restore or Alt+Tab back does not do, so the shell
+also reads the native window's focus state four times a second and reports
+when it flips back (`watch_focus` in `src-tauri/src/lib.rs`). Sign in with Lakeside Games is not offered in
 the desktop window, because the return trip cannot reach it; an account that needs
 linking is linked once in the browser.
 
 The checked-in master icon is `public/brand/margin-of-victory-icon.png`; the
 Tauri-generated sizes for every platform live in `src-tauri/icons/`.
+
+## Started by the Lakeside launcher
+
+The launcher starts an installed game that opts in with `LAKESIDE_LAUNCHER=1`,
+`LAKESIDE_LAUNCHER_VERSION` and, when the player is signed in to the launcher,
+a single-use `LAKESIDE_HANDOFF_CODE` in its environment. This is how it starts
+Corporate Warfare. The shell reads the code at startup and removes it from its
+own environment straight away, so the browser it opens for checkout never
+inherits it. The page asks for it once with the `take_launcher_code` command
+(`src/lib/desktopShell.ts`); a second call returns nothing. From there it takes
+the same path as the web game's `#launcher_code=`: the game server redeems it
+(`POST /api/lakeside/launcher-exchange`) and the player is signed in. A code in
+the wrong shape shows "The launcher could not sign you in" without a server
+call. The code is never logged, put in the address bar or stored.
+
+For the launcher to start this app, its catalog needs a native entry for
+Margin of Victory with the desktop executable and `handoffClientId` set to
+`margin-of-victory`, the client id the game server redeems with.
 
 ## Code signing: what it would unblock
 
@@ -363,11 +403,11 @@ The Mac App Store is a separate route with its own signing and review.
 
 - Windows code signing and macOS notarisation (above). Until then, direct
   downloads are for testers.
-- Forward the native window focus event to the page (Tauri
-  `WindowEvent::Focused(true)` in `src-tauri/src/lib.rs`), so a purchase shows
-  up the moment the player returns on Windows. The Windows smoke test reports
-  `pickedUpByWindowReturn` in `smoke/new/checkout-result.json` and will show
-  whether it works.
+- A native Margin of Victory entry in the Lakeside launcher catalog (see
+  "Started by the Lakeside launcher"). Until then the launcher opens the web
+  game.
+- A second launch while the app is already open starts a second window; there
+  is no single-instance handling yet.
 - Lakeside sign-in and account linking from the desktop app, end to end in a
   real browser.
 - A real purchase on a `desktop-direct` build (CI covers everything up to the
