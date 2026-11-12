@@ -91,6 +91,9 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
 }) {
   const newGame = useGameStore((s) => s.newGame);
   const canPlay = useAuthStore((s) => s.canPlay);
+  // canPlay itself never changes; subscribing to ownership re-renders the tiles
+  // when a purchase or sign-in lands while this screen is open.
+  useAuthStore((s) => s.unlocked);
   const [step, setStep] = useState<StepId>(0);
   const [scenarioId, setScenarioId] = useState<string>(initialScenarioId ?? "2024");
   const [pick, setPick] = useState<CandidateId>(initialParty === "rep" ? "rep" : "dem");
@@ -113,6 +116,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
   const [editorOpen, setEditorOpen] = useState(false);
 
   const globalId = (id: string) => `us-${id}`;
+  const lockedIds = SCENARIO_IDS.filter((id) => !canPlay(globalId(id)));
   const unlocked = canPlay(globalId(scenarioId));
 
   const chooseScenario = (id: string) => {
@@ -206,16 +210,16 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
                       year={s.year}
                       title={`${s.dem.shortName} v. ${s.rep.shortName}`}
                       selected={scenarioId === id}
-                      locked={!canPlay(globalId(id))}
+                      locked={lockedIds.includes(id)}
                       onClick={() => chooseScenario(id)}
                     />
                   );
                 })}
               </div>
-              {PAYWALL_ENABLED && (
+              {PAYWALL_ENABLED && lockedIds.length > 0 && (
                 <p className="setup-note">
                   <Lock size={12} aria-hidden="true" /> Locked years are part of the <strong>United States</strong> pack. Pick one to see it in the{" "}
-                  <button type="button" className="su-link" onClick={() => openStoreForScenario(globalId(SCENARIO_IDS.find((id) => !canPlay(globalId(id))) ?? SCENARIO_IDS[0]))}>store</button>,
+                  <button type="button" className="su-link" onClick={() => openStoreForScenario(globalId(lockedIds[0]))}>store</button>,
                   where you can buy it or redeem a code.
                 </p>
               )}

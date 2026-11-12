@@ -9,7 +9,8 @@ import { createRoot } from "react-dom/client";
 import { App } from "../../App";
 import { useGameStore } from "@store/gameStore";
 import { useStoreNav } from "@store/storeNav";
-import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
+import { PAYWALL_ENABLED, SCENARIO_REGISTRY } from "@content/scenarioRegistry";
+import { useAuthStore } from "@store/authStore";
 import { loadedCountries } from "@content/countries";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -84,6 +85,16 @@ describe("App renders without crashing", () => {
     const html = m.html();
     expect(html).toContain("The Election"); // step 1 of the setup wizard
     expect(html).toContain("The War Room"); // staff-hire step present
+    if (PAYWALL_ENABLED) {
+      // The locked-years note only shows while some year is locked.
+      expect(html).toContain("Locked years are part of");
+      act(() => {
+        useAuthStore.setState({ unlocked: { scenarioIds: SCENARIO_REGISTRY.map((s) => s.scenarioId), packIds: ["complete"] } });
+      });
+      expect(m.html()).not.toContain("Locked years are part of");
+      expect(m.container.querySelectorAll(".election-tile.locked")).toHaveLength(0);
+      act(() => { useAuthStore.setState({ unlocked: { scenarioIds: [], packIds: [] } }); });
+    }
     m.cleanup();
   });
 

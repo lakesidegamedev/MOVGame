@@ -20,6 +20,11 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   already logged in to a game account that is not linked yet, the launcher sign in links that one
   instead.
 
+### Fixed
+
+- The United States setup screen no longer says "Locked years are part of the United States
+  pack" when you own every year, and years you buy while the screen is open unlock straight away.
+
 ## [2.0.0] - 2026-11-12
 
 Margin of Victory 2.0 grows the game from six countries to fourteen, with 121 elections in all. It
