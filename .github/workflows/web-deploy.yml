@@ -1,0 +1,46 @@
+name: Deploy web game
+
+# Builds the web game and publishes it to the Cloudflare Pages project behind
+# lakesidegames.net/games/electioneer/ on every push to main. Uses a Pages-only
+# API token stored as a repository secret; the Cloudflare GitHub app is not needed.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Publish to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: >
+          npx --yes wrangler@4 pages deploy dist
+          --project-name electioneer --branch main
+          --commit-hash "$GITHUB_SHA" --commit-message "main $GITHUB_SHA"
+      - name: Check the live page
+        run: |
+          for i in $(seq 1 12); do
+            curl -fsS "https://lakesidegames.net/games/electioneer/?v=$GITHUB_RUN_ID" | grep -q 'assets/index-' && exit 0
+            sleep 10
+          done
+          echo "live page did not answer" && exit 1
