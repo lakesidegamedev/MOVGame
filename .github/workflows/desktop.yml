@@ -14,7 +14,9 @@ name: Desktop builds
 #   of the same commit that open that port.
 # - Linux: the AppImage and the .deb (install, run, remove).
 # - macOS: open the .app, check its window, and record what Gatekeeper does
-#   with a downloaded copy.
+#   with a downloaded copy. Then a CI autoplay build of the same commit
+#   (desktop-build.mjs --ci-autoplay, never uploaded) plays the free US
+#   campaign to week two by itself and the desk is screenshotted there.
 
 on:
   workflow_dispatch:
@@ -226,6 +228,21 @@ jobs:
         run: |
           app=$(ls -d apps/native/src-tauri/target/release/bundle/macos/*.app | head -n1)
           bash apps/native/scripts/smoke-macos.sh "$app" smoke "$RUNNER_TEMP/unsealed/$(basename "$app")"
+      # WKWebView has no debugging port to drive the game from outside, so this
+      # test build plays by itself and reports to 127.0.0.1. Never uploaded.
+      - name: Build CI autoplay app
+        if: ${{ !cancelled() }}
+        working-directory: apps/native
+        run: |
+          node scripts/desktop-build.mjs "$CHANNEL" --ci-autoplay 47990 --bundles app
+          mkdir -p "$RUNNER_TEMP/autoplay"
+          app=$(ls -d src-tauri/target/release/bundle/macos/*.app | head -n1)
+          ditto "$app" "$RUNNER_TEMP/autoplay/$(basename "$app")"
+          codesign --force --deep --sign - "$RUNNER_TEMP/autoplay/$(basename "$app")"
+      - name: Smoke test (play to week two)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 8
+        run: bash apps/native/scripts/smoke-macos-play.sh "$(ls -d "$RUNNER_TEMP"/autoplay/*.app | head -n1)" smoke/play 47990
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -42,6 +42,11 @@ public static class MovWin {
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
   [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
   [DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
+  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, IntPtr pid);
+  [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
+  [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint from, uint to, bool attach);
+  [DllImport("user32.dll")] public static extern bool BringWindowToTop(IntPtr h);
+  [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
 }
 "@
 
@@ -63,13 +68,27 @@ if ($BlurPid -ne 0) {
   exit 0
 }
 if ($FocusPid -ne 0) {
+  # A real activation, as a taskbar click or Alt+Tab gives: the game window
+  # becomes the foreground window, so Windows sends it WM_ACTIVATE. Joining the
+  # current foreground thread's input queue lets this script hand over the
+  # foreground; the Alt tap covers the case where that is not enough.
   $h = (Get-Process -Id $FocusPid).MainWindowHandle
-  [MovWin]::keybd_event(0x12, 0, 0, [UIntPtr]::Zero)   # Alt down/up lets a background process take the foreground
+  $before = [MovWin]::GetForegroundWindow()
+  $wasIconic = [MovWin]::IsIconic($h)
+  $me = [MovWin]::GetCurrentThreadId()
+  $fgThread = [MovWin]::GetWindowThreadProcessId($before, [IntPtr]::Zero)
+  $attached = $false
+  if ($fgThread -ne 0 -and $fgThread -ne $me) { $attached = [MovWin]::AttachThreadInput($me, $fgThread, $true) }
+  [MovWin]::keybd_event(0x12, 0, 0, [UIntPtr]::Zero)
   [MovWin]::keybd_event(0x12, 0, 2, [UIntPtr]::Zero)
   [MovWin]::ShowWindow($h, 9) | Out-Null          # restore
-  [MovWin]::ShowWindow($h, 3) | Out-Null          # maximise again
+  [MovWin]::BringWindowToTop($h) | Out-Null
   $fg = [MovWin]::SetForegroundWindow($h)
-  Write-Host "app restored; foreground=$fg isForeground=$([MovWin]::GetForegroundWindow() -eq $h)"
+  if ($attached) { [MovWin]::AttachThreadInput($me, $fgThread, $false) | Out-Null }
+  [MovWin]::ShowWindow($h, 3) | Out-Null          # maximise again
+  $isFg = [MovWin]::GetForegroundWindow() -eq $h
+  Write-Host "app restored; wasMinimised=$wasIconic foregroundBefore=$before attachedInput=$attached setForeground=$fg isForeground=$isFg"
+  if (-not $isFg) { Write-Host 'WARNING: the game window is not the foreground window, so this was not a real activation' }
   exit 0
 }
 
