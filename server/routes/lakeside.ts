@@ -31,6 +31,8 @@ import {
   resolveReturnUrl, AccountLinkConflictError, type LakesideIdentity,
 } from "../lakeside.js";
 
+import { beginAuthorization, completeAuthorization, lakesideSigninEnabled, mintLoginCode, redeemLoginCode, resolveLakesideUser } from "../oidc.js";
+
 const AHD_LOGIN_URL = "https://www.ahousedividedgame.com/login";
 
 function baseUrl(): string {
@@ -70,7 +72,33 @@ function signedInUserId(header: string | undefined): string | null {
 
 export const lakesideRouter = Router();
 
+/** MOV_LAKESIDE_SIGNIN on: OIDC authorization-code + PKCE against the central issuer. */
+async function oidcLogin(req: import("express").Request, res: import("express").Response) {
+  const code = typeof req.query.code === "string" ? req.query.code : undefined;
+  const state = typeof req.query.state === "string" ? req.query.state : undefined;
+  if (code || state || req.query.error) {
+    if (!code || !state) return res.status(400).json({ error: "Sign in failed, try again" });
+    try {
+      const { claims, returnUrl } = await completeAuthorization(code, state);
+      const user = resolveLakesideUser(claims);
+      const url = new URL(returnUrl);
+      url.searchParams.set("lakeside_code", mintLoginCode(user.id));
+      return res.redirect(url.toString());
+    } catch {
+      return res.status(401).json({ error: "Sign in failed, try again" });
+    }
+  }
+  const target = resolveReturnUrl(typeof req.query.return === "string" ? req.query.return : undefined, baseUrl());
+  if (!target) return res.status(400).json({ error: "Return URL not allowed" });
+  try {
+    return res.redirect(await beginAuthorization(target));
+  } catch {
+    return res.status(503).json({ error: "Lakeside sign in is unavailable" });
+  }
+}
+
 lakesideRouter.get("/api/lakeside/login", async (req, res) => {
+  if (lakesideSigninEnabled()) return oidcLogin(req, res);
   const target = resolveReturnUrl(typeof req.query.return === "string" ? req.query.return : undefined, baseUrl());
   if (!target) return res.status(400).json({ error: "Return URL not allowed" });
 
@@ -92,6 +120,16 @@ lakesideRouter.get("/api/lakeside/login", async (req, res) => {
 lakesideRouter.post("/api/lakeside/exchange", async (req, res) => {
   const { code } = req.body ?? {};
   if (typeof code !== "string" || !code) return res.status(400).json({ error: "Code required" });
+  if (lakesideSigninEnabled()) {
+    const oidcUser = redeemLoginCode(code);
+    if (oidcUser) {
+      return res.json({
+        token: signToken({ userId: oidcUser.id, username: oidcUser.username }),
+        user: { id: oidcUser.id, username: oidcUser.username, email: oidcUser.email, ahdLinked: !!oidcUser.ahd_user_id },
+        unlocked: await unlockedForUserWithPlatform(oidcUser.id),
+      });
+    }
+  }
   const identity = redeemHandoffCode(code);
   if (!identity) return res.status(401).json({ error: "Sign in link expired, try again" });
   let user;

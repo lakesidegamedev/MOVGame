@@ -79,13 +79,17 @@ export interface Identity {
 interface CacheEntry { at: number; purchases: PlatformPurchase[] }
 const cache = new Map<string, CacheEntry>();
 
-/** Look up the local user's Lakeside identity (ahd_user_id + email). */
+/**
+ * Look up the local user's Lakeside identity. The AHD id when linked; for a
+ * Lakeside-only user (no AHD id) the Lakeside subject is passed in the same
+ * slot, so the accounts entitlement API must accept a subject there.
+ */
 export function identityForUser(userId: string): Identity | null {
-  const row = getDb().prepare("SELECT email, ahd_user_id FROM users WHERE id = ?").get(userId) as
-    | { email: string; ahd_user_id: string | null }
+  const row = getDb().prepare("SELECT email, ahd_user_id, lakeside_sub FROM users WHERE id = ?").get(userId) as
+    | { email: string; ahd_user_id: string | null; lakeside_sub: string | null }
     | undefined;
   if (!row) return null;
-  return { ahdUserId: row.ahd_user_id, email: row.email };
+  return { ahdUserId: row.ahd_user_id ?? row.lakeside_sub, email: row.email };
 }
 
 function cacheKey(identity: Identity): string {
