@@ -7,20 +7,9 @@
 // `plugin:opener|open_url` command (see apps/native/src-tauri). In a plain
 // browser the same call is a new tab.
 
-interface TauriInternals {
-  invoke: (command: string, args?: Record<string, unknown>) => Promise<unknown>;
-}
+import { tauriInternals } from "./desktopShell";
 
-function tauriInternals(): TauriInternals | null {
-  if (typeof window === "undefined") return null;
-  const internals = (window as unknown as { __TAURI_INTERNALS__?: TauriInternals }).__TAURI_INTERNALS__;
-  return internals && typeof internals.invoke === "function" ? internals : null;
-}
-
-/** True inside the packaged desktop shell. */
-export function inDesktopShell(): boolean {
-  return tauriInternals() !== null;
-}
+export { inDesktopShell } from "./desktopShell";
 
 /**
  * Open `url` outside the game window. Resolves true when the browser was asked
