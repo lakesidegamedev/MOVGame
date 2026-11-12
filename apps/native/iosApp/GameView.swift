@@ -81,7 +81,7 @@ struct GameView: View {
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("CAMPAIGN DESK").font(.caption2.bold()).tracking(1.5).foregroundStyle(CampaignStyle.gold)
-                            Text(g.campaignLabel()).font(.headline.bold()).lineLimit(1).minimumScaleFactor(0.8)
+                            Text(g.campaignLabel()).font(.headline.bold()).lineLimit(2).minimumScaleFactor(0.8)
                         }
                         Spacer(minLength: 4)
                         Button(action: onAsk) {
@@ -103,7 +103,7 @@ struct GameView: View {
                             }
                             Spacer()
                             VStack(spacing: 1) {
-                                Text("TOSS-UP EV").font(.caption2.bold()).foregroundStyle(CampaignStyle.gold)
+                                Text("TOSS-UP EV").font(.caption2.bold()).lineLimit(1).minimumScaleFactor(0.6).foregroundStyle(CampaignStyle.gold)
                                 Text("\(proj.tossup)").font(.title.bold()).foregroundStyle(CampaignStyle.gold)
                             }
                             Spacer()
@@ -124,7 +124,7 @@ struct GameView: View {
                                 .position(x: geometry.size.width * CGFloat(g.evMajority()) / CGFloat(g.evTotal()), y: 6)
                         }
                         .frame(height: 12)
-                        Text("\(g.evMajority()) TO WIN").font(.caption2.bold()).foregroundStyle(CampaignStyle.muted)
+                        Text("\(g.evMajority()) OF \(g.evTotal()) TO WIN").font(.caption2.bold()).foregroundStyle(CampaignStyle.muted)
                             .frame(maxWidth: .infinity)
                         HStack(spacing: 8) {
                             headerStat("WEEK", "\(Int(g.turn()) + 1)/\(Int(g.totalTurns()))")
@@ -314,7 +314,7 @@ struct GameView: View {
     private func headerStat(_ label: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(label).font(.system(size: 9, weight: .bold)).foregroundStyle(CampaignStyle.muted)
-            Text(value).font(.subheadline.bold()).minimumScaleFactor(0.75).lineLimit(1)
+            Text(value).font(.subheadline.bold()).minimumScaleFactor(0.5).lineLimit(1)
         }
     }
 

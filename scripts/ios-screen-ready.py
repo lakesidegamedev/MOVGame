@@ -60,8 +60,10 @@ def screen_coverage(path: pathlib.Path):
                 raise ValueError(f'unsupported PNG filter {filter_type}')
         # Probes are already resized to 320 pixels. Sampling them again can
         # miss small party markers near the left edge of multiparty standings.
+        # Keep the side margin thin: on an iPad the standings markers sit about
+        # 35 points in, inside a 1/16 margin of an 820 point wide screen.
         if height // 6 <= y < height * 5 // 6:
-            for x in range(width // 16, width * 15 // 16):
+            for x in range(width // 64, width * 63 // 64):
                 i = x * channels
                 red, green, blue = row[i:i + 3]
                 samples += 1

@@ -17,6 +17,12 @@ data class NativeElection(
 )
 
 data class NativeCountry(val id: String, val name: String, val flag: String)
+/**
+ * Where a regional party (CountryBundle.regional) stands in one election and
+ * what that caps it at (web regionalReach): the regions it contests, the seats
+ * in them, the chamber total and its real seat result.
+ */
+data class NativeRegionalReach(val regionNames: List<String>, val units: Int, val total: Int, val historical: Int)
 data class NativeParty(val id: String, val name: String, val leader: String, val color: String,
                        val charisma: Double, val energy: Double, val competence: Double, val machine: Double)
 data class NativeIssue(val id: String, val name: String, val blurb: String, val salience: Double)
@@ -82,6 +88,35 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
         fun countries(): List<NativeCountry> = NativeCatalog.countries()
 
         fun elections(countryId: String): List<NativeElection> = nativeElections.filter { it.country == countryId }
+
+        /** Read-only: the win line for an election before it starts (matches [goalLine] in play). */
+        fun goalLine(countryId: String, electionId: String): String? {
+            if (countryId == "UK") return majorityForElection(electionId).let { "${it.threshold} of ${it.total} seats to win outright" }
+            val c = COUNTRIES[countryId] ?: return null
+            if (c.plurality) return "Most ${c.unitNamePlural} wins: finish ahead of every rival"
+            val m = c.elections[electionId]?.majority?.let { MajorityRule(total = it.total, threshold = it.threshold) } ?: c.system.majority
+            return "${m.threshold} of ${m.total} ${c.unitNamePlural} to win outright"
+        }
+
+        /** Read-only: the regional-party cap for [partyId], or null for a national party. */
+        fun regionalReach(countryId: String, electionId: String, partyId: String): NativeRegionalReach? {
+            val c = COUNTRIES[countryId] ?: return null
+            if (partyId !in c.regional) return null
+            val election = c.elections[electionId] ?: return null
+            val names = mutableListOf<String>()
+            var units = 0
+            var historical = 0
+            for (meta in c.regions) {
+                val r = election.regions[meta.id] ?: continue
+                historical += r.s[partyId] ?: 0
+                if ((r.v[partyId] ?: 0.0) <= 0.0 && (r.s[partyId] ?: 0) <= 0) continue
+                names += meta.name
+                units += r.s.values.sum()
+            }
+            if (names.isEmpty()) return null
+            val total = election.majority?.total ?: c.system.majority.total
+            return NativeRegionalReach(names, units, total, historical)
+        }
 
         fun parties(countryId: String, electionId: String): List<NativeParty> {
             if (countryId == "UK") {
@@ -185,6 +220,8 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
     fun totalUnits(): Int = uk?.let { majorityForUk(it).total } ?: majorityFor(country!!, bundle()!!).total
     // Single-round plurality country (Mexico): most units wins, no majority line.
     fun isPlurality(): Boolean = bundle()?.plurality == true
+    /** The player's regional-party cap, or null when the player leads a national party. */
+    fun regionalReach(): NativeRegionalReach? = if (uk != null || isCustom()) null else regionalReach(countryId(), electionId(), playerParty())
     // One-line goal under the seat bar.
     fun goalLine(): String = if (isPlurality()) "Most ${unitName()} wins: finish ahead of every rival"
         else "${majority()} of ${totalUnits()} ${unitName()} to win outright"

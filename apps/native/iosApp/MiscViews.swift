@@ -3,76 +3,179 @@ import Security
 import CryptoKit
 import shared
 
+/// Why a pack counts as owned, in the player's words, or nil when it does not.
+func nativeOwnershipReason(packId: String, owned: Set<String>) -> String? {
+    let list = Array(owned)
+    if owned.contains(packId) { return "On your Lakeside account" }
+    if packId != "complete" && owned.contains("complete") && NativeAccess.shared.covers(packId: packId, ownedPacks: ["complete"]) { return "Included in the Complete Collection" }
+    if packId != "global" && owned.contains("global") && NativeAccess.shared.covers(packId: packId, ownedPacks: ["global"]) { return "Included in your Global Elections Pack" }
+    if NativeAccess.shared.covers(packId: packId, ownedPacks: list) { return "Covered by the packs you own" }
+    return nil
+}
+
+/// Every pack in the catalog bundle, Complete Collection first. Prices come
+/// from the App Store product when one exists; a pack without a purchasable
+/// product says "Coming soon" and has no Buy button. Presentation only:
+/// buying, receipts and entitlements stay in StoreKitAdapter and the wallet.
 struct StoreView: View {
     @ObservedObject var session: GameSession
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var store: StoreKitAdapter
     @State private var showingAccount = false
+    @State private var expanded: String?
     init(session: GameSession) { self.session = session; self.store = session.store }
 
+    private let countries = MobileCampaign.companion.countries()
+    private var elections: [NativeElection] { countries.flatMap { MobileCampaign.companion.elections(countryId: $0.id) } }
+
     var body: some View {
+        let all = elections
+        let byScenario = Dictionary(all.map { ($0.scenarioId, $0) }, uniquingKeysWith: { first, _ in first })
+        let packs = NativeCatalog.shared.packs()
+        let linked = session.account.user?.ahdLinked == true
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text("Country bundles").font(.title2.bold())
-                Text("Every election is playable in the beta. Paid bundles are not on sale yet.")
-                    .font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                Text("Election packs").font(.title2.bold())
+                (Text("\(countries.count) countries and \(all.count) elections. ").foregroundColor(CampaignStyle.muted)
+                    + Text("\(all.filter { $0.free }.count) elections, one in every country, are free for everyone.").foregroundColor(CampaignStyle.gold))
+                    .font(.subheadline).fixedSize(horizontal: false, vertical: true)
+                if !store.gating {
+                    Text("Packs are not on sale in the app yet, so every election is open to play.")
+                        .font(.caption).foregroundStyle(CampaignStyle.muted)
+                }
                 if let notice = store.notice {
-                    Text(notice).font(.caption).foregroundStyle(CampaignStyle.muted)
+                    Text(notice).font(.caption).foregroundStyle(CampaignStyle.gold)
                 }
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("INCLUDED NOW").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
-                    includedRow("US 2024, US 2020 and the daily challenge")
-                    includedRow("All six countries while the beta catalog is free")
-                    includedRow("No purchase required today")
-                }
-                .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-                .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
-                Button(action: browse) {
-                    Text("Browse all elections").font(.headline).frame(maxWidth: .infinity).padding(16)
-                }
-                .buttonStyle(.plain).foregroundStyle(CampaignStyle.background)
-                .background(CampaignStyle.coral, in: RoundedRectangle(cornerRadius: 14))
-                if session.account.user?.ahdLinked != true {
-                    Text("Sign in with Lakeside Games to keep any future bundles with your account across web, iOS and Android.")
-                        .font(.caption).foregroundStyle(CampaignStyle.muted)
-                    Button("Sign in with Lakeside Games") { showingAccount = true }
-                        .buttonStyle(.bordered)
-                } else if store.products.isEmpty {
-                    Text(store.gating ? "Loading bundles…" : "Bundles are not on sale in the app yet. Every election is playable.")
-                        .font(.caption).foregroundStyle(CampaignStyle.muted)
-                }
-                ForEach(store.products) { product in
-                    let owned = NativeAccess.shared.covers(packId: product.packId, ownedPacks: Array(store.owned))
-                    HStack {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(product.title).font(.headline)
-                            Text(owned ? "Owned" : product.price).font(.caption).foregroundStyle(CampaignStyle.muted)
-                        }
-                        Spacer()
-                        if !owned {
-                            Button("Buy") { Task { await store.purchase(packId: product.packId) } }
-                                .buttonStyle(.borderedProminent)
-                        }
+                if !linked {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(store.gating ? "Sign in to buy" : "Sign in to use your packs").font(.headline)
+                        Text("Packs belong to your Lakeside account, so they work on the web, iPhone and Android.")
+                            .font(.subheadline).foregroundStyle(CampaignStyle.muted).fixedSize(horizontal: false, vertical: true)
+                        Button("Sign in with Lakeside Games") { showingAccount = true }
+                            .buttonStyle(.bordered).tint(CampaignStyle.gold)
                     }
-                    .padding(14)
+                    .padding(16).frame(maxWidth: .infinity, alignment: .leading)
                     .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
                 }
-                if session.account.user?.ahdLinked == true {
+                if let complete = packs.first(where: { $0.id == "complete" }) {
+                    let list = complete.scenarios.compactMap { byScenario[$0] }
+                    packCard(complete, flag: nil, featured: true, linked: linked,
+                             summary: "Every paid election: \(complete.scenarios.count) elections across \(Set(list.map { $0.country }).count) countries.",
+                             elections: list)
+                }
+                let countryPacks = packs.filter { $0.id != "complete" && !$0.legacy }
+                Text("COUNTRY PACKS · \(countryPacks.count)").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+                    .padding(.top, 4)
+                ForEach(countryPacks, id: \.id) { pack in
+                    let country = countries.first { NativeCatalog.shared.country(id: $0.id)?.packId == pack.id }
+                    let list = country.map { MobileCampaign.companion.elections(countryId: $0.id) } ?? pack.scenarios.compactMap { byScenario[$0] }
+                    let years = list.map { Int($0.year) }
+                    let free = list.filter { $0.free }.count
+                    packCard(pack, flag: country?.flag, featured: false, linked: linked,
+                             summary: "\(pack.scenarios.count) elections, \(String(years.min() ?? 0)) to \(String(years.max() ?? 0))" + (free > 0 ? ". Plus \(free) free to everyone" : ""),
+                             elections: list)
+                }
+                let legacy = packs.filter { $0.legacy && nativeOwnershipReason(packId: $0.id, owned: store.owned) != nil }
+                if !legacy.isEmpty {
+                    Text("RETIRED PACKS YOU OWN").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+                    ForEach(legacy, id: \.id) { pack in
+                        packCard(pack, flag: nil, featured: false, linked: linked,
+                                 summary: "\(pack.scenarios.count) elections. No longer sold; it stays on your account.",
+                                 elections: pack.scenarios.compactMap { byScenario[$0] })
+                    }
+                }
+                Button(action: browse) {
+                    Text("Browse the campaign library").font(.headline).frame(maxWidth: .infinity).padding(14)
+                }
+                .buttonStyle(.plain).foregroundStyle(.white)
+                .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
+                if linked {
                     Button("Restore purchases") { Task { await store.restore() } }
+                        .font(.subheadline.bold()).foregroundStyle(CampaignStyle.gold)
+                        .frame(maxWidth: .infinity, minHeight: 44)
                 }
             }
             .padding(20)
         }
         .background(CampaignStyle.background).preferredColorScheme(.dark)
-        .sheet(isPresented: $showingAccount) { NavigationStack { AccountView(session: session) } }
+        .sheet(isPresented: $showingAccount) {
+            NavigationStack {
+                AccountView(session: session)
+                    .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showingAccount = false } } }
+            }
+        }
         .onAppear { store.refresh() }
     }
 
-    private func includedRow(_ text: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Image(systemName: "checkmark.circle.fill").foregroundStyle(CampaignStyle.gold)
-            Text(text).font(.subheadline).foregroundStyle(.white)
+    private func packCard(_ pack: CatalogPack, flag: String?, featured: Bool, linked: Bool, summary: String, elections: [NativeElection]) -> some View {
+        let reason = nativeOwnershipReason(packId: pack.id, owned: store.owned)
+        let product = store.products.first { $0.packId == pack.id }
+        let open = expanded == pack.id
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    if featured { Text("BEST VALUE").font(.caption2.bold()).tracking(1).foregroundStyle(CampaignStyle.gold) }
+                    Text([flag, pack.name].compactMap { $0 }.joined(separator: " "))
+                        .font(featured ? .title3.bold() : .headline).fixedSize(horizontal: false, vertical: true)
+                    Text(summary).font(.caption).foregroundStyle(CampaignStyle.muted).fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 6)
+                if reason != nil { NativeBadge(text: "Owned", color: Color(red: 0.37, green: 0.80, blue: 0.55)) }
+                else if let product { Text(product.price).font(.headline).monospacedDigit() }
+                // Signed out, products are unknown: point at sign-in only while the
+                // App Store is actually selling packs.
+                else if !linked && store.gating { NativeBadge(text: "Sign in to buy", color: CampaignStyle.muted) }
+                else { NativeBadge(text: "Coming soon", color: CampaignStyle.gold) }
+            }
+            if let reason {
+                Label(reason, systemImage: "checkmark.circle.fill").font(.caption.bold())
+                    .foregroundStyle(Color(red: 0.37, green: 0.80, blue: 0.55))
+            } else if let product {
+                Button { Task { await store.purchase(packId: pack.id) } } label: {
+                    Text("Buy \(pack.name) · \(product.price)").font(.subheadline.bold())
+                        .multilineTextAlignment(.center).frame(maxWidth: .infinity).padding(12)
+                }
+                .buttonStyle(.plain).foregroundStyle(CampaignStyle.background)
+                .background(CampaignStyle.coral, in: RoundedRectangle(cornerRadius: 12))
+            }
+            Button { expanded = open ? nil : pack.id } label: {
+                HStack {
+                    Text(open ? "Hide elections" : "Show \(elections.count) elections").font(.subheadline.bold())
+                    Image(systemName: open ? "chevron.up" : "chevron.down").font(.caption.bold())
+                }
+                .foregroundStyle(CampaignStyle.muted).frame(minHeight: 32)
+            }
+            .buttonStyle(.plain)
+            if open {
+                VStack(spacing: 0) {
+                    ForEach(elections, id: \.scenarioId) { election in
+                        Button { play(election) } label: {
+                            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                                Text("\(election.flag) \(String(election.year))").font(.subheadline).monospacedDigit()
+                                    .foregroundStyle(CampaignStyle.muted)
+                                Text(nativeElectionTitle(election.label)).font(.subheadline).foregroundStyle(.white)
+                                    .multilineTextAlignment(.leading)
+                                Spacer(minLength: 4)
+                                if election.free { NativeBadge(text: "Free", color: Color(red: 0.37, green: 0.80, blue: 0.55)) }
+                            }
+                            .frame(minHeight: 40).contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Opens the election in the library")
+                    }
+                }
+            }
         }
+        .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+        .background(featured ? Color(red: 26/255, green: 38/255, blue: 52/255) : CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(featured && reason == nil ? CampaignStyle.gold.opacity(0.7) : .clear, lineWidth: 1.5))
+    }
+
+    private func play(_ election: NativeElection) {
+        session.dailySetup = nil
+        session.libraryRequest = LibraryPick(countryId: election.country, electionId: election.nativeId)
+        session.playScreen = .library
+        dismiss()
     }
 
     private func browse() {

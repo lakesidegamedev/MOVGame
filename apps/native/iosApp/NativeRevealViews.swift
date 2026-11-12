@@ -35,10 +35,9 @@ struct NativeElectionNightView: View {
                 Text("\(board.calledUnits) of \(data.totalUnits) called · \(data.goalLabel()) · \(board.remaining) remaining")
                     .font(.caption).foregroundStyle(CampaignStyle.muted)
                 RevealMapView(map: night.map(), called: board.called)
-                HStack(spacing: 14) {
-                    legendDot("Harris", color: CampaignStyle.democrat)
-                    legendDot("Trump", color: CampaignStyle.republican)
-                    legendDot("Uncalled", color: Color(hex: "#283649"))
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 14) { legend(board.rows) }
+                    VStack(alignment: .leading, spacing: 6) { legend(board.rows) }
                 }
                 .font(.caption)
                 if let last = board.lastCall { Text(last).font(.headline) }
@@ -61,6 +60,12 @@ struct NativeElectionNightView: View {
             }
         }
         .interactiveDismissDisabled()
+    }
+
+    @ViewBuilder
+    private func legend(_ rows: [NativeRevealTally]) -> some View {
+        ForEach(Array(rows.prefix(5)), id: \.id) { row in legendDot(row.name, color: Color(hex: row.color)) }
+        legendDot("Uncalled", color: Color(hex: "#283649"))
     }
 
     private func legendDot(_ label: String, color: Color) -> some View {
