@@ -107,6 +107,7 @@ jobs:
           cp "$nsis/Margin of Victory Preview_${version}_x64-setup.exe" ../../lifecycle/preview-setup.exe
           ls -la ../../lifecycle
       - name: Install, upgrade, play, buy, uninstall
+        timeout-minutes: 30
         if: ${{ !cancelled() && env.LIFECYCLE == 'true' }}
         shell: pwsh
         run: ./apps/native/scripts/smoke-windows-lifecycle.ps1 -OldSetup lifecycle/old-setup.exe -NewSetup lifecycle/new-setup.exe -PreviewSetup lifecycle/preview-setup.exe -Out smoke
@@ -163,6 +164,7 @@ jobs:
           path: out/*
           if-no-files-found: error
       - name: Smoke test (AppImage and .deb under xvfb)
+        timeout-minutes: 15
         env:
           WEBKIT_DISABLE_DMABUF_RENDERER: '1'
           WEBKIT_DISABLE_COMPOSITING_MODE: '1'
@@ -203,6 +205,14 @@ jobs:
           mkdir -p out
           app=$(ls -d apps/native/src-tauri/target/release/bundle/macos/*.app | head -n1)
           name=$(basename "$app" .app)
+          # Tauri leaves only the linker's ad-hoc signature on the binary, which
+          # Gatekeeper rejects for a downloaded copy ("code has no resources but
+          # signature indicates they must be present"). Seal the whole bundle
+          # ad hoc so testers get the normal "Open Anyway" path. A Developer ID
+          # signature replaces this once there is one.
+          ditto "$app" "$RUNNER_TEMP/unsealed/$name.app"
+          codesign --force --deep --sign - "$app"
+          codesign --verify --deep --strict --verbose=2 "$app"
           ditto -c -k --keepParent "$app" "out/${name}-${CHANNEL}-macos-unsigned.zip"
           hdiutil create -volname "$name" -srcfolder "$app" -ov -format UDZO "out/${name}-${CHANNEL}-macos-unsigned.dmg"
           ls -la out
@@ -212,7 +222,10 @@ jobs:
           path: out/*
           if-no-files-found: error
       - name: Smoke test (open the .app)
-        run: bash apps/native/scripts/smoke-macos.sh "$(ls -d apps/native/src-tauri/target/release/bundle/macos/*.app | head -n1)" smoke
+        timeout-minutes: 10
+        run: |
+          app=$(ls -d apps/native/src-tauri/target/release/bundle/macos/*.app | head -n1)
+          bash apps/native/scripts/smoke-macos.sh "$app" smoke "$RUNNER_TEMP/unsealed/$(basename "$app")"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # macOS desktop smoke test on a CI runner.
 #
-#   smoke-macos.sh <path to .app> <output dir>
+#   smoke-macos.sh <path to .app> <output dir> [unsealed copy of the .app]
 #
 # 1. Records the app's signature and what Gatekeeper says about it.
 # 2. Opens the .app as built (no quarantine flag, like a local build), waits
 #    for its process and an on-screen window, and screenshots the screen.
 # 3. Copies the app, marks the copy as downloaded from the internet (the
 #    quarantine flag a browser sets), asks Gatekeeper again, opens it, and
-#    screenshots what a tester would see.
+#    screenshots what a tester would see. With a third argument, does the same
+#    for the app as Tauri left it, before the workflow sealed it, for comparison.
 # Writes <output dir>/macos-smoke.txt; exits non-zero if step 2 fails.
 set -u
 app=$(cd "$(dirname "$1")" && pwd)/$(basename "$1"); out=$2; mkdir -p "$out"; out=$(cd "$out" && pwd)
@@ -50,18 +51,30 @@ check "app opens with a window" "$([ $alive = 1 ] && [ -n "$wins" ] && echo 1 ||
 [ -n "$pid" ] && kill "$pid" 2>/dev/null
 sleep 2
 
-# What a tester gets after downloading the unsigned build.
-q="$out/quarantined/$(basename "$app")"
-mkdir -p "$out/quarantined"; ditto "$app" "$q"
-xattr -w com.apple.quarantine "0083;$(printf %x "$(date +%s)");Safari;" "$q"
-note "Gatekeeper on a downloaded copy: $(spctl -a -t exec -vv "$q" 2>&1 | tr '\n' ' ')"
-open -n "$q" 2> "$out/open-quarantined.log"
-sleep 10
-screencapture -x "$out/macos-quarantined.png"
-qpid=$(pgrep -f "$q/Contents/MacOS/" | head -n1)
-note "downloaded copy running after open: $([ -n "$qpid" ] && echo "yes (pid $qpid)" || echo no); open said: $(tr '\n' ' ' < "$out/open-quarantined.log")"
-[ -n "$qpid" ] && kill "$qpid" 2>/dev/null
-rm -rf "$out/quarantined" "$out/windows"
+# What a tester gets after downloading the unsigned build. `open` waits while
+# Gatekeeper's prompt is up, so it runs in the background and is killed.
+try_downloaded() { # try_downloaded <label> <app>
+  local label=$1 src=$2 q
+  q="$out/quarantined-$label/$(basename "$src")"
+  mkdir -p "$(dirname "$q")"; ditto "$src" "$q"
+  xattr -w com.apple.quarantine "0083;$(printf %x "$(date +%s)");Safari;" "$q"
+  note "$label: Gatekeeper on a downloaded copy: $(spctl -a -t exec -vv "$q" 2>&1 | tr '\n' ' ')"
+  open -n "$q" > "$out/open-$label.log" 2>&1 &
+  local opener=$!
+  sleep 12
+  screencapture -x "$out/macos-downloaded-$label.png"
+  local qpid; qpid=$(pgrep -f "$q/Contents/MacOS/" | head -n1)
+  note "$label: downloaded copy running after open: $([ -n "$qpid" ] && echo "yes (pid $qpid)" || echo no)"
+  [ -n "$qpid" ] && kill "$qpid" 2>/dev/null
+  kill "$opener" 2>/dev/null
+  killall CoreServicesUIAgent 2>/dev/null   # dismisses the Gatekeeper prompt
+  sleep 2
+  note "$label: open said: $(tr '\n' ' ' < "$out/open-$label.log")"
+  rm -rf "$(dirname "$q")"
+}
+try_downloaded sealed "$app"
+[ $# -ge 3 ] && [ -d "$3" ] && try_downloaded unsealed "$3"
+rm -f "$out/windows"
 
 echo "macos smoke failures: $fails" | tee -a "$report"
 exit $(( fails > 0 ))
