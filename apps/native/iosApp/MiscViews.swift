@@ -47,7 +47,7 @@ struct StoreView: View {
                 }
                 if !linked {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Sign in to buy").font(.headline)
+                        Text(store.gating ? "Sign in to buy" : "Sign in to use your packs").font(.headline)
                         Text("Packs belong to your Lakeside account, so they work on the web, iPhone and Android.")
                             .font(.subheadline).foregroundStyle(CampaignStyle.muted).fixedSize(horizontal: false, vertical: true)
                         Button("Sign in with Lakeside Games") { showingAccount = true }
@@ -121,7 +121,9 @@ struct StoreView: View {
                 Spacer(minLength: 6)
                 if reason != nil { NativeBadge(text: "Owned", color: Color(red: 0.37, green: 0.80, blue: 0.55)) }
                 else if let product { Text(product.price).font(.headline).monospacedDigit() }
-                else if !linked { NativeBadge(text: "Sign in to buy", color: CampaignStyle.muted) }
+                // Signed out, products are unknown: point at sign-in only while the
+                // App Store is actually selling packs.
+                else if !linked && store.gating { NativeBadge(text: "Sign in to buy", color: CampaignStyle.muted) }
                 else { NativeBadge(text: "Coming soon", color: CampaignStyle.gold) }
             }
             if let reason {

@@ -289,7 +289,7 @@ struct SetupView: View {
                     Picker("Difficulty", selection: $difficulty) {
                         ForEach(session.difficulties(), id: \.self) { Text($0.capitalized).tag($0) }
                     }.pickerStyle(.segmented)
-                    Text(difficulty == "easy" ? "More cash and a softer opponent." : difficulty == "hard" ? "Fewer resources and a tougher opponent." : "Balanced resources and opposition.")
+                    Text(nativeDifficultyBlurb(difficulty))
                         .font(.caption).foregroundStyle(CampaignStyle.muted)
                     Picker("Events", selection: $eventMode) {
                         Text("Historical").tag("historical")

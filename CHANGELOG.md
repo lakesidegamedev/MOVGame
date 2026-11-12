@@ -159,7 +159,7 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   third a quarter, and so on.
 - iPhone and iPad: the campaign library lists all 14 countries and 121 elections by country, with
   search, Free and Owned filters, challenge and era filters, and a briefing for each election that
-  says how it is won before you pick a side. India's ten sides, Spain's regional parties and every
+  says how it is won before you pick a side. India's nine sides, Spain's regional parties and every
   other party list fit on a small phone and with large text.
 - iPhone and iPad: the store lists every pack from the catalog with the Complete Collection first,
   says what you own and why, marks each country's free elections, shows the App Store price when a
@@ -167,8 +167,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - iPhone and iPad: the rules read correctly for every election. Mexico says most points wins, the
   United States shows that year's electoral college (266 of 531 to win from 1932 to 1956) on setup,
   the desk and results, states that cast no electoral votes have no tile, election night names the
-  real candidates and parties, and a regional party in Spain is told where it stands and is
-  measured against its real seat count.
+  real candidates and parties, and a regional party (Spain, Canada's Bloc, India's state parties)
+  is told where it stands and is measured against its real seat count.
+- iPhone and iPad: election setup describes the new difficulty ladder under the Easy, Normal and
+  Hard picker, for the United States and every other country.
 - Spain: the Catalan and Basque parties are now playable as regional parties in every election
   they stood in: ERC, CiU and its successors Democràcia i Llibertat and Junts, the PNV, and
   Amaiur and EH Bildu, each with its real lead candidate. They stand only in Catalonia or in the

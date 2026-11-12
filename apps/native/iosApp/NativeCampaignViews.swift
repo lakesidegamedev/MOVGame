@@ -81,6 +81,15 @@ func nativeElectionTitle(_ label: String) -> String {
 }
 
 /// Registry challenge rating colour: easy, medium, hard.
+/// One line per difficulty, the same ladder the web setup describes.
+func nativeDifficultyBlurb(_ difficulty: String) -> String {
+    switch difficulty {
+    case "easy": return "A head start sized to the race, a bigger war chest, and a sloppy opponent. Landslides are still a fight."
+    case "hard": return "The real map, a lighter campaign, a ruthless opponent. Close races need a near-perfect run."
+    default: return "The real map and a slightly stronger campaign than your rival's. Skill decides close races."
+    }
+}
+
 func nativeChallengeColor(_ difficulty: String) -> Color {
     difficulty == "easy" ? Color(red: 0.37, green: 0.80, blue: 0.55) : difficulty == "hard" ? CampaignStyle.coral : CampaignStyle.gold
 }
@@ -184,8 +193,9 @@ struct NativeCampaignLibrary: View {
                 if !dynamicTypeSize.isAccessibilitySize {
                     Text("Choose your election").font(.largeTitle.bold())
                 }
-                Text("\(catalog.count) countries · \(total) elections · \(freeCount) free")
-                    .font(.subheadline).foregroundStyle(CampaignStyle.muted)
+                (Text("\(catalog.count) countries · \(total) elections · ").foregroundColor(CampaignStyle.muted)
+                    + Text("\(freeCount) free").foregroundColor(CampaignStyle.gold))
+                    .font(.subheadline)
                 filters
                 if filtering || !dynamicTypeSize.isAccessibilitySize {
                     Text(filtering ? "\(shownCount) of \(total) elections match" : "Tap a country to see its elections")
@@ -474,6 +484,8 @@ struct NativeElectionBriefing: View {
                             ForEach(["easy", "normal", "hard"], id: \.self) { Text($0.capitalized).tag($0) }
                         }
                         .pickerStyle(.segmented)
+                        Text(nativeDifficultyBlurb(difficulty)).font(.caption).foregroundStyle(CampaignStyle.muted)
+                            .fixedSize(horizontal: false, vertical: true)
                         TextField("Campaign seed", text: $seed).textFieldStyle(.roundedBorder)
                             .textInputAutocapitalization(.never).autocorrectionDisabled()
                         Text("Use the same seed to replay the same campaign").font(.caption).foregroundStyle(CampaignStyle.muted)
