@@ -53,7 +53,7 @@
 .guide { max-width: 780px; }
 .guide-section { display: flex; flex-direction: column; gap: 14px; }
 .guide-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; }
-.guide-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.guide-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 2px 12px; margin-bottom: 8px; }
 .guide-meta { font-size: var(--fs-xs); color: var(--muted); }
 .guide-text { font-size: var(--fs-md); line-height: 1.5; color: var(--ink-300); margin: 0 0 8px; }
 .guide-when { font-size: var(--fs-sm); color: var(--muted); margin: 0; }

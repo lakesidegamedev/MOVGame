@@ -34,3 +34,15 @@ describe("player-facing facts", () => {
     expect(html).not.toMatch(/\b\d+ countries\b/);
   });
 });
+
+describe("guide voting systems", () => {
+  it("explains every voting system in the game once", async () => {
+    const { votingSystemsGuide, VOTING_SYSTEM_NOTES, regionalPartiesGuide } = await import("@content/guide");
+    const systems = votingSystemsGuide();
+    expect(systems).toHaveLength(VOTING_SYSTEM_COUNT);
+    for (const s of systems) expect(s.note, `note for ${s.key}`).not.toBe("");
+    expect(Object.keys(VOTING_SYSTEM_NOTES).sort()).toEqual(systems.map((s) => s.key).sort());
+    expect(systems.flatMap((s) => s.countries).length).toBe(COUNTRY_COUNT);
+    expect(regionalPartiesGuide().map((r) => r.code)).toEqual(expect.arrayContaining(["CA", "IN", "ES"]));
+  });
+});

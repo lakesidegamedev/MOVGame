@@ -688,4 +688,8 @@ export const AUSTRALIA_MODULE = countryModule(AUSTRALIA, {
       { id: "2025", blurb: "Continue the timeline: hold the middle" },
     ],
   },
+  guide: {
+    title: "Australia",
+    body: "Preferential voting in single-member seats, 148 in 1996 and 1998, 150 or 151 since. The game has no preference count: each state's seats follow its vote with preferences folded into the seat curve, so the Greens and One Nation matter mostly through where their votes flow. The Liberal and National parties play as one Coalition. A majority of the House governs alone; a hung parliament needs the crossbench.",
+  },
 });

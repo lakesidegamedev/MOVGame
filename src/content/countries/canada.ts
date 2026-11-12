@@ -739,4 +739,8 @@ export const CANADA_MODULE = countryModule(CANADA, {
       { id: "2025", blurb: "Continue the timeline: the tariff-war rematch" },
     ],
   },
+  guide: {
+    title: "Canada",
+    body: "First past the post in every riding, 282 seats in 1984 rising to 343 in 2025, grouped here into eleven regions with the three territories as one. Seats follow each region's vote along a curve that rewards the leader. Reform and the Canadian Alliance split the right with the Progressive Conservatives until the 2003 merger. The Bloc Québécois stands only in Quebec and plays as a regional party: it cannot win a majority, and the results measure it against its real seat count. Short of a majority, the largest party governs as a minority with case-by-case support.",
+  },
 });

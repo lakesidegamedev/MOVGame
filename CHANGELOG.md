@@ -13,6 +13,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Added
 
+- The guide has a Voting Systems tab: each of the game's ten systems explained once, with the
+  countries that use it, plus regional parties and the free elections. The app guide gains
+  entries for Canada, Australia, regional parties and free elections, and its parliamentary
+  entry no longer names only three countries.
 - Japan: the February 2026 House of Representatives election, Takaichi v. Noda. Lead the LDP,
   the new Centrist Reform Alliance of the Constitutional Democrats and Komeito, Ishin, the DPP,
   Sanseito, Team Mirai, the Communists, Reiwa or the Conservatives, with the real list votes and
