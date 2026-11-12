@@ -20,6 +20,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   already logged in to a game account that is not linked yet, the launcher sign in links that one
   instead.
 - The desktop app signs you in the same way when the Lakeside launcher starts it.
+- After you pay in your browser, the Windows desktop app unlocks the pack about 3 to 12 seconds
+  later, or straight away with "I've paid, check now". It does not yet check the moment you come
+  back to its window.
 
 ### Fixed
 
@@ -31,8 +34,6 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   of the app does not know yet, such as a country added in a later update. The unknown pack is
   ignored until you update.
 - Android now has a launcher icon.
-- On Windows, the desktop app checks for a purchase as soon as you come back to its window after
-  paying in your browser, instead of up to 12 seconds later.
 
 ## [2.0.0] - 2026-11-12
 
