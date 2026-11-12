@@ -1,6 +1,6 @@
 {
-  "webHead": "8d5f396faa7d965c78abc0e62e8daab13c4754c0",
-  "exportedAt": "2026-11-12T02:52:58.032Z",
+  "webHead": "400cd0441eed64529d45ebb80fc540a3b19dda08",
+  "exportedAt": "2026-11-12T03:55:10.496Z",
   "bundles": {
     "editor-defaults": {
       "bytes": 196599
@@ -9,7 +9,7 @@
       "bytes": 779
     },
     "scenario-registry": {
-      "bytes": 38405
+      "bytes": 38409
     },
     "next-campaigns": {
       "bytes": 16468
@@ -42,7 +42,7 @@
       "bytes": 69833
     },
     "countries/de": {
-      "bytes": 59321
+      "bytes": 59323
     },
     "countries/fr": {
       "bytes": 47790

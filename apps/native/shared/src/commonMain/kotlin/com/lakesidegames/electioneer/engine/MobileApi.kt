@@ -95,6 +95,8 @@ class MobileGame private constructor(
                         staff.salaryPerWeek, bonuses.joinToString(" · "))
         }
 
+        // Every issue axis under its fallback (2020) name. A running game's
+        // own list is the instance method liveIssues().
         fun issues(): List<Issue> = IssueId.entries.map { ISSUES.getValue(it.serial) }
 
         fun startConfiguredGame(
@@ -163,6 +165,9 @@ class MobileGame private constructor(
     fun previewPlayerEv(): Int = projectPlannedElection(game).ev.getValue(game.playerCandidate.serial)
 
     fun plannedActions(): List<PlannedActionRow> = plannedActionRows(game)
+
+    /** This election's issues, under the names voters used that year (in IssueId order). */
+    fun liveIssues(): List<Issue> = game.liveIssueIds().map { game.issues.getValue(it.serial) }
 
     fun playerIssuePosition(issueSerial: String): Double =
         game.candidates.getValue(game.playerCandidate.serial).issuePositions[issueSerial] ?: 0.0

@@ -84,7 +84,7 @@ export const DE_ELECTION_ISSUES: Record<string, CountryIssueDef[]> = {
     { id: "ukraine_security", name: "Bundeswehr abroad", blurb: "The July court ruling allowing Bundeswehr missions abroad, after Somalia and the Adriatic." },
   ],
   "1990": [
-    { id: "unity", name: "The cost of unity", blurb: "Unity came on October 3, and Kohl promises it without tax rises while Lafontaine warns of a huge bill." },
+    { id: "unity", name: "The cost of unity", blurb: "Unity came on October 3: Kohl promises to pay for it without tax rises, Lafontaine warns of a huge bill." },
     { id: "economy", name: "Jobs in the East", blurb: "Monetary union at one to one, the Treuhand and eastern factories closing as their markets vanish." },
     { id: "pensions", name: "Social union", blurb: "West German pensions and social insurance extended to the East in July, and who will pay for them." },
     { id: "housing", name: "Housing shortage", blurb: "West German cities short of homes as East Germans and ethnic German resettlers move west." },
