@@ -58,9 +58,12 @@ struct StoreView: View {
                     .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 14))
                 }
                 if let complete = packs.first(where: { $0.id == "complete" }) {
-                    let list = complete.scenarios.compactMap { byScenario[$0] }
+                    // The collection opens every election of every country it covers,
+                    // the free ones included: say the total and how many are already free.
+                    let covered = Set(complete.scenarios.compactMap { byScenario[$0]?.country })
+                    let list = all.filter { covered.contains($0.country) }.sorted { $0.year > $1.year }
                     packCard(complete, flag: nil, featured: true, linked: linked,
-                             summary: "Every paid election: \(complete.scenarios.count) elections across \(Set(list.map { $0.country }).count) countries.",
+                             summary: "Every election in the game: \(list.count) elections across \(covered.count) countries, \(list.filter { $0.free }.count) of them already free.",
                              elections: list)
                 }
                 let countryPacks = packs.filter { $0.id != "complete" && !$0.legacy }

@@ -89,6 +89,18 @@ describe("shared store proxy", () => {
     expect(empty.status).toBe(200);
     expect(empty.body.packIds).toEqual([]);
   });
+  it("passes the Complete Collection, every country pack and the retired Global pack through ownership", async () => {
+    const { PACKS } = await import("../../src/content/packs.ts");
+    const ids = PACKS.map((p) => p.id);
+    // 14 country packs, the Complete Collection and the retired Global pack.
+    expect(ids.length).toBe(16);
+    expect(ids).toEqual(expect.arrayContaining(["complete", "global", "new-zealand", "india", "japan", "brazil", "ireland", "spain", "italy", "mexico"]));
+    const a = user(true);
+    platformBody = { owner: a.owner, packIds: ids, verifiedAt: Date.now() };
+    const response = await call("/ownership", a.token);
+    expect(response.status).toBe(200);
+    expect([...(response.body.packIds as string[])].sort()).toEqual([...ids].sort());
+  });
   it("preserves claim conflicts and keeps upstream auth failures distinct from logout", async () => {
     const a = user(true); platformStatus = 409; platformBody = { error: "This purchase belongs to another Lakeside account." };
     expect((await call("/verify", a.token, { store: "apple", signedTransaction: "signed" })).status).toBe(409);

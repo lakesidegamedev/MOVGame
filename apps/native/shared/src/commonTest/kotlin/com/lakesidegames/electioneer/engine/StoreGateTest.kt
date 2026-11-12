@@ -145,4 +145,32 @@ class StoreGateTest {
         assertNull(allSellable.lock("uk", "1997", scenarios = setOf("uk-1997")))
         assertFalse(StoreGate.OPEN.gating)
     }
+
+    @Test fun allFourteenCountryPacksLockTheirOwnElectionsAndOnlyThose() {
+        assertEquals(14, countryPacks.size)
+        val paid = nativeElections.filter { !it.free }
+        for (e in paid) {
+            val pack = e.packId!!
+            assertEquals(pack, allSellable.lock(e.country, e.nativeId), e.scenarioId)
+            assertNull(allSellable.lock(e.country, e.nativeId, packs = setOf(pack)), "${e.scenarioId} owned")
+            assertNull(allSellable.lock(e.country, e.nativeId, packs = setOf("complete")), "${e.scenarioId} in Complete")
+            // Any other single country pack leaves it locked.
+            val other = countryPacks.first { it != pack }
+            assertEquals(pack, allSellable.lock(e.country, e.nativeId, packs = setOf(other)), "${e.scenarioId} with $other")
+        }
+        // The free election of every country never locks.
+        nativeElections.filter { it.free }.forEach { assertNull(allSellable.lock(it.country, it.nativeId), it.scenarioId) }
+    }
+
+    @Test fun packsTheStoreDoesNotSellYetStayOpenWhileTheRestLock() {
+        // The launch window: the seven older packs are on sale, the eight 2.0 packs are not.
+        val older = setOf("us-historical", "uk-elections", "canada", "germany", "france", "australia", "complete")
+        val gate = StoreGate(true, older)
+        val paid = nativeElections.filter { !it.free }
+        assertTrue(paid.any { it.packId in older })
+        for (e in paid) {
+            if (e.packId in older) assertEquals(e.packId, gate.lock(e.country, e.nativeId), e.scenarioId)
+            else assertNull(gate.lock(e.country, e.nativeId), "${e.scenarioId} must stay open until ${e.packId} is on sale")
+        }
+    }
 }

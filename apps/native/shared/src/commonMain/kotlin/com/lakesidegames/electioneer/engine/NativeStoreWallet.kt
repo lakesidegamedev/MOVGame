@@ -15,17 +15,21 @@ class NativeStoreWallet private constructor(private var wallet: StoredWallet?) {
     companion object {
         fun restore(json: String?): NativeStoreWallet = NativeStoreWallet(json?.let {
             runCatching { EngineJson.decodeFromString<StoredWallet>(it) }.getOrNull()
-        }?.takeIf { it.version == 1 && it.owner.isNotBlank() && it.packIds.all { pack -> pack in NativeCatalog.packIds() } })
+        }?.takeIf { it.version == 1 && it.owner.isNotBlank() }?.let { it.copy(packIds = it.packIds.filter { pack -> pack in NativeCatalog.packIds() }) })
     }
     fun accept(responseJson: String, sessionKey: String, expectedOwner: String, nowMillis: Long): Boolean {
         val snapshot = runCatching { EngineJson.decodeFromString<StoreOwnership>(responseJson) }.getOrNull() ?: return false
         if (sessionKey.isBlank() || expectedOwner.isBlank() || snapshot.owner != expectedOwner ||
-            snapshot.packIds.any { it !in NativeCatalog.packIds() } || snapshot.verifiedAt <= 0 ||
+            snapshot.verifiedAt <= 0 ||
             snapshot.verifiedAt < nowMillis - 300_000 || snapshot.verifiedAt > nowMillis + 300_000) return false
         val previous = wallet?.takeIf { it.sessionKey == sessionKey && it.owner == expectedOwner }
         if (previous != null && snapshot.verifiedAt < previous.sourceAt) return false
+        // A newer server can report a pack this build does not ship (a country
+        // added after this release). It carries no rights here and must not
+        // discard what the player owns, so it is dropped, not rejected.
+        val known = snapshot.packIds.filter { it in NativeCatalog.packIds() }
         val packs = if (previous != null && snapshot.verifiedAt == previous.sourceAt)
-            snapshot.packIds.filter { it in previous.packIds } else snapshot.packIds
+            known.filter { it in previous.packIds } else known
         wallet = StoredWallet(sessionKey = sessionKey, owner = expectedOwner,
             packIds = packs.distinct().sorted(), confirmedAt = minOf(nowMillis, snapshot.verifiedAt), sourceAt = snapshot.verifiedAt)
         return true

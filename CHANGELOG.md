@@ -11,6 +11,15 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ## [Unreleased]
 
+### Fixed
+
+- The iPhone Store now describes the Complete Collection the way Android and the web do: every
+  election in the game, with how many are already free, instead of only the paid ones.
+- iPhone and Android keep everything you own when the Lakeside account holds a pack your version
+  of the app does not know yet, such as a country added in a later update. The unknown pack is
+  ignored until you update.
+- Android now has a launcher icon.
+
 ## [2.0.0] - 2026-11-12
 
 Margin of Victory 2.0 grows the game from six countries to fourteen, with 121 elections in all. It
