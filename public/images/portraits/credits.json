@@ -353,6 +353,16 @@
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
  },
  {
+  "name": "Bertie Ahern",
+  "file": "images/portraits/ie-bertie-ahern.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:BertieAhernBerlin2007-bis.jpg",
+  "title": "BertieAhernBerlin2007-bis.jpg",
+  "author": "ProhibitOnions at English Wikipedia",
+  "license": "CC BY 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+  "attribution": "ProhibitOnions at English Wikipedia"
+ },
+ {
   "name": "Bill Bradley",
   "file": "images/portraits/us-bill-bradley.webp",
   "source": "https://commons.wikimedia.org/wiki/File:Bill-Bradley-2020.jpg",
@@ -646,6 +656,15 @@
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0"
  },
  {
+  "name": "David Cunliffe",
+  "file": "images/portraits/nz-david-cunliffe.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:David_Cunliffe,_2008.jpg",
+  "title": "David Cunliffe, 2008.jpg",
+  "author": "New Zealand Labour Party",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0"
+ },
+ {
   "name": "David Seymour",
   "file": "images/portraits/nz-david-seymour.webp",
   "source": "https://commons.wikimedia.org/wiki/File:David_Seymour_at_Government_House,_Wellington.png",
@@ -686,6 +705,15 @@
   "author": "Roberto Stuckert Filho/Presidência da República",
   "license": "CC BY 3.0 br",
   "licenseUrl": "https://creativecommons.org/licenses/by/3.0/br/deed.en"
+ },
+ {
+  "name": "Don Brash",
+  "file": "images/portraits/nz-don-brash.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Don.Brash.jpg",
+  "title": "Don.Brash.jpg",
+  "author": "Moriori",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
  },
  {
   "name": "Donald Trump",
@@ -1257,6 +1285,15 @@
   "attribution": "Sandro Halank, Wikimedia Commons, CC BY-SA 4.0"
  },
  {
+  "name": "Helen Clark",
+  "file": "images/portraits/nz-helen-clark.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Helen_Clark_official_photo_(cropped).jpg",
+  "title": "Helen Clark official photo (cropped).jpg",
+  "author": "Global Commission on Drug Policy",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ {
   "name": "Helmut Kohl",
   "file": "images/portraits/de-helmut-kohl.webp",
   "source": "https://commons.wikimedia.org/wiki/File:Helmut_Kohl_(1996).jpg",
@@ -1465,6 +1502,15 @@
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
  },
  {
+  "name": "Jamie Whyte",
+  "file": "images/portraits/nz-jamie-whyte.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Jamie_Whyte_(crop).jpg",
+  "title": "Jamie Whyte (crop).jpg",
+  "author": "Mathmo",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+ },
+ {
   "name": "JD Vance",
   "file": "images/portraits/us-jd-vance.webp",
   "source": "https://commons.wikimedia.org/wiki/File:March_2026_Official_Vice_Presidential_Portrait_of_JD_Vance.jpg",
@@ -1659,6 +1705,16 @@
   "license": "Public domain"
  },
  {
+  "name": "John Key",
+  "file": "images/portraits/nz-john-key.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:John_Key_February_2015.jpg",
+  "title": "John Key February 2015.jpg",
+  "author": "US Embassy NZ",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "attribution": "New Zealand Department of the Prime Minister and the Cabinet"
+ },
+ {
   "name": "John Major",
   "file": "images/portraits/uk-john-major.webp",
   "source": "https://commons.wikimedia.org/wiki/File:Prime_Minister_John_Major_(cropped).jpg",
@@ -1832,6 +1888,16 @@
   "license": "Public domain"
  },
  {
+  "name": "Junichiro Koizumi",
+  "file": "images/portraits/jp-junichiro-koizumi.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Junichiro_Koizumi_20010426.jpg",
+  "title": "Junichiro Koizumi 20010426.jpg",
+  "author": "内閣官房内閣広報室",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "attribution": "首相官邸ホームページ"
+ },
+ {
   "name": "Justin Trudeau",
   "file": "images/portraits/ca-justin-trudeau.webp",
   "source": "https://commons.wikimedia.org/wiki/File:Justin_Trudeau_(2023).jpg",
@@ -1847,6 +1913,16 @@
   "title": "Kamala Harris Vice Presidential Portrait.jpg",
   "author": "Lawrence Jackson",
   "license": "Public domain"
+ },
+ {
+  "name": "Katsuya Okada",
+  "file": "images/portraits/jp-katsuya-okada.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Okada_Katsuya_Daijin_1.jpg",
+  "title": "Okada Katsuya Daijin 1.jpg",
+  "author": "内閣官房内閣広報室",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "attribution": "首相官邸ホームページ"
  },
  {
   "name": "Kazuo Shii",
@@ -1930,6 +2006,15 @@
   "title": "Lkadvani.jpg",
   "author": "US State Department",
   "license": "Public domain"
+ },
+ {
+  "name": "Laura Borràs",
+  "file": "images/portraits/es-laura-borras.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Laura_Borr%C3%A0s,_XIV_Premis_Gaud%C3%AD_(2022).jpg",
+  "title": "Laura Borràs, XIV Premis Gaudí (2022).jpg",
+  "author": "GuillemMedina",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
  },
  {
   "name": "Leanne Wood",
@@ -2411,6 +2496,15 @@
   "attribution": "© European Communities, 2005"
  },
  {
+  "name": "Pat Rabbitte",
+  "file": "images/portraits/ie-pat-rabbitte.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Pat_Rabbitte,_circa_2002.jpg",
+  "title": "Pat Rabbitte, circa 2002.jpg",
+  "author": "The Irish Labour Party",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0"
+ },
+ {
   "name": "Paul Keating",
   "file": "images/portraits/au-paul-keating.webp",
   "source": "https://commons.wikimedia.org/wiki/File:Paul_Keating_2017_01.jpg",
@@ -2499,6 +2593,14 @@
   "license": "CC BY 4.0",
   "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
   "attribution": "Department of Foreign Affairs and Trade website – www.dfat.gov.au"
+ },
+ {
+  "name": "Phil Goff",
+  "file": "images/portraits/nz-phil-goff.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Phil_Goff_July_2022_(cropped).jpg",
+  "title": "Phil Goff July 2022 (cropped).jpg",
+  "author": "US Embassy",
+  "license": "Public domain"
  },
  {
   "name": "Pier Ferdinando Casini",
@@ -2673,6 +2775,23 @@
   "author": "Houses of the Oireachtas from Ireland",
   "license": "CC BY 2.0",
   "licenseUrl": "https://creativecommons.org/licenses/by/2.0"
+ },
+ {
+  "name": "Rodney Hide",
+  "file": "images/portraits/nz-rodney-hide.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Rodney_Hide_at_parliament.JPG",
+  "title": "Rodney Hide at parliament.JPG",
+  "author": "The original uploader was Helenalex at English Wikipedia.",
+  "license": "Public domain"
+ },
+ {
+  "name": "Romano Prodi",
+  "file": "images/portraits/it-romano-prodi.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Romano_Prodi_-_Giornata_Autonomia_2014.JPG",
+  "title": "Romano Prodi - Giornata Autonomia 2014.JPG",
+  "author": "Niccolò Caranti",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
  },
  {
   "name": "Ronald Reagan",
@@ -2889,6 +3008,16 @@
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
  },
  {
+  "name": "Takenori Kanzaki",
+  "file": "images/portraits/jp-takenori-kanzaki.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Takenori_Kanzaki_20060926.jpg",
+  "title": "Takenori Kanzaki 20060926.jpg",
+  "author": "内閣広報室",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "attribution": "内閣官房内閣広報室"
+ },
+ {
   "name": "Taro Aso",
   "file": "images/portraits/jp-taro-aso.webp",
   "source": "https://commons.wikimedia.org/wiki/File:Tar%C5%8D_As%C5%8D_20100714.jpg",
@@ -2906,6 +3035,16 @@
   "author": "Noukei314",
   "license": "CC BY-SA 4.0",
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ {
+  "name": "Te Ururoa Flavell",
+  "file": "images/portraits/nz-te-ururoa-flavell.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Hon_Te_Ururoa_Flavell,_Te_Ritorito_2017_(further_crop_-_head).png",
+  "title": "Hon Te Ururoa Flavell, Te Ritorito 2017 (further crop - head).png",
+  "author": "Superu NZ",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "attribution": "Superu NZ"
  },
  {
   "name": "Ted Kennedy",
@@ -3058,6 +3197,15 @@
   "license": "CC BY 4.0",
   "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
   "attribution": "© European Union, 2010"
+ },
+ {
+  "name": "Trevor Sargent",
+  "file": "images/portraits/ie-trevor-sargent.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Trevor_Sargent.jpg",
+  "title": "Trevor Sargent.jpg",
+  "author": "Unknown author",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/"
  },
  {
   "name": "Val Demings",

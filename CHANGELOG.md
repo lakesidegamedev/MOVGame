@@ -18,6 +18,16 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   without a freely licensed photo show their initials, and parties without a logo keep their
   colour. Settings has a Credits section listing every photo and logo with its source, author and
   licence. The pictures add about 1.5 MB to each app.
+- Eight more elections from the past, in the packs of the countries they belong to: New Zealand
+  2008, 2011 and 2014 (Helen Clark's last campaign, then John Key's two wins and the Dirty
+  Politics election), Spain 2016 and November 2019 (the two repeat votes after months of failed
+  talks), Italy 2006 (the first vote under the Porcellum, decided by about 25,000 votes), Japan
+  2005 (Koizumi's postal privatisation election) and Ireland 2007 (Bertie Ahern's third term).
+  Each has its real results by region, the leaders of the day, the campaign's real story beats in
+  the week they happened and the issues of that campaign. Leaders have photos and parties have
+  logos where a free one exists. They sit after each country's existing elections, so nothing you
+  own or have saved moves, and they are paid like the rest of each pack. The Global pack is
+  unchanged.
 - Parties show their real logos, matched to the election you are playing when a party changed its
   logo over the years: on the setup cards, the standings and map legends, the results screen,
   election night and the electoral vote bar. Parties without a freely available logo keep their
