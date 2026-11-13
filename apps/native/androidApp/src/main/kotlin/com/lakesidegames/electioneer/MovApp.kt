@@ -4,8 +4,10 @@ import android.app.Application
 import com.lakesidegames.electioneer.BuildConfig
 import io.sentry.android.core.SentryAndroid
 
-// Phase 6 crash gate (#24): Sentry starts only when a DSN is baked in at
-// release time. Debug and pre-launch builds run with no reporter.
+// Crash reporting (#24): Sentry starts only when a DSN is baked in at build
+// time (MOV_SENTRY_DSN, the same setting the web and desktop builds use).
+// Environment and release match the other builds: "android" and
+// version+commit. No personal data is attached.
 class MovApp : Application() {
     override fun onCreate() {
         super.onCreate()
@@ -13,6 +15,9 @@ class MovApp : Application() {
         if (dsn.isNotBlank()) {
             SentryAndroid.init(this) { options ->
                 options.dsn = dsn
+                options.environment = "android"
+                options.release = "${BuildConfig.VERSION_NAME}+${BuildConfig.BUILD_COMMIT}"
+                options.isSendDefaultPii = false
             }
         }
     }

@@ -73,7 +73,9 @@ account linking in the browser, offline startup, and Steam.
 ## Channels
 
 The channel is selected by Vite mode, and each mode has a `.env.<mode>` file at
-the repository root that sets `VITE_DISTRIBUTION_CHANNEL`.
+the repository root that sets `VITE_DISTRIBUTION_CHANNEL`. The same files
+leave `VITE_SENTRY_DSN` empty; `desktop.yml` fills it from the
+`MOV_SENTRY_DSN` secret (see `docs/error-reporting.md`).
 
 | Channel | Build | Store | Scores | App identifier |
 | --- | --- | --- | --- | --- |

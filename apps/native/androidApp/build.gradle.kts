@@ -9,6 +9,9 @@ fun String.asBuildConfigString(): String = "\"" + replace("\\", "\\\\").replace(
 val sentryDsn = providers.gradleProperty("MOV_SENTRY_DSN")
     .orElse(providers.environmentVariable("MOV_SENTRY_DSN"))
     .orElse("")
+// Commit the build was made from, for crash report release names. CI sets
+// GITHUB_SHA; local builds report "unknown".
+val buildCommit = providers.environmentVariable("GITHUB_SHA").map { it.take(7) }.orElse("unknown")
 
 // Release signing comes only from the build environment (a CI secret or a
 // local shell), never from the repo. All four values must be present for the
@@ -39,8 +42,9 @@ android {
         // with the version and matches the code the Tauri Android shell derives.
         versionCode = versionCodeOverride ?: 2_000_000
         versionName = "2.0.0"
-        // Empty until the store and crash reporting are configured.
+        // Empty unless the build supplies MOV_SENTRY_DSN; then crash reports are on.
         buildConfigField("String", "SENTRY_DSN", sentryDsn.get().asBuildConfigString())
+        buildConfigField("String", "BUILD_COMMIT", buildCommit.get().asBuildConfigString())
     }
 
     signingConfigs {

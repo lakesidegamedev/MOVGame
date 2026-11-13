@@ -37,7 +37,8 @@ runs shared JVM tests and assembles the Compose debug APK at
 The Actions workflow also checks the packaged Android startup manifest and
 runs actual emulator screen, accessibility, keyboard and restart flows. Small
 phone and tablet captures use larger text. Crash reporting is initialized by
-`MovApp` only when a build supplies `MOV_SENTRY_DSN`; Sentry's automatic
+`MovApp` only when a build supplies `MOV_SENTRY_DSN` (the same secret the web
+and desktop builds use, see `docs/error-reporting.md`); Sentry's automatic
 provider initialization stays disabled so an unconfigured build can start.
 
 On this VPS, queue the full check through `lakeside-check-queue` per the host
