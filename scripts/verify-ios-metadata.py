@@ -16,4 +16,8 @@ if missing:
     raise SystemExit("Apple 90474: missing iPad multitasking orientations: " + ", ".join(sorted(missing)))
 if info.get("ITSAppUsesNonExemptEncryption") is not False:
     raise SystemExit("The app's standard platform-only encryption declaration is missing")
-print("iPad multitasking and encryption metadata verified")
+# Reserved Lakeside sign-in return (net.lakesidegames.mov:/auth/callback).
+schemes = {scheme for entry in info.get("CFBundleURLTypes", []) for scheme in entry.get("CFBundleURLSchemes", [])}
+if "net.lakesidegames.mov" not in schemes:
+    raise SystemExit("The net.lakesidegames.mov sign-in return scheme is not registered")
+print("iPad multitasking, encryption and sign-in return scheme metadata verified")

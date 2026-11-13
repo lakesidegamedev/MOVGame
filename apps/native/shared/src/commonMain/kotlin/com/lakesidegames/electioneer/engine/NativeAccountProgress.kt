@@ -70,6 +70,26 @@ class NativeLakesideLogin(private val nonce: String) {
     init { require(Regex("[a-zA-Z0-9_-]{32,128}").matches(nonce)) }
     private var consumed = false
 
+    companion object {
+        /** Shown in place of Google's page when a player picks Google inside the app. */
+        const val GOOGLE_UNAVAILABLE = "Google sign-in works only on the web: sign in at lakesidegames.net, " +
+            "or use Apple, Discord or A House Divided here."
+
+        /**
+         * Google refuses its sign-in inside embedded app browsers, so the apps stop
+         * at the first Google step: the sign-in page's own Google route, or
+         * Google's account page if anything links there directly.
+         */
+        fun isGoogleSignIn(host: String?, path: String?): Boolean {
+            val h = host?.lowercase() ?: return false
+            if (h == "accounts.google.com") return true
+            val p = path?.lowercase() ?: return false
+            return (h == "ahousedividedgame.com" || h.endsWith(".ahousedividedgame.com") ||
+                h == "lakesidegames.net" || h.endsWith(".lakesidegames.net")) &&
+                (p == "/api/auth/google" || p.startsWith("/api/auth/google/"))
+        }
+    }
+
     fun startUrl(): String = "https://sim.ahousedividedgame.com/api/lakeside/login?return=" +
         "https%3A%2F%2Fsim.ahousedividedgame.com%2Fnative-login%3Fstate%3D$nonce"
 
@@ -77,7 +97,7 @@ class NativeLakesideLogin(private val nonce: String) {
         (port == -1 || port == 443) && host?.lowercase() in setOf(
             "sim.ahousedividedgame.com", "auth.lakesidegames.net", "auth.ahousedividedgame.com",
             "ahousedividedgame.com", "www.ahousedividedgame.com", "sandbox.ahousedividedgame.com",
-            "accounts.lakesidegames.net", "discord.com", "accounts.google.com", "www.google.com",
+            "accounts.lakesidegames.net", "discord.com", "www.google.com",
             // Continue with Apple on the Lakeside page: Apple's sign-in page and its frame.
             "appleid.apple.com", "idmsa.apple.com")
 

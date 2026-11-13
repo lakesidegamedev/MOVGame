@@ -55,7 +55,7 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
         "ask.lakesidegames.net", "auth.lakesidegames.net", "auth.ahousedividedgame.com",
         "ahousedividedgame.com", "www.ahousedividedgame.com",
         "sandbox.ahousedividedgame.com", "accounts.lakesidegames.net",
-        "discord.com", "accounts.google.com", "www.google.com",
+        "discord.com", "www.google.com",
         "appleid.apple.com", "idmsa.apple.com",
     ]
 
@@ -119,6 +119,15 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
         DispatchQueue.main.asyncAfter(deadline: .now() + 25, execute: work)
     }
 
+    /// Stops on a sign-in step the app cannot complete and shows why, with Try again.
+    private func showSignInNotice(_ message: String) {
+        timeout?.cancel()
+        generation += 1
+        navigation = nil
+        webView.stopLoading()
+        phase = .failed(message)
+    }
+
     private func recover(_ message: String) {
         timeout?.cancel()
         generation += 1
@@ -158,7 +167,11 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
             return
         }
         #endif
-        if url.scheme == "https", let host = url.host?.lowercased(), allowedHosts.contains(host) {
+        if NativeLakesideLogin.companion.isGoogleSignIn(host: url.host, path: url.path) {
+            // Google blocks its sign-in inside an app's browser.
+            showSignInNotice(NativeLakesideLogin.companion.GOOGLE_UNAVAILABLE)
+            decisionHandler(.cancel)
+        } else if url.scheme == "https", let host = url.host?.lowercased(), allowedHosts.contains(host) {
             decisionHandler(.allow)
         } else {
             UIApplication.shared.open(url)
@@ -169,7 +182,9 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
                  for action: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         guard let url = action.request.url else { return nil }
-        if url.scheme == "https", let host = url.host?.lowercased(), allowedHosts.contains(host) {
+        if NativeLakesideLogin.companion.isGoogleSignIn(host: url.host, path: url.path) {
+            showSignInNotice(NativeLakesideLogin.companion.GOOGLE_UNAVAILABLE)
+        } else if url.scheme == "https", let host = url.host?.lowercased(), allowedHosts.contains(host) {
             webView.load(URLRequest(url: url))
         } else {
             UIApplication.shared.open(url)

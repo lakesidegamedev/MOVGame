@@ -17,6 +17,16 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Reserved for the Lakeside sign-in return,
+                 net.lakesidegames.mov:/auth/callback. It only brings the app
+                 forward; nothing reads the link yet. Android matches custom
+                 schemes without a host on the scheme alone. -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="net.lakesidegames.mov" />
+            </intent-filter>
         </activity>
     </application>
 

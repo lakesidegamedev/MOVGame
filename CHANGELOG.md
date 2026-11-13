@@ -30,6 +30,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   sign-in instead of saying the page cannot be opened.
 - After a test purchase on iPhone or Android, the Store says the pack is unlocked in the app
   instead of "Production ownership is unchanged".
+- iPhone and Android: choosing Google on the sign-in page now stops with one line instead of a
+  Google error page, because Google does not allow its sign-in inside an app. Sign in on the web at
+  lakesidegames.net, or use Apple, Discord or A House Divided in the app. The same applies inside
+  Ask.
 - When the next election after your campaign is part of a pack you do not own, the results screen
   now also offers the next country's free election, so there is always something to play next
   without buying.
