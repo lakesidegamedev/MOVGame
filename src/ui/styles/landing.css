@@ -159,6 +159,9 @@
 }
 .pricing-card h3 { margin: 0 0 4px; font-size: 15px; font-weight: 700; }
 .pricing-price { font-size: 20px; font-weight: 800; margin: 0 0 10px; color: var(--gold); }
+.pricing-price .price-unavailable, .pricing-price .price-pending { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--muted); }
+.price-unavailable .price-retry { padding: 2px 8px; font-size: 12px; }
+.pack-price .price-unavailable, .pack-price .price-pending { font-size: var(--fs-sm, 12px); font-weight: 600; color: var(--muted); }
 .pricing-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .pricing-list li { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); }
 .pricing-list svg { color: var(--green); flex-shrink: 0; }
@@ -219,3 +222,17 @@
 .landing-features { margin-top: var(--space-2); }
 .daily-section { margin-top: var(--space-6); }
 .faq-answer { font-size: var(--fs-md); color: var(--text-2); line-height: var(--lh-body); }
+
+/* Lakeside Games mark in the top bar: small, quiet, keyboard reachable. */
+.lakeside-mark {
+  display: inline-flex; align-items: center; gap: var(--space-1-5); flex-shrink: 0;
+  min-height: 32px; padding: 0 var(--space-1-5); border-radius: var(--radius-sm, 6px);
+  color: var(--text-3); text-decoration: none; font-size: var(--fs-xs); font-weight: var(--fw-medium); letter-spacing: 0;
+}
+.lakeside-mark img { width: 18px; height: 18px; display: block; }
+.lakeside-mark:hover { color: var(--text-1); }
+.lakeside-mark:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+.landing-lakeside { margin-left: var(--space-1); padding-left: var(--space-2-5); border-left: 1px solid var(--border-default); border-radius: 0; }
+@media (max-width: 640px) {
+  .landing-lakeside .lakeside-mark-label { display: none; }
+}

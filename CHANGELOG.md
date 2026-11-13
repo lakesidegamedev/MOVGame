@@ -23,9 +23,22 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - After you pay in your browser, the Windows desktop app checks for the purchase the moment you
   come back to its window (taskbar, Alt+Tab or a click) and unlocks the pack within about a
   second. "I've paid, check now" and the timed check still work as before.
+- A small Lakeside Games mark in the top bar links to lakesidegames.net, on the web and in the
+  desktop app. In a campaign it appears at the end of the tools row on wide screens only, so it
+  never sits among the game controls on phones.
 
 ### Fixed
 
+- Prices on the web and in the desktop app now come only from the Lakeside store, live. If the
+  store is slow or cannot be reached, the game says "Price unavailable, try again" with a Try again
+  button and Buy stays off, instead of showing a price it remembered. The landing page, the Store,
+  the pricing card and the FAQ all follow this rule.
+- Counts of elections, free elections and countries now read the same everywhere: 15 free
+  elections, at least one in every country (two in the United States). The election library's
+  "playable" count no longer includes today's Daily Challenge, which is open to everyone for one
+  day only, so a country no longer shows one more playable election than it has free or owned.
+- The iPhone setup screen now says at least one election in every country is free, instead of
+  one.
 - On iPhone, iPad and Android, "Continue with Apple" on the Lakeside sign-in page now opens Apple's
   sign-in instead of saying the page cannot be opened.
 - After a test purchase on iPhone or Android, the Store says the pack is unlocked in the app

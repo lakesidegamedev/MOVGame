@@ -110,13 +110,13 @@ export function PackDetail({ packId }: { packId: string }) {
                       ? ""
                       : sum.havePacks.length > 0
                         ? `Adds the ${plural(sum.addsPacks.length, "pack")} you don't have (${plural(sum.addsElections, "election")}) and every pack added later.`
-                        : `Every country, plus every pack added later.${sum.saveCents > 0 && sum.addsPacks.length > 1 ? ` Cheaper than buying all ${sum.addsPacks.length} packs separately (${formatPrice(sum.separateCents)}).` : ""}`}
+                        : `Every country, plus every pack added later.${sum.saveCents !== null && sum.separateCents !== null && sum.saveCents > 0 && sum.addsPacks.length > 1 ? ` Cheaper than buying all ${sum.addsPacks.length} packs separately (${formatPrice(sum.separateCents)}).` : ""}`}
                   </p>
                   <OfferAction packId={COMPLETE_ID} label="Buy everything" accessibleName="Buy the Complete Collection" primary={false} />
                 </div>
               )}
               {hint && (offer.kind === "buy" || completeOffer.kind === "buy") && <p className="store-hint">{hint}</p>}
-              {DISTRIBUTION.checkout !== null && priceCents(packId, ctx.catalog) > 0 && (
+              {DISTRIBUTION.checkout !== null && (priceCents(packId, ctx.catalog) ?? 0) > 0 && (
                 <p className="store-hint">One-time purchase, no subscription. It belongs to your Lakeside Games account.</p>
               )}
             </>

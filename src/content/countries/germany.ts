@@ -42,7 +42,6 @@ export const GERMANY_MODULE: CountryModule = {
     id: "germany",
     name: "Germany",
     description: "Ten Bundestag elections from 1990 to 2025. Mixed-member proportional, five-plus parties, and coalition math after the count.",
-    price: 99,
   },
   daily: { pair: ["cdu", "spd"], names: { cdu: "CDU/CSU", spd: "the SPD" } },
   next: {

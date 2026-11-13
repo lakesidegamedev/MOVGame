@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { PACKS_BY_ID } from "@content/packs";
-import { catalogFromResponse, countryPacks, packFacts, summarizeComplete, unreachableCatalog, type CatalogState } from "@lib/storeModel";
+import { catalogFromResponse, countryPacks, packFacts, summarizeComplete, unreachableCatalog, LOADING_CATALOG, type CatalogState } from "@lib/storeModel";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -15,8 +15,9 @@ const hoisted = vi.hoisted(() => ({
   catalog: { value: null as unknown },
 }));
 vi.mock("@lib/distribution", () => ({ DISTRIBUTION: hoisted.policy }));
+const reload = vi.hoisted(() => vi.fn());
 vi.mock("@lib/useCatalog", () => ({
-  useCatalog: () => ({ catalog: hoisted.catalog.value, reload: vi.fn() }),
+  useCatalog: () => ({ catalog: hoisted.catalog.value, reload }),
 }));
 
 import { useAuthStore } from "@store/authStore";
@@ -28,7 +29,8 @@ import StoreScreen from "../StoreScreen";
 const readyCatalog = (unlisted: string[] = []): CatalogState =>
   catalogFromResponse({
     source: "platform",
-    products: [...countryPacks(), PACKS_BY_ID.complete].map((p) => ({ id: p.id, name: p.name, priceCents: p.price, scenarios: [], listed: !unlisted.includes(p.id) })),
+    // What the platform answers (test data: the game has no prices of its own).
+    products: [...countryPacks(), PACKS_BY_ID.complete].map((p) => ({ id: p.id, name: p.name, priceCents: p.id === "complete" ? 399 : 99, scenarios: [], listed: !unlisted.includes(p.id) })),
   });
 
 const player = { id: "u1", username: "campaigner", email: "c@example.com", ahdLinked: true };
@@ -151,17 +153,44 @@ describe("the shelf", () => {
     expect(tile("canada").querySelector("button.primary")).not.toBeNull();
   });
 
-  it("stays browsable with Buy disabled, and says why, when the platform is unreachable", () => {
+  it("shows no price anywhere and disables Buy when the platform is unreachable", () => {
     hoisted.catalog.value = unreachableCatalog();
+    reload.mockReset();
     mount();
     const buys = buttons(/^Buy /);
     expect(buys.length).toBeGreaterThan(0);
     expect(buys.every((b) => b.disabled)).toBe(true);
-    expect(text()).toContain("can't be reached");
-    expect(tile("canada").textContent).toContain("$0.99"); // bundled price for reference
-    expect(buttons(/Try again/).length).toBeGreaterThan(0);
+    expect(text()).toContain("Price unavailable, try again");
+    expect(text()).not.toMatch(/\$\d/); // no number at all, not even a remembered one
+    const retry = buttons(/Try again/);
+    expect(retry.length).toBeGreaterThan(0);
+    click(retry[0]);
+    expect(reload).toHaveBeenCalled();
     click(tile("canada").querySelector("button.pack-tile-main")!);
     expect(text()).toContain("Elections in this pack"); // still browsable
+    expect(text()).not.toMatch(/\$\d/);
+  });
+
+  it("shows no price and disables Buy while the catalog is still loading", () => {
+    hoisted.catalog.value = LOADING_CATALOG;
+    mount();
+    const buys = buttons(/^Buy /);
+    expect(buys.length).toBeGreaterThan(0);
+    expect(buys.every((b) => b.disabled)).toBe(true);
+    expect(text()).not.toMatch(/\$\d/);
+    expect(text()).toContain("Checking the price");
+  });
+
+  it("shows exactly the platform's numbers once it answers", () => {
+    hoisted.catalog.value = catalogFromResponse({
+      source: "platform",
+      products: [...countryPacks(), PACKS_BY_ID.complete].map((p) => ({ id: p.id, name: p.name, priceCents: p.id === "complete" ? 449 : 129, scenarios: [], listed: true })),
+    });
+    mount();
+    expect(tile("canada").textContent).toContain("$1.29");
+    expect(container.querySelector(".store-hero")!.textContent).toContain("$4.49");
+    expect(text()).not.toContain("$0.99");
+    expect(text()).not.toContain("$3.99");
   });
 
   it("filters the shelf to owned and not owned packs", () => {

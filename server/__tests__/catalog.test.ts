@@ -1,7 +1,8 @@
-// The catalog the game serves to its own store: platform prices overlaid on the
-// bundled membership, with an honest `listed` flag per product so a pack the
+// The catalog the game serves to its own store: platform prices on the game's
+// pack membership, with an honest `listed` flag per product so a pack the
 // platform does not sell yet shows as "coming soon", and `source` so the client
-// can tell "not for sale" from "could not ask".
+// can tell "not for sale" from "could not ask". No answer ever carries a price
+// the platform did not give in that answer.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 process.env.LAKESIDE_CATALOG_URL = "https://catalog.example.test/catalog";
@@ -23,7 +24,7 @@ describe("getCatalogResult", () => {
     const by = Object.fromEntries(items.map((i) => [i.id, i]));
     expect(by.canada).toMatchObject({ listed: true, priceCents: 149 });
     expect(by.complete).toMatchObject({ listed: true, priceCents: 449 });
-    expect(by.france).toMatchObject({ listed: false, priceCents: PACKS.find((p) => p.id === "france")!.price });
+    expect(by.france).toMatchObject({ listed: false, priceCents: null }); // the platform did not price it
     expect(items.map((i) => i.id)).toEqual(PACKS.map((p) => p.id)); // the game's membership, in the game's order
   });
 
@@ -33,10 +34,11 @@ describe("getCatalogResult", () => {
     expect(items.find((i) => i.id === "canada")!.scenarios).toEqual(PACKS.find((p) => p.id === "canada")!.scenarios);
   });
 
-  it("does not list a product the platform returned without a usable price", async () => {
-    platformAnswers([{ id: "canada", priceCents: "99" }, { id: "germany", priceCents: -5 }, { id: "france", priceCents: 1.5 }, { id: "australia" }]);
+  it("does not list or price a product the platform returned without a usable price", async () => {
+    platformAnswers([{ id: "canada", priceCents: "99" }, { id: "germany", priceCents: -5 }, { id: "france", priceCents: 1.5 }, { id: "australia" }, { id: "japan", priceCents: 0 }]);
     const { items } = await getCatalogResult();
     expect(items.filter((i) => i.listed)).toEqual([]);
+    expect(items.every((i) => i.priceCents === null)).toBe(true);
   });
 
   it("treats a listing without a channels block as buyable on the web (older platform deploys)", async () => {
@@ -61,17 +63,38 @@ describe("getCatalogResult", () => {
     expect(by.complete.listed).toBe(false);
   });
 
-  it("falls back to bundled prices, marked unlisted and unreachable, when the platform is down", async () => {
+  it("answers unavailable with no prices at all when the platform is down", async () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("down"));
     const { source, items } = await getCatalogResult();
-    expect(source).toBe("bundled");
-    expect(items.every((i) => !i.listed)).toBe(true);
-    expect(items.find((i) => i.id === "complete")!.priceCents).toBe(PACKS.find((p) => p.id === "complete")!.price);
+    expect(source).toBe("unavailable");
+    expect(items.every((i) => !i.listed && i.priceCents === null)).toBe(true);
+    expect(items.map((i) => i.id)).toEqual(PACKS.map((p) => p.id));
   });
 
-  it("treats an HTTP error as unreachable", async () => {
+  it("treats an HTTP error as unavailable", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("nope", { status: 503 }));
-    expect((await getCatalogResult()).source).toBe("bundled");
+    expect((await getCatalogResult()).source).toBe("unavailable");
+  });
+
+  it("treats an answer with no product list as unavailable", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ error: "maintenance" }), { status: 200 }));
+    const { source, items } = await getCatalogResult();
+    expect(source).toBe("unavailable");
+    expect(items.every((i) => i.priceCents === null)).toBe(true);
+  });
+
+  it("treats a slow platform as unavailable", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(globalThis, "fetch").mockImplementation((_url, init) => new Promise((_resolve, reject) => {
+        (init as RequestInit).signal!.addEventListener("abort", () => reject(new Error("aborted")));
+      }));
+      const pending = getCatalogResult();
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect((await pending).source).toBe("unavailable");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("caches a platform answer but retries straight away after a failure", async () => {
@@ -83,7 +106,7 @@ describe("getCatalogResult", () => {
     clearCatalogCache();
     spy.mockReset();
     spy.mockRejectedValueOnce(new Error("blip")).mockResolvedValue(new Response(JSON.stringify({ products: [{ id: "canada", priceCents: 99 }] }), { status: 200 }));
-    expect((await getCatalogResult()).source).toBe("bundled");
+    expect((await getCatalogResult()).source).toBe("unavailable");
     expect((await getCatalogResult()).source).toBe("platform");
   });
 });

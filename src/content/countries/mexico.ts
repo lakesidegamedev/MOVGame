@@ -32,7 +32,6 @@ export const MEXICO_MODULE: CountryModule = {
     id: "mexico",
     name: "Mexico",
     description: "Five presidential elections from 2000 to 2024: Fox, Calderón, Peña Nieto, López Obrador and Sheinbaum across eleven regions, where the most votes win in one round.",
-    price: 99,
   },
   daily: { pair: ["pan", "izq"], names: { pan: "the PAN", izq: "the PRD/Morena left" } },
   next: {

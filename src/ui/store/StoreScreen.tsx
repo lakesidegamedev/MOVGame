@@ -8,7 +8,8 @@ import { useCatalog } from "@lib/useCatalog";
 import { DISTRIBUTION } from "@lib/distribution";
 import { SHELL_FOCUS_EVENT } from "@lib/desktopShell";
 import { BRAND } from "../../brand";
-import { countryPacks, freeElections, freeElectionsByCountry, offerFor } from "@lib/storeModel";
+import { countryPacks, freeElectionsByCountry, offerFor } from "@lib/storeModel";
+import { FREE_ELECTIONS_LINE } from "@content/facts";
 import { StoreContext, type StoreCtx } from "./StoreContext";
 import { useDialogFocus } from "./useDialogFocus";
 import { PurchaseBanner } from "./PurchaseBanner";
@@ -117,9 +118,10 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
     catalog, ownedPackIds, purchases, user, busy, canPlay,
     focusScenarioId: focus.scenarioId,
     buy: (id) => start(id, { catalog, scenarioId: focus.scenarioId }),
+    retryCatalog: reload,
     openPack: (id) => { setPackId(id); mainRef.current?.parentElement?.scrollTo?.({ top: 0 }); },
     play: onPlay,
-  }), [catalog, ownedPackIds, purchases, user, busy, canPlay, focus.scenarioId, start, onPlay]);
+  }), [catalog, ownedPackIds, purchases, user, busy, canPlay, focus.scenarioId, start, onPlay, reload]);
 
   const packs = countryPacks();
   const ownedCount = packs.filter((p) => offerFor(p.id, { ownedPackIds, purchases, catalog, policy: DISTRIBUTION }).kind === "owned").length;
@@ -185,8 +187,8 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
                 <div className="store-banner-main">
                   <WifiOff size={18} aria-hidden="true" />
                   <div>
-                    <strong>Prices shown are the last ones we know</strong>
-                    <p>The Lakeside store can't be reached, so buying is paused. You can still browse everything.</p>
+                    <strong>Price unavailable, try again</strong>
+                    <p>The Lakeside store didn't answer, so prices are hidden and buying is paused. You can still browse everything.</p>
                     <div className="store-banner-actions"><button type="button" className="ghost small" onClick={reload}><RefreshCw size={13} aria-hidden="true" /> Try again</button></div>
                   </div>
                 </div>
@@ -207,7 +209,7 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
                   <span className="store-owned"><OwnedTick /> Free for everyone</span>
                 </div>
                 <p className="store-free-sub">
-                  {plural(freeElections().length, "election")} in {plural(freeElectionsByCountry().length, "country", "countries")}, no account needed, plus the Daily Challenge.
+                  {FREE_ELECTIONS_LINE.charAt(0).toUpperCase() + FREE_ELECTIONS_LINE.slice(1)}, no account needed, plus the Daily Challenge.
                 </p>
                 {/* One cell per free election, so a country with two (the US) does not stretch its row. */}
                 <ul className="store-free-list">

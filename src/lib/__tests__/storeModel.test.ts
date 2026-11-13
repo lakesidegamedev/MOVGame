@@ -3,19 +3,24 @@ import { PACKS_BY_ID, STORE_PACKS } from "@content/packs";
 import { SCENARIO_REGISTRY } from "@content/scenarioRegistry";
 import type { Purchase } from "@lib/api";
 import {
-  catalogFromResponse, countryPacks, describeReason, electionsToOffer, offerFor, ownedReason, ownershipRows,
-  freeElectionsByCountry, packFacts, priceCents, summarizeComplete, unreachableCatalog, LOADING_CATALOG, type CatalogState, type OfferContext,
-  type OwnedReason,
+  catalogFromResponse, countryPacks, countryPriceLabel, describeReason, electionsToOffer, offerFor, ownedReason, ownershipRows,
+  freeElectionsByCountry, packFacts, priceCents, priceLabel, summarizeComplete, unavailableMessage, unreachableCatalog, LOADING_CATALOG,
+  PRICE_UNAVAILABLE, type CatalogState, type OfferContext, type OwnedReason,
 } from "@lib/storeModel";
+import { packPricesFrom } from "@lib/usePackPrices";
+import { FREE_ELECTIONS_LINE } from "@content/facts";
 
 const WEB = { externalStore: true, nativeStoreName: null };
 const STEAM = { externalStore: false, nativeStoreName: "Steam" };
+
+// What a platform answer might say. Test data only: the game has no prices of its own.
+const PLATFORM_CENTS = (id: string) => (id === "complete" ? 399 : id === "global" ? 599 : 99);
 
 function readyCatalog(unlisted: string[] = [], prices: Record<string, number> = {}): CatalogState {
   return catalogFromResponse({
     source: "platform",
     products: STORE_PACKS.concat(PACKS_BY_ID.global).map((p) => ({
-      id: p.id, name: p.name, priceCents: prices[p.id] ?? p.price, scenarios: p.scenarios, listed: !unlisted.includes(p.id),
+      id: p.id, name: p.name, priceCents: prices[p.id] ?? PLATFORM_CENTS(p.id), scenarios: p.scenarios, listed: !unlisted.includes(p.id),
     })),
   });
 }
@@ -37,17 +42,68 @@ describe("catalog interpretation", () => {
   it("never treats a response that does not say 'listed' as for sale", () => {
     const old = catalogFromResponse({ products: [{ id: "canada", name: "Canada", priceCents: 99, scenarios: [] }] });
     expect(old.status).toBe("unreachable");
-    expect(old.entries.canada.listed).toBe(false);
+    expect(old.entries).toEqual({});
+    const unlabelled = catalogFromResponse({ source: "platform", products: [{ id: "canada", name: "Canada", priceCents: 99, scenarios: [] }] });
+    expect(unlabelled.entries.canada.listed).toBe(false);
+  });
+
+  it("keeps no price from an outage answer or an older server's bundled fallback", () => {
+    const down = catalogFromResponse({ source: "unavailable", products: [{ id: "canada", name: "Canada", priceCents: null, scenarios: [], listed: false }] });
+    expect(down).toEqual(unreachableCatalog());
+    const bundled = catalogFromResponse({ source: "bundled", products: [{ id: "canada", name: "Canada", priceCents: 199, scenarios: [], listed: false }] });
+    expect(bundled).toEqual(unreachableCatalog());
+    expect(priceCents("canada", bundled)).toBeNull();
   });
 
   it("ignores malformed products", () => {
-    const c = catalogFromResponse({ source: "platform", products: [null, { id: 4 }, { id: "canada", priceCents: "99" }, { id: "germany", name: "G", priceCents: 150, scenarios: [], listed: true }] as never });
+    const c = catalogFromResponse({ source: "platform", products: [null, { id: 4 }, { id: "canada", priceCents: "99" }, { id: "france", priceCents: null }, { id: "japan", priceCents: 0 }, { id: "germany", name: "G", priceCents: 150, scenarios: [], listed: true }] as never });
     expect(Object.keys(c.entries)).toEqual(["germany"]);
   });
 
-  it("prices from the platform, falling back to the bundled price", () => {
+  it("prices only from a platform answer, never from anything else", () => {
     expect(priceCents("canada", readyCatalog([], { canada: 149 }))).toBe(149);
-    expect(priceCents("canada", unreachableCatalog())).toBe(PACKS_BY_ID.canada.price);
+    expect(priceCents("canada", unreachableCatalog())).toBeNull();
+    expect(priceCents("canada", LOADING_CATALOG)).toBeNull();
+    // Ready, but the platform gave no price for this pack.
+    const partial = catalogFromResponse({ source: "platform", products: [{ id: "canada", name: "Canada", priceCents: 99, scenarios: [], listed: true }] });
+    expect(priceCents("germany", partial)).toBeNull();
+  });
+
+  it("labels prices only when live", () => {
+    expect(priceLabel("canada", readyCatalog([], { canada: 99 }))).toBe("$0.99");
+    expect(priceLabel("complete", readyCatalog())).toBe("$3.99");
+    expect(priceLabel("canada", unreachableCatalog())).toBeNull();
+    expect(priceLabel("canada", LOADING_CATALOG)).toBeNull();
+  });
+
+  it("names one country price, or 'from' the lowest when they differ, or nothing", () => {
+    expect(countryPriceLabel(readyCatalog())).toBe("$0.99");
+    expect(countryPriceLabel(readyCatalog([], { japan: 149 }))).toBe("from $0.99");
+    expect(countryPriceLabel(unreachableCatalog())).toBeNull();
+    expect(countryPriceLabel(LOADING_CATALOG)).toBeNull();
+    const partial = catalogFromResponse({ source: "platform", products: [{ id: "canada", name: "Canada", priceCents: 99, scenarios: [], listed: true }] });
+    expect(countryPriceLabel(partial)).toBeNull();
+  });
+
+  it("gives the landing page and guide no number unless live", () => {
+    const ready = packPricesFrom(readyCatalog());
+    expect(ready).toMatchObject({ ready: true, loading: false, country: "$0.99", complete: "$3.99" });
+    expect(ready.label("canada")).toBe("$0.99");
+    for (const catalog of [LOADING_CATALOG, unreachableCatalog()]) {
+      const p = packPricesFrom(catalog);
+      expect(p.ready).toBe(false);
+      expect(p.country).toBeNull();
+      expect(p.complete).toBeNull();
+      expect(STORE_PACKS.map((pack) => p.label(pack.id))).toEqual(STORE_PACKS.map(() => null));
+    }
+    expect(packPricesFrom(LOADING_CATALOG).loading).toBe(true);
+    expect(packPricesFrom(unreachableCatalog()).loading).toBe(false);
+  });
+
+  it("says plainly when the price is unavailable", () => {
+    expect(PRICE_UNAVAILABLE).toBe("Price unavailable, try again");
+    expect(unavailableMessage("unreachable")).toBe(PRICE_UNAVAILABLE);
+    expect(unavailableMessage("loading")).not.toMatch(/\$/);
   });
 });
 
@@ -141,13 +197,13 @@ describe("offers", () => {
     expect(offerFor("germany", ctx({ catalog })).kind).toBe("coming-soon");
   });
 
-  it("pauses buying, with the bundled price, when the platform cannot be reached", () => {
+  it("pauses buying, with no price at all, when the platform cannot be reached", () => {
     const offer = offerFor("canada", ctx({ catalog: unreachableCatalog() }));
-    expect(offer).toEqual({ kind: "unavailable", priceCents: PACKS_BY_ID.canada.price, reason: "unreachable" });
+    expect(offer).toEqual({ kind: "unavailable", reason: "unreachable" });
   });
 
-  it("waits while the catalog loads", () => {
-    expect(offerFor("canada", ctx({ catalog: LOADING_CATALOG })).kind).toBe("unavailable");
+  it("waits, with no price, while the catalog loads", () => {
+    expect(offerFor("canada", ctx({ catalog: LOADING_CATALOG }))).toEqual({ kind: "unavailable", reason: "loading" });
   });
 
   it("never shows Lakeside checkout on a channel that sells elsewhere", () => {
@@ -187,10 +243,20 @@ describe("Complete Collection summary", () => {
     expect(sum.havePacks).toEqual([]);
   });
 
-  it("computes the saving from current prices", () => {
+  it("computes the saving from live prices", () => {
     const sum = summarizeComplete([], readyCatalog())!;
-    expect(sum.separateCents).toBe(countryPacks().reduce((n, p) => n + p.price, 0));
-    expect(sum.saveCents).toBe(sum.separateCents - PACKS_BY_ID.complete.price);
+    expect(sum.separateCents).toBe(countryPacks().length * 99);
+    expect(sum.saveCents).toBe(countryPacks().length * 99 - 399);
+  });
+
+  it("names no total and no saving until every price is live", () => {
+    for (const catalog of [LOADING_CATALOG, unreachableCatalog()]) {
+      const sum = summarizeComplete([], catalog)!;
+      expect(sum.separateCents).toBeNull();
+      expect(sum.saveCents).toBeNull();
+    }
+    const partial = catalogFromResponse({ source: "platform", products: [{ id: "complete", name: "Complete Collection", priceCents: 399, scenarios: [], listed: true }] });
+    expect(summarizeComplete([], partial)!.saveCents).toBeNull();
   });
 
   it("says so when the remaining packs are cheaper than the collection", () => {
@@ -252,6 +318,7 @@ describe("account ownership list", () => {
     );
     expect(rows.map((r) => r.key)).toEqual(["free", "complete", "canada"]);
     expect(rows[0].reason.kind).toBe("free");
+    expect(rows[0].detail).toBe(`${FREE_ELECTIONS_LINE}, and the Daily Challenge`);
     expect(rows[1].reason.kind).toBe("supporter");
     expect(rows[2].reason.kind).toBe("purchase");
   });

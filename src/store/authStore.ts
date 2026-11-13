@@ -46,6 +46,11 @@ interface AuthStore {
   refresh: () => Promise<void>;
 
   canPlay: (scenarioId: string) => boolean;
+  /**
+   * Free or owned: what counts as "playable" in the library. Unlike canPlay it
+   * leaves out today's Daily Challenge, a one-day pass that is not ownership.
+   */
+  ownsScenario: (scenarioId: string) => boolean;
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -167,6 +172,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     // server scores it ungated (routes/daily.ts). Keep the client in step so
     // the daily never prompts for sign-in or purchase.
     if (dailyAssignment(utcDateString()).scenarioId === scenarioId) return true;
+    return get().unlocked.scenarioIds.includes(scenarioId);
+  },
+  ownsScenario: (scenarioId) => {
+    if (DISTRIBUTION.preview) return true;
+    if (isFreeScenario(scenarioId)) return true;
     return get().unlocked.scenarioIds.includes(scenarioId);
   },
 }));

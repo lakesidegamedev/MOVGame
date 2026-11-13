@@ -34,7 +34,6 @@ export const BRAZIL_MODULE: CountryModule = {
     id: "brazil",
     name: "Brazil",
     description: "Six presidential runoffs from 2002 to 2022: Lula, Rousseff and Bolsonaro across twelve regions, and the voters of the candidates who lost the first round.",
-    price: 99,
   },
   daily: { pair: ["pt", "dir"], names: { pt: "the PT", dir: "the Right" } },
   next: {
