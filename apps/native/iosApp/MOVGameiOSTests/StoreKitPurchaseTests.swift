@@ -50,6 +50,23 @@ final class StoreKitPurchaseTests: XCTestCase {
         return account
     }
 
+    /// StoreKit testing must be active, or product lookups return nothing and
+    /// AppStore.sync() waits for a real App Store sign-in that never comes.
+    /// Fails (never skips) so a broken setup cannot pass as green.
+    private func requireStoreKitTesting() async throws {
+        let found = try await Product.products(for: [Self.sku("canada")])
+        guard !found.isEmpty else { throw StoreKitTestingUnavailable() }
+    }
+
+    /// Runs Restore purchases with a deadline, so a stuck AppStore.sync() fails
+    /// this test instead of hanging the job. A stuck call is left behind.
+    @MainActor
+    private func restore(_ store: StoreKitAdapter, timeout: TimeInterval = 45) async throws {
+        let done = Flag()
+        Task { @MainActor in await store.restore(); done.value = true }
+        try await waitFor("Restore purchases to finish", timeout: timeout) { done.value }
+    }
+
     @MainActor
     private func waitFor(_ what: String, timeout: TimeInterval = 30, _ condition: () -> Bool) async throws {
         let deadline = Date().addingTimeInterval(timeout)
@@ -87,6 +104,7 @@ final class StoreKitPurchaseTests: XCTestCase {
 
     @MainActor
     func testStoreShowsEveryPackWithItsAppStorePrice() async throws {
+        try await requireStoreKitTesting()
         let account = try await signedIn()
         let store = StoreKitAdapter(account: account)
         try await waitFor("15 products") { store.products.count == 15 }
@@ -100,6 +118,7 @@ final class StoreKitPurchaseTests: XCTestCase {
 
     @MainActor
     func testBuyingAPackHandsTheSignedTransactionToTheServerBridge() async throws {
+        try await requireStoreKitTesting()
         let account = try await signedIn()
         let store = StoreKitAdapter(account: account)
         try await waitFor("products") { store.products.count == 15 }
@@ -130,6 +149,7 @@ final class StoreKitPurchaseTests: XCTestCase {
 
     @MainActor
     func testBuyingTheCompleteCollection() async throws {
+        try await requireStoreKitTesting()
         let account = try await signedIn()
         let store = StoreKitAdapter(account: account)
         try await waitFor("products") { store.products.count == 15 }
@@ -141,6 +161,7 @@ final class StoreKitPurchaseTests: XCTestCase {
 
     @MainActor
     func testFailedDeliveryStaysUnfinishedAndRestoreDeliversIt() async throws {
+        try await requireStoreKitTesting()
         let account = try await signedIn()
         let store = StoreKitAdapter(account: account)
         try await waitFor("products") { store.products.count == 15 }
@@ -156,7 +177,7 @@ final class StoreKitPurchaseTests: XCTestCase {
 
         // Back online: Store > Restore purchases.
         FakeBridge.verifyStatus = 200
-        await store.restore()
+        try await restore(store)
         XCTAssertEqual(FakeBridge.deliveredPacks, ["japan"], store.notice ?? "")
         XCTAssertTrue(store.owned.contains("japan"))
         let left = await unfinishedCount()
@@ -166,16 +187,24 @@ final class StoreKitPurchaseTests: XCTestCase {
 
     @MainActor
     func testRestoreOnAFreshInstallReadsOwnershipFromTheAccount() async throws {
+        try await requireStoreKitTesting()
         // Bought earlier on another device: the account already owns the pack.
         FakeBridge.serverOwned = ["brazil"]
         let account = try await signedIn()
         let store = StoreKitAdapter(account: account)
         try await waitFor("products") { store.products.count == 15 }
-        await store.restore()
+        try await restore(store)
         XCTAssertTrue(store.owned.contains("brazil"), store.notice ?? "")
         account.signOut()
     }
 }
+
+struct StoreKitTestingUnavailable: LocalizedError {
+    var errorDescription: String? { "StoreKit testing is not active: Products.storekit returned no products" }
+}
+
+@MainActor
+final class Flag { var value = false }
 
 /// Stands in for the game server's account and store routes.
 final class FakeBridge: URLProtocol {

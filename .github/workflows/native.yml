@@ -241,7 +241,7 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.ios == 'true' }}
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 50
     defaults:
       run:
         working-directory: apps/native
@@ -272,6 +272,9 @@ jobs:
           -derivedDataPath "$RUNNER_TEMP/mov-storekit"
           -resultBundlePath "$RUNNER_TEMP/mov-storekit.xcresult"
           -only-testing:MOVGameiOSTests
+          -test-timeouts-enabled YES
+          -default-test-execution-time-allowance 120
+          -maximum-test-execution-time-allowance 180
           CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=
           test
       - name: Pack the test results
