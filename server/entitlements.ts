@@ -61,11 +61,20 @@ export async function redeemCodeOnPlatform(identity: Identity, code: string): Pr
   }
 }
 
+/**
+ * How the platform granted a product. "supporter" is any active Lakeside
+ * supporter tier (the platform decides which tiers include what; the game
+ * never reads a tier name). "free-access" is the platform's switch that makes
+ * everything free to play for a while; it comes and goes with the switch.
+ */
+export type PurchaseProvider = "stripe" | "code" | "apple" | "google" | "supporter" | "free-access";
+const PROVIDERS: readonly PurchaseProvider[] = ["apple", "google", "code", "stripe", "supporter", "free-access"];
+
 export interface PlatformPurchase {
   game: string;
   productId: string;
   name: string | null;
-  provider: "stripe" | "code" | "apple" | "google" | "supporter";
+  provider: PurchaseProvider;
   amountCents: number | null;
   currency: string | null;
   status: string;
@@ -139,8 +148,8 @@ export async function lookupPlatformPurchases(identity: Identity): Promise<Purch
         game: GAME,
         productId: String(p.productId ?? p.packId ?? ""),
         name: (p.name ?? p.packName ?? null) as string | null,
-        provider: ["apple", "google", "code", "stripe", "supporter"].includes(String(p.provider))
-          ? p.provider as PlatformPurchase["provider"] : Number(p.amountCents ?? 0) > 0 ? "stripe" : "code",
+        provider: (PROVIDERS as readonly string[]).includes(String(p.provider))
+          ? p.provider as PurchaseProvider : Number(p.amountCents ?? 0) > 0 ? "stripe" : "code",
         amountCents: typeof p.amountCents === "number" && Number.isSafeInteger(p.amountCents) ? p.amountCents : null,
         currency: typeof p.currency === "string" ? p.currency : null,
         status: String(p.status ?? "paid"),
