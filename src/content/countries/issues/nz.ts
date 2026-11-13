@@ -29,7 +29,7 @@ export const NZ_ELECTION_ISSUES: Record<string, CountryIssueDef[]> = {
     { id: "immigration", name: "Immigration", blurb: "Record net migration of about 72,000 a year, and Labour and NZ First promises to cut it." },
   ],
   "2014": [
-    { id: "economy_tax", name: "Capital gains tax", blurb: "Labour's tax on gains from investment property, National's promise of a surplus, and the Press debate over homes held in family trusts." },
+    { id: "economy_tax", name: "Capital gains tax", blurb: "Labour's tax on gains from investment property, National's promise of a surplus, and the row over homes held in family trusts." },
     { id: "integrity", name: "Dirty Politics", blurb: "Nicky Hager's book on the leaked Cameron Slater emails and Judith Collins' resignation as a minister." },
     { id: "housing", name: "Housing", blurb: "Auckland prices out of reach, and National's plan to let KiwiSaver members spend their tax credits on a first home." },
     { id: "health", name: "Free doctor visits", blurb: "Labour's promise of free doctor visits and prescriptions for pregnant women, children under 13 and people over 65." },
@@ -45,7 +45,7 @@ export const NZ_ELECTION_ISSUES: Record<string, CountryIssueDef[]> = {
     { id: "referendums", name: "Voting system referendum", blurb: "The referendum held with the election on whether to keep mixed-member proportional voting." },
   ],
   "2008": [
-    { id: "economy_tax", name: "Tax cuts", blurb: "National's promise of about $47 a week more for people on the average wage, against Labour's warning that now is not the time to borrow for tax cuts." },
+    { id: "economy_tax", name: "Tax cuts", blurb: "National's promise of about $47 a week more for the average earner, and Labour's warning against borrowing for tax cuts." },
     { id: "recession", name: "Recession & the banks", blurb: "Treasury's August call that the economy was in recession, and Labour's guarantee of every retail bank deposit." },
     { id: "integrity", name: "Trust", blurb: "Helen Clark's theme for the campaign, John Key's Tranz Rail shares and the inquiries into New Zealand First's donations." },
     { id: "cost_of_living", name: "Food & petrol", blurb: "Petrol above two dollars a litre and the highest inflation in eighteen years." },
