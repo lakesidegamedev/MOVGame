@@ -300,6 +300,14 @@
   "license": "Public domain"
  },
  {
+  "name": "Atal Bihari Vajpayee",
+  "file": "images/portraits/in-atal-bihari-vajpayee.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Atal_Bihari_Vajpayee_2002-06-12.jpg",
+  "title": "Atal Bihari Vajpayee 2002-06-12.jpg",
+  "author": "Helene C. Stikkel",
+  "license": "Public domain"
+ },
+ {
   "name": "Audrey McLaughlin",
   "file": "images/portraits/ca-audrey-mclaughlin.webp",
   "source": "https://commons.wikimedia.org/wiki/File:AudreyMcLaughlin2012_1.png",
@@ -1242,6 +1250,15 @@
   "license": "Public domain"
  },
  {
+  "name": "Harkishan Singh Surjeet",
+  "file": "images/portraits/in-harkishan-singh-surjeet.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Surjith-6.JPG",
+  "title": "Surjith-6.JPG",
+  "author": "Fotokannan",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+ },
+ {
   "name": "Harold Stassen",
   "file": "images/portraits/us-harold-stassen.webp",
   "source": "https://commons.wikimedia.org/wiki/File:Gov._Harold_E._Stassen_LCCN2016877429_(cropped).jpg",
@@ -1913,6 +1930,15 @@
   "title": "Kamala Harris Vice Presidential Portrait.jpg",
   "author": "Lawrence Jackson",
   "license": "Public domain"
+ },
+ {
+  "name": "Kanshi Ram",
+  "file": "images/portraits/in-kanshi-ram.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Kanshiram.jpg",
+  "title": "Kanshiram.jpg",
+  "author": "Deoriaamit",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
  },
  {
   "name": "Katsuya Okada",
@@ -2946,6 +2972,14 @@
   "author": "Noukei314",
   "license": "CC BY-SA 4.0",
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ {
+  "name": "Sonia Gandhi",
+  "file": "images/portraits/in-sonia-gandhi.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Sonia_Gandhi_(cropped).jpg",
+  "title": "Sonia Gandhi (cropped).jpg",
+  "author": "U.S. Department of State",
+  "license": "Public domain"
  },
  {
   "name": "Spiro Agnew",
