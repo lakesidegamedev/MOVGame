@@ -14,6 +14,8 @@ const TIMEOUT_MS = 5_000;
 export interface CatalogItem {
   id: string;
   name: string;
+  /** The platform's store description, or null when it gave none. The game falls back to its own. */
+  description: string | null;
   /**
    * The platform's price for this product, in USD cents. Null whenever the
    * platform did not give one in this answer (unreachable, product absent, or
@@ -38,12 +40,13 @@ export interface CatalogResult {
 
 // The game's own membership, with no price: what every answer is built on.
 function membership(): CatalogItem[] {
-  return PACKS.map((p) => ({ id: p.id, name: p.name, priceCents: null, scenarios: p.scenarios, listed: false }));
+  return PACKS.map((p) => ({ id: p.id, name: p.name, description: null, priceCents: null, scenarios: p.scenarios, listed: false }));
 }
 
 interface PlatformProduct {
   id: string;
   name?: string;
+  description?: string;
   priceCents?: number;
   scenarios?: string[];
   /** Per-storefront sale state. Newer platform deploys send it; older ones omit it. */
@@ -87,12 +90,18 @@ export async function getCatalogResult(): Promise<CatalogResult> {
     if (!Array.isArray(body?.products)) throw new Error("catalog without a product list");
     const products = (body.products as PlatformProduct[]).filter((p) => p && typeof p.id === "string");
     const platform = new Map(products.map((p) => [p.id, p]));
-    // Membership stays the game's; price (and name if present) come from the platform.
+    // Membership stays the game's; price, name and description come from the platform.
     const items = membership().map((m): CatalogItem => {
       const p = platform.get(m.id);
       const priceCents = usablePrice(p);
       if (!p || priceCents === null) return m;
-      return { ...m, name: typeof p.name === "string" && p.name ? p.name : m.name, priceCents, listed: webPurchasable(p) };
+      return {
+        ...m,
+        name: typeof p.name === "string" && p.name ? p.name : m.name,
+        description: typeof p.description === "string" && p.description.trim() ? p.description.trim() : null,
+        priceCents,
+        listed: webPurchasable(p),
+      };
     });
     const result: CatalogResult = { source: "platform", items };
     cache = { at: now, result };

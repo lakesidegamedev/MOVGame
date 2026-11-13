@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, CircleUser, KeyRound, RefreshCw, ShoppingBag, WifiOff } from "lucide-react";
+import { ChevronLeft, CircleUser, ExternalLink as ExternalIcon, Gift, KeyRound, RefreshCw, ShoppingBag, WifiOff } from "lucide-react";
 import { PACKS_BY_ID, packForScenario } from "@content/packs";
 import { useAuthStore } from "@store/authStore";
 import { useStoreNav } from "@store/storeNav";
@@ -8,8 +8,9 @@ import { useCatalog } from "@lib/useCatalog";
 import { DISTRIBUTION } from "@lib/distribution";
 import { SHELL_FOCUS_EVENT } from "@lib/desktopShell";
 import { BRAND } from "../../brand";
-import { countryPacks, freeElectionsByCountry, offerFor } from "@lib/storeModel";
+import { FREE_ACCESS_LINE, countryPacks, freeAccessOn, freeElectionsByCountry, offerFor } from "@lib/storeModel";
 import { FREE_ELECTIONS_LINE } from "@content/facts";
+import { ExternalLink } from "../ExternalLink";
 import { StoreContext, type StoreCtx } from "./StoreContext";
 import { useDialogFocus } from "./useDialogFocus";
 import { PurchaseBanner } from "./PurchaseBanner";
@@ -109,19 +110,23 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
   }, [authModal]);
 
   const ownedPackIds = unlocked.packIds;
+  // The platform's free access switch: everything plays, so the Store shows no prices and no Buy.
+  const freeAccess = !!user && freeAccessOn(purchases);
+  // Lakeside sells it here (web and desktop checkout): say who sells it and how refunds work.
+  const lakesideSale = DISTRIBUTION.checkout !== null && !DISTRIBUTION.preview && !freeAccess;
   // While a purchase is in flight every Buy waits, including after a checkout return whose payment
   // has not shown up yet: that payment went through, so a second Buy would charge twice.
   const busy = phase.kind === "redirecting" || phase.kind === "checkout-open" || phase.kind === "confirming"
     || (phase.kind === "slow" && !phase.fromCheckout);
 
   const ctx: StoreCtx = useMemo(() => ({
-    catalog, ownedPackIds, purchases, user, busy, canPlay,
+    catalog, ownedPackIds, purchases, user, busy, canPlay, freeAccess,
     focusScenarioId: focus.scenarioId,
     buy: (id) => start(id, { catalog, scenarioId: focus.scenarioId }),
     retryCatalog: reload,
     openPack: (id) => { setPackId(id); mainRef.current?.parentElement?.scrollTo?.({ top: 0 }); },
     play: onPlay,
-  }), [catalog, ownedPackIds, purchases, user, busy, canPlay, focus.scenarioId, start, onPlay, reload]);
+  }), [catalog, ownedPackIds, purchases, user, busy, canPlay, freeAccess, focus.scenarioId, start, onPlay, reload]);
 
   const packs = countryPacks();
   const ownedCount = packs.filter((p) => offerFor(p.id, { ownedPackIds, purchases, catalog, policy: DISTRIBUTION }).kind === "owned").length;
@@ -177,12 +182,29 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
             </span>
           </div>
         </header>
+        {lakesideSale && (
+          <p className="store-trust">
+            <span>Sold by <b>Lakeside Games</b>.</span> <span>Payments by <b>Stripe</b>.</span>{" "}
+            <span><b>Refunds within 14 days, no questions asked.</b></span>
+          </p>
+        )}
 
         <main className="store-main" ref={mainRef} id="store-main">
           <div className="store-live-wrap">
+            {freeAccess && (
+              <div className="store-banner good store-free-access" role="status">
+                <div className="store-banner-main">
+                  <Gift size={18} aria-hidden="true" />
+                  <div>
+                    <strong>{FREE_ACCESS_LINE}.</strong>
+                    <p>Every country and every election is open on your Lakeside account. Nothing to buy.</p>
+                  </div>
+                </div>
+              </div>
+            )}
             <PurchaseBanner />
             {note && <p className="store-note" role="status">{note}</p>}
-            {catalog.status === "unreachable" && DISTRIBUTION.checkout !== null && (
+            {catalog.status === "unreachable" && DISTRIBUTION.checkout !== null && !freeAccess && (
               <div className="store-banner warn" role="status">
                 <div className="store-banner-main">
                   <WifiOff size={18} aria-hidden="true" />
@@ -233,7 +255,8 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
                   <div>
                     <h2 id="store-packs-title">Country packs</h2>
                     <p className="store-packs-sub">
-                      {plural(packs.length, "pack")}{user ? ` · ${ownedCount} owned` : ""}. Each is a one-time purchase.
+                      {plural(packs.length, "pack")}{user ? ` · ${ownedCount} owned` : ""}.{" "}
+                      {freeAccess ? "Every pack is open to play right now." : "Each is a one-time purchase."}
                     </p>
                   </div>
                   <div className="store-filters" role="group" aria-label="Filter packs">
@@ -252,8 +275,13 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
               </section>
 
               <section className="store-fine" aria-label="How purchases work">
+                {!DISTRIBUTION.preview && DISTRIBUTION.checkout !== null && (
+                  <p className="store-site-link">
+                    <ExternalLink href={BRAND.storeUrl}>See everything on the Lakeside store <ExternalIcon size={13} aria-hidden="true" /></ExternalLink>
+                  </p>
+                )}
                 <ul>
-                  <li>One-time purchases, no subscription. Prices are in US dollars.</li>
+                  {!freeAccess && <li>One-time purchases, no subscription. Prices are in US dollars. Every pack is also included with any Lakeside supporter tier.</li>}
                   <li>
                     {DISTRIBUTION.preview
                       ? "This is a preview build: every election is unlocked for testing, and nothing can be bought here."

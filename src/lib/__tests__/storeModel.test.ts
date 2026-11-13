@@ -5,7 +5,7 @@ import type { Purchase } from "@lib/api";
 import {
   catalogFromResponse, countryPacks, countryPriceLabel, describeReason, electionsToOffer, offerFor, ownedReason, ownershipRows,
   freeElectionsByCountry, packFacts, priceCents, priceLabel, summarizeComplete, unavailableMessage, unreachableCatalog, LOADING_CATALOG,
-  PRICE_UNAVAILABLE, type CatalogState, type OfferContext, type OwnedReason,
+  PRICE_UNAVAILABLE, freeAccessOn, packDescription, packName, SUPPORTER_INCLUDED, type CatalogState, type OfferContext, type OwnedReason,
 } from "@lib/storeModel";
 import { packPricesFrom } from "@lib/usePackPrices";
 import { FREE_ELECTIONS_LINE } from "@content/facts";
@@ -161,11 +161,14 @@ describe("covered-by rules", () => {
 
   it("describes reasons in plain words", () => {
     expect(describeReason({ kind: "free" })).toBe("Included free with the game");
-    expect(describeReason({ kind: "supporter", at: null })).toBe("Included with your Supporter membership");
+    expect(describeReason({ kind: "supporter", at: null })).toBe("Included with any Lakeside supporter tier");
+    expect(describeReason({ kind: "free-access" })).toBe("Free to play right now");
     expect(describeReason({ kind: "code", at: null })).toBe("Unlocked with a code");
     expect(describeReason({ kind: "purchase", provider: "apple", at: null })).toBe("Bought on the App Store");
     const via = ownedReason("canada", ["complete"], [purchase("complete", "supporter")])!;
-    expect(describeReason(via)).toBe("Included in your Complete Collection from your Supporter membership");
+    expect(describeReason(via)).toBe("Included with any Lakeside supporter tier");
+    const free = ownedReason("canada", ["complete"], [purchase("complete", "free-access")])!;
+    expect(describeReason(free)).toBe("Free to play right now");
     // No current country pack sits wholly inside Global any more, so build the
     // reason by hand to keep the wording for a single named pack covered.
     const global: OwnedReason = { kind: "included", via: [{ pack: PACKS_BY_ID.global, reason: { kind: "purchase", provider: "stripe", at: null } }] };
@@ -343,5 +346,41 @@ describe("what to offer after a purchase", () => {
   });
   it("returns nothing for an unknown pack", () => {
     expect(electionsToOffer("nope", undefined, [])).toEqual([]);
+  });
+});
+
+describe("supporter tiers and free access", () => {
+  it("never names a tier: every supporter grant reads the same", () => {
+    expect(SUPPORTER_INCLUDED).toBe("Included with any Lakeside supporter tier");
+    for (const p of STORE_PACKS) {
+      const direct = ownedReason(p.id, [p.id], [purchase(p.id, "supporter")]);
+      expect(direct && describeReason(direct)).toBe(SUPPORTER_INCLUDED);
+    }
+  });
+
+  it("treats a supporter grant as owned, so no pack is ever offered for sale", () => {
+    const ctx: OfferContext = { ownedPackIds: ["complete"], purchases: [purchase("complete", "supporter")], catalog: readyCatalog(), policy: WEB };
+    for (const p of STORE_PACKS) expect(offerFor(p.id, ctx).kind, p.id).toBe("owned");
+  });
+
+  it("is on only for a paid free-access entitlement", () => {
+    expect(freeAccessOn([])).toBe(false);
+    expect(freeAccessOn([purchase("canada")])).toBe(false);
+    expect(freeAccessOn([purchase("canada", "free-access")])).toBe(true);
+    expect(freeAccessOn([{ ...purchase("canada", "free-access"), status: "refunded" }])).toBe(false);
+  });
+});
+
+describe("live names and descriptions", () => {
+  it("come from the Lakeside catalog when it answered, and from the game otherwise", () => {
+    const live = catalogFromResponse({
+      source: "platform",
+      products: [{ id: "canada", name: " Canada Pack ", description: "From the Lakeside store.", priceCents: 99, scenarios: [], listed: true }],
+    });
+    expect(packName("canada", live)).toBe("Canada Pack");
+    expect(packDescription("canada", live)).toBe("From the Lakeside store.");
+    expect(packName("germany", live)).toBe(PACKS_BY_ID.germany.name);
+    expect(packName("canada", unreachableCatalog())).toBe(PACKS_BY_ID.canada.name);
+    expect(packDescription("canada", LOADING_CATALOG)).toBe(PACKS_BY_ID.canada.description);
   });
 });

@@ -47,7 +47,11 @@ export interface Purchase {
   packId: string | null;
   packName: string | null;
   scenarioId: string | null;
-  provider: "stripe" | "code" | "apple" | "google" | "supporter";
+  /**
+   * How the Lakeside platform granted it. "supporter": any active Lakeside
+   * supporter tier. "free-access": everything is free to play right now.
+   */
+  provider: "stripe" | "code" | "apple" | "google" | "supporter" | "free-access";
   amountCents: number | null;
   currency: string | null;
   status: "paid" | "refunded";
@@ -57,6 +61,8 @@ export interface Purchase {
 export interface CatalogProduct {
   id: string;
   name: string;
+  /** The Lakeside store's description; older servers send none. */
+  description?: string | null;
   /** Null when the platform gave no price for it in this answer. */
   priceCents: number | null;
   scenarios: string[];
