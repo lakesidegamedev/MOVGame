@@ -442,12 +442,18 @@ export interface SeatResult {
 }
 
 // Who can form a government after the seats fall, the UK analog of the U.S.
-// 269–269 contingent-election ending.
+// 269–269 contingent-election ending. The head of government is `party`,
+// `lead` or `parties[0]`. `support` lists parties that vote the government in
+// from outside without joining it; absent means none (or, for
+// confidence_supply, just `partner`). `seats` on a coalition or
+// confidence_supply counts every vote that carried it, support included; on a
+// minority it is the governing party's own seats. A coalition with
+// `minority: true` was invested short of a majority, on more yes than no votes.
 export type Government =
   | { kind: "majority"; party: PartyId; seats: number }
-  | { kind: "minority"; party: PartyId; seats: number }
-  | { kind: "coalition"; parties: PartyId[]; seats: number }
-  | { kind: "confidence_supply"; lead: PartyId; partner: PartyId; seats: number }
+  | { kind: "minority"; party: PartyId; seats: number; support?: PartyId[] }
+  | { kind: "coalition"; parties: PartyId[]; seats: number; support?: PartyId[]; minority?: boolean }
+  | { kind: "confidence_supply"; lead: PartyId; partner: PartyId; seats: number; support?: PartyId[] }
   | { kind: "hung"; largest: PartyId };
 
 export interface GameResult {
