@@ -689,9 +689,20 @@
     "skip": "no photo of this person alone under a public domain or CC BY / CC BY-SA licence on Wikimedia Commons"
   },
   {
+    "name": "Atal Bihari Vajpayee",
+    "country": "IN",
+    "qid": "Q233289",
+    "file": "Atal Bihari Vajpayee 2002-06-12.jpg"
+  },
+  {
     "name": "Edappadi K. Palaniswami",
     "country": "IN",
     "qid": "Q6323772"
+  },
+  {
+    "name": "Harkishan Singh Surjeet",
+    "country": "IN",
+    "qid": "Q562179"
   },
   {
     "name": "J. Jayalalithaa",
@@ -704,6 +715,11 @@
     "country": "IN",
     "qid": "Q3531971",
     "skip": "no photo of this person alone under a public domain or CC BY / CC BY-SA licence on Wikimedia Commons"
+  },
+  {
+    "name": "Kanshi Ram",
+    "country": "IN",
+    "qid": "Q1397644"
   },
   {
     "name": "L. K. Advani",
@@ -755,6 +771,11 @@
     "country": "IN",
     "qid": "Q7531710",
     "file": "Sitaram Yechury at 2019 Hyderabad Book fair1 (cropped).jpg"
+  },
+  {
+    "name": "Sonia Gandhi",
+    "country": "IN",
+    "qid": "Q163225"
   },
   {
     "name": "Antonio Ingroia",
