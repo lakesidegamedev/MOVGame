@@ -297,14 +297,14 @@ export const NEW_ZEALAND: CountryBundle = {
         { id: "press_debate_cgt", headline: "In the Christchurch debate on 2 September Key lands a hit when Cunliffe cannot say whether family homes held in trusts would escape Labour's capital gains tax, and {party} loses the economic argument", role: "any", party: "lab", weight: 3, appeal: -0.025, momentum: -7, turn: 3 },
         { id: "act_launch", headline: "ACT launches on 7 September with a promise to repeal the Resource Management Act and scrap the Overseas Investment Office, and {party} gives its base something to cheer", role: "any", party: "act", weight: 2, appeal: 0.01, momentum: 3, turn: 4 },
         { id: "harawira_email", headline: "Hone Harawira sends party members an expletive-filled email on 8 September about the Internet Party's cannabis push, and {party} looks like a marriage of convenience", role: "any", party: "oth", weight: 3, appeal: -0.02, momentum: -6, turn: 4 },
-        { id: "moment_of_truth", headline: "Kim Dotcom's Moment of Truth event on 15 September puts Glenn Greenwald, Edward Snowden and Julian Assange on one stage, and the headlines do not turn into votes for {party}", role: "any", party: "oth", weight: 2, appeal: -0.01, momentum: -4, turn: 5 },
+        { id: "moment_of_truth", headline: "Kim Dotcom's Moment of Truth event on 15 September brings Glenn Greenwald, Edward Snowden and Julian Assange into one night on surveillance, and the headlines do not turn into votes for {party}", role: "any", party: "oth", weight: 2, appeal: -0.01, momentum: -4, turn: 5 },
         { id: "steak_not_lamb", headline: "Key tells supporters on 17 September that if they want a National government they should party vote National, not buy 'a lamb chop' when they want steak, and {party} squeezes its partners", role: "any", party: "nat", weight: 3, appeal: 0.02, momentum: 5, turn: 5 },
         { id: "davis_endorsed", headline: "Key and Winston Peters both back Labour's Kelvin Davis in Te Tai Tokerau on 18 September, and Hone Harawira says they are trying to overturn the voters' choice, which costs {party} its electorate lifeline", role: "any", party: "oth", weight: 2, appeal: -0.02, momentum: -5, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
-        { id: "peters_crowds", headline: "Winston Peters fills provincial halls with older voters angry at both big parties, and {party} climbs", role: "any", party: "nzf", weight: 2, appeal: 0.025, momentum: 7 },
+        { id: "peters_crowds", headline: "Winston Peters fills provincial halls on the campaign trail, and {party} climbs", role: "any", party: "nzf", weight: 2, appeal: 0.025, momentum: 7 },
         { id: "craig_billboards", headline: "Colin Craig's Conservatives plaster the country with billboards and polls close to the 5% line, and {party} peels votes from the right", role: "any", party: "oth", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "turia_goes", headline: "Tariana Turia, co-founder of the Māori Party, is standing down at this election, and {party} has to hold its seats without her", role: "any", party: "tpm", weight: 2, appeal: -0.02, momentum: -4 },
-        { id: "green_surplus", headline: "The Greens' Russel Norman and Metiria Turei keep a steady 10% by pitching a clean economy and a Labour-Green government, and {party} stays in the frame", role: "any", party: "grn", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "green_surplus", headline: "The Greens' Russel Norman and Metiria Turei hold steady near 10% and say they want to be in a Labour-led government, and {party} stays in the frame", role: "any", party: "grn", weight: 2, appeal: 0.015, momentum: 4 },
       ],
     },
 
@@ -336,11 +336,11 @@ export const NEW_ZEALAND: CountryBundle = {
         { id: "peters_debate", headline: "Winston Peters wins the minor parties' debate on 16 November in the viewers' text poll, with 36%, and {party} is suddenly a story again", role: "any", party: "nzf", weight: 3, appeal: 0.025, momentum: 7, turn: 4 },
         { id: "worm_turns", headline: "Goff wins the TV3 debate on 21 November in front of an audience of undecided voters, and {party} gets its best night of the campaign", role: "any", party: "lab", weight: 3, appeal: 0.02, momentum: 6, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
-        { id: "asset_sales", headline: "National's plan to sell minority stakes in state power companies and Air New Zealand keeps polling badly, and voters who dislike it look at {party}", role: "any", party: "lab", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "asset_sales", headline: "National's plan to sell minority stakes in state energy companies keeps polling badly, and voters who dislike it look at {party}", role: "any", party: "lab", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "rena_oil", headline: "Oil from the grounded container ship Rena keeps washing onto Bay of Plenty beaches, and {party} makes the case against deep sea drilling", role: "any", party: "grn", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "mana_launch", headline: "Hone Harawira's new Mana party takes aim at the Māori Party in the Māori electorates, and {party} has a fight on its hands", role: "any", party: "tpm", weight: 2, appeal: -0.02, momentum: -5 },
-        { id: "brash_act", headline: "Don Brash returns as ACT leader to rescue a party that polls near zero, but the party's only hope is the Epsom seat, and {party} has to rely on National's goodwill", role: "any", party: "act", weight: 2, appeal: 0.01, momentum: 3 },
-        { id: "super_age", headline: "Labour's plan to raise the age of eligibility for superannuation is back on the front page, and {party} says it will not touch it", role: "any", party: "nat", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "brash_act", headline: "Don Brash takes over as ACT leader to rescue a party polling below the 5% line, but its best hope is still the Epsom seat, and {party} has to rely on National's goodwill", role: "any", party: "act", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "super_age", headline: "The age of superannuation eligibility comes up in the minor parties' debates on 30 October and 16 November, and Winston Peters says nobody else will defend the pension at 65, which wins {party} a hearing", role: "any", party: "nzf", weight: 2, appeal: 0.015, momentum: 4 },
       ],
     },
 
@@ -376,7 +376,7 @@ export const NEW_ZEALAND: CountryBundle = {
         // Unscheduled flavour: joins the weekly draw, fires at most once.
         { id: "peters_censure", headline: "Parliament censures Winston Peters 62 to 56 over the Owen Glenn donation, and {party} cannot shake the whiff of scandal", role: "any", party: "nzf", weight: 2, appeal: -0.03, momentum: -7 },
         { id: "tranz_rail", headline: "Labour says John Key did not disclose nearly half his Tranz Rail shares while he was transport spokesman, and {party} has to deal with a question of trust", role: "any", party: "nat", weight: 2, appeal: -0.02, momentum: -5 },
-        { id: "petrol_prices", headline: "Petrol has crossed two dollars a litre and food prices are the highest in eighteen years, and voters who feel the squeeze look at {party}", role: "any", party: "nat", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "petrol_prices", headline: "Petrol has crossed two dollars a litre and inflation is at an eighteen-year high, and voters who feel the squeeze look at {party}", role: "any", party: "nat", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "efa_chill", headline: "Critics say the Electoral Finance Act has a chilling effect on political activity, and {party} makes it a question of free speech", role: "any", party: "act", weight: 2, appeal: 0.02, momentum: 5 },
         { id: "maori_marae_polls", headline: "Polls commissioned by the Marae programme suggest the Māori Party will win most of the Māori electorates, and {party} says it can work with either big party", role: "any", party: "tpm", weight: 2, appeal: 0.02, momentum: 5 },
       ],

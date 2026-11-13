@@ -37,7 +37,7 @@ export const NZ_ELECTION_ISSUES: Record<string, CountryIssueDef[]> = {
     { id: "spying", name: "Surveillance", blurb: "Kim Dotcom's fight with the government and the Moment of Truth event on mass surveillance and the Five Eyes network." },
   ],
   "2011": [
-    { id: "assets", name: "Asset sales", blurb: "National's plan to sell minority stakes in state power companies and Air New Zealand, and the pledge from Labour and the Greens to stop it." },
+    { id: "assets", name: "Asset sales", blurb: "National's plan to sell minority stakes in state energy companies, and the pledge from Labour and the Greens to stop it." },
     { id: "economy_tax", name: "Economy & recovery", blurb: "The Christchurch earthquakes, the Rena oil spill and a slow recovery from the recession." },
     { id: "superannuation", name: "Superannuation age", blurb: "The age at which people can claim New Zealand Superannuation, and the argument over raising it above 65." },
     { id: "cost_of_living", name: "Jobs & prices", blurb: "Youth unemployment and the cost of food and power for families on ordinary incomes." },

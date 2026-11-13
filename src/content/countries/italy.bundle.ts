@@ -420,7 +420,7 @@ export const ITALY: CountryBundle = {
       id: "2006",
       year: 2006,
       label: "2006 · Prodi v. Berlusconi",
-      tagline: "April 2006. Silvio Berlusconi has led the longest government in Italian republican history and asks for five more years. Romano Prodi leads a broad centre-left Union that has to hold together long enough to win. It is the first vote under the Porcellum, a new law that guarantees the winning coalition 340 of the 630 seats, and the two sides are within a point or two of each other.",
+      tagline: "April 2006. Silvio Berlusconi has led the longest government in Italian republican history and asks for five more years. Romano Prodi leads a broad centre-left Union that has to hold together long enough to win. It is the first vote under the Porcellum, a new law that guarantees the winning coalition 340 of the 630 seats, and the polls have the two sides close.",
       majority: { total: 630, threshold: 316 },
       goalText: "316 of 630 seats",
       salience: { tax: 0.85, economy: 0.75, jobs: 0.55, media: 0.5, electoral_law: 0.5, reputation: 0.3 },
@@ -446,7 +446,7 @@ export const ITALY: CountryBundle = {
         { id: "debate_rules", headline: "Berlusconi gives way on 3 March and drops his extra closing speech, and Prodi agrees at last to two televised debates, which gives {party} the first win of the campaign", role: "any", party: "csx", weight: 3, appeal: 0.01, momentum: 3, turn: 0 },
         { id: "first_debate", headline: "More than 16 million watch the first Prodi and Berlusconi debate on 14 March, a record for political television. Berlusconi scribbles nervously, mixes up Iran and Iraq, and {party} is judged to have had the better night", role: "any", party: "csx", weight: 3, appeal: 0.02, momentum: 6, turn: 2 },
         { id: "ici_surprise", headline: "In his closing three minutes on 3 April Berlusconi announces that he will abolish ICI, the local property tax. Allies are caught off guard, but the promise is the talk of the week for {party}", role: "any", party: "cdx", weight: 3, appeal: 0.025, momentum: 7, turn: 5 },
-        { id: "interests_remark", headline: "Berlusconi tells a business audience on 4 April that he has too much respect for Italians to think many of them would vote against their own interests, and he uses a crude word. {party}'s rivals quote it all week", role: "any", party: "cdx", weight: 2, appeal: -0.02, momentum: -5, turn: 5 },
+        { id: "ici_mayors", headline: "Prodi answers the ICI surprise on 3 April by asking what centre-right mayors think of losing a tax that pays for their councils, and the rest of the House of Freedoms is not fully behind the promise. {party} has a line of attack", role: "any", party: "csx", weight: 2, appeal: 0.015, momentum: 4, turn: 5 },
         // Unscheduled flavour: joins the weekly draw, fires at most once.
         { id: "inheritance_tax", headline: "Berlusconi says a Prodi government would bring back the inheritance tax and tax treasury bills, and Prodi answers that only the very rich would pay. Taxes dominate the last weeks for {party}", role: "any", party: "cdx", weight: 3, appeal: 0.02, momentum: 5 },
         { id: "tax_wedge", headline: "Prodi promises a 5% cut in the tax wedge on labour, and {party} says the money will come from the rich and from tax evasion", role: "any", party: "csx", weight: 2, appeal: 0.015, momentum: 4 },

@@ -363,7 +363,7 @@ export const IRELAND: CountryBundle = {
       },
       // The real story beats of 2007, in campaign order (a turn is one week; turn 5 is the week before polling day).
       events: [
-        { id: "early_dissolution", headline: "Ahern dissolves the Dáil early on Sunday 29 April, and evidence about his finances in 1994 that has just leaked to the Mahon Tribunal dominates the first fortnight. {party} fights on the defensive", role: "any", party: "ff", weight: 3, appeal: -0.03, momentum: -8, turn: 2 },
+        { id: "early_dissolution", headline: "Ahern calls the election early on Sunday 29 April, and evidence about his finances in 1994 that has just leaked to the Mahon Tribunal dominates the first fortnight. {party} fights on the defensive", role: "any", party: "ff", weight: 3, appeal: -0.03, momentum: -8, turn: 2 },
         { id: "stormont_restored", headline: "Ahern stands with Tony Blair at Stormont on 8 May as Ian Paisley and Martin McGuinness take office, and {party} goes into the last fortnight as the party of the peace process", role: "any", party: "ff", weight: 3, appeal: 0.02, momentum: 6, turn: 3 },
         { id: "westminster_speech", headline: "Ahern becomes the first Irish Taoiseach to address both Houses of the British Parliament on 15 May, in the middle of the campaign, and {party} has a statesman's stage", role: "any", party: "ff", weight: 2, appeal: 0.015, momentum: 4, turn: 4 },
         { id: "kenny_debate", headline: "The Prime Time debate between Ahern and Kenny concentrates on Kenny's lack of experience, and an Irish Times poll in the last week has {party} back at 41%", role: "any", party: "ff", weight: 3, appeal: 0.025, momentum: 7, turn: 5 },

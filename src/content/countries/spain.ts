@@ -24,7 +24,7 @@ export const SPAIN_MODULE: CountryModule = {
       description: "Four parties in one race for the first time. Rajoy defends a recovery and a corruption record against Sánchez, Podemos and Citizens." },
     { electionId: "2011", year: 2011, label: "2011 · Rajoy v. Rubalcaba", difficulty: "hard",
       description: "The crash election. Zapatero steps aside, unemployment is above 21%, and Rajoy needs only to avoid mistakes. The question is how large his majority will be." },
-    { electionId: "2019nov", year: 2019, label: "2019 (Nov) · Sánchez v. Casado", difficulty: "hard", addedLater: true,
+    { electionId: "2019nov", year: 2019, label: "2019 (Nov) · Sánchez v. Casado", difficulty: "easy", addedLater: true,
       description: "Sánchez could not form a government, so Spain votes again. The Catalan sentence, Franco's exhumation and Más País's split of the left shape a campaign with Vox in its first national debate." },
     { electionId: "2016", year: 2016, label: "2016 · Rajoy v. Sánchez", difficulty: "hard", addedLater: true,
       description: "A repeat election after six months of failed talks. Podemos and United Left join forces to overtake the PSOE, Rajoy asks for stability and Rivera wants to be the pivot." },
