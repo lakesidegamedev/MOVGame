@@ -190,7 +190,7 @@ function NoticeBanner() {
   const notice = useAuthStore((s) => s.notice);
   const dismiss = useAuthStore((s) => s.dismissNotice);
   if (!notice) return null;
-  const good = notice.kind === "lakeside-signed-in";
+  const good = notice.kind === "lakeside-signed-in" || notice.kind === "account-deleted";
   const text =
     notice.kind === "lakeside-signed-in"
       ? `Signed in as ${notice.username} with your Lakeside Games account.`
@@ -198,7 +198,9 @@ function NoticeBanner() {
         ? "A game account already uses that email. Log in with its password first, then link your Lakeside account from Your Account."
         : notice.kind === "launcher-failed"
           ? "The launcher could not sign you in. You can still play, or use Log In."
-          : "That sign in link expired. Try again from the login screen.";
+          : notice.kind === "account-deleted"
+            ? `Your ${BRAND.name} account is deleted and you are signed out. Packs you bought stay with your Lakeside Games account.`
+            : "That sign in link expired. Try again from the login screen.";
   return (
     <div className={`notice-banner${good ? " good" : ""}`} role="status">
       {good ? <Check size={14} /> : null}

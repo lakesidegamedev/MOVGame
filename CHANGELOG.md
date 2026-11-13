@@ -23,6 +23,17 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - After you pay in your browser, the Windows desktop app checks for the purchase the moment you
   come back to its window (taskbar, Alt+Tab or a click) and unlocks the pack within about a
   second. "I've paid, check now" and the timed check still work as before.
+- You can delete your account on the web and desktop: select your username, then Your account,
+  then Delete account, and type your username to confirm. It removes the game account with its
+  cloud saves, scores and achievements, and signs you out. Packs you bought stay with your Lakeside
+  Games account.
+
+### Changed
+
+- The privacy policy is rewritten for 2.0. It now covers purchases in every version of the game,
+  the Lakeside account, cloud saves, daily scores, Ask and deleting your account, and states that
+  the game uses no analytics and that error reporting is switched off. It also drops claims that
+  were out of date.
 
 ### Fixed
 
