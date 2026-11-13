@@ -18,8 +18,12 @@ production build green.
   entitlements, leaderboard, and score validation
 - Dexie (IndexedDB) local persistence, Sentry browser SDK
 - No router library; view switching is app state in `App.tsx`
-- Deployed by `/root/bin/auto-deploy.sh` (systemd timer, 2 min): fetch, pull,
-  build, restart `ahd-sim-campaign.service`, build-gated
+- The web app deploys from `main` to Cloudflare Pages (`web-deploy.yml`). The API
+  (`server/`, `ahd-sim-campaign.service`) is NOT part of that: it runs from a
+  separate checkout on the API host and must be pulled and restarted by hand
+  after any merge that changes pack or scenario membership. Entitlements are
+  computed by that server, so a stale API leaves new elections locked for every
+  account, however many packs it owns.
 
 **Already existed before this project** (the original handoff prompt assumed a
 hobby prototype; the repo was well past that):
