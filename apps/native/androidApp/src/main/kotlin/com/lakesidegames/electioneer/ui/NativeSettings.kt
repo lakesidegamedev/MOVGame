@@ -91,6 +91,7 @@ fun NativeSettingsScreen(session: GameSession) {
             SecondaryButton("How to play", { session.go(Screen.GUIDE) }, Modifier.fillMaxWidth())
             SecondaryButton("Scenario editor", { session.go(Screen.EDITOR) }, Modifier.fillMaxWidth())
         }
+        NativeCreditsCard()
         MovCard(tight = true) {
             CardHead("About")
             GhostButton("Privacy policy", { uri.openUri("https://lakesidegames.net/games/margin-of-victory/?legal=privacy") }, color = Mov.Info)

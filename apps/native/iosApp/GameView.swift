@@ -96,6 +96,16 @@ struct GameView: View {
                     Button("Undo", action: session.undo).disabled(!session.canUndo())
                     if deskSection == .map {
                     VStack(spacing: 7) {
+                        // The two tickets: photo and party logo beside each count.
+                        HStack(spacing: 8) {
+                            LeaderPortraitView(name: g.candidateName(side: "dem"), ring: Color(hex: g.ticketColor(side: "dem")), size: 38)
+                            PartyMarkView(color: g.ticketColor(side: "dem"), logo: g.logo(side: "dem"))
+                            Text(g.candidateName(side: "dem")).font(.caption).lineLimit(1)
+                            Spacer(minLength: 4)
+                            Text(g.candidateName(side: "rep")).font(.caption).lineLimit(1)
+                            PartyMarkView(color: g.ticketColor(side: "rep"), logo: g.logo(side: "rep"))
+                            LeaderPortraitView(name: g.candidateName(side: "rep"), ring: Color(hex: g.ticketColor(side: "rep")), size: 38)
+                        }
                         HStack(alignment: .top) {
                             VStack(alignment: .leading) {
                                 Text(g.ticketName(side: "dem").uppercased()).font(.caption2.bold()).foregroundStyle(Color(hex: g.ticketColor(side: "dem")))

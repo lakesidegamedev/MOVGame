@@ -28,7 +28,10 @@ struct NativeElectionNightView: View {
                 if let projection = board.projection { Text(projection).font(.title2.bold()) }
                 ForEach(board.rows, id: \.id) { row in
                     VStack(alignment: .leading, spacing: 5) {
-                        Text("\(row.name): \(row.units) \(data.unitLabel)").font(.headline)
+                        HStack(spacing: 6) {
+                            PartyMarkView(color: row.color, logo: night.logo(partyId: row.id))
+                            Text("\(row.name): \(row.units) \(data.unitLabel)").font(.headline)
+                        }
                         ProgressView(value: Double(row.units), total: Double(data.totalUnits)).tint(Color(hex: row.color))
                     }
                 }

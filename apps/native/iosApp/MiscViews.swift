@@ -668,3 +668,104 @@ struct ImageCreditsView: View {
         .background(CampaignStyle.background)
     }
 }
+
+// MARK: Leader photos and party logos
+
+/// Leader photos and party logos ship in the shared content bundle (bundles/art).
+/// Each is a few kilobytes; decoded images are cached in memory.
+enum NativeArtImages {
+    private static let cache = NSCache<NSString, UIImage>()
+
+    static func image(_ file: String?) -> UIImage? {
+        guard let file, !file.isEmpty else { return nil }
+        if let hit = cache.object(forKey: file as NSString) { return hit }
+        let name = (file as NSString).deletingPathExtension
+        let ext = (file as NSString).pathExtension
+        guard let path = Bundle.main.path(forResource: name, ofType: ext, inDirectory: "bundles/art"),
+              let image = UIImage(contentsOfFile: path) else { return nil }
+        cache.setObject(image, forKey: file as NSString)
+        return image
+    }
+}
+
+func nativeInitials(_ name: String?) -> String {
+    let words = (name ?? "").split(separator: " ").filter { !$0.isEmpty }
+    if words.count >= 2, let first = words.first?.first, let last = words.last?.first { return "\(first)\(last)".uppercased() }
+    return String(words.first?.prefix(2) ?? "").uppercased()
+}
+
+/// A party's logo on a small white tile beside its name, or its colour swatch
+/// when the game has no logo for it. Decorative: the name is the label.
+struct PartyMarkView: View {
+    let color: String
+    let logo: String?
+    var size: CGFloat = 12
+
+    var body: some View {
+        if let image = NativeArtImages.image(logo) {
+            let height = size + 6
+            let ratio = image.size.height > 0 ? image.size.width / image.size.height : 1
+            Image(uiImage: image).resizable().scaledToFit()
+                .padding(2)
+                .frame(width: min(max(height * ratio, height), height * 2.6), height: height)
+                .background(Color.white, in: RoundedRectangle(cornerRadius: 3))
+                .accessibilityHidden(true)
+        } else {
+            RoundedRectangle(cornerRadius: 3).fill(Color(hex: color)).frame(width: size, height: size)
+                .accessibilityHidden(true)
+        }
+    }
+}
+
+/// A leader's photo in a circle ringed in the party colour, or their initials
+/// when there is no freely licensed photo. Decorative: the name is shown beside it.
+struct LeaderPortraitView: View {
+    let name: String?
+    let ring: Color
+    var size: CGFloat = 40
+
+    var body: some View {
+        ZStack {
+            Circle().fill(Color(hex: "#1c2a38"))
+            if let image = NativeArtImages.image(NativeArt.shared.portrait(name: name)) {
+                Image(uiImage: image).resizable().scaledToFill().frame(width: size, height: size).clipShape(Circle())
+            } else {
+                Text(nativeInitials(name)).font(.system(size: size * 0.36, weight: .bold)).foregroundStyle(.white)
+            }
+        }
+        .frame(width: size, height: size)
+        .overlay(Circle().strokeBorder(ring, lineWidth: 2))
+        .accessibilityHidden(true)
+    }
+}
+
+/// Credits for the leader photos and party logos, the same lines as the web
+/// Credits page. Each line opens its Commons file page.
+struct NativeCreditsView: View {
+    var body: some View {
+        List {
+            Section {
+                Text("Photos of leaders and candidates come from Wikimedia Commons. Each is public domain or used under the Creative Commons licence named next to it, and was cropped to a square and made smaller. Leaders with no freely licensed photo are shown with their initials.")
+                    .font(.caption)
+                ForEach(NativeArt.shared.portraitCredits(), id: \.self) { credit in creditLine(credit) }
+            } header: { Text("Leader photos") }
+            Section {
+                Text("Party logos are the property of their parties and are shown only to identify each party. They come from Wikimedia Commons, listed here with the source, the author and the status or licence Commons gives each file, and were trimmed and made smaller. Parties without a logo on Commons are shown by their colour.")
+                    .font(.caption)
+                ForEach(NativeArt.shared.logoCredits(), id: \.self) { credit in creditLine(credit) }
+            } header: { Text("Party logos") }
+        }
+        .navigationTitle("Credits")
+        .preferredColorScheme(.dark)
+    }
+
+    @ViewBuilder
+    private func creditLine(_ credit: ArtCredit) -> some View {
+        let text = "\(credit.name): \(credit.title), \(credit.author), \(credit.license)"
+        if let url = URL(string: credit.source) {
+            Link(destination: url) { Text(text).font(.caption).multilineTextAlignment(.leading) }
+        } else {
+            Text(text).font(.caption)
+        }
+    }
+}

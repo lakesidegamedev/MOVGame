@@ -6,6 +6,7 @@ import com.lakesidegames.electioneer.content.SCENARIOS
 import com.lakesidegames.electioneer.content.SCENARIO_IDS
 import com.lakesidegames.electioneer.content.STAFF_POOL
 import com.lakesidegames.electioneer.content.ISSUES
+import com.lakesidegames.electioneer.content.NativeArt
 import kotlin.math.roundToInt
 
 data class CampaignChoice(val id: String, val year: Int, val label: String, val tagline: String, val demName: String, val repName: String)
@@ -133,6 +134,12 @@ class MobileGame private constructor(
     fun playerSerial(): String = game.playerCandidate.serial
     fun ticketName(side: String): String = game.candidates.getValue(side).shortName
     fun ticketColor(side: String): String = game.candidates.getValue(side).color
+    /** The candidate's full name ("dem", "rep"). */
+    fun candidateName(side: String): String = game.candidates.getValue(side).name
+    /** Photo file of the candidate (NativeArt.DIRECTORY), or null for initials. */
+    fun portrait(side: String): String? = NativeArt.portrait(candidateName(side))
+    /** The party's logo in this election year, or null (custom races show colours only). */
+    fun logo(side: String): String? = NativeArt.usLogo(game, side)
 
     fun campaignLabel(): String = customDocument(game.customScenario)?.label ?: SCENARIOS[game.scenarioId ?: "2020"]?.label ?: "Your campaign"
 

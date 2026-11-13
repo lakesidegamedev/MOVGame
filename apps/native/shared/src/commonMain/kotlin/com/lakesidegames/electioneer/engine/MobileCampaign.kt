@@ -164,6 +164,12 @@ class MobileCampaign private constructor(private var uk: UkGameState?, private v
     }
 
     fun isCustom(): Boolean = uk?.custom == true || country?.custom == true
+    /** The leader's name for a party in this campaign (custom races carry the player's own names). */
+    fun leaderName(partyId: String): String? = uk?.leaders?.get(partyId)?.name ?: country?.leaders?.get(partyId)?.name
+    /** Photo file for a party's leader (NativeArt.DIRECTORY), or null for initials. */
+    fun portrait(partyId: String): String? = NativeArt.portrait(leaderName(partyId))
+    /** The party's logo at this election, or null. Custom races rename parties, so they show colours only. */
+    fun logo(partyId: String): String? = if (isCustom()) null else NativeArt.logo(countryId(), partyId, electionId())
     fun countryId(): String = country?.let { customDocument(it.customScenario)?.country ?: it.countryId } ?: "UK"
     fun map(): NativeMap = nativeMaps.getValue(countryId())
     fun electionId(): String = uk?.electionId ?: country!!.electionId

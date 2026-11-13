@@ -57,6 +57,9 @@ struct NativeSettingsView: View {
                 NavigationLink("How to play") { CampaignGuideView() }
                 Button("Replay tutorial") { settings.replayTutorial(); dismiss() }
             }
+            Section("Credits") {
+                NavigationLink("Leader photos and party logos") { NativeCreditsView() }
+            }
             Section("Margin of Victory") {
                 Link("Privacy policy", destination: URL(string: "https://lakesidegames.net/games/margin-of-victory/?legal=privacy")!)
                 Link("Terms of service", destination: URL(string: "https://lakesidegames.net/games/margin-of-victory/?legal=terms")!)

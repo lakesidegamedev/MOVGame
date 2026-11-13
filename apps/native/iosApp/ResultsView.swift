@@ -38,6 +38,13 @@ struct ResultsView: View {
                         Text(g.resultWinnerSerial() == g.playerSerial() ? "Victory" : "The race is over")
                             .font(.largeTitle.bold())
                         Text(g.resultWinnerSerial() == "tie" ? "Electoral College tied. No candidate reaches \(g.evMajority())." : "\(g.resultWinnerName()) wins the presidency").font(.title3)
+                        HStack(spacing: 8) {
+                            LeaderPortraitView(name: g.candidateName(side: "dem"), ring: Color(hex: g.ticketColor(side: "dem")), size: 44)
+                            PartyMarkView(color: g.ticketColor(side: "dem"), logo: g.logo(side: "dem"))
+                            Spacer()
+                            PartyMarkView(color: g.ticketColor(side: "rep"), logo: g.logo(side: "rep"))
+                            LeaderPortraitView(name: g.candidateName(side: "rep"), ring: Color(hex: g.ticketColor(side: "rep")), size: 44)
+                        }
                         HStack {
                             Text("DEM \(Int(g.resultDemEv()))").foregroundStyle(CampaignStyle.democrat)
                             Spacer()

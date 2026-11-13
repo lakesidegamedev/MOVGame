@@ -1,5 +1,7 @@
 package com.lakesidegames.electioneer.ui
 
+import com.lakesidegames.electioneer.content.NativeArt
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -58,6 +60,13 @@ fun ResultsScreen(session: GameSession) {
             Text(if (won) "Victory" else "Defeat", style = MaterialTheme.typography.displayMedium, color = Mov.Text1)
             Text(if (result.winner == "tie") "Electoral College tied. No candidate reaches ${college.majority}." else "$winnerName wins the presidency",
                 style = MaterialTheme.typography.titleMedium, color = Mov.Text2)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
+                LeaderPortrait(dem?.name, dem?.color, size = 44.dp)
+                PartyMark(dem?.color, NativeArt.usLogo(g, CandidateId.DEM.serial))
+                Spacer(Modifier.weight(1f))
+                PartyMark(rep?.color, NativeArt.usLogo(g, CandidateId.REP.serial))
+                LeaderPortrait(rep?.name, rep?.color, size = 44.dp)
+            }
             Row(verticalAlignment = Alignment.Bottom) {
                 BigNumber("$demEv", dem?.shortName ?: "Dem", Mov.DemText)
                 Spacer(Modifier.weight(1f))

@@ -182,9 +182,12 @@ private fun ElectionBriefing(session: GameSession, election: NativeElection, dai
                     val on = party.id == partyId
                     MovCard(tight = true, accent = on, color = if (on) Mov.Surface2 else Mov.Surface1, onClick = { partyId = party.id }) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
-                            PartySwatch(partyFill(party.color), size = 14.dp)
+                            LeaderPortrait(party.leader, party.color, size = 40.dp)
                             Column(Modifier.weight(1f)) {
-                                Text(party.name, color = partyInk(party.color), style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s1_5)) {
+                                    PartyMark(party.color, com.lakesidegames.electioneer.content.NativeArt.logo(election.country, party.id, election.nativeId))
+                                    Text(party.name, Modifier.weight(1f, fill = false), color = partyInk(party.color), style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                }
                                 Text(party.leader, color = Mov.Text2, style = MaterialTheme.typography.bodySmall)
                             }
                             if (on) Tag("Your side", TagKind.Accent)

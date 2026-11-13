@@ -216,8 +216,10 @@ struct SetupView: View {
                                 .font(.caption.bold()).tracking(1.5).foregroundStyle(CampaignStyle.muted)
                         }
                         HStack(spacing: 10) {
-                            partyCard("dem", name: campaign.demName, party: "DEMOCRAT", color: CampaignStyle.democrat)
-                            partyCard("rep", name: campaign.repName, party: "REPUBLICAN", color: CampaignStyle.republican)
+                            partyCard("dem", name: campaign.demName, party: "DEMOCRAT", color: CampaignStyle.democrat,
+                                      logo: NativeArt.shared.logo(country: "US", party: "dem", electionId: String(campaign.year)))
+                            partyCard("rep", name: campaign.repName, party: "REPUBLICAN", color: CampaignStyle.republican,
+                                      logo: NativeArt.shared.logo(country: "US", party: "rep", electionId: String(campaign.year)))
                         }
                         if !usesAccessibilityLayout {
                             Image("cover-country-us")
@@ -374,12 +376,16 @@ struct SetupView: View {
         mateId = ""
     }
 
-    private func partyCard(_ side: String, name: String, party: String, color: Color) -> some View {
+    private func partyCard(_ side: String, name: String, party: String, color: Color, logo: String? = nil) -> some View {
         Button {
             player = side
             mateId = ""
         } label: {
             VStack(alignment: .leading, spacing: usesCompactAX ? 6 : 8) {
+                HStack(spacing: 6) {
+                    LeaderPortraitView(name: name, ring: color, size: 32)
+                    if logo != nil { PartyMarkView(color: "#94a3b8", logo: logo) }
+                }
                 Text(party).font(.caption2.bold()).tracking(0.7).foregroundStyle(color)
                     .lineLimit(1).minimumScaleFactor(0.6)
                 Text(name).font(.subheadline.bold()).foregroundStyle(.white)

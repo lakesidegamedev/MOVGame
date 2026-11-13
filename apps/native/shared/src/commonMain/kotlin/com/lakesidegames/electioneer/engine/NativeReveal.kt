@@ -145,15 +145,24 @@ object NativeReveal {
 }
 
 class NativeElectionNight private constructor(private val data: NativeRevealData, private val sequence: NativeRevealSchedule,
-    private val geography: NativeMap) {
+    private val geography: NativeMap, private val logos: Map<String, String> = emptyMap()) {
     companion object {
         fun create(snapshot: String): NativeElectionNight? {
             val data = NativeReveal.data(snapshot) ?: return null
             val world = MobileCampaign.restore(snapshot)
             val map = world?.map() ?: nativeMaps.getValue("US")
-            return NativeElectionNight(data, NativeReveal.schedule(data), map)
+            val logos = if (world != null) data.parties.mapNotNull { p -> world.logo(p.id)?.let { p.id to it } }.toMap() else usLogos(snapshot)
+            return NativeElectionNight(data, NativeReveal.schedule(data), map, logos)
+        }
+
+        // The two U.S. parties' logos at this scenario's election; none for custom races.
+        private fun usLogos(snapshot: String): Map<String, String> {
+            val game = loadGame(snapshot)?.state ?: return emptyMap()
+            return listOf("dem", "rep").mapNotNull { id -> NativeArt.usLogo(game, id)?.let { id to it } }.toMap()
         }
     }
+    /** The party's logo file (NativeArt.DIRECTORY) at this election, or null. */
+    fun logo(partyId: String): String? = logos[partyId]
     fun data(): NativeRevealData = data
     fun map(): NativeMap = geography
     fun count(): Int = sequence.entries.size
