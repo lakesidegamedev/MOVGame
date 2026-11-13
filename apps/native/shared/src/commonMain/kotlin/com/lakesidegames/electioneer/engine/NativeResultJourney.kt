@@ -34,7 +34,7 @@ class NativeResultsJourney private constructor() {
             val role = NativeDaily.roleName(player)
             val title = "Margin of Victory${if (daily) " Daily · $dateUTC" else ""}"
             val scoreLine = if (summary.score >= 0) " · Score ${comma(summary.score)}" else ""
-            val share = "$title\n${flag} ${label} · as $role\n${if (won) "🏆" else "🗳️"} $unitLine$scoreLine\nlakesidegames.net/games/electioneer"
+            val share = "$title\n${flag} ${label} · as $role\n${if (won) "🏆" else "🗳️"} $unitLine$scoreLine\nlakesidegames.net/games/margin-of-victory"
             val next = (if (custom) null else nextHints[meta!!.scenarioId])?.let { hint ->
                 val party = if (country == "US") player else {
                     val playable = MobileCampaign.parties(country, hint.electionId)
