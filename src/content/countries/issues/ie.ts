@@ -37,4 +37,12 @@ export const IE_ELECTION_ISSUES: Record<string, CountryIssueDef[]> = {
     { id: "cost_of_living", name: "Pay & household bills", blurb: "Pay cuts, the new universal social charge on every payslip, and rising household bills." },
     { id: "housing", name: "Mortgages & ghost estates", blurb: "Homeowners in negative equity and arrears after the property crash, and empty ghost estates." },
   ],
+  "2007": [
+    { id: "health", name: "Health", blurb: "Trolleys in hospital corridors and the parties' promises of so many more hospital beds." },
+    { id: "crime", name: "Crime", blurb: "Gang violence and the parties' promises of so many more gardaí." },
+    { id: "economy", name: "The economy", blurb: "A long boom, rising house prices and the question of who can keep it going." },
+    { id: "integrity", name: "Ahern & the Mahon Tribunal", blurb: "Evidence about the Taoiseach's finances in 1994, and whether he is fit to serve." },
+    { id: "education", name: "Education", blurb: "Class sizes and the parties' promises on pupil-teacher ratios." },
+    { id: "alliance", name: "Alliance for Change", blurb: "Fine Gael and Labour's pre-election pact against the Fianna Fáil and Progressive Democrat government." },
+  ],
 };

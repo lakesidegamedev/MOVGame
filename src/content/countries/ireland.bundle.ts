@@ -1,4 +1,4 @@
-// IRELAND: four general elections to the Dail, one bundle.
+// IRELAND: five general elections to the Dail, one bundle.
 //
 // Single transferable vote in multi-seat constituencies of three to five
 // seats. The engine has no STV count, so this is modelled the way Australia
@@ -45,6 +45,18 @@
 // Before Profit in 2016. Regional electorate weights are the 2024 votes cast;
 // with those weights the national first-preference shares stay within 0.2
 // points of the official results in every election.
+//
+// 2007 was added later (24 May 2007, 166 seats in 43 constituencies, the
+// same boundaries as 2011). Same method: first-preference votes summed by
+// party from each constituency page on Wikipedia, winners counted from the
+// elected candidates in each table. Fianna Fail 78 (including the outgoing
+// Ceann Comhairle, Rory O'Hanlon, returned automatically in Cavan-Monaghan,
+// who has no first-preference votes), Fine Gael 51, Labour 20, the Greens 6,
+// Sinn Fein 4, the Progressive Democrats 2 and independents 5. The
+// Progressive Democrats sit in `oth` with the small parties that won no
+// seat. First preferences: Fianna Fail 41.6%, Fine Gael 27.3%, Labour 10.1%,
+// Sinn Fein 6.9%, the Greens 4.7%. The constituencies map to the same ten
+// regions as in 2011.
 //
 // 2024 (29 November): 174 seats, 88 for a majority. Fianna Fail 48, Sinn Fein
 // 39, Fine Gael 38, Labour 11, Social Democrats 11, Independent Ireland 4,
@@ -328,6 +340,43 @@ export const IRELAND: CountryBundle = {
         { id: "independents_local", headline: "Local independents with a record of constituency work stand against the discredited party machines, and {party} draws votes in the towns", role: "any", party: "ind", weight: 2, appeal: 0.02, momentum: 5 },
       ],
     },
+
+    "2007": {
+      id: "2007",
+      year: 2007,
+      label: "2007 · Ahern v. Kenny",
+      tagline: "May 2007. Bertie Ahern is after a third term at the head of a Fianna Fáil and Progressive Democrat government. Enda Kenny's Fine Gael and Pat Rabbitte's Labour offer an 'Alliance for Change' with an agreed transfer pact, and questions about the Taoiseach's finances at the Mahon Tribunal dominate the first fortnight. The polls say it could go either way. Win the most seats, then find the numbers.",
+      majority: { total: 166, threshold: 84 },
+      goalText: "84 of 166 seats",
+      salience: { health: 0.8, crime: 0.7, economy: 0.7, integrity: 0.65, education: 0.6, alliance: 0.5 },
+      regions: {
+        BOR: { v: { ff: 0.435, fg: 0.294, sf: 0.173, grn: 0.037, ind: 0.030, lab: 0.029, oth: 0.003 }, s: { ff: 11, fg: 5, sf: 2 } },
+        WES: { v: { fg: 0.392, ff: 0.341, ind: 0.098, oth: 0.055, sf: 0.048, lab: 0.042, grn: 0.024 }, s: { fg: 8, ff: 6, lab: 1, oth: 1, ind: 1 } },
+        MID: { v: { ff: 0.498, fg: 0.289, lab: 0.090, oth: 0.054, sf: 0.046, grn: 0.014, ind: 0.009 }, s: { ff: 5, fg: 3, lab: 1 } },
+        CMB: { v: { ff: 0.436, fg: 0.234, lab: 0.142, ind: 0.069, grn: 0.050, sf: 0.046, oth: 0.022 }, s: { ff: 10, fg: 5, lab: 3 } },
+        DNO: { v: { ff: 0.435, fg: 0.164, lab: 0.124, grn: 0.085, sf: 0.081, ind: 0.063, oth: 0.047 }, s: { ff: 8, lab: 3, fg: 3, ind: 2, grn: 1 } },
+        MUN: { v: { ff: 0.420, fg: 0.281, ind: 0.113, lab: 0.084, sf: 0.053, grn: 0.025, oth: 0.024 }, s: { ff: 11, fg: 9, ind: 2, sf: 1, lab: 1 } },
+        DWE: { v: { ff: 0.366, fg: 0.175, lab: 0.161, oth: 0.121, sf: 0.090, grn: 0.061, ind: 0.025 }, s: { ff: 4, lab: 3, fg: 2, oth: 1, grn: 1 } },
+        DSO: { v: { ff: 0.354, fg: 0.217, lab: 0.156, oth: 0.109, grn: 0.093, sf: 0.047, ind: 0.024 }, s: { ff: 7, fg: 5, grn: 3, lab: 3, sf: 1 } },
+        COR: { v: { ff: 0.428, fg: 0.320, lab: 0.116, grn: 0.051, sf: 0.050, oth: 0.019, ind: 0.015 }, s: { ff: 9, fg: 7, lab: 3 } },
+        SEA: { v: { ff: 0.453, fg: 0.297, lab: 0.115, sf: 0.059, grn: 0.039, oth: 0.027, ind: 0.010 }, s: { ff: 7, fg: 4, lab: 2, grn: 1 } },
+      },
+      // The real story beats of 2007, in campaign order (a turn is one week; turn 5 is the week before polling day).
+      events: [
+        { id: "early_dissolution", headline: "Ahern dissolves the Dáil early on Sunday 29 April, and evidence about his finances in 1994 that has just leaked to the Mahon Tribunal dominates the first fortnight. {party} fights on the defensive", role: "any", party: "ff", weight: 3, appeal: -0.03, momentum: -8, turn: 2 },
+        { id: "stormont_restored", headline: "Ahern stands with Tony Blair at Stormont on 8 May as Ian Paisley and Martin McGuinness take office, and {party} goes into the last fortnight as the party of the peace process", role: "any", party: "ff", weight: 3, appeal: 0.02, momentum: 6, turn: 3 },
+        { id: "westminster_speech", headline: "Ahern becomes the first Irish Taoiseach to address both Houses of the British Parliament on 15 May, in the middle of the campaign, and {party} has a statesman's stage", role: "any", party: "ff", weight: 2, appeal: 0.015, momentum: 4, turn: 4 },
+        { id: "kenny_debate", headline: "The Prime Time debate between Ahern and Kenny concentrates on Kenny's lack of experience, and an Irish Times poll in the last week has {party} back at 41%", role: "any", party: "ff", weight: 3, appeal: 0.025, momentum: 7, turn: 5 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "contract_better_ireland", headline: "Fine Gael's Contract for a Better Ireland is the centrepiece of its campaign, with set totals of hospital beds, gardaí and teachers, and {party} says it is the government that is not delivering", role: "any", party: "fg", weight: 3, appeal: 0.02, momentum: 5 },
+        { id: "alliance_for_change", headline: "Fine Gael and Labour offer the Alliance for Change, a proposed coalition with an agreed transfer pact, and {party} says only a change of government will fix health and crime", role: "any", party: "lab", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "pd_stay", headline: "The Progressive Democrats decide to stay in government rather than pull out over Ahern's finances, and {party}'s partners have bought the Taoiseach his time", role: "any", party: "ff", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "cowen_robust", headline: "Finance Minister Brian Cowen's robust exchanges in the final stretch rally the party's base, and {party} has an asset on the stump", role: "any", party: "ff", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "green_change", headline: "The Greens stay non-aligned but say they favour a change from the outgoing government, and {party} is the only party willing to talk to Sinn Féin", role: "any", party: "grn", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "sf_shut_out", headline: "Every party except the Greens says it would not put Sinn Féin in a government, and {party} fights for its seats from outside the pacts", role: "any", party: "sf", weight: 2, appeal: -0.01, momentum: -3 },
+        { id: "polls_close", headline: "Early polls show the Alliance for Change gaining on the government, and some commentators say Fianna Fáil could come back with only 65 seats. {party} warns its voters not to stay at home", role: "any", party: "fg", weight: 2, appeal: 0.02, momentum: 5 },
+      ],
+    },
   },
 
   leaders: {
@@ -367,6 +416,13 @@ export const IRELAND: CountryBundle = {
       sf: { partyId: "sf", name: "Gerry Adams", charisma: 62, energy: 66, competence: 50, machine: 60 },
       grn: { partyId: "grn", name: "John Gormley", charisma: 40, energy: 54, competence: 52, machine: 34 },
       pbp: { partyId: "pbp", name: "Joe Higgins & Richard Boyd Barrett", charisma: 66, energy: 72, competence: 56, machine: 36 },
+    },
+    "2007": {
+      ff: { partyId: "ff", name: "Bertie Ahern", charisma: 78, energy: 72, competence: 66, machine: 92 },
+      fg: { partyId: "fg", name: "Enda Kenny", charisma: 56, energy: 74, competence: 52, machine: 66 },
+      lab: { partyId: "lab", name: "Pat Rabbitte", charisma: 66, energy: 70, competence: 66, machine: 58 },
+      grn: { partyId: "grn", name: "Trevor Sargent", charisma: 52, energy: 62, competence: 62, machine: 46 },
+      sf: { partyId: "sf", name: "Gerry Adams", charisma: 68, energy: 70, competence: 58, machine: 78 },
     },
   },
 
