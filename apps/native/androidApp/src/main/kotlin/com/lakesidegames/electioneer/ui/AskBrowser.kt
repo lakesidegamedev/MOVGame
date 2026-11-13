@@ -22,6 +22,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.lakesidegames.electioneer.BuildConfig
+import com.lakesidegames.electioneer.engine.NativeLakesideLogin
 import com.lakesidegames.electioneer.engine.NativeCatalog
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -42,7 +43,7 @@ private class AskBrowser(private val context: Context, private val smoke: String
     private val allowedHosts = setOf("ask.lakesidegames.net", "auth.lakesidegames.net",
         "auth.ahousedividedgame.com", "ahousedividedgame.com", "www.ahousedividedgame.com",
         "sandbox.ahousedividedgame.com", "accounts.lakesidegames.net", "discord.com",
-        "accounts.google.com", "www.google.com")
+        "www.google.com", "appleid.apple.com", "idmsa.apple.com")
     var view: WebView by mutableStateOf(createView())
         private set
 
@@ -57,6 +58,11 @@ private class AskBrowser(private val context: Context, private val smoke: String
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val url = request.url
                 if (url.userInfo != null) { recover("This page cannot be opened in Ask."); return true }
+                if (NativeLakesideLogin.isGoogleSignIn(url.host, url.path)) {
+                    // Google blocks its sign-in inside an app's browser.
+                    showSignInNotice(NativeLakesideLogin.GOOGLE_UNAVAILABLE)
+                    return true
+                }
                 val allowed = url.scheme == "https" && (url.port == -1 || url.port == 443) && url.host in allowedHosts
                 if (allowed) {
                     if (request.isForMainFrame) mayRetry = request.method == "GET" && url.host == "ask.lakesidegames.net"
@@ -139,6 +145,16 @@ private class AskBrowser(private val context: Context, private val smoke: String
         handler.removeCallbacksAndMessages(null)
         val current = generation
         handler.postDelayed({ if (generation == current && phase == AskPhase.LOADING) recover("Ask did not finish loading. Try again.") }, 25_000)
+    }
+
+    /** Stops on a sign-in step the app cannot complete and shows why, with Try again. */
+    private fun showSignInNotice(message: String) {
+        handler.removeCallbacksAndMessages(null)
+        generation++
+        activeUrl = ""
+        view.stopLoading()
+        phase = AskPhase.FAILED
+        notice = message
     }
 
     private fun recover(message: String) {

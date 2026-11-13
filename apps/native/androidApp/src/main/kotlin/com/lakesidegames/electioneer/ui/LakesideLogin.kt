@@ -47,6 +47,11 @@ fun LakesideLogin(onCode: (String) -> Unit, onClose: () -> Unit) {
                         else notice = "This sign-in return could not be verified. Close and try again."
                         return true
                     }
+                    if (NativeLakesideLogin.isGoogleSignIn(uri.host, uri.path)) {
+                        // Google blocks its sign-in inside an app's browser.
+                        notice = NativeLakesideLogin.GOOGLE_UNAVAILABLE
+                        return true
+                    }
                     if (!flow.allows(uri.scheme, uri.host, uri.port)) {
                         notice = "This page cannot be opened during sign-in."
                         return true
