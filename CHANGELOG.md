@@ -43,6 +43,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Changed
 
+- Three Indian parties, the Samajwadi Party, the Biju Janata Dal and the YSR Congress Party, show
+  their colour instead of a logo: the copies of their logos on Wikimedia Commons do not carry a
+  licence we can rely on.
 - The privacy policy is rewritten for 2.0. It now covers purchases in every version of the game,
   the Lakeside account, cloud saves, daily scores, Ask and deleting your account, and states that
   the game uses no analytics and that error reporting is switched off. It also drops claims that

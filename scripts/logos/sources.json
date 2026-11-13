@@ -1746,9 +1746,7 @@
   "qid": "Q1546941",
   "label": "Samajwadi Party",
   "logos": [],
-  "file": "Samajwadi Party.png",
-  "why": "Wikidata names none",
-  "author": "Samajwadi Party"
+  "skip": "Commons file comes from a clipart site and its CC0 claim is not the party's; the slot shows its colour"
  },
  {
   "country": "in",
@@ -1767,8 +1765,7 @@
   "qid": "Q859993",
   "label": "Biju Janata Dal",
   "logos": [],
-  "file": "Biju Janata Dal logo.svg",
-  "why": "Wikidata names none"
+  "skip": "Commons file is a party logo uploaded as the uploader's own work; the licence claim is weak, so the slot shows its colour"
  },
  {
   "country": "in",
@@ -1777,8 +1774,7 @@
   "qid": "Q8046035",
   "label": "YSR Congress Party",
   "logos": [],
-  "file": "YSRCPLOGO.jpg",
-  "why": "Wikidata names none"
+  "skip": "Commons file is a party logo uploaded as the uploader's own work; the licence claim is weak, so the slot shows its colour"
  },
  {
   "country": "in",
