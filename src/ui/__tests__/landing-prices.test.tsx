@@ -85,5 +85,21 @@ describe("landing page prices", () => {
     expect(mark.getAttribute("href")).toBe("https://lakesidegames.net/");
     expect(mark.getAttribute("aria-label")).toMatch(/Lakeside Games/);
     expect(mark.tabIndex).toBe(0);
+    // Small and at the far left, before the game's own name.
+    expect(container.querySelector(".landing-brand")!.firstElementChild).toBe(mark);
+    expect(mark.textContent).not.toContain("Lakeside Games");
+  });
+
+  it("links back to the Lakeside store, account, other games and support in the footer", () => {
+    hoisted.catalog.value = live(99, 399);
+    mount();
+    const links = [...container.querySelectorAll<HTMLAnchorElement>(".landing-lakeside-links a")]
+      .map((a) => [a.textContent, a.getAttribute("href"), a.getAttribute("target")]);
+    expect(links).toEqual([
+      ["Lakeside store", "https://lakesidegames.net/store", "_blank"],
+      ["Account", "https://lakesidegames.net/account", "_blank"],
+      ["Other games", "https://lakesidegames.net/games", "_blank"],
+      ["Support", "https://lakesidegames.net/services/#support", "_blank"],
+    ]);
   });
 });

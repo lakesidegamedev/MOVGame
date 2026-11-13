@@ -15,6 +15,7 @@ import { BUILD_COMMIT, DISTRIBUTION } from "@lib/distribution";
 import { UserMenu } from "@ui/auth/UserMenu";
 import { DailyCard } from "@ui/DailyCard";
 import { LakesideMark } from "@ui/LakesideMark";
+import { ExternalLink } from "@ui/ExternalLink";
 import { ElectionLibrary, LibraryCard } from "@ui/library/ElectionLibrary";
 import { EvBar } from "@ui/EvBar";
 import { Sparkline } from "@ui/Sparkline";
@@ -22,7 +23,7 @@ import {
   Play, Trophy, Check, X, ShoppingBag,
   LineChart, Mic2, Globe2, RefreshCw,
 } from "lucide-react";
-import { BRAND } from "../brand";
+import { BRAND, LAKESIDE_LINKS } from "../brand";
 import { useSavesStore } from "@store/savesStore";
 import { sessionGame } from "@store/sessions";
 import type { GameState } from "@engine/types";
@@ -277,8 +278,8 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
       <div className="landing-topbar">
         <div className="landing-topbar-inner">
           <span className="landing-brand">
+            <LakesideMark className="landing-lakeside" label={false} />
             <span className="mark"><img src="brand/margin-of-victory-icon.png" alt="" width={24} height={24} /></span>{BRAND.name}
-            <LakesideMark className="landing-lakeside" />
           </span>
           <span className="row" style={{ gap: 6 }}>
             <button className="ghost small" onClick={() => openStore()}>
@@ -474,6 +475,12 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
           <a className="ghost small" href="https://ask.lakesidegames.net/?game=electioneer" target="_blank" rel="noopener noreferrer">Ask about the game</a>
           <button className="ghost small" onClick={() => openStore()}>Store</button>
           <span className="muted small" title="Coming soon">Discord (coming soon)</span>
+          <nav className="landing-lakeside-links" aria-label="Lakeside Games">
+            <ExternalLink className="ghost small" href={LAKESIDE_LINKS.store}>Lakeside store</ExternalLink>
+            <ExternalLink className="ghost small" href={LAKESIDE_LINKS.account}>Account</ExternalLink>
+            <ExternalLink className="ghost small" href={LAKESIDE_LINKS.games}>Other games</ExternalLink>
+            <ExternalLink className="ghost small" href={LAKESIDE_LINKS.support}>Support</ExternalLink>
+          </nav>
           <a className="lakeside-credit" href="https://lakesidegames.net" target="_blank" rel="noopener">
             <img src="lakeside-mark.svg" alt="Lakeside Games logo" width={20} height={20} />
             by Lakeside Games
