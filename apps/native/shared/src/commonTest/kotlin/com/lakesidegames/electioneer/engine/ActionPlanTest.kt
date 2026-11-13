@@ -43,4 +43,14 @@ class ActionPlanTest {
         assertTrue(removePlannedAction(game, 1))
         assertEquals(3, game.queuedActions.size)
     }
+
+    @Test
+    fun queueLandsOnTheChosenDayNotDayOne() {
+        val game = createGame(NewGameOptions(seed = "phone-days", playerCandidate = CandidateId.DEM))
+        val state = game.states.first { it.abbr == "PA" }
+        for (day in listOf(3, 5, 7)) assertTrue(queuePlannedAction(game, ActionType.RALLY, state.id, day))
+        assertEquals(listOf(3, 5, 7), plannedActionRows(game).map { it.day })
+        // Day 1 stays open; only the quick-add helper picks it.
+        assertEquals(1, nextOpenPlanDay(game))
+    }
 }
