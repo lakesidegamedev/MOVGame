@@ -46,6 +46,18 @@ for (const doc of defaults.slice(1)) {
   for (const key of MP_TRAIT_KEYS) for (const bad of [-1, 101, "60", undefined]) change(doc, `mp/parties/0/${key}`, bad);
   if (doc.engine === "country") change(doc, "mp/countryId", "XX");
 }
+// A France race saved when 1981 to 2017 still used the ens and rn slots loads
+// with each election's real parties (module renamedParties); a party that
+// did not stand in that election is still rejected.
+const frIndex = MULTIPARTY_COUNTRY_CODES.indexOf("FR") + 2;
+if (frIndex >= 2) {
+  const fr = structuredClone(defaults[frIndex]) as any;
+  fr.mp.baseElection = "1988";
+  fr.mp.parties = [{ ...fr.mp.parties[0], partyId: "ens" }, { ...fr.mp.parties[1], partyId: "rn" }];
+  capture(fr);
+  change(fr, "mp/baseElection", "2017");
+  change(fr, "mp/parties/1/partyId", "fn");
+}
 for (const raw of [null, [], 0, "text"]) capture(raw);
 const campaigns = defaults.map(source => {
   const cs = structuredClone(source);

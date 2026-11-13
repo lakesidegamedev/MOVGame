@@ -4,6 +4,7 @@ import "@content/countries/all";
 import {
   makeDefaultCustomScenario,
   makeDefaultMultiparty,
+  multipartyPartiesFor,
   validateCustomScenario,
   serializeCustomScenario,
   parseCustomScenario,
@@ -92,6 +93,23 @@ describe("country custom scenario", () => {
 
     const next = countryAdvanceTurn(game, country, { autoResolvePlayerEvents: true });
     expect(next.turn).toBe(1);
+  });
+
+  it("loads a France race saved when 1988 still used the ens and rn slots", () => {
+    const cs = makeDefaultMultiparty("country", "FR");
+    cs.mp!.baseElection = "1988";
+    cs.mp!.parties = multipartyPartiesFor("country", "FR", "1988");
+    expect(cs.mp!.parties.map((p) => p.partyId)).toEqual(["ps", "rpr"]);
+    cs.mp!.parties[0].partyId = "ens";
+    cs.mp!.parties[1].partyId = "rn";
+    const r = validateCustomScenario(JSON.parse(serializeCustomScenario(cs)));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.mp!.parties.map((p) => p.partyId)).toEqual(["ps", "rpr"]);
+    // 2022 never changed: its slots are still ens and rn.
+    const now = makeDefaultMultiparty("country", "FR");
+    now.mp!.baseElection = "2022";
+    now.mp!.parties = multipartyPartiesFor("country", "FR", "2022");
+    expect(now.mp!.parties.map((p) => p.partyId)).toEqual(["ens", "rn"]);
   });
 });
 

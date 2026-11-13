@@ -70,6 +70,14 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- France now names the real parties at every election. Mitterrand, Jospin, Royal and Hollande
+  stand for the Parti socialiste, Giscard d'Estaing for the UDF, Chirac for the RPR, Sarkozy for
+  the UMP, Jean-Marie and Marine Le Pen for the Front National until its 2018 renaming, and Macron
+  for En Marche in 2017 and Ensemble in 2022. Before, the 1981 to 2012 finalists all appeared as
+  "The Centre" or "Rassemblement National". The UDF shows its 1978 logo, En Marche and the Front
+  National show theirs, and the setup screen's first-round line names the two finalists (it showed
+  "NaN%" for 2002). Daily challenges keep the same election and side on every date, and custom
+  races you built on an older French election still open.
 - In the iPhone and Android apps, Ask keeps Lakeside's sign-in and account pages, now at
   lakesidegames.net/account, inside Ask instead of sending you to your phone's browser.
 - The iPhone and Android apps no longer run out of memory and close when you add an action after

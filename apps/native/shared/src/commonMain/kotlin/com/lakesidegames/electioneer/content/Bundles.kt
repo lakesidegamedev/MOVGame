@@ -277,6 +277,8 @@ data class CatalogCountry(
     val dailyPair: List<String>,
     val roleNames: Map<String, String> = emptyMap(),
     val packId: String,
+    /** Election id to old party id to new id, for custom races saved before an election got its real parties. */
+    val renamedParties: Map<String, Map<String, String>>? = null,
     val guide: CatalogGuide? = null,
 )
 

@@ -99,8 +99,8 @@ describe("difficulty helpers", () => {
 
   it("normal and hard leave the opening map at the historical baseline", () => {
     for (const difficulty of ["normal", "hard"] as const) {
-      const base = createCountryGame(COUNTRIES.FR, { election: "2012", seed: 1, playerParty: "rn" });
-      const g = createCountryGame(COUNTRIES.FR, { election: "2012", seed: 1, playerParty: "rn", difficulty });
+      const base = createCountryGame(COUNTRIES.FR, { election: "2012", seed: 1, playerParty: "ump" });
+      const g = createCountryGame(COUNTRIES.FR, { election: "2012", seed: 1, playerParty: "ump", difficulty });
       expect(computeCountryResult(g, COUNTRIES.FR).voteShare).toEqual(computeCountryResult(base, COUNTRIES.FR).voteShare);
     }
   });

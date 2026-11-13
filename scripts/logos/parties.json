@@ -47,10 +47,14 @@
   {"country": "de", "party": "lnk", "from": 2009, "wiki": "The Left (Germany)"},
   {"country": "de", "party": "fdp", "wiki": "Free Democratic Party (Germany)"},
 
-  {"country": "fr", "party": "ens", "from": 2017, "wiki": "La République En Marche!", "note": "The centre slot is Macron's party only from 2017"},
-  {"country": "fr", "party": "rn", "from": 2002, "to": 2002, "wiki": "National Front (France)"},
-  {"country": "fr", "party": "rn", "from": 2017, "to": 2017, "wiki": "National Front (France)"},
+  {"country": "fr", "party": "ens", "from": 2022, "wiki": "La République En Marche!"},
   {"country": "fr", "party": "rn", "from": 2022, "wiki": "National Front (France)"},
+  {"country": "fr", "party": "em", "from": 2017, "to": 2017, "wiki": "La République En Marche!"},
+  {"country": "fr", "party": "ps", "wiki": "Socialist Party (France)"},
+  {"country": "fr", "party": "rpr", "wiki": "Rally for the Republic"},
+  {"country": "fr", "party": "udf", "wiki": "Union for French Democracy"},
+  {"country": "fr", "party": "ump", "wiki": "Union for a Popular Movement"},
+  {"country": "fr", "party": "fn", "wiki": "National Front (France)"},
 
   {"country": "br", "party": "pt", "wiki": "Workers' Party (Brazil)"},
   {"country": "br", "party": "dir", "to": 2014, "wiki": "Brazilian Social Democracy Party"},

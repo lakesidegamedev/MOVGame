@@ -433,6 +433,9 @@ function validateMultipartyConfig(
     if (!country.elections[baseElection]) errors.push(`Unknown election "${baseElection}" for ${country.label}.`);
     else allowed = countryPlayablePartiesIn(country, baseElection);
   }
+  const renamed = (engine === "country" && typeof baseElection === "string"
+    ? countryModuleFor(raw.countryId as string)?.renamedParties?.[baseElection]
+    : undefined) ?? {};
 
   const partiesRaw = raw.parties;
   const parties: CustomPartyInput[] = [];
@@ -445,7 +448,7 @@ function validateMultipartyConfig(
     partiesRaw.forEach((p, i) => {
       const where = `party ${i + 1}`;
       if (!isObject(p)) { errors.push(`${where}: missing data.`); return; }
-      const pid = p.partyId;
+      const pid = typeof p.partyId === "string" ? renamed[p.partyId] ?? p.partyId : p.partyId;
       if (typeof pid !== "string" || pid.trim() === "") {
         errors.push(`${where}: needs a party id.`);
       } else if (allowed.length > 0 && !allowed.includes(pid)) {
