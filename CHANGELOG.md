@@ -20,9 +20,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   already logged in to a game account that is not linked yet, the launcher sign in links that one
   instead.
 - The desktop app signs you in the same way when the Lakeside launcher starts it.
-- After you pay in your browser, the Windows desktop app unlocks the pack about 3 to 12 seconds
-  later, or straight away with "I've paid, check now". It does not yet check the moment you come
-  back to its window.
+- After you pay in your browser, the Windows desktop app checks for the purchase the moment you
+  come back to its window (taskbar, Alt+Tab or a click) and unlocks the pack within about a
+  second. "I've paid, check now" and the timed check still work as before.
 
 ### Fixed
 
