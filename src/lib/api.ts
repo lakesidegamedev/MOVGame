@@ -165,6 +165,10 @@ export const api = {
 
   me: () => call<{ user: ApiUser; unlocked: Unlocked }>("/api/auth/me").then((r) => ({ ...r, unlocked: normalizeUnlocked(r.unlocked) })),
 
+  // Removes the game account with its cloud saves, scores and achievements.
+  // Purchases stay on the Lakeside account (server/routes/auth.ts).
+  deleteAccount: () => call<{ deleted: boolean }>("/api/auth/account", { method: "DELETE" }),
+
   activate: (code: string) =>
     call<{ scenarioId?: string; packId?: string; packName?: string; unlocked: Unlocked }>(
       "/api/auth/activate", { method: "POST", body: JSON.stringify({ code }) })

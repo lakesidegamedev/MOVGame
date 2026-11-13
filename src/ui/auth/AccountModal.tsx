@@ -4,7 +4,7 @@ import { PACKS_BY_ID } from "@content/packs";
 import { useStoreNav } from "@store/storeNav";
 import { isValidActivationCode, normalizeActivationCode } from "@lib/activationCode";
 import { describeReason, ownershipRows } from "@lib/storeModel";
-import { X, KeyRound, CircleUser, Link2, ShoppingBag, LogOut, RefreshCw, Check, Receipt } from "lucide-react";
+import { X, KeyRound, CircleUser, Link2, ShoppingBag, LogOut, RefreshCw, Check, Receipt, Trash2 } from "lucide-react";
 import { Spinner } from "@ui/Skeleton";
 import { LakesideButton } from "./LakesideButton";
 
@@ -20,6 +20,71 @@ function fmtAmount(cents: number | null, currency: string | null, provider: stri
   if (cents == null || currency == null) return provider === "code" ? "Code" : "Purchase";
   if (cents === 0) return "Code";
   return `$${(cents / 100).toFixed(2)} ${currency.toUpperCase()}`;
+}
+
+// Account deletion (App Store 5.1.1(v), Play account deletion, privacy policy).
+// Two steps: open the panel, then type the username to arm the button.
+function DeleteAccountCard({ username }: { username: string }) {
+  const deleteAccount = useAuthStore((s) => s.deleteAccount);
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const matches = typed.trim().toLowerCase() === username.toLowerCase();
+
+  const cancel = () => { setOpen(false); setTyped(""); setError(null); };
+  const confirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!matches || busy) return;
+    setBusy(true);
+    setError(null);
+    const out = await deleteAccount();
+    // On success the store signs out and closes this modal.
+    if (out) { setBusy(false); setError(out); }
+  };
+
+  if (!open) {
+    return (
+      <div className="row" style={{ justifyContent: "flex-end", marginTop: 4 }}>
+        <button className="danger small" onClick={() => setOpen(true)}>
+          <Trash2 size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Delete account
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="account-card" style={{ marginTop: 12, borderColor: "var(--negative-edge)" }} role="group" aria-label="Delete account">
+      <div className="account-title" style={{ color: "var(--negative)" }}>
+        <Trash2 size={13} style={{ verticalAlign: "-2px", marginRight: 5 }} />Delete account
+      </div>
+      <p className="small" style={{ margin: "6px 0" }}>
+        This permanently deletes your game account <strong>{username}</strong>: your cloud saves, leaderboard and
+        daily scores, and achievements. It cannot be undone.
+      </p>
+      <p className="muted small" style={{ margin: "0 0 8px" }}>
+        Packs you bought stay with your Lakeside Games account. Sign in with it again and they are still yours.
+        Campaigns saved on this device stay on this device. You are signed out afterwards.
+      </p>
+      <form onSubmit={confirm}>
+        <label className="muted small" htmlFor="delete-account-confirm">Type your username to confirm</label>
+        <div className="row" style={{ gap: 8, marginTop: 4 }}>
+          <input
+            id="delete-account-confirm" type="text" value={typed} placeholder={username}
+            autoComplete="off" spellCheck={false}
+            onChange={(e) => setTyped(e.target.value)}
+            style={{ flex: 1, minWidth: 0 }}
+          />
+          <button className="danger small" type="submit" disabled={!matches || busy}>
+            {busy ? <Spinner label="Deleting…" /> : "Delete permanently"}
+          </button>
+          <button className="ghost small" type="button" onClick={cancel} disabled={busy}>Cancel</button>
+        </div>
+      </form>
+      {error && (
+        <p className="small" role="alert" style={{ margin: "8px 0 0", color: "var(--rose)" }}>{error}</p>
+      )}
+    </div>
+  );
 }
 
 export function AccountModal() {
@@ -201,6 +266,8 @@ export function AccountModal() {
               <LogOut size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Log out
             </button>
           </div>
+
+          <DeleteAccountCard username={user.username} />
         </div>
       </div>
     </div>

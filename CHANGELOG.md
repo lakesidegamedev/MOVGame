@@ -23,6 +23,17 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - After you pay in your browser, the Windows desktop app checks for the purchase the moment you
   come back to its window (taskbar, Alt+Tab or a click) and unlocks the pack within about a
   second. "I've paid, check now" and the timed check still work as before.
+- You can delete your account on the web and desktop: select your username, then Your account,
+  then Delete account, and type your username to confirm. It removes the game account with its
+  cloud saves, scores and achievements, and signs you out. Packs you bought stay with your Lakeside
+  Games account.
+
+### Changed
+
+- The privacy policy is rewritten for 2.0. It now covers purchases in every version of the game,
+  the Lakeside account, cloud saves, daily scores, Ask and deleting your account, and states that
+  the game uses no analytics and that error reporting is switched off. It also drops claims that
+  were out of date.
 - A small Lakeside Games mark at the left of the top bar links to lakesidegames.net, on the web
   and in the desktop app. In a campaign it sits at the start of the tools row on wide screens
   only, so it never sits among the game controls on phones.
@@ -33,7 +44,6 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - When Lakeside makes everything free for a while, the Store says "Everything is free to play
   while A House Divided is paused", shows every pack as open, and shows no prices or Buy buttons.
 
-### Changed
 
 - Margin of Victory has a new web address: lakesidegames.net/games/margin-of-victory. The old
   /games/electioneer address keeps working and sends you to the new one. Saves, sign-in and

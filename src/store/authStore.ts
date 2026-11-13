@@ -15,7 +15,9 @@ export type AuthNotice =
   | { kind: "lakeside-failed" }
   | { kind: "lakeside-link-needs-login" }
   // Opened from the Lakeside launcher but its sign in did not go through.
-  | { kind: "launcher-failed" };
+  | { kind: "launcher-failed" }
+  // Shown on the landing page after the player deleted their account.
+  | { kind: "account-deleted" };
 
 interface AuthStore {
   user: ApiUser | null;
@@ -43,6 +45,11 @@ interface AuthStore {
   refreshEntitlements: () => Promise<boolean>;
   loadPurchases: () => Promise<boolean>;
   logout: () => void;
+  /**
+   * Delete the game account on the server, then sign out on this device.
+   * Resolves null on success, or a message to show when nothing was deleted.
+   */
+  deleteAccount: () => Promise<string | null>;
   refresh: () => Promise<void>;
 
   canPlay: (scenarioId: string) => boolean;
@@ -128,6 +135,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   logout: () => {
     clearSession();
     set({ user: null, unlocked: { scenarioIds: [], packIds: [] }, purchases: [] });
+  },
+
+  deleteAccount: async () => {
+    try {
+      await api.deleteAccount();
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) return "Your session has expired. Log in again, then delete the account.";
+      return e instanceof ApiError ? e.message : "Could not reach the server. Your account was not deleted.";
+    }
+    get().logout();
+    set({ modal: null, paywallScenarioId: null, notice: { kind: "account-deleted" } });
+    return null;
   },
 
   refresh: async () => {
