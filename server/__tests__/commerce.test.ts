@@ -202,6 +202,11 @@ describe("return URL allowlist", () => {
     expect(lakeside.resolveReturnUrl("/foo", base)).toBe(`${base}/foo`);
     expect(lakeside.resolveReturnUrl("https://lakesidegames.net/games/electioneer/", base))
       .toBe("https://lakesidegames.net/games/electioneer/");
+    expect(lakeside.resolveReturnUrl("https://lakesidegames.net/games/margin-of-victory/?store=canada", base))
+      .toBe("https://lakesidegames.net/games/margin-of-victory/?store=canada");
+    expect(lakeside.resolveReturnUrl("https://www.lakesidegames.net/games/margin-of-victory/", base))
+      .toBe("https://www.lakesidegames.net/games/margin-of-victory/");
+    expect(lakeside.resolveReturnUrl("https://lakesidegames.net.evil.example.com/games/margin-of-victory/", base)).toBeNull();
     expect(lakeside.resolveReturnUrl("https://evil.example.com/", base)).toBeNull();
     expect(lakeside.resolveReturnUrl("http://lakesidegames.net/", base)).toBeNull();
     expect(lakeside.resolveReturnUrl(undefined, base)).toBe(`${base}/`);

@@ -2,7 +2,7 @@
 
 Android uses Kotlin Multiplatform for the simulation and Jetpack Compose for the interface. iOS uses the same KMP simulation with a SwiftUI interface. Neither mobile app runs the web UI or a Tauri wrapper. Desktop remains a Tauri shell around the [MOVGame](https://github.com/Egg3901/MOVGame) web client.
 
-The store-visible package identifier remains `com.lakesidegames.electioneer`. The web game lives at `/games/electioneer/`. All clients are maintained in this
+The store-visible package identifier remains `com.lakesidegames.electioneer`. The web game lives at `/games/margin-of-victory/` (the old `/games/electioneer/` path redirects there). All clients are maintained in this
 repository: web at the root, native clients in `apps/native`.
 
 ## Project layout

@@ -1,6 +1,6 @@
 // Thin fetch wrapper for the campaign backend. In dev, Vite proxies /api to the
 // server process; on sim.ahousedividedgame.com the SPA and API share an origin.
-// On every other mount (lakesidegames.net/games/electioneer, Cloudflare Pages
+// On every other mount (any path on lakesidegames.net, Cloudflare Pages
 // previews) there is NO /api/* on the page origin: requests would hit the SPA
 // fallback and return index.html with HTTP 200, which the client would read as
 // empty successful payloads. All calls are therefore addressed to the campaign
@@ -329,7 +329,9 @@ export interface DailyChampions {
 // button always drives that host's /api/lakeside/login. It bounces back to the
 // CURRENT page (any allowed origin) with a one-time ?lakeside_code=, which the
 // SPA exchanges for its normal token. Works identically whether the app is
-// served from sim.ahousedividedgame.com or the /games/electioneer mount.
+// served from sim.ahousedividedgame.com or any path on lakesidegames.net
+// (/games/margin-of-victory/, or the old /games/electioneer/ address): the
+// return target is the page's own origin and path, whatever they are.
 export function lakesideLoginUrl(returnParams: Record<string, string> = {}): string {
   const loc = window.location;
   // Same-origin relative endpoint on sim (and in dev, where Vite proxies /api);

@@ -55,7 +55,7 @@ the player already has shows no price and no Buy.
 Every count on the landing page, the store and the guide comes from
 `src/content/facts.ts`, which reads the scenario registry. The web build also
 publishes them as `catalog-facts.json` next to `index.html`
-(`/games/electioneer/catalog-facts.json`) for the Lakeside store. Definitions:
+(`/games/margin-of-victory/catalog-facts.json`) for the Lakeside store. Definitions:
 
 - **free**: playable by anyone at any time with no purchase. Every country has at
   least one; the US has two. The Daily Challenge is separate and never counted.
