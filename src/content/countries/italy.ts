@@ -11,7 +11,7 @@ export const ITALY_MODULE: CountryModule = {
   flag: "🇮🇹",
   engine: "country",
   load: () => import("./italy.bundle").then((m) => m.ITALY),
-  blurb: "Coalitions, a majority bonus, then a mixed system and a chamber cut to 400: four elections from 2008 to 2022.",
+  blurb: "Coalitions, a majority bonus, then a mixed system and a chamber cut to 400: five elections from 2006 to 2022.",
   cover: "images/covers/country-it.jpg",
   art: { a: "#0f3d2e", b: "#c8102e", glow: "rgba(236,240,245,0.2)" },
   freeElections: ["2022"],
