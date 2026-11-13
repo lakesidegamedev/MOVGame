@@ -30,9 +30,10 @@ class NativeDailyTest {
     @Test
     fun classicDaysKeepTheirOriginalScenario() {
         // Pinned before New Zealand joined: these dates are classic days and
-        // must keep the scenario they always had.
+        // must keep the scenario they always had. fr-2017 keeps its side (Le
+        // Pen): the slot is "fn" since France 2017 shows the Front National.
         val pinned = listOf(
-            Triple("2026-01-01", "us-1968", "dem"), Triple("2026-01-02", "fr-2017", "rn"),
+            Triple("2026-01-01", "us-1968", "dem"), Triple("2026-01-02", "fr-2017", "fn"),
             Triple("2026-01-03", "uk-1992", "con"), Triple("2026-01-05", "de-2017", "spd"),
             Triple("2026-01-08", "ca-2015", "cpc"), Triple("2026-01-14", "au-2022", "alp"),
             Triple("2026-09-30", "us-2008", "dem"), Triple("2026-10-01", "uk-2005", "con"),

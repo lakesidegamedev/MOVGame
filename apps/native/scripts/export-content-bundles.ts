@@ -98,6 +98,7 @@ async function main() {
         bundle: m.engine === "country" ? `countries/${m.code.toLowerCase()}` : null,
         dailyPair: m.daily.pair, roleNames: m.daily.names, packId: m.pack.id,
         guide: m.guide ?? null,
+        ...(m.renamedParties ? { renamedParties: m.renamedParties } : {}),
       })),
       packs: PACKS.map((p: any) => ({ id: p.id, name: p.name, scenarios: p.scenarios, legacy: p.legacy === true })),
     },

@@ -453,8 +453,8 @@
   "license": "Public domain"
  },
  {
-  "party": "Renaissance",
-  "file": "images/logos/fr-ens-logo-en-marche.webp",
+  "party": "En Marche",
+  "file": "images/logos/fr-em-logo-en-marche.webp",
   "source": "https://commons.wikimedia.org/wiki/File:Logo_En_Marche_!.svg",
   "title": "Logo En Marche !.svg",
   "author": "En Marche !; Vectorization: Tubezlob",
@@ -478,6 +478,14 @@
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
  },
  {
+  "party": "Front National",
+  "file": "images/logos/fr-fn-rassemblement-national.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Rassemblement_National.svg",
+  "title": "Rassemblement National.svg",
+  "author": "jpfabre",
+  "license": "Public domain"
+ },
+ {
   "party": "National Rally",
   "file": "images/logos/fr-rn-logo-rassemblement-national.webp",
   "source": "https://commons.wikimedia.org/wiki/File:Logo_Rassemblement_National.svg",
@@ -486,11 +494,11 @@
   "license": "Public domain"
  },
  {
-  "party": "National Rally",
-  "file": "images/logos/fr-rn-rassemblement-national.webp",
-  "source": "https://commons.wikimedia.org/wiki/File:Rassemblement_National.svg",
-  "title": "Rassemblement National.svg",
-  "author": "jpfabre",
+  "party": "Union for French Democracy",
+  "file": "images/logos/fr-udf-union-pour-la-democratie-drancaise-logo-france-1978-1991.webp",
+  "source": "https://commons.wikimedia.org/wiki/File:Union_pour_la_D%C3%A9mocratie_Dran%C3%A7aise_-_logo_(France,_1978-1991).svg",
+  "title": "Union pour la Démocratie Drançaise - logo (France, 1978-1991).svg",
+  "author": "UDF",
   "license": "Public domain"
  },
  {

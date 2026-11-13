@@ -53,10 +53,14 @@ describe("party logos", () => {
   });
 
   it("picks the logo of the party that held the slot at that election", () => {
-    // France's centre slot is Mitterrand's Socialists in 1981: no Ensemble logo then.
-    expect(partyLogoFor("FR", "ens", 1981)).toBeNull();
-    expect(partyLogoFor("FR", "ens", 2017)).toMatch(/en-marche/);
+    // France: each finalist's own party, the FN flame until the 2018 renaming.
+    expect(partyLogoFor("FR", "em", 2017)).toMatch(/en-marche/);
     expect(partyLogoFor("FR", "ens", 2022)).toMatch(/lrem/);
+    expect(partyLogoFor("FR", "ens", 2027)).toMatch(/renaissance/);
+    expect(partyLogoFor("FR", "fn", 2002)).toBe(partyLogoFor("FR", "fn", 2017));
+    expect(partyLogoFor("FR", "rn", 2022)).not.toBe(partyLogoFor("FR", "fn", 2017));
+    expect(partyLogoFor("FR", "udf", 1981)).toMatch(/1978-1991/);
+    expect(partyLogoFor("FR", "ps", 1981)).toBeNull();
     expect(partyLogoFor("DE", "lnk", 1994)).toMatch(/pds/);
     expect(partyLogoFor("DE", "lnk", 2013)).toMatch(/linke/);
     expect(partyLogoFor("UK", "ld", 1983)).toMatch(/alliance/);

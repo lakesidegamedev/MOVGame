@@ -134,6 +134,12 @@ export interface CountryModule {
    * they match the bundle.
    */
   regionalParties?: string[];
+  /**
+   * Party ids an election used before it got its real parties (France 1981 to
+   * 2017 once stood on two shared slots): election id, then old id to new id.
+   * Saved custom races built on such an election load with the new ids.
+   */
+  renamedParties?: Record<string, Record<string, string>>;
   /** A "how this system works" entry for the native guide, if the generic ones do not cover it. */
   guide?: { title: string; body: string };
 }

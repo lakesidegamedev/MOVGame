@@ -159,6 +159,10 @@ class NativeCustomScenario private constructor() {
                     } else if (country != null) {
                         if (election !in country.elections) errors += "Unknown election \"$election\" for ${country.label}." else allowed = playablePartiesIn(country, election)
                     }
+                    // Old slot ids of an election that later got its real parties (France 1981 to 2017).
+                    val renamed = if (engine == "country" && election != null)
+                        CONTENT_CATALOG.countries.firstOrNull { it.id == mp.text("countryId") }?.renamedParties?.get(election).orEmpty()
+                    else emptyMap()
                     val list = mp["parties"] as? JsonArray
                     val normalized = mutableListOf<JsonElement>()
                     if (list == null) errors += "Party list is missing."
@@ -169,7 +173,7 @@ class NativeCustomScenario private constructor() {
                             val where = "party ${index + 1}"
                             val p = value as? JsonObject
                             if (p == null) { errors += "$where: missing data."; continue }
-                            val pid = p.text("partyId")
+                            val pid = p.text("partyId")?.let { renamed[it] ?: it }
                             if (pid.isNullOrBlank()) errors += "$where: needs a party id."
                             else if (allowed.isNotEmpty() && pid !in allowed) errors += "$where: \"$pid\" does not contest this election."
                             else if (!seen.add(pid)) errors += "$where: \"$pid\" is listed twice."
@@ -180,7 +184,8 @@ class NativeCustomScenario private constructor() {
                             for (key in mpTraits) number(p, key, 0.0, 100.0, "$where: trait \"$key\" must be a number.", "$where: trait \"$key\" must be between 0 and 100.")
                             number(p, "baseSupport", -1.0, 1.0, "$where: base support must be a number.", "$where: base support must be between -1 and 1.")
                             normalized += JsonObject(p.filterKeys { it in mpTraits + listOf("partyId", "color", "baseSupport") } +
-                                listOf("name", "shortName", "leaderName").associateWith { JsonPrimitive(p.text(it)?.trim() ?: "") })
+                                listOf("name", "shortName", "leaderName").associateWith { JsonPrimitive(p.text(it)?.trim() ?: "") } +
+                                (if (pid != null && pid != p.text("partyId")) mapOf("partyId" to JsonPrimitive(pid)) else emptyMap()))
                         }
                     }
                     common["mp"] = JsonObject(mp.filterKeys { it == "baseElection" || (it == "countryId" && engine == "country") } + ("parties" to JsonArray(normalized)))

@@ -786,9 +786,8 @@
  {
   "country": "fr",
   "party": "ens",
-  "from": 2017,
+  "from": 2022,
   "wiki": "La République En Marche!",
-  "note": "The centre slot is Macron's party only from 2017",
   "qid": "Q23731823",
   "label": "Renaissance",
   "logos": [
@@ -824,49 +823,10 @@
    }
   ],
   "files": {
-   "2017": "Logo En Marche !.svg",
    "2022": "Logo-LREM-noir.svg",
    "2027": "Renaissance-logotype-officiel.svg"
   },
-  "why": "En Marche ! in 2017, La République en marche in April 2022, Renaissance from September 2022"
- },
- {
-  "country": "fr",
-  "party": "rn",
-  "from": 2002,
-  "to": 2002,
-  "wiki": "National Front (France)",
-  "qid": "Q205150",
-  "label": "National Rally",
-  "logos": [
-   {
-    "file": "Logo Rassemblement National.svg",
-    "rank": "normal",
-    "from": 2018,
-    "to": null
-   }
-  ],
-  "file": "Rassemblement National.svg",
-  "why": "The Front National flame, in use until the 2018 renaming"
- },
- {
-  "country": "fr",
-  "party": "rn",
-  "from": 2017,
-  "to": 2017,
-  "wiki": "National Front (France)",
-  "qid": "Q205150",
-  "label": "National Rally",
-  "logos": [
-   {
-    "file": "Logo Rassemblement National.svg",
-    "rank": "normal",
-    "from": 2018,
-    "to": null
-   }
-  ],
-  "file": "Rassemblement National.svg",
-  "why": "The Front National flame, in use until the 2018 renaming"
+  "why": "La République en marche in April 2022, Renaissance from September 2022"
  },
  {
   "country": "fr",
@@ -884,6 +844,110 @@
    }
   ],
   "file": "Logo Rassemblement National.svg"
+ },
+ {
+  "country": "fr",
+  "party": "em",
+  "from": 2017,
+  "to": 2017,
+  "wiki": "La République En Marche!",
+  "qid": "Q23731823",
+  "label": "En Marche",
+  "logos": [
+   {
+    "file": "En marche logo.png",
+    "rank": "normal",
+    "from": 2016,
+    "to": 2017
+   },
+   {
+    "file": "Logo En Marche !.svg",
+    "rank": "normal",
+    "from": 2017,
+    "to": 2017
+   },
+   {
+    "file": "Logo-LREM-noir.svg",
+    "rank": "normal",
+    "from": 2017,
+    "to": 2022
+   },
+   {
+    "file": "Renaissance ALT.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Renaissance-logotype-officiel.svg",
+    "rank": "preferred",
+    "from": 2022,
+    "to": null
+   }
+  ],
+  "file": "Logo En Marche !.svg",
+  "why": "En Marche ! in 2017"
+ },
+ {
+  "country": "fr",
+  "party": "ps",
+  "wiki": "Socialist Party (France)",
+  "qid": "Q170972",
+  "label": "Socialist Party",
+  "logos": [],
+  "skip": "Commons has only the 2024 wordmark and acronym placeholders, no logo the PS used from 1981 to 2012 with a clear licence"
+ },
+ {
+  "country": "fr",
+  "party": "rpr",
+  "wiki": "Rally for the Republic",
+  "qid": "Q1052584",
+  "label": "Rally for the Republic",
+  "logos": [],
+  "skip": "Commons has only an acronym placeholder for the RPR, no logo with a clear licence"
+ },
+ {
+  "country": "fr",
+  "party": "udf",
+  "wiki": "Union for French Democracy",
+  "qid": "Q827415",
+  "label": "Union for French Democracy",
+  "logos": [
+   {
+    "file": "UDF logo, 1978.jpg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ],
+  "file": "Union pour la Démocratie Drançaise - logo (France, 1978-1991).svg",
+  "why": "The UDF logo of 1978 to 1991, public domain text logo"
+ },
+ {
+  "country": "fr",
+  "party": "ump",
+  "wiki": "Union for a Popular Movement",
+  "qid": "Q173152",
+  "label": "Union for a Popular Movement",
+  "logos": [],
+  "skip": "The Commons UMP logo is copied from a logo site with an unknown author; the licence claim is weak"
+ },
+ {
+  "country": "fr",
+  "party": "fn",
+  "wiki": "National Front (France)",
+  "qid": "Q205150",
+  "label": "Front National",
+  "logos": [
+   {
+    "file": "Logo Rassemblement National.svg",
+    "rank": "normal",
+    "from": 2018,
+    "to": null
+   }
+  ],
+  "file": "Rassemblement National.svg",
+  "why": "The Front National flame, in use until the 2018 renaming"
  },
  {
   "country": "br",

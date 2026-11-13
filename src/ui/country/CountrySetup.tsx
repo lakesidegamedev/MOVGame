@@ -17,6 +17,19 @@ import { SCENARIOS_BY_ID } from "@content/scenarioRegistry";
 import { FR_FIRST_ROUND } from "@content/countries/france.runoff";
 import { COUNTRY_MODULES_BY_CODE } from "@content/countries";
 
+// "First round: PS 25.9%, UDF 28.3%, eliminated candidates 45.8%." The two
+// finalists are the election's playable parties; every other key in the
+// first-round table is a group of eliminated candidates.
+function firstRoundLine(country: CountryBundle, election: string, finalists: PartyId[]): string {
+  const shares = FR_FIRST_ROUND[election];
+  const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
+  const named = finalists.filter((p) => shares[p] !== undefined);
+  const rest = Object.entries(shares).filter(([p]) => !named.includes(p)).reduce((s, [, x]) => s + x, 0);
+  const parts = named.map((p) => `${partyShort(country, p)} ${pct(shares[p])}`);
+  if (rest > 0) parts.push(`eliminated candidates ${pct(rest)}`);
+  return `First round: ${parts.join(", ")}.`;
+}
+
 function randomSeed(): string {
   return String(Math.floor(Math.random() * 1_000_000)).padStart(6, "0");
 }
@@ -57,7 +70,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
               The first round is complete. The campaign starts with finalist support and voter transfers already reflected in the regional map.
             </p>
             <div className="small">
-              First round: Centre {(FR_FIRST_ROUND[election].ens * 100).toFixed(1)}%, RN {(FR_FIRST_ROUND[election].rn * 100).toFixed(1)}%, left {(FR_FIRST_ROUND[election].lfi * 100).toFixed(1)}%, right {(FR_FIRST_ROUND[election].lr * 100).toFixed(1)}%.
+              {firstRoundLine(country, election, playable)}
             </div>
           </div>
         )}
