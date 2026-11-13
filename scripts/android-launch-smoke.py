@@ -392,4 +392,7 @@ try:
         raise RuntimeError('Failed flows: ' + '; '.join(failures))
 finally:
     (output / 'logcat.txt').write_text(adb('logcat', '-d', '-t', '1200'))
+    # The main buffer rolls over during a full run; the crash buffer keeps
+    # every app crash with its stack trace.
+    (output / 'logcat-crash.txt').write_text(adb('logcat', '-b', 'crash', '-d'))
     adb('shell', 'am', 'force-stop', PACKAGE)
