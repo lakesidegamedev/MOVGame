@@ -428,15 +428,31 @@ struct ActionPlannerView: View {
                 Text("Plan estimate: \(game.previewPlayerEv()) EV. Rival moves and events can change the result.")
                     .font(.caption).foregroundStyle(CampaignStyle.gold)
             }
-            HStack {
-                Menu {
+            VStack(alignment: .leading, spacing: 6) {
+                Label("DAY \(draft.day) · \(dayCount)/3 MOVES", systemImage: "calendar")
+                    .font(.subheadline.bold()).foregroundStyle(CampaignStyle.gold)
+                // Seven always-visible day buttons, so a phone player can plan any day
+                // of the week (the web game has a "+" on every day, Android has chips).
+                HStack(spacing: 6) {
                     ForEach(1...7, id: \.self) { n in
-                        Button("Day \(n) · \(plan.filter { Int($0.day) == n }.count)/3 planned") { draft.day = n }
+                        let count = plan.filter { Int($0.day) == n }.count
+                        Button { draft.day = n; draft.notice = nil } label: {
+                            VStack(spacing: 1) {
+                                Text("\(n)").font(.headline)
+                                Text("\(count)/3").font(.caption2)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                            .foregroundStyle(draft.day == n ? CampaignStyle.background : (count >= 3 ? CampaignStyle.muted : .white))
+                            .background(draft.day == n ? CampaignStyle.gold : CampaignStyle.background, in: RoundedRectangle(cornerRadius: 10))
+                            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(CampaignStyle.muted.opacity(0.5)))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Day \(n), \(count) of 3 planned")
+                        .accessibilityAddTraits(draft.day == n ? .isSelected : [])
                     }
-                } label: {
-                    Label("DAY \(draft.day) · \(dayCount)/3 MOVES", systemImage: "calendar")
-                        .font(.subheadline.bold()).foregroundStyle(CampaignStyle.gold)
                 }
+            }
+            HStack {
                 Spacer()
                 Text("CASH " + nativeMoneyMillions("$", (session.currentGame()?.availableCash() ?? 0) / 1_000_000))
                     .font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
