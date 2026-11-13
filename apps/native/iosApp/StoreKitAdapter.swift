@@ -44,6 +44,14 @@ final class StoreKitAdapter: ObservableObject {
     private var pinnedGate: StoreGate?
     /// Simulator captures only: show the locked state without a live store.
     func pinGateForCapture(_ value: StoreGate) { pinnedGate = value; gate = value }
+    private var pinnedProducts: [StoreProduct]?
+    /// Simulator captures only: list products with the configured App Store
+    /// prices, because a simulator has no App Store products to load.
+    func pinProductsForCapture(_ value: [StoreProduct]) { pinnedProducts = value; products = value }
+    /// The pinned capture store reads as a linked account would see it.
+    var showsCaptureProducts: Bool { pinnedProducts != nil }
+    #else
+    var showsCaptureProducts: Bool { false }
     #endif
     private let account: CampaignAccount
     private let wallet: NativeStoreWallet
@@ -79,6 +87,9 @@ final class StoreKitAdapter: ObservableObject {
     private func refreshAll() async {
         owned = Set(wallet.packs(sessionKey: account.storeSessionKey(), nowMillis: Self.now()))
         Task { [weak self] in await self?.refreshGate() }
+        #if targetEnvironment(simulator)
+        if let pinnedProducts { products = pinnedProducts; return }
+        #endif
         guard account.user?.ahdLinked == true else { products = []; return }
         do {
             try await configure()
@@ -174,7 +185,7 @@ final class StoreKitAdapter: ObservableObject {
             // to redeliver. Finish only after the server's durable receipt.
             await transaction.finish()
             notice = result.status != "paid" ? "Purchase is not active." : result.environment == "Sandbox"
-                ? "Test purchase verified. Production ownership is unchanged." : "Purchase delivered to your Lakeside account."
+                ? "Test purchase verified and unlocked in the app. Web ownership is unchanged." : "Purchase delivered to your Lakeside account."
             if refresh { try await refreshOwnership() }
         } catch { notice = error.localizedDescription }
     }

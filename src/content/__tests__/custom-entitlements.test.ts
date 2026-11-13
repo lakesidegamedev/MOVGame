@@ -102,23 +102,26 @@ describe("import of a paid-base custom", () => {
 });
 
 describe("release bundles", () => {
-  it("sells a $0.99 bundle per country and a $3.99 Complete Collection", async () => {
+  it("sells one bundle per country and a Complete Collection, with no price of its own", async () => {
     const { STORE_PACKS, ALL_PAID } = await import("@content/packs");
     const { COUNTRY_MODULES } = await import("@content/countries");
-    const prices = Object.fromEntries(STORE_PACKS.map((p) => [p.id, p.price]));
-    expect(prices).toEqual({
-      ...Object.fromEntries(COUNTRY_MODULES.map((m) => [m.pack.id, 99])),
-      complete: 399,
-    });
-    for (const id of ["us-historical", "uk-elections", "canada", "germany", "france", "australia", "new-zealand"]) {
-      expect(prices[id], id).toBe(99);
-    }
-    const countryTotal = STORE_PACKS.filter((p) => p.id !== "complete").reduce((n, p) => n + p.price, 0);
-    expect(countryTotal).toBeGreaterThan(prices.complete);
+    expect(STORE_PACKS.map((p) => p.id)).toEqual([...COUNTRY_MODULES.map((m) => m.pack.id), "complete"]);
+    // Prices belong to the platform catalog only; the game's pack data carries none.
+    for (const p of STORE_PACKS) expect(Object.keys(p), p.id).not.toContain("price");
+    for (const m of COUNTRY_MODULES) expect(Object.keys(m.pack), m.code).not.toContain("price");
     // Every paid scenario sits in exactly one country bundle.
     const covered = STORE_PACKS.filter((p) => p.id !== "complete").flatMap((p) => p.scenarios);
     expect(new Set(covered).size).toBe(covered.length);
     expect([...covered].sort()).toEqual([...ALL_PAID].sort());
+  });
+
+  it("points the paywall at the country's own pack, never the Complete Collection first", async () => {
+    const { ALL_PAID, STORE_PACKS } = await import("@content/packs");
+    for (const id of ALL_PAID) {
+      const pack = packForScenario(id)!;
+      expect(pack.id, id).not.toBe("complete");
+      expect(STORE_PACKS.find((p) => p.id === pack.id)!.scenarios, id).toContain(id);
+    }
   });
 
   it("keeps the retired Global pack as an entitlement for existing owners", async () => {

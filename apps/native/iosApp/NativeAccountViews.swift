@@ -36,6 +36,11 @@ private final class LakesideBrowser: NSObject, ObservableObject, WKNavigationDel
             } else { notice = "This sign-in return could not be verified. Close and try again." }
             return false
         }
+        if NativeLakesideLogin.companion.isGoogleSignIn(host: parts.host, path: parts.path) {
+            // Google blocks its sign-in inside an app's browser.
+            notice = NativeLakesideLogin.companion.GOOGLE_UNAVAILABLE
+            return false
+        }
         if !flow.allows(scheme: parts.scheme, host: parts.host, port: port) {
             notice = "This page cannot be opened during sign-in."
             return false

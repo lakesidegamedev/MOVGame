@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, type AuthedRequest } from "../auth.js";
-import { identityForUser, clearEntitlementsCache } from "../entitlements.js";
+import { identityForUser, clearEntitlementsCache, ownedProductIds } from "../entitlements.js";
 import { unlockedForUser } from "../activation.js";
 import { PACKS_BY_ID } from "../../src/content/packs.js";
 
@@ -70,9 +70,13 @@ storeRouter.post(["/binding", "/verify", "/ownership"], async (req: AuthedReques
     // The platform can sell packs this build does not ship yet (a newer
     // country, a newer client). Drop ids we do not know instead of failing the
     // whole wallet, so everything the player owns here keeps working.
+    // Entitlements add what the platform grants without a store purchase: any
+    // active supporter tier and the free access switch. The apps read pack
+    // access from this list only, never from a tier name.
+    const entitled = (await ownedProductIds(identity)).filter(p => Object.prototype.hasOwnProperty.call(PACKS_BY_ID, p));
     const packs = (reported as string[]).filter(p => Object.prototype.hasOwnProperty.call(PACKS_BY_ID, p));
     const local = unlockedForUser(userId).packIds;
-    return res.json({ owner: userId, packIds: [...new Set([...packs, ...local])], verifiedAt: result.body.verifiedAt });
+    return res.json({ owner: userId, packIds: [...new Set([...packs, ...entitled, ...local])], verifiedAt: result.body.verifiedAt });
   }
   res.json({ ...result.body, owner: userId });
 });

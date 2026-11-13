@@ -28,7 +28,6 @@ export const NEW_ZEALAND_MODULE: CountryModule = {
     id: "new-zealand",
     name: "New Zealand",
     description: "Three MMP elections from 2017 to 2023: Jacindamania, the COVID landslide, and the six-party Parliament that followed.",
-    price: 99,
   },
   daily: { pair: ["lab", "nat"], names: { lab: "Labour", nat: "National" } },
   next: {

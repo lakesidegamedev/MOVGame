@@ -1,7 +1,8 @@
 // Purchasable scenario bundles, one per country plus the Complete Collection.
-// Price in USD cents. The server seeds
-// activation codes per pack; redeeming a pack code unlocks every scenario in
-// it. This file is shared by the client (labels) and the server (entitlement).
+// The server seeds activation codes per pack; redeeming a pack code unlocks
+// every scenario in it. This file is shared by the client (labels) and the
+// server (entitlement). It holds no prices: the Lakeside platform catalog is
+// the only price source (GET /api/catalog -> /account/api/catalog).
 
 import { COUNTRY_MODULES } from "./countries/index";
 import { SCENARIO_REGISTRY } from "./scenarioRegistry";
@@ -10,8 +11,6 @@ export interface ScenarioPack {
   id: string;
   name: string;
   description: string;
-  price: number; // USD cents. Offline fallback only; the canonical price is the
-                 // platform catalog (GET /api/catalog -> /account/api/catalog).
   scenarios: string[];
   // Retired from sale but still honoured for players who already own it.
   // Hidden from every storefront; entitlement checks still expand it.
@@ -26,7 +25,6 @@ const countryPacks: ScenarioPack[] = COUNTRY_MODULES.map((m) => ({
   id: m.pack.id,
   name: m.pack.name,
   description: m.pack.description,
-  price: m.pack.price,
   scenarios: SCENARIO_REGISTRY.filter((s) => s.country === m.code && !s.free).map((s) => s.scenarioId),
 }));
 
@@ -51,14 +49,12 @@ export const PACKS: ScenarioPack[] = [
     id: "complete",
     name: "Complete Collection",
     description: "Every country and every scenario in the game, plus any scenarios added later.",
-    price: 399,
     scenarios: ALL_PAID,
   },
   {
     id: "global",
     name: "Global Elections Pack",
     description: "Canada, Germany, France, and Australia. No longer sold; existing owners keep every scenario in it.",
-    price: 599,
     scenarios: [...GLOBAL_ALL],
     legacy: true,
   },
@@ -69,11 +65,14 @@ export const STORE_PACKS: ScenarioPack[] = PACKS.filter((p) => !p.legacy);
 
 export const PACKS_BY_ID: Record<string, ScenarioPack> = Object.fromEntries(PACKS.map((p) => [p.id, p]));
 
-/** The cheapest pack on sale that unlocks a scenario (for paywall prompts). */
+/**
+ * The smallest pack on sale that unlocks a scenario (for paywall prompts): the
+ * country's own pack before the Complete Collection.
+ */
 export function packForScenario(scenarioId: string): ScenarioPack | undefined {
   return STORE_PACKS
     .filter((p) => p.scenarios.includes(scenarioId))
-    .sort((a, b) => a.price - b.price)[0];
+    .sort((a, b) => a.scenarios.length - b.scenarios.length)[0];
 }
 
 /** Whether owning `ownedPackIds` already covers every scenario in `packId`. */

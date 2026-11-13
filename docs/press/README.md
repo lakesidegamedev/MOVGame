@@ -15,13 +15,13 @@ countries.
 
 ## Links
 
-- Play: https://lakesidegames.net/games/electioneer/
-- Product page: https://lakesidegames.net/electioneer/
-- Store: https://lakesidegames.net/store/
+- Play: https://lakesidegames.net/games/margin-of-victory/
+- Product page: https://lakesidegames.net/margin-of-victory/
+- Store: https://lakesidegames.net/store/margin-of-victory
 - Contact: https://lakesidegames.net/contact/
 
-The `electioneer` URL is retained for compatibility. The public product name is
-Margin of Victory.
+The old `/games/electioneer/` and `/electioneer/` addresses redirect to the new
+ones. `electioneer` stays only as an internal product identifier.
 
 ## Screenshots
 

@@ -13,7 +13,7 @@ import { countryNextScenario } from "@content/nextScenario";
 import { partyColor, partyName, partyShort, sortBySeats } from "./helpers";
 import { Trophy, Lock } from "lucide-react";
 import { ElectionNight, hasSeenReveal, revealSupported } from "../electionNight/ElectionNight";
-import { ElectionNightShell } from "../electionNight/ElectionNightShell";
+import { ElectionNightShell, freeChoice } from "../electionNight/ElectionNightShell";
 import { MultipartySeatPanel } from "../electionNight/MultipartySeatPanel";
 import { countryReveal } from "../electionNight/countryReveal";
 import { DailyResultPanel } from "../DailyResultPanel";
@@ -210,6 +210,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
                 onPlay: () => newGame(country.id, next.id, nextParty, String(Date.now()), difficulty),
                 onUnlock: () => openStoreForScenario(packId),
                 mapPreview,
+                freeAlternative: freeChoice(unlocked, country.id, scenarioId),
               }
             : null
         }

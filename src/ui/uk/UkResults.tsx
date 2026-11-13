@@ -12,7 +12,7 @@ import { UK_ELECTIONS } from "@content/uk/elections";
 import { UK_NEXT_SCENARIO } from "@content/nextScenario";
 import { partyName, partyShort, sortBySeats, partyColor } from "./parties";
 import { ElectionNight, hasSeenReveal, revealSupported } from "../electionNight/ElectionNight";
-import { ElectionNightShell } from "../electionNight/ElectionNightShell";
+import { ElectionNightShell, freeChoice } from "../electionNight/ElectionNightShell";
 import { MultipartySeatPanel } from "../electionNight/MultipartySeatPanel";
 import { ukReveal } from "../electionNight/ukReveal";
 import { DailyResultPanel } from "../DailyResultPanel";
@@ -185,6 +185,7 @@ export function UkResults() {
                 onPlay: () => newGame(next.id, nextParty, String(Date.now()), difficulty),
                 onUnlock: () => openStoreForScenario(`uk-${next.id}`),
                 mapPreview: <UkMiniMap seats={r.seats} />,
+                freeAlternative: freeChoice(unlocked, "UK", scenarioId),
               }
             : null
         }

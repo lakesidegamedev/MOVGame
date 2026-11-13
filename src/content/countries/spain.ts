@@ -31,7 +31,6 @@ export const SPAIN_MODULE: CountryModule = {
     id: "spain",
     name: "Spain",
     description: "Four Congress of Deputies elections from 2011 to 2023: the crash, the end of two-party politics, the Vox breakthrough and the 2023 deadlock.",
-    price: 99,
   },
   daily: { pair: ["pp", "psoe"], names: { pp: "the PP", psoe: "the PSOE" } },
   next: {

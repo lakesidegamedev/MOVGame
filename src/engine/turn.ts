@@ -95,7 +95,7 @@ function buildRecap(game: GameState, turn: number, evBefore: number, cashBefore:
   const cashDelta = cashAfter - cashBefore;
   recap.splice(1, 0, {
     label: "Campaign cash",
-    detail: `$${(cashAfter / 1_000_000).toFixed(1)}M after ${cashDelta >= 0 ? "+" : "-"}$${(Math.abs(cashDelta) / 1_000_000).toFixed(1)}M this week`,
+    detail: `${cashAfter < 0 && (-cashAfter / 1_000_000).toFixed(1) !== "0.0" ? "-" : ""}$${(Math.abs(cashAfter) / 1_000_000).toFixed(1)}M after ${cashDelta >= 0 ? "+" : "-"}$${(Math.abs(cashDelta) / 1_000_000).toFixed(1)}M this week`,
   });
   const own = recap.slice(2).filter((item) => item.detail.startsWith("Your action"));
   const other = recap.slice(2).filter((item) => !item.detail.startsWith("Your action"));

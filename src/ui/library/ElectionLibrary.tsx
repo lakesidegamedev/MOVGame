@@ -86,12 +86,18 @@ export function LibraryCard({ s, unlocked, showFree, onPlay, onLocked }: {
 export function ElectionLibrary({
   rows,
   canPlay,
+  owns = canPlay,
   showAccess,
   onPlay,
   onLocked,
 }: {
   rows: readonly ScenarioMeta[];
   canPlay: (scenarioId: string) => boolean;
+  /**
+   * Free or owned, for the "N playable" count. Defaults to canPlay; the game
+   * passes a version without today's Daily Challenge, which is a one-day pass.
+   */
+  owns?: (scenarioId: string) => boolean;
   /** Show the Owned and Locked filter and the Free tags (paywall on). */
   showAccess: boolean;
   onPlay: (s: ScenarioMeta) => void;
@@ -199,7 +205,7 @@ export function ElectionLibrary({
       {groups.length ? groups.map((g) => {
         const open = narrowing || expanded.has(g.code) || !!filters.country;
         const shown = open ? g.rows : g.rows.slice(0, COLLAPSED_ROWS);
-        const owned = g.rows.filter((s) => canPlay(s.scenarioId)).length;
+        const owned = g.rows.filter((s) => owns(s.scenarioId)).length;
         return (
           <section key={g.code} className="library-group" aria-label={g.name}>
             <header className="library-group-head">

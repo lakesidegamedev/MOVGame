@@ -1,12 +1,15 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 import { execSync } from "node:child_process";
-import { COUNTRY_COUNT, ELECTION_COUNT, FIRST_YEAR, LAST_YEAR, VOTING_SYSTEM_COUNT } from "./src/content/facts";
+import { readFileSync } from "node:fs";
+import { COUNTRY_COUNT, ELECTION_COUNT, FIRST_YEAR, LAST_YEAR, VOTING_SYSTEM_COUNT, catalogFacts } from "./src/content/facts";
 
-// Release = current commit SHA, so GlitchTip events map to a commit.
+// Build identity: the short commit SHA and the package version. Error reports
+// carry both, so a stack maps to a release and a commit.
 let release = "unknown";
 try { release = execSync("git rev-parse --short HEAD").toString().trim(); } catch { /* not a git checkout */ }
+const appVersion = (JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as { version: string }).version;
 
 // index.html carries counts for search and link previews. They come from the
 // scenario registry at build time so they never go stale.
@@ -20,13 +23,26 @@ const htmlFacts = {
     }),
 };
 
+// The store and marketing counts as JSON, next to index.html
+// (/games/margin-of-victory/catalog-facts.json on the web), so the Lakeside store
+// reads the same numbers the game shows. Generated from the content data on
+// every build; no prices in it.
+const catalogFactsJson: Plugin = {
+  name: "mov-catalog-facts",
+  apply: "build",
+  generateBundle() {
+    this.emitFile({ type: "asset", fileName: "catalog-facts.json", source: `${JSON.stringify(catalogFacts(), null, 2)}\n` });
+  },
+};
+
 // Static SPA build. Output is plain static assets so it wraps directly in Tauri
 // later with no rewrite. No SSR, no server framework.
 export default defineConfig({
   base: "./",
-  plugins: [react(), htmlFacts],
+  plugins: [react(), htmlFacts, catalogFactsJson],
   define: {
     "import.meta.env.VITE_RELEASE": JSON.stringify(release),
+    "import.meta.env.VITE_APP_VERSION": JSON.stringify(appVersion),
   },
   resolve: {
     alias: {

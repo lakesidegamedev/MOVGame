@@ -59,8 +59,8 @@ export interface CountryPackDef {
   id: string;
   name: string;
   description: string;
-  /** USD cents, offline fallback only (the platform catalog is canonical). */
-  price: number;
+  // No price here: the Lakeside platform catalog is the only price source,
+  // and the game shows a price only when that catalog answered.
 }
 
 export interface NextLink {

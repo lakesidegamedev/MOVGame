@@ -58,8 +58,9 @@ Actions is the release runner.
   TestFlight exercise of purchase/restore/refund through `StoreKitAdapter`.
 - [ ] App Store Server Notifications endpoint on the campaign server (web
   repo) for refunds/revocations.
-- [ ] sentry-cocoa via SPM + DSN (Android hook `MovApp` is the pattern to
-  mirror; not added blind from Linux).
+- [ ] Optional: sentry-cocoa via SPM, reading the same `MOV_SENTRY_DSN`
+  secret (Android hook `MovApp` is the pattern to mirror; not added blind
+  from Linux). Until then the iOS app sends no crash reports of its own.
 - [ ] Listing: screenshots, privacy manifest and nutrition label reflecting
   the actual account, cloud, score, Ask and telemetry behavior; TestFlight
   beta notes and crash-free gate.

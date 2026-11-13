@@ -1,6 +1,6 @@
 // Thin fetch wrapper for the campaign backend. In dev, Vite proxies /api to the
 // server process; on sim.ahousedividedgame.com the SPA and API share an origin.
-// On every other mount (lakesidegames.net/games/electioneer, Cloudflare Pages
+// On every other mount (any path on lakesidegames.net, Cloudflare Pages
 // previews) there is NO /api/* on the page origin: requests would hit the SPA
 // fallback and return index.html with HTTP 200, which the client would read as
 // empty successful payloads. All calls are therefore addressed to the campaign
@@ -47,7 +47,11 @@ export interface Purchase {
   packId: string | null;
   packName: string | null;
   scenarioId: string | null;
-  provider: "stripe" | "code" | "apple" | "google" | "supporter";
+  /**
+   * How the Lakeside platform granted it. "supporter": any active Lakeside
+   * supporter tier. "free-access": everything is free to play right now.
+   */
+  provider: "stripe" | "code" | "apple" | "google" | "supporter" | "free-access";
   amountCents: number | null;
   currency: string | null;
   status: "paid" | "refunded";
@@ -57,13 +61,17 @@ export interface Purchase {
 export interface CatalogProduct {
   id: string;
   name: string;
-  priceCents: number;
+  /** The Lakeside store's description; older servers send none. */
+  description?: string | null;
+  /** Null when the platform gave no price for it in this answer. */
+  priceCents: number | null;
   scenarios: string[];
   listed?: boolean;
 }
 
 export interface CatalogResponse {
-  source?: "platform" | "bundled";
+  /** "platform" is the only answer that carries prices. "bundled" is what older servers sent during an outage. */
+  source?: "platform" | "unavailable" | "bundled";
   products: CatalogProduct[];
 }
 
@@ -157,6 +165,10 @@ export const api = {
 
   me: () => call<{ user: ApiUser; unlocked: Unlocked }>("/api/auth/me").then((r) => ({ ...r, unlocked: normalizeUnlocked(r.unlocked) })),
 
+  // Removes the game account with its cloud saves, scores and achievements.
+  // Purchases stay on the Lakeside account (server/routes/auth.ts).
+  deleteAccount: () => call<{ deleted: boolean }>("/api/auth/account", { method: "DELETE" }),
+
   activate: (code: string) =>
     call<{ scenarioId?: string; packId?: string; packName?: string; unlocked: Unlocked }>(
       "/api/auth/activate", { method: "POST", body: JSON.stringify({ code }) })
@@ -165,11 +177,10 @@ export const api = {
   activations: () => call<{ unlocked: Unlocked }>("/api/auth/activations")
     .then((r) => ({ ...r, unlocked: normalizeUnlocked(r.unlocked) })),
 
-  // Product catalog with platform prices (single source of truth on the
-  // platform; the server falls back to bundled prices if it is unreachable).
-  // `source` says whether the platform answered ("platform") or the bundled
-  // fallback was served ("bundled"); `listed` is true only for products the
-  // platform actually sells.
+  // Product catalog with platform prices (the platform is the only price
+  // source). `source` says whether the platform answered ("platform") or could
+  // not be reached ("unavailable", no prices); `listed` is true only for
+  // products the platform actually sells.
   catalog: () => call<CatalogResponse>("/api/catalog"),
 
   // ── Purchases + Lakeside ID ──
@@ -328,7 +339,9 @@ export interface DailyChampions {
 // button always drives that host's /api/lakeside/login. It bounces back to the
 // CURRENT page (any allowed origin) with a one-time ?lakeside_code=, which the
 // SPA exchanges for its normal token. Works identically whether the app is
-// served from sim.ahousedividedgame.com or the /games/electioneer mount.
+// served from sim.ahousedividedgame.com or any path on lakesidegames.net
+// (/games/margin-of-victory/, or the old /games/electioneer/ address): the
+// return target is the page's own origin and path, whatever they are.
 export function lakesideLoginUrl(returnParams: Record<string, string> = {}): string {
   const loc = window.location;
   // Same-origin relative endpoint on sim (and in dev, where Vite proxies /api);

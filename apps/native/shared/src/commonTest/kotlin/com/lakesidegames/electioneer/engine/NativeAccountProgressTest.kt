@@ -69,6 +69,9 @@ class NativeAccountProgressTest {
         assertTrue(flow.startUrl().endsWith("%2Fnative-login%3Fstate%3D$nonce"))
         assertTrue(flow.allows("https", "auth.lakesidegames.net", -1))
         assertFalse(flow.allows("http", "auth.lakesidegames.net", -1))
+        assertTrue(flow.allows("https", "appleid.apple.com", -1), "Continue with Apple must open")
+        assertTrue(flow.allows("https", "idmsa.apple.com", -1))
+        assertFalse(flow.allows("https", "apple.com.attacker.test", -1))
         assertFalse(flow.allows("https", "auth.lakesidegames.net.attacker.test", -1))
         assertFalse(flow.allows("https", "auth.lakesidegames.net", 444))
         fun take(scheme: String = "https", host: String = "sim.ahousedividedgame.com", port: Int = -1,
@@ -85,5 +88,21 @@ class NativeAccountProgressTest {
         assertNull(take(main = false))
         assertEquals(code, take())
         assertNull(take(), "A duplicate navigation cannot redeem the same code again")
+    }
+
+    @Test
+    fun googleSignInStopsInsideTheAppWithOnePlainLine() {
+        val flow = NativeLakesideLogin("a".repeat(32))
+        assertFalse(flow.allows("https", "accounts.google.com", -1))
+        assertTrue(NativeLakesideLogin.isGoogleSignIn("accounts.google.com", "/o/oauth2/v2/auth"))
+        assertTrue(NativeLakesideLogin.isGoogleSignIn("ahousedividedgame.com", "/api/auth/google/login"))
+        assertTrue(NativeLakesideLogin.isGoogleSignIn("WWW.ahousedividedgame.com", "/api/auth/google/callback"))
+        assertFalse(NativeLakesideLogin.isGoogleSignIn("ahousedividedgame.com", "/api/auth/discord/login"))
+        assertFalse(NativeLakesideLogin.isGoogleSignIn("ahousedividedgame.com", "/api/auth/googleplay"))
+        assertFalse(NativeLakesideLogin.isGoogleSignIn("attacker.test", "/api/auth/google/login"))
+        assertFalse(NativeLakesideLogin.isGoogleSignIn(null, "/api/auth/google/login"))
+        val line = NativeLakesideLogin.GOOGLE_UNAVAILABLE
+        assertFalse('\n' in line)
+        listOf("lakesidegames.net", "Apple", "Discord", "A House Divided").forEach { assertTrue(it in line, it) }
     }
 }

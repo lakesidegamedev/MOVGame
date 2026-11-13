@@ -126,6 +126,41 @@ describe("ElectionNightShell", () => {
     expect(onUnlock).toHaveBeenCalledTimes(1);
   });
 
+  it("offers a free election first when the next one is locked", () => {
+    const onUnlock = vi.fn();
+    const onFree = vi.fn();
+    mount(
+      <ElectionNightShell
+        eyebrow="PROJECTED WINNER"
+        headline="Winner"
+        counterValue={270}
+        counterLabel="EV"
+        swing={swing}
+        nextScenario={{
+          title: "1932 · Roosevelt v. Hoover",
+          blurb: "Back to the start of the timeline",
+          unlocked: false,
+          ctaLabel: "Play 1932 →",
+          lockLabel: "Unlock 1932",
+          onPlay: vi.fn(),
+          onUnlock,
+          freeAlternative: { label: "🇬🇧 2024 · Starmer's landslide", onPlay: onFree },
+        }}
+      />,
+    );
+
+    const free = container.querySelector<HTMLButtonElement>("[data-testid='ens-next-free']")!;
+    expect(free.className).toContain("primary");
+    expect(free.textContent).toContain("Play free: 🇬🇧 2024 · Starmer's landslide");
+    act(() => {
+      free.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(onFree).toHaveBeenCalledTimes(1);
+    const unlock = [...container.querySelectorAll("button")].find((b) => b.textContent?.includes("Unlock 1932"));
+    expect(unlock).toBeTruthy();
+    expect(onUnlock).not.toHaveBeenCalled();
+  });
+
   it("renders children and footer slots for map / score posting", () => {
     mount(
       <ElectionNightShell

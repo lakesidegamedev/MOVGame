@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { PACKS_BY_ID } from "@content/packs";
-import { catalogFromResponse, countryPacks, packFacts, summarizeComplete, unreachableCatalog, type CatalogState } from "@lib/storeModel";
+import { catalogFromResponse, countryPacks, packFacts, summarizeComplete, unreachableCatalog, LOADING_CATALOG, type CatalogState } from "@lib/storeModel";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -15,8 +15,9 @@ const hoisted = vi.hoisted(() => ({
   catalog: { value: null as unknown },
 }));
 vi.mock("@lib/distribution", () => ({ DISTRIBUTION: hoisted.policy }));
+const reload = vi.hoisted(() => vi.fn());
 vi.mock("@lib/useCatalog", () => ({
-  useCatalog: () => ({ catalog: hoisted.catalog.value, reload: vi.fn() }),
+  useCatalog: () => ({ catalog: hoisted.catalog.value, reload }),
 }));
 
 import { useAuthStore } from "@store/authStore";
@@ -28,7 +29,8 @@ import StoreScreen from "../StoreScreen";
 const readyCatalog = (unlisted: string[] = []): CatalogState =>
   catalogFromResponse({
     source: "platform",
-    products: [...countryPacks(), PACKS_BY_ID.complete].map((p) => ({ id: p.id, name: p.name, priceCents: p.price, scenarios: [], listed: !unlisted.includes(p.id) })),
+    // What the platform answers (test data: the game has no prices of its own).
+    products: [...countryPacks(), PACKS_BY_ID.complete].map((p) => ({ id: p.id, name: p.name, priceCents: p.id === "complete" ? 399 : 99, scenarios: [], listed: !unlisted.includes(p.id) })),
   });
 
 const player = { id: "u1", username: "campaigner", email: "c@example.com", ahdLinked: true };
@@ -134,9 +136,10 @@ describe("the shelf", () => {
       purchases: [{ ...stripe("complete"), provider: "supporter" as const, amountCents: 0 }],
     });
     mount();
-    expect(container.querySelector(".store-hero")!.textContent).toContain("Included with your Supporter membership");
+    expect(container.querySelector(".store-hero")!.textContent).toContain("Included with any Lakeside supporter tier");
+    expect(container.querySelector(".store-hero")!.textContent).not.toMatch(/Supporter\+|Supporter membership/);
     for (const p of countryPacks()) {
-      expect(tile(p.id).textContent).toContain("Included in your Complete Collection");
+      expect(tile(p.id).textContent).toContain("Included with any Lakeside supporter tier");
       expect(tile(p.id).querySelector("button.primary")).toBeNull();
     }
     expect(buttons(/^Buy /)).toHaveLength(0);
@@ -151,17 +154,44 @@ describe("the shelf", () => {
     expect(tile("canada").querySelector("button.primary")).not.toBeNull();
   });
 
-  it("stays browsable with Buy disabled, and says why, when the platform is unreachable", () => {
+  it("shows no price anywhere and disables Buy when the platform is unreachable", () => {
     hoisted.catalog.value = unreachableCatalog();
+    reload.mockReset();
     mount();
     const buys = buttons(/^Buy /);
     expect(buys.length).toBeGreaterThan(0);
     expect(buys.every((b) => b.disabled)).toBe(true);
-    expect(text()).toContain("can't be reached");
-    expect(tile("canada").textContent).toContain("$0.99"); // bundled price for reference
-    expect(buttons(/Try again/).length).toBeGreaterThan(0);
+    expect(text()).toContain("Price unavailable, try again");
+    expect(text()).not.toMatch(/\$\d/); // no number at all, not even a remembered one
+    const retry = buttons(/Try again/);
+    expect(retry.length).toBeGreaterThan(0);
+    click(retry[0]);
+    expect(reload).toHaveBeenCalled();
     click(tile("canada").querySelector("button.pack-tile-main")!);
     expect(text()).toContain("Elections in this pack"); // still browsable
+    expect(text()).not.toMatch(/\$\d/);
+  });
+
+  it("shows no price and disables Buy while the catalog is still loading", () => {
+    hoisted.catalog.value = LOADING_CATALOG;
+    mount();
+    const buys = buttons(/^Buy /);
+    expect(buys.length).toBeGreaterThan(0);
+    expect(buys.every((b) => b.disabled)).toBe(true);
+    expect(text()).not.toMatch(/\$\d/);
+    expect(text()).toContain("Checking the price");
+  });
+
+  it("shows exactly the platform's numbers once it answers", () => {
+    hoisted.catalog.value = catalogFromResponse({
+      source: "platform",
+      products: [...countryPacks(), PACKS_BY_ID.complete].map((p) => ({ id: p.id, name: p.name, priceCents: p.id === "complete" ? 449 : 129, scenarios: [], listed: true })),
+    });
+    mount();
+    expect(tile("canada").textContent).toContain("$1.29");
+    expect(container.querySelector(".store-hero")!.textContent).toContain("$4.49");
+    expect(text()).not.toContain("$0.99");
+    expect(text()).not.toContain("$3.99");
   });
 
   it("filters the shelf to owned and not owned packs", () => {
@@ -372,5 +402,63 @@ describe("keyboard and screen readers", () => {
     useAuthStore.setState({ modal: "login" });
     mount();
     expect(container.querySelector("[role='dialog']")!.hasAttribute("inert")).toBe(true);
+  });
+});
+
+describe("the Lakeside store", () => {
+  const freeAccessPurchases = () => [...countryPacks(), PACKS_BY_ID.complete].map((p) => ({
+    ...stripe(p.id), provider: "free-access" as const, amountCents: null, currency: null,
+  }));
+
+  it("says who sells it, who takes payment and the refund promise, and links to the Lakeside store", () => {
+    mount();
+    expect(container.querySelector(".store-trust")!.textContent!.replace(/\s+/g, " ").trim())
+      .toBe("Sold by Lakeside Games. Payments by Stripe. Refunds within 14 days, no questions asked.");
+    const link = [...container.querySelectorAll<HTMLAnchorElement>("a")].find((a) => a.textContent?.includes("See everything on the Lakeside store"))!;
+    expect(link.getAttribute("href")).toBe("https://lakesidegames.net/store/margin-of-victory");
+    expect(link.getAttribute("target")).toBe("_blank");
+  });
+
+  it("uses the Lakeside catalog's names and descriptions once it answers", () => {
+    hoisted.catalog.value = catalogFromResponse({
+      source: "platform",
+      products: [...countryPacks(), PACKS_BY_ID.complete].map((p) => ({
+        id: p.id, name: p.id === "canada" ? "Canada Pack" : p.name, description: p.id === "canada" ? "Live text from the Lakeside store." : null,
+        priceCents: p.id === "complete" ? 399 : 99, scenarios: [], listed: true,
+      })),
+    });
+    mount();
+    expect(tile("canada").textContent).toContain("Canada Pack");
+    expect(tile("canada").textContent).toContain("Live text from the Lakeside store.");
+    expect(tile("germany").textContent).toContain(PACKS_BY_ID.germany.description);
+  });
+
+  it("says everything is free and shows no prices or Buy while free access is on", () => {
+    useAuthStore.setState({
+      user: player,
+      unlocked: { scenarioIds: [], packIds: [...countryPacks().map((p) => p.id), "complete"] },
+      purchases: freeAccessPurchases(),
+    });
+    mount();
+    expect(text()).toContain("Everything is free to play while A House Divided is paused");
+    expect(text()).not.toMatch(/\$\d/);
+    expect(buttons(/^Buy /)).toHaveLength(0);
+    expect(container.querySelector(".store-trust")).toBeNull();
+    expect(tile("canada").textContent).toContain("Free to play right now");
+  });
+
+  it("shows no price or Buy under free access even for a pack the switch did not cover", () => {
+    useAuthStore.setState({ user: player, unlocked: { scenarioIds: [], packIds: ["canada"] }, purchases: freeAccessPurchases().filter((p) => p.packId === "canada") });
+    mount();
+    expect(text()).toContain("Everything is free to play while A House Divided is paused");
+    expect(text()).not.toMatch(/\$\d/);
+    expect(buttons(/^Buy /)).toHaveLength(0);
+  });
+
+  it("keeps prices and Buy for a signed-in player without free access", () => {
+    useAuthStore.setState({ user: player, unlocked: { scenarioIds: [], packIds: [] }, purchases: [] });
+    mount();
+    expect(text()).not.toContain("Everything is free to play");
+    expect(buttons(/^Buy /).length).toBeGreaterThan(0);
   });
 });

@@ -129,7 +129,7 @@ private fun buildRecap(game: GameState, turn: Int, evBefore: Int, cashBefore: Do
     val cashAfter = game.resources.getValue(game.playerCandidate.serial).cash
     val cashDelta = cashAfter - cashBefore
     recap.add(1, TurnRecapItem(label = "Campaign cash",
-        detail = "\$${toFixed1(cashAfter / 1_000_000)}M after ${if (cashDelta >= 0) "+" else "-"}\$${toFixed1(abs(cashDelta) / 1_000_000)}M this week"))
+        detail = "${if (cashAfter < 0 && toFixed1(-cashAfter / 1_000_000) != "0.0") "-" else ""}\$${toFixed1(abs(cashAfter) / 1_000_000)}M after ${if (cashDelta >= 0) "+" else "-"}\$${toFixed1(abs(cashDelta) / 1_000_000)}M this week"))
     return recap.take(2) + recap.drop(2).filter { it.detail.startsWith("Your action") } +
         recap.drop(2).filter { !it.detail.startsWith("Your action") }.take(8)
 }

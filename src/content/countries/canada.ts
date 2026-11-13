@@ -47,7 +47,6 @@ export const CANADA_MODULE: CountryModule = {
     id: "canada",
     name: "Canada",
     description: "Twelve federal elections from 1984 to 2025: the Mulroney landslide, the free trade vote, the Bloc and Reform breakthrough, the Harper years, Sunny ways and the tariff-war comeback.",
-    price: 99,
   },
   daily: { pair: ["lpc", "cpc"], names: { lpc: "the Liberals", cpc: "the Conservatives" } },
   next: {

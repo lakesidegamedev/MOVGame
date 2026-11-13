@@ -160,7 +160,7 @@ const CHANGELOG = [
   { version: "2.0.0", date: "2026-11", changes: [
     "Eight new countries: New Zealand, India, Japan, Brazil, Ireland, Spain, Italy and Mexico. The game now has 14 countries and 121 elections.",
     "Canada, Australia, Germany and France go back to the 1980s and 1990s, and the United States goes back to 1932, each year with its own Electoral College.",
-    "Every country has one free election. Each country is a $0.99 pack, and the Complete Collection is $3.99.",
+    "At least one election in every country is free (two in the United States). Every other election is in its country's pack, and the Complete Collection unlocks every country. The Store shows current prices.",
     "A Store screen shows what you own, what each pack holds and how to buy it.",
     "Difficulty means the same thing in every country: Normal is a fair fight you can win from either side, Easy gives a head start sized to the race, and Hard makes your campaigning land a little lighter.",
     "Every election has its own issues, and scheduled events land in the weeks they really happened.",

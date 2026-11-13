@@ -10,6 +10,7 @@ import { useSavesStore } from "@store/savesStore";
 import { LazyFallback } from "@ui/Fallbacks";
 import type { EditorLaunchTarget } from "@ui/SetupScreen";
 import type { View } from "@ui/view";
+import { usePlayNav } from "@store/playNav";
 
 // The landing page renders from metadata alone (the scenario registry and the
 // country modules). Every game shell carries its engine, content and map
@@ -114,6 +115,13 @@ export function App() {
     else if (meta.engine === "uk") go({ kind: "uk", electionId: meta.nativeId });
     else go({ kind: "country", countryId: meta.country, electionId: meta.nativeId });
   };
+
+  // A results screen asked to start another election (a free one in another country).
+  const playRequest = usePlayNav((s) => s.scenarioId);
+  useEffect(() => {
+    const id = playRequest ? usePlayNav.getState().take() : null;
+    if (id) playScenario(id);
+  }, [playRequest]);
 
   // The campaign editor (on the US setup screen) can start a UK or country game.
   const launchFromEditor = (target: EditorLaunchTarget) =>

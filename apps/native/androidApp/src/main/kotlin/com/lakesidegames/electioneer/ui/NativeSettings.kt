@@ -93,10 +93,10 @@ fun NativeSettingsScreen(session: GameSession) {
         }
         MovCard(tight = true) {
             CardHead("About")
-            GhostButton("Privacy policy", { uri.openUri("https://lakesidegames.net/games/electioneer/?legal=privacy") }, color = Mov.Info)
-            GhostButton("Terms of service", { uri.openUri("https://lakesidegames.net/games/electioneer/?legal=terms") }, color = Mov.Info)
+            GhostButton("Privacy policy", { uri.openUri("https://lakesidegames.net/games/margin-of-victory/?legal=privacy") }, color = Mov.Info)
+            GhostButton("Terms of service", { uri.openUri("https://lakesidegames.net/games/margin-of-victory/?legal=terms") }, color = Mov.Info)
             GhostButton("Contact support", { uri.openUri("mailto:support@lakesidegames.net") }, color = Mov.Info)
-            GhostButton("Web game", { uri.openUri("https://lakesidegames.net/games/electioneer/") }, color = Mov.Info)
+            GhostButton("Web game", { uri.openUri("https://lakesidegames.net/games/margin-of-victory/") }, color = Mov.Info)
             Text("Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})", style = MaterialTheme.typography.bodySmall.num, color = Mov.Text4)
         }
     }

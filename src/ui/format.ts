@@ -1,8 +1,18 @@
+/** Dollars, short: "$8.1M", "$350K". The sign goes before the symbol: "-$8.1M". */
 export function money(n: number): string {
-  if (Math.abs(n) >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
-  if (Math.abs(n) >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (Math.abs(n) >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
-  return `$${n.toFixed(0)}`;
+  const a = Math.abs(n);
+  const digits = a >= 1_000_000_000 ? (a / 1_000_000_000).toFixed(2)
+    : a >= 1_000_000 ? (a / 1_000_000).toFixed(1)
+    : a >= 1_000 ? (a / 1_000).toFixed(0)
+    : a.toFixed(0);
+  const unit = a >= 1_000_000_000 ? "B" : a >= 1_000_000 ? "M" : a >= 1_000 ? "K" : "";
+  return `${n < 0 && Number(digits) !== 0 ? "-" : ""}$${digits}${unit}`;
+}
+
+/** An amount already in millions, in a campaign's currency: "£12M", "-R$2.5M". */
+export function moneyMillions(symbol: string, millions: number, digits = 1): string {
+  const body = Math.abs(millions).toFixed(digits);
+  return `${millions < 0 && Number(body) !== 0 ? "-" : ""}${symbol}${body}M`;
 }
 
 export function pct(n: number, digits = 1): string {

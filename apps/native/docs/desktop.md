@@ -29,17 +29,19 @@ installed game with real clicks:
   pack as owned, the Store shows "United States unlocked" (3.3 seconds after
   the window came back in run 43299800492). The game server was mocked for
   this step; no payment is made.
-- Bringing the game window back does not check for the purchase at once on
-  Windows. This is a known gap. The unlock arrives through the timed check (every 4
-  to 12 seconds for ten minutes after Buy) or "I've paid, check now"; measured
-  pickup after the window came back is about 3 to 12 seconds (3.1 s in run
-  43316276775, 3.3 s in run 43299800492). Tried and dropped: Tauri's
-  `Focused(true)` does not fire on Windows for a taskbar restore or Alt+Tab, and
-  polling the native window's focus state every 250 ms also produced no event
-  in CI (run 43316276775). The smoke records the timing as a note and no longer
-  asserts it. A possible next approach is a Win32 `WM_ACTIVATEAPP` or
-  `WM_SETFOCUS` hook on the main window, verified on a runner before it is
-  relied on.
+- Bringing the game window back checks for the purchase at once on Windows.
+  The shell subclasses the game window and, on `WM_ACTIVATE`, sends the page
+  `mov-shell-focus`. In run 43332464583 the helper minimised the game window,
+  then made it the foreground window again (`AttachThreadInput` plus
+  `SetForegroundWindow`, the way a taskbar click or Alt+Tab does); the hook
+  reported 2 activations and the Store showed "United States unlocked" 259 ms
+  after the restore (800 ms after the first focus report). The smoke asserts
+  that a focus report reaches the page and that the pickup lands within 2 s of
+  it. Why earlier runs saw no focus at all: their helper restored
+  `Process.MainWindowHandle`, which names a hidden window of the process while
+  the game window is minimised, so the game window never came back to the
+  front in CI (run 43330269865: `wasMinimised=False`, Edge still in front).
+  WebView2 sends the page no `visibilitychange` on minimise or restore.
 - Started the way the Lakeside launcher starts it, with a sign-in code in
   `LAKESIDE_HANDOFF_CODE`, the game redeems the code once and the player is
   signed in. The game server was faked for this step. Verified in run
@@ -60,7 +62,9 @@ the setup wizard. The .deb installs with apt, puts `electioneer` on the PATH
 and a "Margin of Victory" menu entry in place, runs, and removes cleanly.
 
 **macOS** (`macos-latest`, Apple Silicon, macOS 26): the .app opens with its
-window (1024 by 674 on the runner) and the landing page. See "Installing an
+window (1024 by 674 on the runner) and the landing page, and a CI autoplay
+build plays the free US campaign to week two (runs 43330269865 and
+43332464583: Sept 1 to Sept 8). See "Installing an
 unsigned macOS build" for what a downloaded copy does.
 
 Not covered: Intel Macs, Windows on ARM, a real payment, Lakeside sign-in and
@@ -69,7 +73,9 @@ account linking in the browser, offline startup, and Steam.
 ## Channels
 
 The channel is selected by Vite mode, and each mode has a `.env.<mode>` file at
-the repository root that sets `VITE_DISTRIBUTION_CHANNEL`.
+the repository root that sets `VITE_DISTRIBUTION_CHANNEL`. The same files
+leave `VITE_SENTRY_DSN` empty; `desktop.yml` fills it from the
+`MOV_SENTRY_DSN` secret (see `docs/error-reporting.md`).
 
 | Channel | Build | Store | Scores | App identifier |
 | --- | --- | --- | --- | --- |
@@ -162,6 +168,12 @@ about 8.
 - **macOS** (`scripts/smoke-macos.sh`): opens the .app and checks its window,
   then opens a copy marked as downloaded and records what Gatekeeper does, for
   the sealed bundle and for the bundle as Tauri leaves it.
+  Then a CI autoplay build of the same commit (`desktop-build.mjs
+  --ci-autoplay`, never uploaded; WKWebView has no debugging port to drive it
+  from outside) plays the free US campaign from the landing page to week two by
+  itself and reports each stage to a local listener
+  (`scripts/ci-autoplay.mjs`, `scripts/smoke-macos-play.sh`); the desk is
+  screenshotted at week two (`smoke/play/macos-week-two.png`).
 
 ### Where saves live
 
@@ -268,9 +280,9 @@ seconds for ten minutes, and again when the window comes back (see
 `src/store/storeFlow.ts` and `src/ui/store/StoreScreen.tsx`). On Windows the
 page gets no `focus` or `visibilitychange` when the window is restored, so the
 shell forwards Tauri's `WindowEvent::Focused(true)` to the page as a
-`mov-shell-focus` event on `window`, and the Store treats it like `focus`. That
-event does not arrive on Windows after a taskbar restore or Alt+Tab (see
-"Smoke tests"), so there the timed check does the work. Sign in with Lakeside Games is not offered in
+`mov-shell-focus` event on `window`, and the Store treats it like `focus`. On
+Windows the shell also sends that event on every `WM_ACTIVATE` of the game
+window (see "Smoke tests"), so coming back from the browser checks at once. Sign in with Lakeside Games is not offered in
 the desktop window, because the return trip cannot reach it; an account that needs
 linking is linked once in the browser.
 

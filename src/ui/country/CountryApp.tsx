@@ -16,6 +16,7 @@ import { DeskHeader } from "@ui/DeskHeader";
 import { partyInk } from "@ui/colors";
 import { movAskUrlFromSnapshot, movSeatAskSnapshot } from "@lib/ask";
 import { countryGameIssues } from "@engine/countryGame";
+import { moneyMillions } from "../format";
 
 function countryEventView(country: CountryBundle, electionId: string, eventId: string) {
   const deck = country.elections[electionId]?.events ?? [];
@@ -149,7 +150,7 @@ function CountryShell({ country: baseCountry, onExit, initialElection, initialSe
         scoreboard={live ? <CountrySeatBar country={country} result={live} /> : undefined}
         metrics={[
           { label: `Your ${country.unitNamePlural}`, value: playerSeats, color: partyInk(partyColor(country, activeGame.playerParty)) },
-          { label: "Funds", value: `${country.currency}${res.funds.toFixed(0)}M` },
+          { label: "Funds", value: moneyMillions(country.currency, res.funds, 0) },
           { label: "Actions", value: `${res.maxActions - used}/${res.maxActions}`, warn: used >= res.maxActions },
         ]}
         undoLabel="Undo"

@@ -1,8 +1,7 @@
 import { useMemo } from "react";
-import { loadedCountry } from "@content/countries";
 import { deriveReport, type ReplayLog } from "@lib/replay";
 import { Sparkline } from "./Sparkline";
-import { money } from "./format";
+import { replayMoney } from "./replayMoney";
 
 // Post-game "why you won / lost" breakdown, built entirely from the replay
 // log. Engine-agnostic: it renders for US, UK, and country games alike and
@@ -40,12 +39,6 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
 
   const debates = r.events.filter((e) => e.text.startsWith("Debate:"));
   const otherEvents = r.events.filter((e) => !e.text.startsWith("Debate:"));
-  // Country replay logs carry "<CODE>-<election>" as their scenario id.
-  const currency = log?.engine === "uk"
-    ? "£"
-    : log?.engine === "country"
-      ? loadedCountry(log.scenarioId.split("-")[0]!.toUpperCase())?.currency ?? "$"
-      : "$";
 
   return (
     <div className="card">
@@ -68,7 +61,7 @@ export function WhyReport({ log, won }: { log: ReplayLog | null; won: boolean | 
         </div>
         {r.cashSpent !== null && (
           <div className="report-cell">
-            <div className="rv">{money(r.cashSpent).replace("$", currency)}</div>
+            <div className="rv">{replayMoney(log, r.cashSpent)}</div>
             <div className="rl">Net cash used, including fundraising</div>
           </div>
         )}

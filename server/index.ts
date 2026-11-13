@@ -34,13 +34,12 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "campaign-server" });
 });
 
-// Product catalog with platform prices (one source of truth on the platform;
-// bundled prices are the offline-safe fallback). Same-origin so the SPA reads
-// it regardless of which host it is mounted on.
+// Product catalog with platform prices (the platform is the only price
+// source). Same-origin so the SPA reads it regardless of which host it is
+// mounted on. When the platform cannot be reached the answer says so
+// (source "unavailable", no prices) and is never cached anywhere.
 app.get("/api/catalog", async (_req, res) => {
   const { source, items } = await getCatalogResult();
-  // An answer from the bundled fallback means the platform was unreachable;
-  // do not let a cache keep serving it after the platform recovers.
   res.set("Cache-Control", source === "platform" ? "public, max-age=300" : "no-store");
   res.json({ source, products: items });
 });

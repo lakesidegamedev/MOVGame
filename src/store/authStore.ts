@@ -15,7 +15,9 @@ export type AuthNotice =
   | { kind: "lakeside-failed" }
   | { kind: "lakeside-link-needs-login" }
   // Opened from the Lakeside launcher but its sign in did not go through.
-  | { kind: "launcher-failed" };
+  | { kind: "launcher-failed" }
+  // Shown on the landing page after the player deleted their account.
+  | { kind: "account-deleted" };
 
 interface AuthStore {
   user: ApiUser | null;
@@ -43,9 +45,19 @@ interface AuthStore {
   refreshEntitlements: () => Promise<boolean>;
   loadPurchases: () => Promise<boolean>;
   logout: () => void;
+  /**
+   * Delete the game account on the server, then sign out on this device.
+   * Resolves null on success, or a message to show when nothing was deleted.
+   */
+  deleteAccount: () => Promise<string | null>;
   refresh: () => Promise<void>;
 
   canPlay: (scenarioId: string) => boolean;
+  /**
+   * Free or owned: what counts as "playable" in the library. Unlike canPlay it
+   * leaves out today's Daily Challenge, a one-day pass that is not ownership.
+   */
+  ownsScenario: (scenarioId: string) => boolean;
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -125,6 +137,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ user: null, unlocked: { scenarioIds: [], packIds: [] }, purchases: [] });
   },
 
+  deleteAccount: async () => {
+    try {
+      await api.deleteAccount();
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) return "Your session has expired. Log in again, then delete the account.";
+      return e instanceof ApiError ? e.message : "Could not reach the server. Your account was not deleted.";
+    }
+    get().logout();
+    set({ modal: null, paywallScenarioId: null, notice: { kind: "account-deleted" } });
+    return null;
+  },
+
   refresh: async () => {
     // Always probe the server so offline guests get the "play offline" UX
     // instead of lock/login prompts that can't succeed.
@@ -167,6 +191,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     // server scores it ungated (routes/daily.ts). Keep the client in step so
     // the daily never prompts for sign-in or purchase.
     if (dailyAssignment(utcDateString()).scenarioId === scenarioId) return true;
+    return get().unlocked.scenarioIds.includes(scenarioId);
+  },
+  ownsScenario: (scenarioId) => {
+    if (DISTRIBUTION.preview) return true;
+    if (isFreeScenario(scenarioId)) return true;
     return get().unlocked.scenarioIds.includes(scenarioId);
   },
 }));

@@ -44,7 +44,6 @@ export const US_MODULE: CountryModule = {
     id: "us-historical",
     name: "United States",
     description: "Twenty-four presidential races from 1932 to 2024: the New Deal, the Truman upset, Eisenhower's crusade, the Kennedy debates, the Daisy ad, Watergate, the Reagan Revolution, the Florida recount, the Rust Belt upset, the pandemic election and the 2024 rematch.",
-    price: 99,
   },
   daily: { pair: ["dem", "rep"], names: { dem: "the Democrats", rep: "the Republicans" } },
   next: {

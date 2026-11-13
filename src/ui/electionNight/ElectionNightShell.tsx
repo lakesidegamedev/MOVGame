@@ -8,6 +8,8 @@ import { partyInk } from "@ui/colors";
 import { RollingCounter } from "./RollingCounter";
 import { Swingometer, type SwingometerProps } from "./Swingometer";
 import "./shell.css";
+import { freeAlternative } from "@content/nextScenario";
+import { usePlayNav } from "@store/playNav";
 
 export interface ShellNextScenario {
   title: string;
@@ -19,6 +21,20 @@ export interface ShellNextScenario {
   onUnlock: () => void;
   /** Optional mini map / cartogram preview shown beside the copy. */
   mapPreview?: ReactNode;
+  /** Shown when the next election is locked: a free one the player can start now. */
+  freeAlternative?: { label: string; onPlay: () => void } | null;
+}
+
+/**
+ * The free election to offer beside a locked next election (null when the
+ * next one is playable), ready for the card. Starts it through the app root.
+ */
+export function freeChoice(unlocked: boolean, country: string, playedScenarioId: string): ShellNextScenario["freeAlternative"] {
+  if (unlocked) return null;
+  const meta = freeAlternative(country, playedScenarioId);
+  if (!meta) return null;
+  // The registry label already starts with the year ("2020 · Biden v. Trump").
+  return { label: `${meta.flag} ${meta.label}`, onPlay: () => usePlayNav.getState().play(meta.scenarioId) };
 }
 
 export interface ElectionNightShellProps {
@@ -128,6 +144,7 @@ function NextScenarioCard({
   onPlay,
   onUnlock,
   mapPreview,
+  freeAlternative,
 }: ShellNextScenario) {
   return (
     <div className={`ens-next${unlocked ? "" : " locked"}`} data-testid="ens-next-scenario">
@@ -140,6 +157,13 @@ function NextScenarioCard({
         </div>
         {unlocked ? (
           <button className="primary" onClick={onPlay}>{ctaLabel}</button>
+        ) : freeAlternative ? (
+          <div className="ens-next-actions">
+            <button className="primary" onClick={freeAlternative.onPlay} data-testid="ens-next-free">
+              Play free: {freeAlternative.label} →
+            </button>
+            <button onClick={onUnlock}><Lock size={13} aria-hidden="true" />{lockLabel.replace(/^🔒\s*/, "")}</button>
+          </div>
         ) : (
           <button onClick={onUnlock}><Lock size={13} aria-hidden="true" />{lockLabel.replace(/^🔒\s*/, "")}</button>
         )}

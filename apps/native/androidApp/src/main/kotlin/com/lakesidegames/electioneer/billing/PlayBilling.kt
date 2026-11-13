@@ -234,7 +234,7 @@ class PlayBilling(
             val result = account.verifyStorePurchase(purchase.purchaseToken)
             lastNotice = when {
                 result.getString("status") != "paid" -> "Purchase is not active."
-                result.getString("environment") == "Sandbox" -> "Test purchase verified. Production ownership is unchanged."
+                result.getString("environment") == "Sandbox" -> "Test purchase verified and unlocked in the app. Web ownership is unchanged."
                 else -> "Purchase delivered to your Lakeside account."
             }
         } catch (error: Exception) { lastNotice = error.message ?: "Purchase delivery will retry when you restore." }

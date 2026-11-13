@@ -41,7 +41,6 @@ export const FRANCE_MODULE: CountryModule = {
     id: "france",
     name: "France",
     description: "Nine presidential elections from 1981 to 2027. Two rounds, a crowded first ballot, and a runoff decided by who the losers back.",
-    price: 99,
   },
   daily: { pair: ["ens", "rn"], names: { ens: "Ensemble", rn: "the RN" } },
   next: {
