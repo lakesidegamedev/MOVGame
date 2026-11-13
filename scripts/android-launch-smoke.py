@@ -325,8 +325,10 @@ def png_size(path):
 
 
 def play_flows():
-    # Google Play listing screenshots: 9:16 phone, and 16:9 seven and ten inch
-    # tablets, with a clean demo-mode status bar. Only on build/android-play.
+    # Google Play listing screenshots: 9:16 phone and 9:16 portrait seven and
+    # ten inch tablets, with a clean demo-mode status bar. Only on
+    # build/android-play. Portrait shows the whole campaign desk; landscape
+    # left it in a short band between the top bar and End Week.
     adb('shell', 'settings', 'put', 'global', 'sysui_demo_allowed', '1')
     demo = ['shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command']
     adb(*demo, 'enter')
@@ -338,8 +340,8 @@ def play_flows():
     try:
         for label, size, density, screens, expected in [
                 ('phone', None, None, PLAY_PHONE, None),
-                ('tablet-7', '1920x1080', '280', PLAY_TABLET, (1920, 1080)),
-                ('tablet-10', '2560x1440', '320', PLAY_TABLET, (2560, 1440))]:
+                ('tablet-7', '1080x1920', '280', PLAY_TABLET, (1080, 1920)),
+                ('tablet-10', '1440x2560', '320', PLAY_TABLET, (1440, 2560))]:
             if size:
                 adb('shell', 'wm', 'size', size)
                 adb('shell', 'wm', 'density', density)
@@ -365,6 +367,20 @@ def play_flows():
         adb(*demo, 'exit')
 
 
+def account_delete_flows():
+    # Delete account on the signed-in Account screen: the card, the
+    # confirmation, and Cancel leaving the account in place. Runs last because
+    # the capture account has no session and must not touch other flows.
+    launch('account-signed-in')
+    capture('account-signed-in', 'Welcome, campaigner', 'ask')
+    tap_label('Delete account')
+    capture('account-delete-confirm', 'It cannot be undone', 'ask')
+    tap_label('Cancel', pinned=True)
+    capture('account-delete-cancelled', 'Welcome, campaigner', 'ask')
+    if 'IT CANNOT BE UNDONE' in semantic_text('account-delete-cancelled-check'):
+        raise RuntimeError('Cancel did not close the Delete account confirmation')
+
+
 def section(run):
     # Keep capturing after a failed section so one broken flow does not hide
     # every later screen. The job still fails at the end.
@@ -386,7 +402,7 @@ try:
     adb('shell', 'settings', 'put', 'global', 'animator_duration_scale', '0')
     if os.environ.get('MOV_PLAY_CAPTURES') == '1':
         section(play_flows)
-    for run in (ask_flows, route_flows, accessibility_flows, layout_flows, queue_flows, keyboard_flows, restart_flows):
+    for run in (ask_flows, route_flows, accessibility_flows, layout_flows, queue_flows, keyboard_flows, restart_flows, account_delete_flows):
         section(run)
     if failures:
         raise RuntimeError('Failed flows: ' + '; '.join(failures))

@@ -13,6 +13,13 @@ internal fun captureDebugFlow(session: GameSession, flow: String) {
         "setup" to Screen.SETUP, "store" to Screen.STORE,
         "settings" to Screen.SETTINGS, "guide" to Screen.GUIDE, "editor" to Screen.EDITOR, "boards" to Screen.BOARDS)
     if (flow in routes) { session.go(routes.getValue(flow)); return }
+    if (flow == "account-signed-in") {
+        // The signed-in Account screen, to check Delete account and its confirmation.
+        // There is no session token, so no request can act on a real account.
+        session.account.showSignedInForCapture(com.lakesidegames.electioneer.ui.AccountUser("capture", "campaigner", "campaigner@example.com"))
+        session.go(Screen.ACCOUNT)
+        return
+    }
     if (flow.startsWith("library-")) {
         // Open the library on one country's newest election, to show its side picker.
         val country = flow.substringAfter('-')

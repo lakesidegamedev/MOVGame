@@ -27,6 +27,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   then Delete account, and type your username to confirm. It removes the game account with its
   cloud saves, scores and achievements, and signs you out. Packs you bought stay with your Lakeside
   Games account.
+- Android: Account now has Delete account, like iPhone. It permanently removes your Margin of
+  Victory account with its cloud saves, scores and achievements, after you confirm.
 
 ### Changed
 
@@ -43,8 +45,6 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   14 days, no questions asked." It links to the full Lakeside store page for Margin of Victory.
 - When Lakeside makes everything free for a while, the Store says "Everything is free to play
   while A House Divided is paused", shows every pack as open, and shows no prices or Buy buttons.
-
-
 - Margin of Victory has a new web address: lakesidegames.net/games/margin-of-victory. The old
   /games/electioneer address keeps working and sends you to the new one. Saves, sign-in and
   purchases carry over.
@@ -53,9 +53,6 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - Every Lakeside supporter tier includes every Margin of Victory pack and the Complete Collection.
   The Store and your account say "Included with any Lakeside supporter tier", the iPhone and
   Android apps show every pack as owned, and nothing offers a supporter a pack to buy.
-
-- Android: Account now has Delete account, like iPhone. It permanently removes your Margin of
-  Victory account with its cloud saves, scores and achievements, after you confirm.
 
 ### Fixed
 

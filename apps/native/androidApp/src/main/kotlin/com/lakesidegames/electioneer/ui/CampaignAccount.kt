@@ -242,6 +242,8 @@ class CampaignAccount(context: Context, private val scope: CoroutineScope) {
         readDetails()
         _notice.value = "Campaign code activated."
     }
+    /** Debug captures only: shows the signed-in Account screen with no server session. */
+    internal fun showSignedInForCapture(user: AccountUser) { _user.value = user }
     /** Permanently deletes this game account on the server, then signs out. */
     fun deleteAccount() = operation {
         call("/api/auth/account", "DELETE")

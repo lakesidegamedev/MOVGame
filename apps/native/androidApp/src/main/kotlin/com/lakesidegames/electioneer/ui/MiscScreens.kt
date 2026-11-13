@@ -86,7 +86,7 @@ fun AccountScreen(session: GameSession) {
                 SecondaryButton("Activate code", { account.activate(code) }, Modifier.fillMaxWidth(), enabled = !busy && code.isNotBlank())
             }
             MovCard {
-                CardHead("Delete account")
+                CardHead("Delete your account")
                 Text("Deleting removes this Margin of Victory account, its cloud saves, scores and achievements. Packs bought on your Lakeside account stay with that account.",
                     color = Mov.Text3, style = MaterialTheme.typography.bodyMedium)
                 GhostButton("Delete account", { confirmingDelete = true }, enabled = !busy, color = Mov.Negative)
