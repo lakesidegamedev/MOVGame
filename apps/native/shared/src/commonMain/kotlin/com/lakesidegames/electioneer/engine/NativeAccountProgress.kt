@@ -77,7 +77,9 @@ class NativeLakesideLogin(private val nonce: String) {
         (port == -1 || port == 443) && host?.lowercase() in setOf(
             "sim.ahousedividedgame.com", "auth.lakesidegames.net", "auth.ahousedividedgame.com",
             "ahousedividedgame.com", "www.ahousedividedgame.com", "sandbox.ahousedividedgame.com",
-            "accounts.lakesidegames.net", "discord.com", "accounts.google.com", "www.google.com")
+            "accounts.lakesidegames.net", "discord.com", "accounts.google.com", "www.google.com",
+            // Continue with Apple on the Lakeside page: Apple's sign-in page and its frame.
+            "appleid.apple.com", "idmsa.apple.com")
 
     fun isCallback(scheme: String?, host: String?, port: Int, path: String?): Boolean =
         scheme == "https" && host?.lowercase() == "sim.ahousedividedgame.com" && (port == -1 || port == 443) && path == "/native-login"

@@ -32,7 +32,7 @@ struct StoreView: View {
         let all = elections
         let byScenario = Dictionary(all.map { ($0.scenarioId, $0) }, uniquingKeysWith: { first, _ in first })
         let packs = NativeCatalog.shared.packs()
-        let linked = session.account.user?.ahdLinked == true
+        let linked = session.account.user?.ahdLinked == true || store.showsCaptureProducts
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Election packs").font(.title2.bold())

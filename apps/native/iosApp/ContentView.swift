@@ -56,6 +56,7 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
         "ahousedividedgame.com", "www.ahousedividedgame.com",
         "sandbox.ahousedividedgame.com", "accounts.lakesidegames.net",
         "discord.com", "accounts.google.com", "www.google.com",
+        "appleid.apple.com", "idmsa.apple.com",
     ]
 
     override init() {
@@ -429,7 +430,7 @@ struct ContentView: View {
             #if targetEnvironment(simulator)
             if ProcessInfo.processInfo.arguments.contains("--mov-capture-account") || ProcessInfo.processInfo.arguments.contains("--mov-capture-lakeside-login") { menuDestination = .account }
             if ProcessInfo.processInfo.arguments.contains("--mov-capture-editor") { menuDestination = .editor }
-            if ProcessInfo.processInfo.arguments.contains("--mov-capture-store") { menuDestination = .store }
+            if ProcessInfo.processInfo.arguments.contains(where: { $0.hasPrefix("--mov-capture-store") }) { menuDestination = .store }
             if ProcessInfo.processInfo.arguments.contains("--mov-capture-settings") { menuDestination = .settings }
             if ProcessInfo.processInfo.arguments.contains("--mov-capture-guide") { menuDestination = .guide }
             if ProcessInfo.processInfo.arguments.contains("--mov-capture-champions") { menuDestination = .boards }
