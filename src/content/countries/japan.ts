@@ -36,7 +36,6 @@ export const JAPAN_MODULE: CountryModule = {
     id: "japan",
     name: "Japan",
     description: "Seven House of Representatives elections from 2009 to 2026: the Democratic landslide, Abe's return, the Hope split, the slush fund election that cost the coalition its majority, and Takaichi's two-thirds landslide.",
-    price: 99,
   },
   // 2026 pairs the LDP with the CRA, which replaced the CDP (row dailyPair).
   daily: { pair: ["ldp", "dpj"], names: { ldp: "the LDP", dpj: "the DPJ/CDP", cra: "the CRA" } },

@@ -99,7 +99,7 @@ struct HomeView: View {
                     .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 16))
                 }
                 .buttonStyle(.plain)
-                Text("\(catalog.countries) countries and \(catalog.elections) elections from \(String(catalog.firstYear)) to today. One election in every country is free.").font(.caption).foregroundStyle(CampaignStyle.muted)
+                Text("\(catalog.countries) countries and \(catalog.elections) elections from \(String(catalog.firstYear)) to today. At least one election in every country is free.").font(.caption).foregroundStyle(CampaignStyle.muted)
             }
             .padding(18)
         }

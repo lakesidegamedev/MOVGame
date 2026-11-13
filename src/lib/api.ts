@@ -57,13 +57,15 @@ export interface Purchase {
 export interface CatalogProduct {
   id: string;
   name: string;
-  priceCents: number;
+  /** Null when the platform gave no price for it in this answer. */
+  priceCents: number | null;
   scenarios: string[];
   listed?: boolean;
 }
 
 export interface CatalogResponse {
-  source?: "platform" | "bundled";
+  /** "platform" is the only answer that carries prices. "bundled" is what older servers sent during an outage. */
+  source?: "platform" | "unavailable" | "bundled";
   products: CatalogProduct[];
 }
 
@@ -165,11 +167,10 @@ export const api = {
   activations: () => call<{ unlocked: Unlocked }>("/api/auth/activations")
     .then((r) => ({ ...r, unlocked: normalizeUnlocked(r.unlocked) })),
 
-  // Product catalog with platform prices (single source of truth on the
-  // platform; the server falls back to bundled prices if it is unreachable).
-  // `source` says whether the platform answered ("platform") or the bundled
-  // fallback was served ("bundled"); `listed` is true only for products the
-  // platform actually sells.
+  // Product catalog with platform prices (the platform is the only price
+  // source). `source` says whether the platform answered ("platform") or could
+  // not be reached ("unavailable", no prices); `listed` is true only for
+  // products the platform actually sells.
   catalog: () => call<CatalogResponse>("/api/catalog"),
 
   // ── Purchases + Lakeside ID ──

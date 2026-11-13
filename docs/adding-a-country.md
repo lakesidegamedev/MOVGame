@@ -201,7 +201,7 @@ export const COUNTRY_NAME_MODULE: CountryModule = {
     { electionId: "2025", year: 2025, label: "2025 · Leader v. Leader", difficulty: "hard",
       description: "One or two sentences for the picker." },
   ],
-  pack: { id: "country-name", name: "Country Name", description: "Plain description of the pack.", price: 99 },
+  pack: { id: "country-name", name: "Country Name", description: "Plain description of the pack." },
   daily: { pair: ["aaa", "bbb"], names: { aaa: "the Short", bbb: "the Other" } },
   next: {
     chain: [

@@ -44,7 +44,6 @@ export const UK_MODULE: CountryModule = {
     id: "uk-elections",
     name: "United Kingdom",
     description: "Eighteen general elections, from Churchill's 1951 comeback to Starmer's 2024 landslide. Multiparty first past the post, hung parliaments and all.",
-    price: 99,
   },
   daily: { pair: ["lab", "con"], names: { lab: "Labour", con: "the Conservatives" } },
   // Chronological, wrapping at the end.

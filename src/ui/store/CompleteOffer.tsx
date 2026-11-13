@@ -71,20 +71,20 @@ export function CompleteOffer({ compact = false }: { compact?: boolean }) {
             <OfferAction packId={COMPLETE_ID} />
           ) : (
             <>
-              {offer.kind !== "coming-soon" && (
+              {offer.kind === "buy" && completePrice !== null && (
                 <div className="store-bigprice">
                   <span className="store-price big">{formatPrice(completePrice)}</span>
                   <span className="store-price-note">one-time</span>
                 </div>
               )}
               <OfferAction packId={COMPLETE_ID} label="Buy the Complete Collection" showPrice={false} />
-              {buyable && sum.addsPacks.length > 1 && sum.saveCents > 0 && (
+              {buyable && sum.separateCents !== null && sum.saveCents !== null && sum.addsPacks.length > 1 && sum.saveCents > 0 && (
                 <p className="store-save">
                   The {sum.addsPacks.length} packs you don't have cost {formatPrice(sum.separateCents)} one by one.{" "}
                   <b>Save {formatPrice(sum.saveCents)}.</b>
                 </p>
               )}
-              {buyable && sum.addsPacks.length > 0 && sum.saveCents <= 0 && (
+              {buyable && sum.separateCents !== null && sum.saveCents !== null && sum.addsPacks.length > 0 && sum.saveCents <= 0 && (
                 <p className="store-save">
                   The {plural(sum.addsPacks.length, "pack")} you don't have cost {formatPrice(sum.separateCents)} together, so buy them one by one
                   if that is all you want. The Complete Collection also covers every pack added later.

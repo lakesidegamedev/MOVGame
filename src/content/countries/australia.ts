@@ -44,7 +44,6 @@ export const AUSTRALIA_MODULE: CountryModule = {
     id: "australia",
     name: "Australia",
     description: "Eleven federal elections from 1996 to 2025. Preferential voting from the end of Keating to the teal wave: the GST, Tampa, WorkChoices, hung parliaments and the unlosable election.",
-    price: 99,
   },
   daily: { pair: ["alp", "lnp"], names: { alp: "Labor", lnp: "the Coalition" } },
   next: {

@@ -10,6 +10,7 @@ import { COUNTRY_MODULES } from "@content/countries";
 import { PACKS_BY_ID, STORE_PACKS, packCovered, type ScenarioPack } from "@content/packs";
 import { SCENARIOS_BY_ID, SCENARIO_REGISTRY, type CountryCode, type ScenarioMeta } from "@content/scenarioRegistry";
 import { countryCover } from "@content/covers";
+import { FREE_ELECTIONS_LINE } from "@content/facts";
 import type { CatalogResponse, Purchase, Unlocked } from "./api";
 import type { DistributionPolicy } from "./distribution";
 
@@ -18,43 +19,78 @@ export const COMPLETE_ID = "complete";
 // ── Catalog ──────────────────────────────────────────────────────────────
 
 export interface CatalogEntry {
+  /** The platform's price in USD cents, from this session's answer. */
   priceCents: number;
   /** The platform sells this product right now. */
   listed: boolean;
 }
 
 export interface CatalogState {
-  /** loading: not answered yet. ready: the platform catalog answered. unreachable: only bundled prices are known. */
+  /**
+   * loading: not answered yet. ready: the platform catalog answered in this
+   * session. unreachable: no usable answer (down, slow, or a server that could
+   * only offer a fallback), so no price is known.
+   */
   status: "loading" | "ready" | "unreachable";
   entries: Record<string, CatalogEntry>;
 }
 
 export const LOADING_CATALOG: CatalogState = { status: "loading", entries: {} };
 
-/** Interpret /api/catalog. Anything short of a clear platform answer counts as unreachable. */
+/** Shown wherever a price would go when the live catalog has not given one. */
+export const PRICE_UNAVAILABLE = "Price unavailable, try again";
+
+/**
+ * Interpret /api/catalog. Only an answer the server marks as the platform's
+ * own counts; anything else (an outage answer, an older server's bundled
+ * fallback, a malformed body) is unreachable and carries no prices at all.
+ */
 export function catalogFromResponse(res: CatalogResponse | null | undefined): CatalogState {
+  if (res?.source !== "platform") return unreachableCatalog();
   const entries: Record<string, CatalogEntry> = {};
-  for (const p of Array.isArray(res?.products) ? res!.products : []) {
-    if (!p || typeof p.id !== "string" || typeof p.priceCents !== "number") continue;
+  for (const p of Array.isArray(res.products) ? res.products : []) {
+    if (!p || typeof p.id !== "string") continue;
+    if (typeof p.priceCents !== "number" || !Number.isSafeInteger(p.priceCents) || p.priceCents <= 0) continue;
     entries[p.id] = { priceCents: p.priceCents, listed: p.listed === true };
   }
-  // Only the platform's own answer can say a pack is not for sale. A response
-  // from the bundled fallback, or from an older server that does not say, is
-  // "we do not know", never "buyable".
-  return { status: res?.source === "platform" ? "ready" : "unreachable", entries };
+  return { status: "ready", entries };
 }
 
 export function unreachableCatalog(): CatalogState {
   return { status: "unreachable", entries: {} };
 }
 
-/** Platform price when known, bundled price otherwise. */
-export function priceCents(packId: string, catalog: CatalogState): number {
-  return catalog.entries[packId]?.priceCents ?? PACKS_BY_ID[packId]?.price ?? 0;
+/**
+ * The platform's price for a pack, or null when the live catalog has not
+ * given one in this session. There is no other price source: callers show
+ * PRICE_UNAVAILABLE (or no number at all) for null.
+ */
+export function priceCents(packId: string, catalog: CatalogState): number | null {
+  if (catalog.status !== "ready") return null;
+  return catalog.entries[packId]?.priceCents ?? null;
 }
 
 export function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
+}
+
+/** "$0.99", or null when no live price is known. */
+export function priceLabel(packId: string, catalog: CatalogState): string | null {
+  const cents = priceCents(packId, catalog);
+  return cents === null ? null : formatPrice(cents);
+}
+
+/**
+ * What one country pack costs, for copy that talks about "each country": the
+ * single live price when every country pack has the same one, "from" the
+ * lowest when they differ, null when any is unknown.
+ */
+export function countryPriceLabel(catalog: CatalogState): string | null {
+  const cents = countryPacks().map((p) => priceCents(p.id, catalog));
+  if (!cents.length || cents.some((c) => c === null)) return null;
+  const known = cents as number[];
+  const low = Math.min(...known);
+  return known.every((c) => c === low) ? formatPrice(low) : `from ${formatPrice(low)}`;
 }
 
 // ── Ownership ────────────────────────────────────────────────────────────
@@ -152,8 +188,8 @@ export type Offer =
   | { kind: "buy"; priceCents: number }
   /** The game ships this pack but the platform does not sell it yet. */
   | { kind: "coming-soon" }
-  /** Buy is off until the platform answers; the bundled price is shown for reference. */
-  | { kind: "unavailable"; priceCents: number; reason: "loading" | "unreachable" };
+  /** No live price yet (still asking, or the platform could not be reached): no number and no Buy. */
+  | { kind: "unavailable"; reason: "loading" | "unreachable" };
 
 export interface OfferContext {
   ownedPackIds: readonly string[];
@@ -173,17 +209,15 @@ export function offerFor(packId: string, ctx: OfferContext): Offer {
   if (ctx.policy.preview) return { kind: "preview" };
   if (!ctx.policy.externalStore) return { kind: "native-store", storeName: ctx.policy.nativeStoreName ?? "your platform store" };
   const { catalog } = ctx;
-  if (catalog.status === "loading") return { kind: "unavailable", priceCents: priceCents(packId, catalog), reason: "loading" };
-  if (catalog.status === "unreachable") return { kind: "unavailable", priceCents: priceCents(packId, catalog), reason: "unreachable" };
+  if (catalog.status === "loading") return { kind: "unavailable", reason: "loading" };
+  if (catalog.status === "unreachable") return { kind: "unavailable", reason: "unreachable" };
   const entry = catalog.entries[packId];
   if (!entry?.listed) return { kind: "coming-soon" };
   return { kind: "buy", priceCents: entry.priceCents };
 }
 
 export function unavailableMessage(reason: "loading" | "unreachable"): string {
-  return reason === "loading"
-    ? "Checking the store…"
-    : "The Lakeside store can't be reached right now, so buying is paused. You can still browse. Try again in a moment.";
+  return reason === "loading" ? "Checking the price…" : PRICE_UNAVAILABLE;
 }
 
 // ── Complete Collection ──────────────────────────────────────────────────
@@ -209,10 +243,10 @@ export interface CompleteSummary {
   addsElections: number;
   /** Country packs already owned or covered. */
   havePacks: ScenarioPack[];
-  /** What the remaining packs cost one by one, at current prices. */
-  separateCents: number;
-  /** Positive when the collection is cheaper than buying the remainder separately. */
-  saveCents: number;
+  /** What the remaining packs cost one by one, at live prices; null while any price is unknown. */
+  separateCents: number | null;
+  /** Positive when the collection is cheaper than buying the remainder separately; null while any price is unknown. */
+  saveCents: number | null;
 }
 
 export function countryOfScenario(scenarioId: string): CountryCode | undefined {
@@ -230,7 +264,9 @@ export function summarizeComplete(ownedPackIds: readonly string[], catalog: Cata
   const addsPacks = all.filter((p) => !packCovered(p.id, ownedPackIds));
   const owned = new Set(ownedPackIds.flatMap((id) => PACKS_BY_ID[id]?.scenarios ?? []));
   const addsElections = pack.scenarios.filter((s) => !owned.has(s)).length;
-  const separateCents = addsPacks.reduce((sum, p) => sum + priceCents(p.id, catalog), 0);
+  const prices = addsPacks.map((p) => priceCents(p.id, catalog));
+  const completeCents = priceCents(pack.id, catalog);
+  const separateCents = prices.some((c) => c === null) ? null : (prices as number[]).reduce((sum, c) => sum + c, 0);
   return {
     pack,
     elections: everything.length,
@@ -240,7 +276,7 @@ export function summarizeComplete(ownedPackIds: readonly string[], catalog: Cata
     addsElections,
     havePacks,
     separateCents,
-    saveCents: separateCents - priceCents(pack.id, catalog),
+    saveCents: separateCents === null || completeCents === null ? null : separateCents - completeCents,
   };
 }
 
@@ -354,12 +390,10 @@ export interface OwnershipRow {
 
 /** What the player owns, one row per pack, with why. The free base game leads. */
 export function ownershipRows(unlocked: Unlocked, purchases: readonly Purchase[]): OwnershipRow[] {
-  const free = freeElections();
-  const countries = new Set(free.map((s) => s.country)).size;
   const rows: OwnershipRow[] = [{
     key: "free",
     name: "Base game",
-    detail: `${free.length} free elections across ${countries} countries, and the Daily Challenge`,
+    detail: `${FREE_ELECTIONS_LINE}, and the Daily Challenge`,
     reason: { kind: "free" },
   }];
   const ids = [...unlocked.packIds].filter((id) => PACKS_BY_ID[id]);

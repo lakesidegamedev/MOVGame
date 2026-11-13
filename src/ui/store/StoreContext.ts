@@ -13,6 +13,8 @@ export interface StoreCtx {
   focusScenarioId?: string;
   canPlay: (scenarioId: string) => boolean;
   buy: (packId: string) => void;
+  /** Ask the platform for prices again (after "Price unavailable"). */
+  retryCatalog: () => void;
   openPack: (packId: string) => void;
   play: (scenarioId: string) => void;
 }
