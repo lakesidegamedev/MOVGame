@@ -8,7 +8,8 @@
 import { InsetFrames } from "@ui/mapExtras";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, SkipForward, Zap } from "lucide-react";
-import { partyInk } from "@ui/colors";
+import { partyFill, partyInk } from "@ui/colors";
+import { Avatar } from "@ui/Avatar";
 import "./electionNight.css";
 import { buildSchedule, unitAllocation, OTHERS_ID, type RevealUnit } from "@lib/electionReveal";
 export { buildSchedule, OTHERS_ID } from "@lib/electionReveal";
@@ -44,6 +45,10 @@ export interface RevealProps {
   // projection lands once the winner's lead cannot be overturned.
   pluralityWinner?: string;
   storageKey?: string; // sessionStorage key so refresh/resume doesn't replay
+  // Party id to leader or candidate name, for portraits on the board, the
+  // projection banner and the header. Set by the results screens, not the
+  // adapters, so the shared reveal data stays the same on every platform.
+  leaders?: Record<string, string>;
   onDone: () => void;
 }
 
@@ -86,6 +91,8 @@ type Speed = "1x" | "2x" | "instant";
 
 export function ElectionNight(props: RevealProps) {
   const { title, totalUnits, threshold, parties, units, playerPartyId, storageKey, map, onDone } = props;
+  const leaders = props.leaders ?? {};
+  const faces = parties.filter((p) => leaders[p.id]).slice(0, 2);
   const unitLabel = props.unitLabel ?? "seats";
   const noMajorityLabel = props.noMajorityLabel ?? "NO OVERALL MAJORITY: HUNG PARLIAMENT";
 
@@ -189,7 +196,14 @@ export function ElectionNight(props: RevealProps) {
             <div className="en-eyebrow">
               <span className="en-live" /> LIVE · ELECTION NIGHT
             </div>
-            <h2 className="en-title">{title}</h2>
+            <div className="en-title-row">
+              {faces.length > 0 && (
+                <span className="en-faces" aria-hidden="true">
+                  {faces.map((p) => <Avatar key={p.id} name={leaders[p.id]} color={partyFill(p.color)} size={34} ring />)}
+                </span>
+              )}
+              <h2 className="en-title">{title}</h2>
+            </div>
           </div>
           <div className="en-controls">
             {(["1x", "2x", "instant"] as const).map((s) => (
@@ -255,17 +269,25 @@ export function ElectionNight(props: RevealProps) {
 
         {projected && (
           <div className="en-banner" style={{ background: projected.color }}>
-            PROJECTION: {projected.short} WINS
+            {leaders[projected.id] && (
+              <Avatar name={leaders[projected.id]} color={partyFill(projected.color)} size={40} ring ringColor="#fff" />
+            )}
+            <span>PROJECTION: {projected.short} WINS</span>
           </div>
         )}
         {finished && !projected && <div className="en-banner hung">{noMajorityLabel}</div>}
 
-        <div className="en-board">
+        <div className={`en-board${faces.length > 0 ? " with-faces" : ""}`}>
           {parties.map((p) => {
             const val = p.id === OTHERS_ID ? othersTotal : (tallies[p.id] ?? 0);
             return (
               <div className={`en-row${p.id === playerPartyId ? " mine" : ""}`} key={p.id}>
-                <span className="en-party" style={{ color: partyInk(p.color) }}>{p.short}</span>
+                <span className="en-party" style={{ color: partyInk(p.color) }} title={leaders[p.id]}>
+                  {faces.length > 0 && (leaders[p.id]
+                    ? <Avatar name={leaders[p.id]} color={partyFill(p.color)} size={24} ring />
+                    : <span className="en-face-blank" aria-hidden="true" />)}
+                  <span className="en-party-short">{p.short}</span>
+                </span>
                 <div className="en-track">
                   <div className="en-fill" style={{ width: `${totalUnits > 0 ? (val / totalUnits) * 100 : 0}%`, background: p.color }} />
                   {pluralityWinner === undefined && (

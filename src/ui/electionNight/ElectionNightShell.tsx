@@ -4,7 +4,8 @@
 // next-scenario wiring and pass the results in via props + children/footer.
 import type { ReactNode } from "react";
 import { Lock } from "lucide-react";
-import { partyInk } from "@ui/colors";
+import { partyFill, partyInk } from "@ui/colors";
+import { Avatar } from "@ui/Avatar";
 import { RollingCounter } from "./RollingCounter";
 import { Swingometer, type SwingometerProps } from "./Swingometer";
 import "./shell.css";
@@ -43,6 +44,8 @@ export interface ElectionNightShellProps {
   /** Animated winner / hung headline. */
   headline: string;
   headlineColor?: string;
+  /** The projected winner's leader or candidate, shown as a portrait above the headline. */
+  winner?: { name: string; color: string };
   /** One-line verdict under the headline. */
   subhead?: string;
   subheadTone?: "win" | "loss" | "neutral";
@@ -68,6 +71,7 @@ export function ElectionNightShell({
   eyebrow,
   headline,
   headlineColor,
+  winner,
   subhead,
   subheadTone = "neutral",
   counterValue,
@@ -82,6 +86,11 @@ export function ElectionNightShell({
   return (
     <div className="ens-root" data-testid="election-night-shell">
       <div className="ens-hero">
+        {winner && (
+          <div className="ens-winner" data-testid="ens-winner">
+            <Avatar name={winner.name} color={partyFill(winner.color)} size={64} ring />
+          </div>
+        )}
         <div className="ens-eyebrow">{eyebrow}</div>
         <h1
           className="ens-headline"

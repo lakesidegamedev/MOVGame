@@ -29,6 +29,12 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   Games account.
 - Android: Account now has Delete account, like iPhone. It permanently removes your Margin of
   Victory account with its cloud saves, scores and achievements, after you confirm.
+- Leaders and candidates have photos in every country, on the web and in the desktop app: on the
+  setup screen's party and candidate cards, by the title and on every party's row on election
+  night, on the projection banner, and above the winner on the results screen, each in a ring of
+  the party colour. The photos are public domain or Creative Commons images from Wikimedia
+  Commons; a new Credits page (in the footer, next to Privacy and Terms) names the source, author
+  and licence of every one. Leaders without a freely licensed photo keep their initials.
 
 ### Changed
 

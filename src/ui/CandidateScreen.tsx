@@ -37,7 +37,7 @@ function CandidateCard({
       onClick={onSelect}
       style={{ cursor: "pointer", borderColor: selected ? ticket.color : undefined }}
     >
-      <Avatar name={ticket.name} color={ticket.color} size={44} />
+      <Avatar name={ticket.name} color={ticket.color} size={44} ring />
       <div className="candinfo">
         <div className="nm" style={{ color: partyInk(ticket.color) }}>{ticket.name}</div>
         <div className="rm">{ticket.party}</div>
@@ -79,7 +79,7 @@ export function CandidateScreen({ scenarioId, onClose }: { scenarioId?: string; 
           {view === "candidate" && (
             <div className="profile-body">
               <div className="profile-header">
-                <Avatar name={ticket.name} color={ticket.color} size={64} />
+                <Avatar name={ticket.name} color={ticket.color} size={64} ring />
                 <div>
                   <h3>{ticket.name}</h3>
                   <p className="muted">{ticket.party} · Presidential nominee</p>
@@ -102,7 +102,7 @@ export function CandidateScreen({ scenarioId, onClose }: { scenarioId?: string; 
               <div className="vp-list">
                 {roster.map((m) => (
                   <div className="vp-row" key={m.id}>
-                    <Avatar name={m.name} color={ticket.color} size={44} />
+                    <Avatar name={m.name} color={ticket.color} size={44} ring />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="vp-row-name">
                         {m.name}{m.historical && <span className="vp-star"> ★</span>}
