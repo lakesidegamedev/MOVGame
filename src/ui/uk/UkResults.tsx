@@ -12,6 +12,7 @@ import { UK_ELECTIONS } from "@content/uk/elections";
 import { UK_NEXT_SCENARIO } from "@content/nextScenario";
 import { partyName, partyShort, sortBySeats, partyColor } from "./parties";
 import { ElectionNight, hasSeenReveal, revealSupported } from "../electionNight/ElectionNight";
+import { namedLeaders } from "@ui/Avatar";
 import { ElectionNightShell, freeChoice } from "../electionNight/ElectionNightShell";
 import { MultipartySeatPanel } from "../electionNight/MultipartySeatPanel";
 import { ukReveal } from "../electionNight/ukReveal";
@@ -91,9 +92,10 @@ export function UkResults() {
   };
 
   const reveal = useMemo(() => ukReveal(game), [game]);
+  const leaders = useMemo(() => namedLeaders(game.leaders), [game.leaders]);
   const [nightDone, setNightDone] = useState(() => !revealSupported() || hasSeenReveal(reveal.storageKey ?? ""));
   if (!nightDone) {
-    return <ElectionNight {...reveal} onDone={() => setNightDone(true)} />;
+    return <ElectionNight {...reveal} leaders={leaders} onDone={() => setNightDone(true)} />;
   }
 
   const next = UK_NEXT_SCENARIO[game.electionId];
@@ -146,6 +148,7 @@ export function UkResults() {
         eyebrow={eyebrow}
         headline={headline}
         headlineColor={headlineParty ? partyColor(headlineParty) : undefined}
+        winner={headlineParty && leaders[headlineParty] ? { name: leaders[headlineParty], color: partyColor(headlineParty) } : undefined}
         subhead={
           won
             ? "You won a majority."

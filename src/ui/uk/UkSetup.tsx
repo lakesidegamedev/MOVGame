@@ -135,7 +135,7 @@ export function UkSetup({ onBack, initialElection, initialSeed, initialParty }: 
                 <div className="vp-roster">
                   {field.map(({ party: p, leader: nm }) => (
                     <span key={p} className="vp-card static">
-                      <Avatar name={nm} color={partyFill(partyColor(p))} size={20} />
+                      <Avatar name={nm} color={partyFill(partyColor(p))} size={24} ring />
                       <span className="vp-name">{nm} <span className="muted">({partyShort(p)})</span></span>
                     </span>
                   ))}

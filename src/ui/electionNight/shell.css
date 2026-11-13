@@ -391,3 +391,11 @@
   .ens-body { grid-area: body; }
   .ens-side { grid-area: side; position: sticky; top: 16px; }
 }
+
+/* The projected winner's portrait, in the party colour ring. */
+.ens-winner {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+  animation: ens-fade-up 0.55s var(--ease) both;
+}

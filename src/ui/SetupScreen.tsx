@@ -252,7 +252,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
                       className={`vp-card${mate === m.id ? " sel" : ""}`}
                       onClick={() => setMate(m.id)}
                     >
-                      <Avatar name={m.name} color={ticket.color} size={20} />
+                      <Avatar name={m.name} color={ticket.color} size={24} ring />
                       <span className="vp-name">{m.name}</span>
                       {m.historical && <span className="vp-star" title="Historical pick">★</span>}
                     </button>

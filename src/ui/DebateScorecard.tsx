@@ -55,7 +55,7 @@ export function DebateScorecard() {
             const isWinner = debate.winner === c;
             return (
               <div key={c} className={`sc-row${isWinner ? " sc-win" : ""}`}>
-                <Avatar name={cands[c].name} color={cands[c].color} size={38} />
+                <Avatar name={cands[c].name} color={cands[c].color} size={38} ring />
                 <div className="sc-meta">
                   <div className="sc-name" style={{ color: partyInk(cands[c].color) }}>
                     {cands[c].name} {c === player && <span className="sc-you">you</span>}

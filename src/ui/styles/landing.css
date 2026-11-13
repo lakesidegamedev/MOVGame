@@ -236,3 +236,8 @@
 .landing-lakeside { margin-right: var(--space-1); padding: 0 var(--space-2) 0 0; min-height: 24px; border-right: 1px solid var(--border-default); border-radius: 0; }
 .landing-lakeside img { width: 16px; height: 16px; }
 .landing-lakeside-links { display: inline-flex; flex-wrap: wrap; gap: var(--space-1); }
+
+/* Credits tab of the legal page: long, dense attribution lists. */
+.credits-list { margin: 6px 0 14px; padding-left: 18px; font-size: var(--fs-sm); line-height: 1.45; color: var(--text-2); }
+.credits-list li { margin: 2px 0; overflow-wrap: anywhere; }
+.credits-list strong { color: var(--text); font-weight: var(--fw-semibold); }
