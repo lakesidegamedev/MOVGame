@@ -18,6 +18,7 @@ import { Home, MessageCircleQuestion } from "lucide-react";
 import { DeskHeader } from "@ui/DeskHeader";
 import { partyInk } from "@ui/colors";
 import { movAskUrlFromSnapshot, movSeatAskSnapshot } from "@lib/ask";
+import { moneyMillions } from "../format";
 
 function ukEventView(electionId: string, eventId: string) {
   const deck = UK_ELECTION_EVENTS[electionId] ?? [];
@@ -90,7 +91,7 @@ export function UkApp({ onExit, initialElection, initialSeed, initialParty, setu
         scoreboard={live ? <UkSeatBar result={live} total={maj.total} threshold={maj.threshold} /> : undefined}
         metrics={[
           { label: "Your seats", value: playerSeats, color: partyInk(partyColor(game.playerParty)) },
-          { label: "Funds", value: `£${res.funds.toFixed(0)}M` },
+          { label: "Funds", value: moneyMillions("£", res.funds, 0) },
           { label: "Actions", value: `${res.maxActions - used}/${res.maxActions}`, warn: used >= res.maxActions },
         ]}
         undoLabel="Undo"

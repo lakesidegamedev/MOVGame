@@ -71,6 +71,14 @@ private struct NativeCountryMapView: View {
 
 /// Election title without the leading "2024 · " year prefix.
 /// "1 seat", "2 seats": singular when the count is one.
+/// An amount in millions with the sign before the symbol ("-$8.1M", never "$-8.1M"), as the web game writes it.
+/// String(format:) is not localized, so the decimal point is always ".".
+func nativeMoneyMillions(_ symbol: String, _ millions: Double, digits: Int = 1) -> String {
+    let body = String(format: "%.\(digits)f", abs(millions))
+    let isZero = !body.contains { "123456789".contains($0) }
+    return (millions < 0 && !isZero ? "-" : "") + symbol + body + "M"
+}
+
 func nativeUnits(_ count: Int, _ plural: String) -> String {
     "\(count) \(count == 1 && plural.hasSuffix("s") ? String(plural.dropLast()) : plural)"
 }
@@ -782,8 +790,8 @@ struct NativeWorldCampaign: View {
         let regional = ["rally", "surrogate", "ground_game", "gotv", "canvass"].contains(type)
         return VStack(alignment: .leading, spacing: 12) {
             Text("Plan your week").font(.title2.bold())
-            Text("\(game.currency())\(String(format: "%.1f", game.funds()))M cash · \(game.slotsLeft()) moves left").font(.subheadline)
-            Text("Planned \(game.currency())\(String(format: "%.1f", game.plannedSpend()))M · Available \(game.currency())\(String(format: "%.1f", game.availableFunds()))M")
+            Text("\(nativeMoneyMillions(game.currency(), game.funds())) cash · \(game.slotsLeft()) moves left").font(.subheadline)
+            Text("Planned \(nativeMoneyMillions(game.currency(), game.plannedSpend())) · Available \(nativeMoneyMillions(game.currency(), game.availableFunds()))")
                 .font(.caption).foregroundStyle(CampaignStyle.muted)
             Text("Plan estimate: \(game.previewPlayerUnits()) \(game.unitName()) after your queued actions. Rival moves and events can change the result.")
                 .font(.caption).foregroundStyle(CampaignStyle.gold)

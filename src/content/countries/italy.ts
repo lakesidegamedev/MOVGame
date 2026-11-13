@@ -30,7 +30,6 @@ export const ITALY_MODULE: CountryModule = {
     id: "italy",
     name: "Italy",
     description: "Four elections to the Chamber of Deputies from 2008 to 2022: the Berlusconi comeback, the Monti and Grillo years, and the Rosatellum.",
-    price: 99,
   },
   daily: { pair: ["csx", "cdx"], names: { csx: "the Centre-left", cdx: "the Centre-right" } },
   next: {

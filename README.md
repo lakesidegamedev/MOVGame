@@ -10,9 +10,10 @@ campaign pressures. The countries are the modules registered in
 > week, answer the moments that matter, and rewrite the result.
 
 Play in the browser at
-[lakesidegames.net/games/electioneer](https://lakesidegames.net/games/electioneer/).
-The existing `/games/electioneer/` address and internal `electioneer` product
-identifier remain unchanged so existing links, purchases, and saves keep working.
+[lakesidegames.net/games/margin-of-victory](https://lakesidegames.net/games/margin-of-victory/).
+The old `/games/electioneer/` address redirects there. The internal
+`electioneer` product identifier stays unchanged so purchases and saves keep
+working, and the web build works from any path on the site.
 
 Changes by version: [CHANGELOG.md](CHANGELOG.md)
 

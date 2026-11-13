@@ -31,7 +31,6 @@ export const INDIA_MODULE: CountryModule = {
     id: "india",
     name: "India",
     description: "Four Lok Sabha elections from 2009 to 2024: the UPA's second term, the Modi wave, the Balakot election and the 2024 result that left the BJP needing its allies.",
-    price: 99,
   },
   daily: { pair: ["nda", "upa"], names: { nda: "the NDA", upa: "the UPA / INDIA bloc" } },
   next: {

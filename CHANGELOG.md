@@ -34,9 +34,43 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   the Lakeside account, cloud saves, daily scores, Ask and deleting your account, and states that
   the game uses no analytics and that error reporting is switched off. It also drops claims that
   were out of date.
+- A small Lakeside Games mark at the left of the top bar links to lakesidegames.net, on the web
+  and in the desktop app. In a campaign it sits at the start of the tools row on wide screens
+  only, so it never sits among the game controls on phones.
+- The footer links to the Lakeside store, your Lakeside account, the other Lakeside games and
+  Lakeside support.
+- The Store says who sells the packs: "Sold by Lakeside Games. Payments by Stripe. Refunds within
+  14 days, no questions asked." It links to the full Lakeside store page for Margin of Victory.
+- When Lakeside makes everything free for a while, the Store says "Everything is free to play
+  while A House Divided is paused", shows every pack as open, and shows no prices or Buy buttons.
+
+
+- Margin of Victory has a new web address: lakesidegames.net/games/margin-of-victory. The old
+  /games/electioneer address keeps working and sends you to the new one. Saves, sign-in and
+  purchases carry over.
+- The Store looks like the Lakeside store: the same navy and orange, the same typeface and plain
+  buttons. Pack names, descriptions and prices come live from the Lakeside store.
+- Every Lakeside supporter tier includes every Margin of Victory pack and the Complete Collection.
+  The Store and your account say "Included with any Lakeside supporter tier", the iPhone and
+  Android apps show every pack as owned, and nothing offers a supporter a pack to buy.
 
 ### Fixed
 
+- After a loss with a locked next election, the results screen now offers the same country's other
+  free election first (United States 2020 after United States 2024) instead of a free election in
+  another country, and names it with its year once: "2020 · Biden v. Trump", not "2020 2020".
+- Campaign money below zero reads "-$8.1M" instead of "$-8.1M", on the web, in the desktop app,
+  on iPhone and on Android, in every currency.
+- Prices on the web and in the desktop app now come only from the Lakeside store, live. If the
+  store is slow or cannot be reached, the game says "Price unavailable, try again" with a Try again
+  button and Buy stays off, instead of showing a price it remembered. The landing page, the Store,
+  the pricing card and the FAQ all follow this rule.
+- Counts of elections, free elections and countries now read the same everywhere: 15 free
+  elections, at least one in every country (two in the United States). The election library's
+  "playable" count no longer includes today's Daily Challenge, which is open to everyone for one
+  day only, so a country no longer shows one more playable election than it has free or owned.
+- The iPhone setup screen now says at least one election in every country is free, instead of
+  one.
 - On iPhone, iPad and Android, "Continue with Apple" on the Lakeside sign-in page now opens Apple's
   sign-in instead of saying the page cannot be opened.
 - After a test purchase on iPhone or Android, the Store says the pack is unlocked in the app

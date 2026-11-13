@@ -21,7 +21,7 @@ export interface ShareCardOpts {
  *   Margin of Victory Daily · 2026-07-08
  *   🇩🇪 2021 · Scholz v. Laschet — as SPD
  *   🏆 371 seats · Score 8,420
- *   lakesidegames.net/games/electioneer
+ *   lakesidegames.net/games/margin-of-victory
  */
 export function buildShareText(o: ShareCardOpts): string {
   return [

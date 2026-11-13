@@ -4,24 +4,26 @@ import { packCovered, STORE_PACKS } from "@content/packs";
 import { countryCover } from "@content/covers";
 import { COUNTRY_MODULES } from "@content/countries";
 import {
-  COUNTRY_COUNT, ELECTION_COUNT, FREE_COUNTRY_COUNT, FREE_ELECTION_COUNT, VOTING_SYSTEM_COUNT,
-  countryInSentence, electionCountFor, firstYearFor, joinList,
+  COUNTRY_COUNT, ELECTION_COUNT, FREE_COUNTRY_COUNT, FREE_ELECTION_COUNT, FREE_ELECTIONS_LINE, PAID_ELECTION_COUNT,
+  VOTING_SYSTEM_COUNT, countryInSentence, electionCountFor, firstYearFor, joinList,
 } from "@content/facts";
 import { useAuthStore } from "@store/authStore";
 import { useStoreNav } from "@store/storeNav";
-import { usePackPrices } from "@lib/usePackPrices";
-import { packFacts, COMPLETE_ID } from "@lib/storeModel";
+import { usePackPrices, type PackPrices } from "@lib/usePackPrices";
+import { packFacts, COMPLETE_ID, PRICE_UNAVAILABLE } from "@lib/storeModel";
 import { BUILD_COMMIT, DISTRIBUTION } from "@lib/distribution";
 import { UserMenu } from "@ui/auth/UserMenu";
 import { DailyCard } from "@ui/DailyCard";
+import { LakesideMark } from "@ui/LakesideMark";
+import { ExternalLink } from "@ui/ExternalLink";
 import { ElectionLibrary, LibraryCard } from "@ui/library/ElectionLibrary";
 import { EvBar } from "@ui/EvBar";
 import { Sparkline } from "@ui/Sparkline";
 import {
   Play, Trophy, Check, X, ShoppingBag,
-  LineChart, Mic2, Globe2,
+  LineChart, Mic2, Globe2, RefreshCw,
 } from "lucide-react";
-import { BRAND } from "../brand";
+import { BRAND, LAKESIDE_LINKS } from "../brand";
 import { useSavesStore } from "@store/savesStore";
 import { sessionGame } from "@store/sessions";
 import type { GameState } from "@engine/types";
@@ -33,14 +35,37 @@ function otherCountriesList(): string {
 }
 const COUNTRY_FLAGS = COUNTRY_MODULES.map((m) => m.flag);
 const VOTING_SYSTEMS_LINE = `${COUNTRY_COUNT} countries, ${VOTING_SYSTEM_COUNT} voting systems`;
-const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
-// "13 full elections across 12 countries": every country has a free election.
-const FREE_LINE = `${FREE_ELECTION_COUNT} full elections across ${FREE_COUNTRY_COUNT} countries`;
+// "15 free elections, at least one in every country": one phrase everywhere.
+const FREE_LINE = FREE_ELECTIONS_LINE;
 // The hero has just named the totals, so it says "15 of them, at least one in
-// every country" rather than repeating "across 14 countries".
+// every country" rather than repeating the word "elections".
 const HERO_FREE_LINE = FREE_COUNTRY_COUNT === COUNTRY_COUNT
   ? `${FREE_ELECTION_COUNT} of them, at least one in every country`
   : FREE_LINE;
+
+// Prices in running copy: the live numbers when the platform answered, and
+// wording with no number at all otherwise. Never a bundled or remembered price.
+function eachCountryText(prices: PackPrices): string {
+  return prices.country ? `a ${prices.country} bundle` : "a one-time bundle";
+}
+function everythingText(prices: PackPrices): string {
+  return prices.complete ? `for ${prices.complete}` : "in one purchase";
+}
+
+/** Where a price would go when there is no live one: a short note and a way to ask again. */
+function PriceUnavailable({ prices, compact = false }: { prices: PackPrices; compact?: boolean }) {
+  if (prices.loading) return <span className="price-pending">Checking the price…</span>;
+  return (
+    <span className="price-unavailable" role="status">
+      {compact ? "Price unavailable" : PRICE_UNAVAILABLE}
+      {!compact && (
+        <button type="button" className="ghost small price-retry" onClick={prices.retry}>
+          <RefreshCw size={12} aria-hidden="true" /> Try again
+        </button>
+      )}
+    </span>
+  );
+}
 
 export type LandingDestination =
   | { kind: "us"; scenarioId: string }   // native id, e.g. "2024"
@@ -123,7 +148,7 @@ function FeaturesSection() {
 
 const BUY_QUESTION = "Where do I buy bundles?";
 
-function faqItems(prices: Record<string, number>): { q: string; a: string }[] {
+function faqItems(prices: PackPrices): { q: string; a: string }[] {
   return [
   {
     q: "What's actually free?",
@@ -131,7 +156,7 @@ function faqItems(prices: Record<string, number>): { q: string; a: string }[] {
   },
   {
     q: "What do I get if I pay?",
-    a: `Each country is a ${money(prices["us-historical"] ?? 99)} bundle with the rest of its elections: the US back to ${firstYearFor("US")}, ${otherCountriesList()}. The Complete Collection unlocks every country for ${money(prices.complete ?? 399)}. Both are one time purchases, not subscriptions.`,
+    a: `Each country is ${eachCountryText(prices)} with the rest of its elections: the US back to ${firstYearFor("US")}, ${otherCountriesList()}. The Complete Collection unlocks every country ${everythingText(prices)}. Both are one time purchases, not subscriptions.${prices.ready ? "" : " The Store shows the current prices."}`,
   },
   {
     q: BUY_QUESTION,
@@ -152,7 +177,7 @@ function faqItems(prices: Record<string, number>): { q: string; a: string }[] {
   ];
 }
 
-function FaqSection({ prices }: { prices: Record<string, number> }) {
+function FaqSection({ prices }: { prices: PackPrices }) {
   const items = faqItems(prices).map((item) => {
     if (DISTRIBUTION.externalStore) return item;
     if (item.q === "What do I get if I pay?") {
@@ -232,6 +257,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
     resumable.unshift({ target: { kind: "us", saveId: "autosave" }, label: "US campaign", turn: currentUsGame.turn, updatedAt: Date.now() });
   }
   const canPlay = useAuthStore((s) => s.canPlay);
+  const ownsScenario = useAuthStore((s) => s.ownsScenario);
   const unlocked = useAuthStore((s) => s.unlocked);
   const openStore = useStoreNav((s) => s.openStore);
   const packPrices = usePackPrices();
@@ -254,6 +280,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
       <div className="landing-topbar">
         <div className="landing-topbar-inner">
           <span className="landing-brand">
+            <LakesideMark className="landing-lakeside" label={false} />
             <span className="mark"><img src="brand/margin-of-victory-icon.png" alt="" width={24} height={24} /></span>{BRAND.name}
           </span>
           <span className="row" style={{ gap: 6 }}>
@@ -279,7 +306,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
               Run a real campaign turn by turn: allocate a budget, target battlegrounds, survive debates,
               and watch the map move. {ELECTION_COUNT} elections across {COUNTRY_COUNT} countries.
               {PAYWALL_ENABLED
-                ? ` ${HERO_FREE_LINE}, and the daily challenge are free forever. The rest of each country is ${money(packPrices["us-historical"] ?? 99)}, or ${money(packPrices.complete ?? 399)} for everything.`
+                ? ` ${HERO_FREE_LINE}, and the daily challenge are free forever.${packPrices.country && packPrices.complete ? ` The rest of each country is ${packPrices.country}, or ${packPrices.complete} for everything.` : " The rest of each country is a one-time bundle, or get everything in one purchase."}`
                 : " All of them are free to play right now."}
             </p>
             <div className="landing-hero-actions">
@@ -350,6 +377,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
           <ElectionLibrary
             rows={SCENARIO_REGISTRY}
             canPlay={canPlay}
+            owns={ownsScenario}
             showAccess={PAYWALL_ENABLED}
             onPlay={play}
             onLocked={locked}
@@ -372,10 +400,12 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             </div>
             <div className="pricing-card">
               <h3>Country bundles</h3>
-              <p className="pricing-price">{PAYWALL_ENABLED ? `${money(packPrices["us-historical"] ?? 99)} per country` : "Free for now"}</p>
+              <p className="pricing-price">
+                {!PAYWALL_ENABLED ? "Free for now" : packPrices.country ? `${packPrices.country} per country` : <PriceUnavailable prices={packPrices} />}
+              </p>
               <ul className="pricing-list">
-                <li><Check size={13} /> {SCENARIO_REGISTRY.length - free.length} additional elections across {STORE_PACKS.length - 1} country bundles</li>
-                <li><Check size={13} /> Complete Collection: every country for {money(packPrices.complete ?? 399)}</li>
+                <li><Check size={13} /> {PAID_ELECTION_COUNT} more elections across {COUNTRY_COUNT} country bundles</li>
+                <li><Check size={13} /> Complete Collection: every country {everythingText(packPrices)}</li>
                 {PAYWALL_ENABLED ? (
                   <>
                     <li><Check size={13} /> One time purchase, yours to keep, no subscription</li>
@@ -411,10 +441,10 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
                   <span className="pack-foot">
                     <span className="pack-price">
                       {PAYWALL_ENABLED ? (
-                        <>${((packPrices[p.id] ?? p.price) / 100).toFixed(2)}</>
+                        packPrices.label(p.id) ?? <PriceUnavailable prices={packPrices} compact />
                       ) : (
                         <>
-                          <s style={{ opacity: 0.5, fontWeight: 500 }}>${((packPrices[p.id] ?? p.price) / 100).toFixed(2)}</s>
+                          {packPrices.label(p.id) && <s style={{ opacity: 0.5, fontWeight: 500 }}>{packPrices.label(p.id)}</s>}
                           <span style={{ color: "var(--green)", fontWeight: 800, marginLeft: 6 }}>Free</span>
                         </>
                       )}
@@ -447,6 +477,12 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
           <a className="ghost small" href="https://ask.lakesidegames.net/?game=electioneer" target="_blank" rel="noopener noreferrer">Ask about the game</a>
           <button className="ghost small" onClick={() => openStore()}>Store</button>
           <span className="muted small" title="Coming soon">Discord (coming soon)</span>
+          <nav className="landing-lakeside-links" aria-label="Lakeside Games">
+            <ExternalLink className="ghost small" href={LAKESIDE_LINKS.store}>Lakeside store</ExternalLink>
+            <ExternalLink className="ghost small" href={LAKESIDE_LINKS.account}>Account</ExternalLink>
+            <ExternalLink className="ghost small" href={LAKESIDE_LINKS.games}>Other games</ExternalLink>
+            <ExternalLink className="ghost small" href={LAKESIDE_LINKS.support}>Support</ExternalLink>
+          </nav>
           <a className="lakeside-credit" href="https://lakesidegames.net" target="_blank" rel="noopener">
             <img src="lakeside-mark.svg" alt="Lakeside Games logo" width={20} height={20} />
             by Lakeside Games

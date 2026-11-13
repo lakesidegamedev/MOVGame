@@ -30,7 +30,7 @@ object NativeAnalysis {
                 NativeAnalysisRow("Charisma", points(traits.charisma)), NativeAnalysisRow("Energy", points(traits.energy)),
                 NativeAnalysisRow("Debate preparation", points(traits.debatePrep)), NativeAnalysisRow("Debating skill", points(traits.debatingSkill)),
                 NativeAnalysisRow("Policy command", points(traits.policyKnowledge)), NativeAnalysisRow("Intelligence", points(traits.intelligence)),
-                NativeAnalysisRow("Fundraising", points(traits.fundraisingProwess)), NativeAnalysisRow("Cash", "\$${points(resource.cash / 1_000_000)}M"),
+                NativeAnalysisRow("Fundraising", points(traits.fundraisingProwess)), NativeAnalysisRow("Cash", NativeMoney.millions("$", resource.cash / 1_000_000)),
                 NativeAnalysisRow("Momentum", points(resource.nationalMomentum)), NativeAnalysisRow("Media narrative", points(resource.mediaNarrative)),
                 NativeAnalysisRow("Staff", game.staff?.get(candidate.id.serial).orEmpty().joinToString { STAFF_BY_ID[it]?.name ?: it }.ifEmpty { "None" }),
             ))

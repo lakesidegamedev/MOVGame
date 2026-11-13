@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ArrowRight, Undo2, Vote } from "lucide-react";
 import { BRAND } from "../brand";
+import { LakesideMark } from "./LakesideMark";
 
 export interface DeskMetric {
   label: string;
@@ -75,6 +76,7 @@ export function DeskHeader({
         </div>
       </div>
       <div className="desk-subbar">
+        <LakesideMark className="desk-lakeside" label={false} />
         {ticker ?? <span className="desk-ticker-empty" />}
         <nav className="desk-tools toolbar" aria-label="Campaign tools">{tools}</nav>
       </div>

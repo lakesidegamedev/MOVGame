@@ -1,8 +1,7 @@
 import { useId } from "react";
-import { Check, Clock, Lock } from "lucide-react";
-import { PACKS_BY_ID } from "@content/packs";
+import { Check, Clock, Lock, RefreshCw } from "lucide-react";
 import { DISTRIBUTION } from "@lib/distribution";
-import { describeReason, formatPrice, offerFor, unavailableMessage, type Offer } from "@lib/storeModel";
+import { describeReason, formatPrice, offerFor, packName, unavailableMessage, type Offer } from "@lib/storeModel";
 import { useStoreCtx } from "./StoreContext";
 
 export function useOffer(packId: string): Offer {
@@ -37,8 +36,10 @@ export function OfferAction({ packId, label, accessibleName, primary = true, com
   const ctx = useStoreCtx();
   const offer = useOffer(packId);
   const noteId = useId();
-  const name = PACKS_BY_ID[packId]?.name ?? packId;
+  const name = packName(packId, ctx.catalog);
 
+  // Free access: never a price or a Buy, even for a pack the switch somehow left out.
+  if (ctx.freeAccess && offer.kind !== "owned") return null;
   if (offer.kind === "owned") {
     return (
       <span className="store-owned" title={describeReason(offer.reason)}>
@@ -62,26 +63,44 @@ export function OfferAction({ packId, label, accessibleName, primary = true, com
   if (offer.kind === "coming-soon") {
     return <span className="store-soon"><Clock size={13} aria-hidden="true" /> Coming soon</span>;
   }
+  const buyName = accessibleName ?? (label && label.includes(name) ? label : `${label ?? "Buy"} ${name}`);
+  if (offer.kind === "unavailable") {
+    // No live price: no number anywhere, Buy off, and a way to ask again.
+    return (
+      <span className={`store-action${compact ? " compact" : ""}`}>
+        <button
+          type="button"
+          className={`${primary ? "primary" : "ghost"}${compact ? " small" : ""}`}
+          disabled
+          aria-describedby={noteId}
+          aria-label={buyName}
+        >
+          {label ?? "Buy"}
+        </button>
+        <span id={noteId} className="store-action-note" role="status">
+          {unavailableMessage(offer.reason)}
+          {offer.reason === "unreachable" && (
+            <button type="button" className="ghost small store-retry" onClick={ctx.retryCatalog}>
+              <RefreshCw size={12} aria-hidden="true" /> Try again
+            </button>
+          )}
+        </span>
+      </span>
+    );
+  }
   const price = formatPrice(offer.priceCents);
-  const disabled = offer.kind === "unavailable" || ctx.busy;
   return (
     <span className={`store-action${compact ? " compact" : ""}`}>
       {showPrice && <span className="store-price" aria-label={`Price ${price}`}>{price}</span>}
       <button
         type="button"
         className={`${primary ? "primary" : "ghost"}${compact ? " small" : ""}`}
-        disabled={disabled}
-        aria-describedby={offer.kind === "unavailable" ? noteId : undefined}
-        aria-label={`${accessibleName ?? (label && label.includes(name) ? label : `${label ?? "Buy"} ${name}`)} for ${price}`}
+        disabled={ctx.busy}
+        aria-label={`${buyName} for ${price}`}
         onClick={() => ctx.buy(packId)}
       >
         {label ?? "Buy"}
       </button>
-      {offer.kind === "unavailable" && (
-        <span id={noteId} className="store-action-note">
-          {compact ? (offer.reason === "loading" ? "Checking the store…" : "Store unreachable") : unavailableMessage(offer.reason)}
-        </span>
-      )}
     </span>
   );
 }

@@ -96,4 +96,21 @@ describe("ElectionLibrary", () => {
     expect(m.container.textContent).toContain('No elections match these filters for "no such campaign"');
     m.cleanup();
   });
+
+  it("counts free and owned elections as playable, never today's Daily Challenge", () => {
+    // us-1960 stands in for a paid election that is today's Daily Challenge:
+    // it can be opened today, but it is not owned, so the count stays at 2.
+    const today = (id: string) => id === "us-2024" || id === "us-2020" || id === "us-1960";
+    const owned = (id: string) => id === "us-2024" || id === "us-2020";
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() => {
+      root.render(<ElectionLibrary rows={SCENARIO_REGISTRY} canPlay={today} owns={owned} showAccess onPlay={() => {}} onLocked={() => {}} />);
+    });
+    const us = container.querySelector('[aria-label="United States"] .library-group-meta')!;
+    expect(us.textContent).toContain("2 playable");
+    act(() => root.unmount());
+    container.remove();
+  });
 });

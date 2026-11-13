@@ -60,7 +60,7 @@ data class StoreGate(val gating: Boolean = false, val sellable: Set<String> = em
      * The pack a new campaign on [country]/[nativeId] needs, or null when it
      * is playable: gating off, free, today's daily, owned through any pack
      * (Lakeside account, Google Play, App Store, Complete Collection, legacy
-     * Global pack, Supporter perk), unlocked on the account (activation codes
+     * Global pack, any Lakeside supporter tier), unlocked on the account (activation codes
      * and web unlocks on the game account, linked or not), or not sellable here.
      */
     fun lockedPack(country: String, nativeId: String, ownedPacks: Set<String>, accountScenarios: Set<String>, dailyScenarioId: String?): String? {

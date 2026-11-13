@@ -57,7 +57,6 @@ describe("country modules", () => {
       expect(m.code, m.code).toMatch(/^[A-Z]{2}$/);
       expect(m.pack.id, m.code).toMatch(/^[a-z][a-z0-9-]*$/);
       expect(["complete", "global"]).not.toContain(m.pack.id);
-      expect(m.pack.price, `${m.code} price`).toBeGreaterThan(0);
       expect(m.name.length, `${m.code} name`).toBeGreaterThan(0);
       expect(m.flag.length, `${m.code} flag`).toBeGreaterThan(0);
       if (m.engine === "country") {

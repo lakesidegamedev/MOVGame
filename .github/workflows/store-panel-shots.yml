@@ -1,0 +1,49 @@
+name: Store panel pictures
+
+# Pictures of the in-game Store from this pull request's own build, so Store
+# changes can be reviewed without building anything locally. Runs only when
+# the Store, its styles or its model change. The pictures are an artifact.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/ui/store/**'
+      - 'src/lib/storeModel.ts'
+      - 'src/ui/fonts/**'
+      - 'scripts/store-panel-shots.mjs'
+      - '.github/workflows/store-panel-shots.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: store-panel-shots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Capture the Store
+        run: |
+          npx vite preview --port 4173 --strictPort &
+          server=$!
+          for i in $(seq 1 30); do curl -fsS http://localhost:4173/ >/dev/null && break; sleep 1; done
+          node scripts/store-panel-shots.mjs http://localhost:4173/ store-panel-shots
+          kill "$server"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-panel-shots
+          path: store-panel-shots/
+          retention-days: 14

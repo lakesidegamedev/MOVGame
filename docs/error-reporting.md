@@ -33,7 +33,7 @@ Each event carries:
 
 Once the secret is set and a build has shipped, open the game with
 `#sentry-test` at the end of the address, for example
-`https://lakesidegames.net/games/electioneer/#sentry-test`.
+`https://lakesidegames.net/games/margin-of-victory/#sentry-test`.
 
 The page sends one error named `Sentry test error (<environment> <release>)`,
 removes the hash from the address so a reload does not send another, and

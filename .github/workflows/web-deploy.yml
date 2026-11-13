@@ -1,7 +1,8 @@
 name: Deploy web game
 
 # Builds the web game and publishes it to the Cloudflare Pages project behind
-# lakesidegames.net/games/electioneer/ on every push to main. Uses a Pages-only
+# lakesidegames.net/games/margin-of-victory/ (the old /games/electioneer/ path
+# redirects there) on every push to main. Uses a Pages-only
 # API token stored as a repository secret; the Cloudflare GitHub app is not needed.
 
 on:
@@ -43,8 +44,12 @@ jobs:
           --commit-hash "$GITHUB_SHA" --commit-message "main $GITHUB_SHA"
       - name: Check the live page
         run: |
+          # The new address first; the old one (which redirects once hosting moves) as well,
+          # so the check passes on either side of the switch.
           for i in $(seq 1 12); do
-            curl -fsS "https://lakesidegames.net/games/electioneer/?v=$GITHUB_RUN_ID" | grep -q 'assets/index-' && exit 0
+            for path in margin-of-victory electioneer; do
+              curl -fsSL "https://lakesidegames.net/games/$path/?v=$GITHUB_RUN_ID" | grep -q 'assets/index-' && exit 0
+            done
             sleep 10
           done
           echo "live page did not answer" && exit 1

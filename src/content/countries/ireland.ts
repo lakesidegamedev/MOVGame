@@ -30,7 +30,6 @@ export const IRELAND_MODULE: CountryModule = {
     id: "ireland",
     name: "Ireland",
     description: "Four Dáil elections from 2011 to 2024 under the single transferable vote: the Troika landslide, the water charge election, Sinn Féin's surge and the coalition that followed.",
-    price: 99,
   },
   daily: { pair: ["ff", "fg"], names: { ff: "Fianna Fáil", fg: "Fine Gael" } },
   next: {
