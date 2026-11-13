@@ -1,27 +1,21 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import * as Sentry from "@sentry/browser";
 import { App } from "./App";
 import "./ui/styles.css";
 import { BUILD_COMMIT, DISTRIBUTION } from "@lib/distribution";
+import { initErrorReporting } from "@lib/errorReporting";
 
 if (DISTRIBUTION.preview) document.title = `Margin of Victory PREVIEW ${BUILD_COMMIT}, not for distribution`;
 
-// Error tracking (GlitchTip). Errors only — no performance spans, no replays;
-// release is the build SHA so stacks map to a commit. No DSN ⇒ fully inert
-// (local dev, tests).
-const dsn = import.meta.env.VITE_GLITCHTIP_DSN as string | undefined;
-if (dsn) {
-  Sentry.init({
-    dsn,
-    release: (import.meta.env.VITE_RELEASE as string | undefined) ?? "dev",
-    tracesSampleRate: 0,
-    sendDefaultPii: false,
-  });
-}
+initErrorReporting({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  channel: DISTRIBUTION.channel,
+  version: import.meta.env.VITE_APP_VERSION,
+  commit: BUILD_COMMIT,
+});
 
 // Privacy-friendly analytics (self-hosted umami). Inert until a website id is
-// configured in .env.production — register the site in the umami UI and set
+// configured in .env.production: register the site in the umami UI and set
 // VITE_UMAMI_WEBSITE_ID (+ optional VITE_UMAMI_SRC).
 const umamiId = import.meta.env.VITE_UMAMI_WEBSITE_ID as string | undefined;
 if (umamiId) {

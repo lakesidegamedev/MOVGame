@@ -28,7 +28,11 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - name: Build
+        env:
+          # Error reporting: the one shared setting. Empty or absent keeps it off.
+          VITE_SENTRY_DSN: ${{ secrets.MOV_SENTRY_DSN }}
+        run: npm run build
       - name: Publish to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

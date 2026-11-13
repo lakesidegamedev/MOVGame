@@ -39,7 +39,7 @@ them.
 | `ANDROID_KEYSTORE_PASSWORD` | The keystore password |
 | `ANDROID_KEY_ALIAS` | The key alias inside the keystore |
 | `ANDROID_KEY_PASSWORD` | The key password |
-| `MOV_SENTRY_DSN` | Optional. Crash reporting stays off when empty |
+| `MOV_SENTRY_DSN` | Optional. Crash reporting stays off when empty. Shared with the web and desktop builds (`docs/error-reporting.md`) |
 
 Create the upload key once and keep the keystore backed up outside the repo:
 

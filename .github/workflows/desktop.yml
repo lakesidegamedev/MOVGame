@@ -45,6 +45,9 @@ env:
   # Pushes always run it; a manual run can turn it off.
   LIFECYCLE: ${{ github.event_name == 'push' || inputs.lifecycle }}
   CARGO_TERM_COLOR: always
+  # Error reporting: the one shared setting, baked into every web bundle these
+  # jobs build. Empty or absent keeps it off.
+  VITE_SENTRY_DSN: ${{ secrets.MOV_SENTRY_DSN }}
 
 jobs:
   windows:
