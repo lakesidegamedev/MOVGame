@@ -41,4 +41,23 @@ export const IN_ELECTION_ISSUES: Record<string, CountryIssueDef[]> = {
     { id: "corruption", name: "Black money", blurb: "Advani's pledge to bring back Indian money held in Swiss banks, and the 2008 cash-for-votes scandal." },
     { id: "federalism", name: "Telangana demand", blurb: "The TRS demand for a separate Telangana state, which brought it into the TDP's grand alliance." },
   ],
+  "2004": [
+    { id: "growth", name: "India Shining", blurb: "Growth above 8 percent and the government's costly 'India Shining' advertising, set against villages that felt left out." },
+    { id: "welfare", name: "Farm distress", blurb: "A poor 2002 monsoon, farm debt and farmers' suicides in Andhra Pradesh, against the boom in the cities." },
+    { id: "identity", name: "Ayodhya and Gujarat", blurb: "The Ram temple demand, which led the DMK and the PMK to leave the NDA, and the memory of the 2002 Gujarat riots." },
+    { id: "leadership", name: "Vajpayee and Sonia Gandhi", blurb: "The prime minister's standing against Sonia Gandhi, whose foreign birth the BJP and the AIADMK kept raising." },
+    { id: "jobs", name: "Jobs and disinvestment", blurb: "The sale of state companies and fears that growth was not creating jobs, a line the unions and the Left pressed." },
+    { id: "security", name: "Terror and Pakistan talks", blurb: "The 2001 Parliament attack and the army standoff that followed, and the January 2004 peace talks with Pakistan." },
+    { id: "stability", name: "A stable government", blurb: "The NDA's closing argument: a single prime minister against a patchwork of parties that had never governed together." },
+    { id: "local", name: "Water, roads and power", blurb: "Drought, water scarcity and bad roads and power in many states mattered more to voters than national themes." },
+  ],
+  "1999": [
+    { id: "security", name: "Kargil", blurb: "The war with Pakistan from May to July in the Kargil hills, and the Lahore bus journey that came before it." },
+    { id: "leadership", name: "Sonia Gandhi's birth", blurb: "Her Italian birth, which three senior leaders cited when they left Congress to form the NCP, against Vajpayee." },
+    { id: "stability", name: "One vote", blurb: "The April confidence vote lost by one vote, and the third general election in under four years." },
+    { id: "growth", name: "Growth and reform", blurb: "Steady growth and low inflation under the NDA, and the pace of economic liberalisation." },
+    { id: "corruption", name: "Jayalalithaa's cases", blurb: "The corruption cases against Jayalalithaa and her demand to dismiss the Tamil Nadu government, which brought the NDA down." },
+    { id: "alliances", name: "Who allies with whom", blurb: "The NDA's twenty-odd parties, Congress's thin alliances and a loose Third Front of the Left and socialists." },
+    { id: "identity", name: "Temple and Christians", blurb: "The NDA agenda that left the temple and a uniform civil code aside, and the 1999 attacks on Christian missionaries." },
+  ],
 };

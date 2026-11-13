@@ -18,6 +18,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   without a freely licensed photo show their initials, and parties without a logo keep their
   colour. Settings has a Credits section listing every photo and logo with its source, author and
   licence. The pictures add about 1.5 MB to each app.
+- India 1999 and 2004, in the India pack: Vajpayee's return after Kargil and one lost confidence
+  vote, then the 2004 upset in which Sonia Gandhi's Congress and its new state alliances beat 'India
+  Shining'. Each has its real results by region, with every party grouped into the alliance it
+  stood in before polling, the leaders of the day, the campaign's story beats in the week they
+  happened and the issues of that campaign. They sit after India's existing elections, so nothing
+  you own or have saved moves, and they are paid like the rest of the pack. Samajwadi, BSP, Left
+  and Congress leaders have photos where a free one exists, and parties have logos.
 - Eight more elections from the past, in the packs of the countries they belong to: New Zealand
   2008, 2011 and 2014 (Helen Clark's last campaign, then John Key's two wins and the Dirty
   Politics election), Spain 2016 and November 2019 (the two repeat votes after months of failed

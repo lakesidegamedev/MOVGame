@@ -131,6 +131,8 @@
     "es-2016": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0.1 },
     "jp-2005": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "it-2006": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
-    "ie-2007": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
+    "ie-2007": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "in-2004": { "suggested": "hard", "authored": "hard" },
+    "in-1999": { "suggested": "hard", "authored": "hard" }
   }
 }

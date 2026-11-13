@@ -1,15 +1,18 @@
-// INDIA: four Lok Sabha general elections, one bundle.
+// INDIA: six Lok Sabha general elections, one bundle.
 //
 // First past the post in 543 single-member constituencies. India's parties
 // are not national, so the bundle models the alliances voters actually
 // faced in each state: the BJP-led National Democratic Alliance (NDA), the
 // Congress-led United Progressive Alliance (UPA; the INDIA bloc in 2024) and
-// the regional parties that stood outside both. Regions are groups of states
+// the regional parties that stood outside both. In 1999 and 2004 the UPA row
+// is Congress and the allies it had before polling (the UPA itself was named
+// after the 2004 count). Regions are groups of states
 // and union territories (fifteen in all), each with its real seat total.
 //
 // Method. Every number is aggregated from constituency-level results (all
 // candidates, all votes) in the Election Commission of India's published
-// tables, as carried in public open datasets for 2009, 2014, 2019 and 2024.
+// tables, as carried in public open datasets for 1999, 2004, 2009, 2014, 2019
+// and 2024.
 // Each candidate's party is mapped to the side it stood on in that state
 // that year; votes are summed by region and the seat is given to the
 // candidate with the most votes in each constituency. NOTA and independents
@@ -33,10 +36,50 @@
 // Left in Bengal, so it is shown separately even though it belongs to INDIA
 // nationally. The 2019 UPA total here includes the four Maharashtra and one
 // Lakshadweep seats of the NCP, which fought on a joint Congress slate.
-// Andhra Pradesh and Telangana are one region (42 seats in all four
+// Andhra Pradesh and Telangana are one region (42 seats in all six
 // elections) so that the 2009 and 2014 states line up with the present map.
+// For 1999 and 2004 the present map is rebuilt from the constituencies of the
+// day: Bihar and Jharkhand, Madhya Pradesh and Chhattisgarh, and Uttar Pradesh
+// and Uttarakhand were each one state in 1999, so the five Uttarakhand seats
+// (Almora, Garhwal, Hardwar, Nainital, Tehri Garhwal) are moved from Uttar
+// Pradesh to the hills region, and every region keeps its seat total.
 // The Andaman and Nicobar Islands vote with West Bengal and Lakshadweep with
 // Kerala; neither is drawn on the map.
+//
+// 2004 (20 April to 10 May, count 13 May). Alliances are the pre-poll seat
+// sharing recorded on Wikipedia's state pages for the election (party tables
+// for each state, 2004 Indian general election in <state>): NDA 189 (BJP 138,
+// Shiv Sena 12, BJD 11, SAD 8, JD(U) 8, TDP 5, Trinamool 2 and five small
+// allies), UPA 228 (Congress 145, RJD 24, DMK 16, NCP 9, PMK 6, TRS 5, JMM 5,
+// LJP 4, MDMK 4, and the Left parties that stood on a Congress or DMK slate
+// in Tamil Nadu, Andhra Pradesh and Jharkhand), Left 55, Samajwadi Party
+// with the RLD 39 (the UP seat deal of 70 and 10), BSP 19, the rest 13. The
+// NDA total matches the usual 189. The UPA row is wider than the 218 to 222
+// usually quoted because the Left seats it fought alongside are counted by
+// state. The Left Front fought Congress in West Bengal, Kerala and Tripura,
+// so it stands apart there. AIADMK was in the NDA in Tamil Nadu in 2004. The
+// DMK, PMK and MDMK had left the NDA and were in Congress's front, which is
+// how a front that won all 40 seats in Tamil Nadu and Puducherry counts as
+// UPA. Parties outside every front (JD(S), AGP, INLD, the National
+// Conference, independents) are in Other. Two independents backed by a front
+// are counted with it: Kokrajhar in Assam (NDA, from the Assam page) and
+// Ernakulam in Kerala (Left).
+// States without an alliance table on their Wikipedia page (Odisha, Rajasthan,
+// Goa, Tripura and the small northeastern states and territories) take each
+// party's national alliance.
+// 1999 (5 September to 3 October, count 6 October). Alliances are the table
+// "By state and alliance" in the Wikipedia article for the election, checked
+// against its Tamil Nadu, Bihar, Kerala and West Bengal pages: NDA 299 (BJP
+// 182, TDP 29, JD(U) 21, Shiv Sena 15, DMK 12, BJD 10, Trinamool 8, INLD 5,
+// PMK 5, MDMK 4, SAD 2, ABLTC 2 and four small allies), which is the 299 the
+// article gives, Congress and allies 139 (Congress 114, AIADMK 10, RJD 7,
+// and the Left parties on the Tamil Nadu and Punjab slates), Left 41, the
+// Samajwadi Party 26, BSP 14, the NCP 8 (founded in June 1999 and standing
+// alone), the rest 16. The AIADMK is counted with Congress because the two
+// fought Tamil Nadu together; the DMK, PMK and MDMK were NDA members. The
+// National Conference contested all six Kashmir seats against the BJP and is
+// in Other. The article's table leaves out the AIADMK and the small states;
+// the Tamil Nadu page and each party's national alliance fill them in.
 //
 // 2024 (19 April to 1 June, count 4 June): NDA 293 (BJP 240, TDP 16, JD(U)
 // 12, Shiv Sena 7, LJP Ram Vilas 5), INDIA bloc 234 (Congress 99, SP 37,
@@ -80,7 +123,7 @@ export const INDIA: CountryBundle = {
       { id: "upa", name: "UPA / INDIA bloc (Congress and allies)", shortName: "UPA/INDIA", color: "#1ea7e1" },
       { id: "tmc", name: "All India Trinamool Congress", shortName: "Trinamool", color: "#28b04a" },
       { id: "left", name: "Left Front (CPI(M), CPI and allies)", shortName: "Left", color: "#b3122f" },
-      { id: "sp", name: "Samajwadi Party (with RLD in 2019)", shortName: "Samajwadi", color: "#d6336c" },
+      { id: "sp", name: "Samajwadi Party (with the RLD in 2004 and 2019)", shortName: "Samajwadi", color: "#d6336c" },
       { id: "bsp", name: "Bahujan Samaj Party", shortName: "BSP", color: "#2b3a9e" },
       { id: "bjd", name: "Biju Janata Dal", shortName: "BJD", color: "#0a9a74" },
       { id: "ysr", name: "YSR Congress Party", shortName: "YSRCP", color: "#7b8ee6" },
@@ -89,6 +132,7 @@ export const INDIA: CountryBundle = {
       { id: "dmk", name: "Dravida Munnetra Kazhagam (2014, outside the UPA)", shortName: "DMK", color: "#3a3a3a" },
       { id: "aiadmk", name: "All India Anna Dravida Munnetra Kazhagam", shortName: "AIADMK", color: "#7a9a2c" },
       { id: "aap", name: "Aam Aadmi Party", shortName: "AAP", color: "#17a2b8" },
+      { id: "ncp", name: "Nationalist Congress Party (standing alone in 1999)", shortName: "NCP", color: "#1f9e9a" },
       { id: "oth", name: "Others (independents, NOTA, small parties)", shortName: "Other", color: "#9aa0a6" },
     ],
     allocation: { id: "regional_seats_curve", label: "First past the post (543 constituencies, regional seats curve)", unit: "seat" },
@@ -357,6 +401,94 @@ export const INDIA: CountryBundle = {
         { id: "jaya_front", headline: "Jayalalithaa stitches together a front of the AIADMK, PMK, MDMK and the Left in Tamil Nadu, and {party} fights the DMK on even terms", role: "any", party: "aiadmk", weight: 2, appeal: 0.02, momentum: 5 },
       ],
     },
+
+    "2004": {
+      id: "2004",
+      year: 2004,
+      label: "2004 · Vajpayee v. Sonia Gandhi",
+      tagline: "April and May 2004. The NDA has called the election early on the back of 'India Shining', a decisive run of state wins and a prime minister still ahead in the polls. Sonia Gandhi's Congress has finally built alliances in Tamil Nadu, Bihar and Maharashtra, while the Samajwadi Party and the BSP stand outside both fronts in Uttar Pradesh. Four phases of polling, counted on 13 May.",
+      salience: { growth: 0.7, welfare: 0.75, identity: 0.5, leadership: 0.45, jobs: 0.5, security: 0.4, stability: 0.5, local: 0.45 },
+      regions: {
+        UP: { v: { nda: 0.231, upa: 0.124, sp: 0.312, bsp: 0.247, oth: 0.086 }, s: { nda: 11, upa: 9, sp: 38, bsp: 19, oth: 3 } },
+        BJ: { v: { nda: 0.37, upa: 0.446, left: 0.016, bsp: 0.033, oth: 0.135 }, s: { nda: 12, upa: 42 } },
+        MP: { v: { nda: 0.481, upa: 0.359, left: 0.004, bsp: 0.047, oth: 0.109 }, s: { nda: 35, upa: 5 } },
+        GR: { v: { nda: 0.488, upa: 0.434, left: 0.005, bsp: 0.024, oth: 0.049 }, s: { nda: 35, upa: 17, oth: 1 } },
+        MH: { v: { nda: 0.428, upa: 0.429, left: 0.008, bsp: 0.03, oth: 0.105 }, s: { nda: 26, upa: 24 } },
+        DH: { v: { nda: 0.254, upa: 0.466, bsp: 0.041, oth: 0.239 }, s: { nda: 2, upa: 16 } },
+        PB: { v: { nda: 0.448, upa: 0.386, bsp: 0.077, oth: 0.089 }, s: { nda: 11, upa: 2 } },
+        HM: { v: { nda: 0.368, upa: 0.398, left: 0.004, sp: 0.03, bsp: 0.037, oth: 0.163 }, s: { nda: 4, upa: 6, sp: 1, oth: 4 } },
+        KA: { v: { nda: 0.367, upa: 0.369, bsp: 0.012, oth: 0.252 }, s: { nda: 18, upa: 8, oth: 2 } },
+        KL: { v: { nda: 0.122, upa: 0.384, left: 0.461, bsp: 0.005, oth: 0.028 }, s: { nda: 2, upa: 1, left: 18 } },
+        TN: { v: { nda: 0.38, upa: 0.573, bsp: 0.006, oth: 0.041 }, s: { upa: 40 } },
+        AT: { v: { nda: 0.415, upa: 0.52, bsp: 0.014, oth: 0.051 }, s: { nda: 5, upa: 37 } },
+        WB: { v: { nda: 0.292, upa: 0.149, left: 0.505, bsp: 0.009, oth: 0.045 }, s: { nda: 1, upa: 7, left: 35 } },
+        OD: { v: { nda: 0.494, upa: 0.42, bsp: 0.022, oth: 0.064 }, s: { nda: 18, upa: 3 } },
+        NE: { v: { nda: 0.335, upa: 0.305, left: 0.083, oth: 0.277 }, s: { nda: 9, upa: 11, left: 2, oth: 3 } },
+      },
+      // The real story beats of 2004, in campaign order.
+      events: [
+        { id: "dmk_pmk_exit", headline: "The DMK and the PMK, who left the NDA in December and January over Ayodhya, have joined Congress's front in Tamil Nadu, and {party} faces a southern collapse", role: "any", party: "nda", weight: 3, appeal: -0.025, momentum: -7, turn: 0 },
+        { id: "rahul_amethi", headline: "Rahul Gandhi announces in March that he will contest his father's old seat at Amethi, and {party} puts a new face in front of Uttar Pradesh", role: "any", party: "upa", weight: 3, appeal: 0.015, momentum: 5, turn: 0 },
+        { id: "foreign_origin_04", headline: "The BJP and the AIADMK tell the Election Commission they will keep raising Sonia Gandhi's foreign origin, and {party} spends another week on it", role: "any", party: "nda", weight: 3, appeal: -0.01, momentum: -3, turn: 1 },
+        { id: "vajpayee_lucknow", headline: "Vajpayee files his nomination at Lucknow on 7 April, and {party} opens its campaign on its best-known face", role: "any", party: "nda", weight: 3, appeal: 0.02, momentum: 6, turn: 1 },
+        { id: "nda_manifesto", headline: "NDA leaders meet in New Delhi on 8 April to adopt an 'Agenda for Development and Good Governance', and {party} sets out the case for another term", role: "any", party: "nda", weight: 3, appeal: 0.01, momentum: 3, turn: 1 },
+        { id: "ap_double_poll", headline: "Andhra Pradesh votes for the state assembly and the Lok Sabha together on 20 and 26 April, and {party}'s ally, the TDP, carries the weight of its time in office", role: "any", party: "nda", weight: 3, appeal: -0.02, momentum: -6, turn: 3 },
+        { id: "market_slide", headline: "Share prices start to fall after the second phase on 26 April as investors doubt an NDA win, and {party} is put on the defensive over its reform record", role: "any", party: "nda", weight: 3, appeal: -0.015, momentum: -5, turn: 3 },
+        { id: "chhapra_repoll", headline: "Booth capturing is reported at Chhapra in Bihar on 5 May and the Election Commission orders a fresh poll there, an awkward week for the RJD, {party}'s main Bihar ally", role: "any", party: "upa", weight: 3, appeal: -0.01, momentum: -3, turn: 5 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "india_shining", headline: "The 'India Shining' advertisements, about 5 billion rupees of them, run in every medium while villages cope with drought, and {party} is accused of boasting", role: "any", party: "nda", weight: 2, appeal: -0.02, momentum: -6 },
+        { id: "mulayam_alone", headline: "Talks with Congress collapsed, so Mulayam Singh Yadav's Samajwadi Party and its ally the RLD take on Congress, the BJP and the BSP alone, and {party} makes Uttar Pradesh a four-way race", role: "any", party: "sp", weight: 2, appeal: 0.025, momentum: 7 },
+        { id: "mayawati_all_80", headline: "Mayawati's BSP contests all 80 seats in Uttar Pradesh, and {party} bets on its Dalit base across the state", role: "any", party: "bsp", weight: 2, appeal: 0.02, momentum: 6 },
+        { id: "dpa_clear_field", headline: "Karunanidhi's front of the DMK, Congress, PMK, MDMK and the Left puts up one candidate against the AIADMK and the BJP in each of Tamil Nadu's 39 seats, and {party} has a clear field", role: "any", party: "upa", weight: 2, appeal: 0.03, momentum: 8 },
+        { id: "lalu_front", headline: "Lalu Prasad Yadav's RJD, Congress and Ram Vilas Paswan's LJP settle a Bihar seat deal of 26, 4 and 8, with one seat each for the NCP and the CPI(M), and {party} is the front to beat", role: "any", party: "upa", weight: 2, appeal: 0.025, momentum: 7 },
+        { id: "maharashtra_front", headline: "Congress and the NCP fight Maharashtra as one front, with 26 and 18 seats, and {party} avoids the split vote that cost it in 1999", role: "any", party: "upa", weight: 2, appeal: 0.025, momentum: 7 },
+        { id: "left_swing", headline: "The Left Front fights Congress and the NDA in Bengal, Kerala and Tripura, and {party} presents itself as the vote that decides the next government", role: "any", party: "left", weight: 2, appeal: 0.02, momentum: 5 },
+      ],
+    },
+
+    "1999": {
+      id: "1999",
+      year: 1999,
+      label: "1999 · Vajpayee v. Sonia Gandhi",
+      tagline: "September and October 1999. Vajpayee's government fell by a single vote in April, the Kargil war has just ended, and the NDA has gathered more than twenty parties behind him. Sonia Gandhi fights her first Lok Sabha election with few allies, and Sharad Pawar has left Congress over her Italian birth. Polling runs from 5 September to 3 October.",
+      salience: { security: 0.8, leadership: 0.65, stability: 0.7, growth: 0.45, corruption: 0.3, alliances: 0.4, identity: 0.35 },
+      regions: {
+        UP: { v: { nda: 0.292, upa: 0.161, sp: 0.25, bsp: 0.226, oth: 0.071 }, s: { nda: 27, upa: 11, sp: 26, bsp: 14, oth: 2 } },
+        BJ: { v: { nda: 0.455, upa: 0.371, left: 0.037, bsp: 0.009, ncp: 0.013, oth: 0.115 }, s: { nda: 41, upa: 11, left: 1, oth: 1 } },
+        MP: { v: { nda: 0.466, upa: 0.439, bsp: 0.052, oth: 0.043 }, s: { nda: 29, upa: 11 } },
+        GR: { v: { nda: 0.507, upa: 0.452, left: 0.005, bsp: 0.015, ncp: 0.003, oth: 0.018 }, s: { nda: 36, upa: 16, oth: 1 } },
+        MH: { v: { nda: 0.382, upa: 0.333, left: 0.006, bsp: 0.003, ncp: 0.214, oth: 0.062 }, s: { nda: 30, upa: 11, ncp: 6, oth: 3 } },
+        DH: { v: { nda: 0.555, upa: 0.377, bsp: 0.021, oth: 0.047 }, s: { nda: 17, upa: 1 } },
+        PB: { v: { nda: 0.406, upa: 0.444, bsp: 0.038, oth: 0.112 }, s: { nda: 3, upa: 9, oth: 1 } },
+        HM: { v: { nda: 0.44, upa: 0.337, left: 0.006, bsp: 0.066, oth: 0.151 }, s: { nda: 10, upa: 1, oth: 4 } },
+        KA: { v: { nda: 0.405, upa: 0.454, bsp: 0.006, oth: 0.135 }, s: { nda: 10, upa: 18 } },
+        KL: { v: { nda: 0.08, upa: 0.47, left: 0.399, oth: 0.051 }, s: { upa: 12, left: 9 } },
+        TN: { v: { nda: 0.469, upa: 0.419, oth: 0.112 }, s: { nda: 26, upa: 14 } },
+        AT: { v: { nda: 0.498, upa: 0.428, left: 0.027, oth: 0.047 }, s: { nda: 36, upa: 5, oth: 1 } },
+        WB: { v: { nda: 0.373, upa: 0.135, left: 0.465, oth: 0.027 }, s: { nda: 11, upa: 3, left: 29 } },
+        OD: { v: { nda: 0.578, upa: 0.369, left: 0.014, bsp: 0.003, oth: 0.036 }, s: { nda: 19, upa: 2 } },
+        NE: { v: { nda: 0.272, upa: 0.364, left: 0.066, ncp: 0.027, oth: 0.271 }, s: { nda: 4, upa: 14, left: 2, ncp: 2, oth: 3 } },
+      },
+      // The real story beats of 1999, in campaign order.
+      events: [
+        { id: "one_vote_fall", headline: "Vajpayee's government fell by a single vote on 17 April when the AIADMK withdrew, and {party} asks voters to finish what the Lok Sabha could not", role: "any", party: "nda", weight: 3, appeal: 0.025, momentum: 7, turn: 0 },
+        { id: "pawar_exit", headline: "Sharad Pawar, P. A. Sangma and Tariq Anwar, expelled on 20 May for questioning Sonia Gandhi's Italian birth, have founded the NCP, and {party} fights Maharashtra against its own former chief minister", role: "any", party: "upa", weight: 3, appeal: -0.03, momentum: -8, turn: 0 },
+        { id: "dmk_joins_nda", headline: "The DMK joins the NDA for the first time while the AIADMK, which brought the government down, stands with Congress in Tamil Nadu, and {party} gathers more than twenty parties", role: "any", party: "nda", weight: 3, appeal: 0.02, momentum: 6, turn: 1 },
+        { id: "sonia_bellary", headline: "Sonia Gandhi files in Bellary as well as Amethi, and the BJP answers with Sushma Swaraj in Bellary, so {party} makes a southern seat the symbol of its campaign", role: "any", party: "upa", weight: 3, appeal: 0.02, momentum: 6, turn: 1 },
+        { id: "tdp_bjp_andhra", headline: "In Andhra Pradesh the TDP takes 34 seats and the BJP 8 in one joint run against Congress, and {party} treats the state as its anchor in the south", role: "any", party: "nda", weight: 3, appeal: 0.015, momentum: 5, turn: 2 },
+        { id: "madhepura", headline: "Lalu Prasad Yadav is tied down at Madhepura by Sharad Yadav of the JD(U), and {party} has its Bihar chief fighting for his own seat", role: "any", party: "upa", weight: 3, appeal: -0.02, momentum: -5, turn: 4 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "kargil", headline: "The Kargil war, ended in July, is still the story in every barracks town and village, and {party} campaigns on Vajpayee's handling of it", role: "any", party: "nda", weight: 2, appeal: 0.03, momentum: 8 },
+        { id: "videshi_swadeshi", headline: "The BJP sets the 'videshi' Sonia Gandhi against the 'swadeshi' Vajpayee at every rally, and {party} has a ready contrast", role: "any", party: "nda", weight: 2, appeal: 0.02, momentum: 6 },
+        { id: "sonia_offer_resign", headline: "Sonia Gandhi's offer in May to resign as party leader brought an outpouring of support, and {party} workers rally round her", role: "any", party: "upa", weight: 2, appeal: 0.015, momentum: 5 },
+        { id: "few_allies", headline: "Congress goes into the campaign with far fewer allies than the NDA's twenty-odd parties, and {party} has to win seat by seat on its own", role: "any", party: "upa", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "mulayam_refuses", headline: "Mulayam Singh Yadav refused in April to back a Sonia Gandhi government, and {party} now fights Congress as well as the BJP in Uttar Pradesh", role: "any", party: "sp", weight: 2, appeal: 0.02, momentum: 6 },
+        { id: "bsp_every_seat", headline: "The BSP contests every one of the 85 seats in Uttar Pradesh on its own, and {party} backs its Dalit base against all comers", role: "any", party: "bsp", weight: 2, appeal: 0.015, momentum: 5 },
+        { id: "basu_offer", headline: "Jayalalithaa's April suggestion of Jyoti Basu as prime minister, which he declined, keeps {party} in the national picture", role: "any", party: "left", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "bengal_tmc_bjp", headline: "Mamata Banerjee's Trinamool Congress and the BJP take on the Left Front together across Bengal, and {party} faces a combined opposition in its stronghold", role: "any", party: "left", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "growth_record", headline: "Steady growth and low inflation under the NDA give {party} a record to run on", role: "any", party: "nda", weight: 2, appeal: 0.015, momentum: 4 },
+      ],
+    },
   },
 
   leaders: {
@@ -402,6 +534,20 @@ export const INDIA: CountryBundle = {
       bsp: { partyId: "bsp", name: "Mayawati", charisma: 70, energy: 74, competence: 62, machine: 84 },
       bjd: { partyId: "bjd", name: "Naveen Patnaik", charisma: 62, energy: 58, competence: 70, machine: 80 },
       aiadmk: { partyId: "aiadmk", name: "J. Jayalalithaa", charisma: 74, energy: 68, competence: 60, machine: 76 },
+    },
+    "2004": {
+      nda: { partyId: "nda", name: "Atal Bihari Vajpayee", charisma: 86, energy: 52, competence: 78, machine: 84 },
+      upa: { partyId: "upa", name: "Sonia Gandhi", charisma: 66, energy: 76, competence: 56, machine: 74 },
+      left: { partyId: "left", name: "Harkishan Singh Surjeet", charisma: 36, energy: 46, competence: 66, machine: 78 },
+      sp: { partyId: "sp", name: "Mulayam Singh Yadav", charisma: 64, energy: 66, competence: 60, machine: 78 },
+      bsp: { partyId: "bsp", name: "Mayawati", charisma: 62, energy: 70, competence: 56, machine: 76 },
+    },
+    "1999": {
+      nda: { partyId: "nda", name: "Atal Bihari Vajpayee", charisma: 90, energy: 58, competence: 78, machine: 88 },
+      upa: { partyId: "upa", name: "Sonia Gandhi", charisma: 56, energy: 66, competence: 40, machine: 62 },
+      left: { partyId: "left", name: "Harkishan Singh Surjeet", charisma: 38, energy: 50, competence: 66, machine: 78 },
+      sp: { partyId: "sp", name: "Mulayam Singh Yadav", charisma: 62, energy: 64, competence: 58, machine: 74 },
+      bsp: { partyId: "bsp", name: "Kanshi Ram", charisma: 54, energy: 56, competence: 56, machine: 72 },
     },
   },
 
