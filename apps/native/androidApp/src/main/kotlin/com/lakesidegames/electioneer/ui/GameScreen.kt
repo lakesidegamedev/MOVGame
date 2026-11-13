@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lakesidegames.electioneer.engine.CandidateId
+import com.lakesidegames.electioneer.engine.NativeMoney
 import com.lakesidegames.electioneer.engine.electoralRule
 
 // U.S. campaign desk: scoreboard, state tile map, seven-day plan, events and recap.
@@ -83,7 +84,7 @@ fun GameScreen(session: GameSession) {
             SeatBar(listOf(Mov.Dem to demEv, Mov.Tossup to tossEv, Mov.Gop to repEv), college.total, college.majority,
                 description = "${dem.shortName} $demEv, tossup $tossEv, ${rep.shortName} $repEv electoral votes. ${college.majority} to win.")
             StatRow {
-                Metric("\$${"%.1f".format((res?.cash ?: 0.0) / 1_000_000)}M", "Cash")
+                Metric(NativeMoney.millions("$", (res?.cash ?: 0.0) / 1_000_000), "Cash")
                 Metric("${session.slotsLeft()}", "Actions left")
                 Metric("${g.queuedActions.size}", "Planned")
             }

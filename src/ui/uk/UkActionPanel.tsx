@@ -1,3 +1,4 @@
+import { moneyMillions } from "../format";
 import { useEffect, useState } from "react";
 import { useUkStore } from "@store/ukStore";
 import { ukGameIssues, type UkAction, type UkActionType, type UkAdMode } from "@engine/ukGame";
@@ -134,7 +135,7 @@ export function UkActionPanel() {
         <span className="card-sub num">{used}/{pool} actions · max {MAX_PER_DAY}/day</span>
       </div>
       <div className="plan-budget">
-        <div className="metric"><span className="l">Funds</span><span className="v">£{res.funds.toFixed(1)}M</span></div>
+        <div className="metric"><span className="l">Funds</span><span className="v">{moneyMillions("£", res.funds)}</span></div>
         <div className="metric"><span className="l">Planned / available</span><span className="v">£{committedFunds.toFixed(1)}M / £{availableFunds.toFixed(1)}M</span></div>
         <div className="metric"><span className="l">Actions</span><span className="v">{res.actions}/{res.maxActions}</span></div>
         <div className="metric"><span className="l">Momentum</span><span className="v">{res.momentum >= 0 ? "+" : ""}{res.momentum.toFixed(0)}</span></div>

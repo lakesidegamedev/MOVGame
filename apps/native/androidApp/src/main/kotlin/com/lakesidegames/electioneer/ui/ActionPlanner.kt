@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.lakesidegames.electioneer.engine.ActionType
 import com.lakesidegames.electioneer.engine.AdMode
 import com.lakesidegames.electioneer.engine.GameState
+import com.lakesidegames.electioneer.engine.NativeMoney
 import com.lakesidegames.electioneer.engine.IssueId
 import com.lakesidegames.electioneer.engine.liveIssueIds
 import com.lakesidegames.electioneer.engine.plannedActionRows
@@ -89,8 +90,8 @@ fun ActionPlanner(session: GameSession, game: GameState, selectedId: String?) {
 
     MovCard {
         CardHead("Week plan") { Tag("${session.slotsLeft()} actions left", if (session.slotsLeft() > 0) TagKind.Accent else TagKind.Outline) }
-        KeyValue("Planned ads", "$${"%.1f".format(plannedSpend / 1_000_000)}M")
-        KeyValue("Available cash", "$${"%.1f".format(availableCash / 1_000_000)}M")
+        KeyValue("Planned ads", NativeMoney.millions("$", plannedSpend / 1_000_000))
+        KeyValue("Available cash", NativeMoney.millions("$", availableCash / 1_000_000))
         if (game.queuedActions.isNotEmpty()) {
             Text("Plan estimate: ${projectPlannedElection(game).ev.getValue(game.playerCandidate.serial)} EV. Rival moves and events can change the result.",
                 style = MaterialTheme.typography.bodySmall, color = Mov.Info)

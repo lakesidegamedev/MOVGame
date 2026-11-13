@@ -129,7 +129,7 @@ struct GameView: View {
                         HStack(spacing: 8) {
                             headerStat("WEEK", "\(Int(g.turn()) + 1)/\(Int(g.totalTurns()))")
                             Spacer()
-                            headerStat("CASH", String(format: "$%.1fM", g.playerCash() / 1_000_000))
+                            headerStat("CASH", nativeMoneyMillions("$", g.playerCash() / 1_000_000))
                             Spacer()
                             headerStat("ACTIONS LEFT", "\(Int(g.slotsLeft()))")
                             Spacer()
@@ -428,7 +428,7 @@ struct ActionPlannerView: View {
                         .font(.subheadline.bold()).foregroundStyle(CampaignStyle.gold)
                 }
                 Spacer()
-                Text(String(format: "CASH $%.1fM", (session.currentGame()?.availableCash() ?? 0) / 1_000_000))
+                Text("CASH " + nativeMoneyMillions("$", (session.currentGame()?.availableCash() ?? 0) / 1_000_000))
                     .font(.caption.bold()).foregroundStyle(CampaignStyle.muted)
                     .minimumScaleFactor(0.8).lineLimit(1)
             }
