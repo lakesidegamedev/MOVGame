@@ -255,7 +255,7 @@ fun SeatBar(segments: List<Pair<Color, Int>>, total: Int, majority: Int?, modifi
 }
 
 /**
- * One party row for standings tables: swatch, party name in readable ink,
+ * One party row for standings tables: logo (or swatch), party name in readable ink,
  * then right-aligned tabular numbers. [highlight] marks the player's party.
  */
 @Composable
@@ -266,11 +266,12 @@ fun PartyRow(
     modifier: Modifier = Modifier,
     highlight: Boolean = false,
     tag: String? = null,
+    logo: String? = null,
 ) {
     Row(modifier.fillMaxWidth().clip(MovRadius.sm).background(if (highlight) Mov.Surface2 else Color.Transparent)
         .heightIn(min = 32.dp).padding(horizontal = MovSpace.s1_5, vertical = MovSpace.s1).semantics(mergeDescendants = true) {},
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
-        PartySwatch(partyFill(color))
+        PartyMark(color, logo)
         Text(name, Modifier.weight(1f), color = partyInk(color), style = MaterialTheme.typography.bodyMedium,
             fontWeight = if (highlight) FontWeight.Bold else FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)
         tag?.let { Tag(it, TagKind.Accent) }

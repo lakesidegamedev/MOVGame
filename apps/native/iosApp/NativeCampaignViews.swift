@@ -541,9 +541,12 @@ struct NativeElectionBriefing: View {
         let regional = MobileCampaign.companion.regionalReach(countryId: pick.countryId, electionId: pick.electionId, partyId: party.id) != nil
         return Button { partyId = party.id } label: {
             HStack(spacing: 10) {
-                RoundedRectangle(cornerRadius: 3).fill(nativePartyColor(party.color)).frame(width: 6, height: 34).accessibilityHidden(true)
+                LeaderPortraitView(name: party.leader, ring: nativePartyColor(party.color), size: 38)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(party.name).font(.subheadline.bold()).foregroundStyle(.white)
+                    HStack(spacing: 6) {
+                        PartyMarkView(color: party.color, logo: NativeArt.shared.logo(country: pick.countryId, party: party.id, electionId: pick.electionId))
+                        Text(party.name).font(.subheadline.bold()).foregroundStyle(.white)
+                    }
                     Text(party.leader).font(.caption).foregroundStyle(CampaignStyle.muted)
                 }
                 Spacer(minLength: 4)
@@ -608,10 +611,11 @@ struct NativeRegionalPartyNote: View {
 private struct NativeStandingRows: View {
     let rows: [NativeStanding]
     let units: String
+    var logo: (String) -> String? = { _ in nil }
     var body: some View {
         ForEach(rows, id: \.partyId) { row in
             HStack(spacing: 8) {
-                RoundedRectangle(cornerRadius: 3).fill(nativePartyColor(row.color)).frame(width: 14, height: 14)
+                PartyMarkView(color: row.color, logo: logo(row.partyId), size: 14)
                 Text(row.name).font(.subheadline.bold())
                 Spacer(minLength: 4)
                 Text("\(nativeUnits(Int(row.units), units)) · \(String(format: "%.1f", row.voteShare * 100))%")
@@ -642,7 +646,19 @@ struct NativeWorldCampaign: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     NativeCampaignCoach(country: game.countryId(), goal: game.goalText(), turn: Int(game.turn()), selected: regionId.isEmpty ? nil : regionId, queued: game.plan().count, settings: session.settings)
-                    Text(game.label()).font(.title2.bold())
+                    // The desk header: your leader and party for this election.
+                    let mine = game.standings().first(where: { $0.partyId == game.playerParty() })
+                    HStack(spacing: 12) {
+                        LeaderPortraitView(name: game.leaderName(partyId: game.playerParty()), ring: nativePartyColor(mine?.color ?? "#94a3b8"), size: 44)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(game.label()).font(.title2.bold())
+                            HStack(spacing: 6) {
+                                PartyMarkView(color: mine?.color ?? "#94a3b8", logo: game.logo(partyId: game.playerParty()))
+                                Text([game.leaderName(partyId: game.playerParty()), mine?.name].compactMap { $0 }.joined(separator: " · "))
+                                    .font(.subheadline).foregroundStyle(CampaignStyle.muted).lineLimit(1)
+                            }
+                        }
+                    }
                     Text(game.isOver() ? "ELECTION RESULT" : "WEEK \(game.turn() + 1) OF \(game.totalTurns())")
                         .font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
                     Text(game.goalText()).font(.subheadline).foregroundStyle(CampaignStyle.muted)
@@ -656,7 +672,7 @@ struct NativeWorldCampaign: View {
                     if !game.isOver() { Button("Undo week", action: session.undo).disabled(!session.canUndo()) }
                     VStack(alignment: .leading, spacing: 8) {
                         Text(game.isOver() ? game.outcome() : "Projected standings").font(.headline)
-                        NativeStandingRows(rows: game.standings(), units: game.unitName())
+                        NativeStandingRows(rows: game.standings(), units: game.unitName(), logo: { game.logo(partyId: $0) })
                         Text(game.goalLine())
                             .font(.caption).foregroundStyle(CampaignStyle.muted)
                     }.nativeCampaignCard()

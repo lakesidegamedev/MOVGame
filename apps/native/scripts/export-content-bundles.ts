@@ -19,10 +19,32 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const WEB_REPO = path.resolve(HERE, "../../..");
 const OUT = path.resolve(HERE, "../shared/src/commonMain/resources/bundles");
 
+interface WebCredit { name?: string; party?: string; file: string; source: string; title: string; author: string; license: string; licenseUrl?: string; attribution?: string }
+
+// The apps' copy of the web's portrait and logo tables. Files are named by
+// their basename; the apps read them from bundles/art/. Credits keep only
+// logos the table still uses, as the web Credits page does.
+function artBundle(portraits: Record<string, string>, logos: { country: string; party: string; from: number; to: number; file: string }[]) {
+  const read = (rel: string) => JSON.parse(fs.readFileSync(path.join(WEB_REPO, "public", rel), "utf8")) as WebCredit[];
+  const credit = (name: string, c: WebCredit) => ({
+    name, source: c.source, title: c.title, author: c.attribution ?? c.author, license: c.license,
+    ...(c.licenseUrl ? { licenseUrl: c.licenseUrl } : {}),
+  });
+  const shownLogos = new Set(logos.map((r) => r.file));
+  return {
+    portraits: Object.fromEntries(Object.entries(portraits).map(([name, file]) => [name, path.basename(file)])),
+    logos: logos.map((r) => ({ country: r.country, party: r.party, from: r.from, to: r.to, file: path.basename(r.file) })),
+    portraitCredits: read("images/portraits/credits.json").map((c) => credit(c.name ?? "", c)),
+    logoCredits: read("images/logos/credits.json").filter((c) => shownLogos.has(c.file)).map((c) => credit(c.party ?? "", c)),
+  };
+}
+
 async function main() {
   const editor = await import(`${WEB_REPO}/src/content/customScenario.ts`);
   const { makeDefaultCustomScenario, makeDefaultMultiparty, validateCustomScenario } = editor;
   const { SOUND_CUES } = await import(`${WEB_REPO}/src/lib/sfxTones.ts`);
+  const { PORTRAITS } = await import(`${WEB_REPO}/src/content/portraits.ts`);
+  const { PARTY_LOGOS } = await import(`${WEB_REPO}/src/content/partyLogos.ts`);
   const { BLOCS } = await import(`${WEB_REPO}/src/content/blocs.ts`);
   const { CANDIDATES, OPPONENT_OF } = await import(`${WEB_REPO}/src/content/candidates.ts`);
   const { STAFF_POOL } = await import(`${WEB_REPO}/src/content/staff.ts`);
@@ -102,6 +124,9 @@ async function main() {
       })),
       packs: PACKS.map((p: any) => ({ id: p.id, name: p.name, scenarios: p.scenarios, legacy: p.legacy === true })),
     },
+    // Leader photos and party logos: name or party to a file under
+    // bundles/art/ (written by export-art.py), plus the Credits screen lines.
+    "art": artBundle(PORTRAITS, PARTY_LOGOS),
     "us-blocs": { blocs: Object.values(BLOCS) },
     "us-candidates": { candidates: CANDIDATES, opponentOf: OPPONENT_OF },
     "us-staff": { pool: STAFF_POOL },

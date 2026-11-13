@@ -50,7 +50,8 @@ fun ElectionNightScreen(session: GameSession) {
                 SeatBar(board.rows.map { partyFill(it.color) to it.units }, data.totalUnits, data.threshold.takeIf { data.pluralityWinner == null },
                     description = board.rows.joinToString("; ") { "${it.name} ${it.units} ${data.unitLabel}" } + ". ${data.goalLabel()}.")
                 board.rows.forEach { row ->
-                    PartyRow(row.color, row.name, listOf("${row.units}"), highlight = row.id == data.playerPartyId, tag = if (row.id == data.playerPartyId) "You" else null)
+                    PartyRow(row.color, row.name, listOf("${row.units}"), highlight = row.id == data.playerPartyId, tag = if (row.id == data.playerPartyId) "You" else null,
+                        logo = reveal.logo(row.id))
                 }
                 KeyValue("Called", "${board.calledUnits} of ${data.totalUnits}")
                 KeyValue("Goal", data.goalLabel())

@@ -119,6 +119,14 @@ fun SetupScreen(session: GameSession) {
         }
         item {
             SetupSection("2 · Your ticket") {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
+                    val year = campaign.year.toString()
+                    LeaderPortrait(campaign.demName, null, size = 44.dp, ring = Mov.Dem)
+                    PartyMark(null, com.lakesidegames.electioneer.content.NativeArt.logo("US", "dem", year))
+                    Spacer(Modifier.weight(1f))
+                    PartyMark(null, com.lakesidegames.electioneer.content.NativeArt.logo("US", "rep", year))
+                    LeaderPortrait(campaign.repName, null, size = 44.dp, ring = Mov.Gop)
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     MovChip(campaign.demName, player == CandidateId.DEM, { player = CandidateId.DEM; mateId = "" }, leading = Mov.Dem)
                     MovChip(campaign.repName, player == CandidateId.REP, { player = CandidateId.REP; mateId = "" }, leading = Mov.Gop)

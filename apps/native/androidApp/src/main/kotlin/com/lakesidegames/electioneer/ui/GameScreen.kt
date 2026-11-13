@@ -73,6 +73,16 @@ fun GameScreen(session: GameSession) {
             Text(label, style = MaterialTheme.typography.headlineSmall, color = Mov.Text1)
         }
         MovCard {
+            // The two tickets: photo and party logo beside each count.
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
+                LeaderPortrait(dem.name, dem.color, size = 40.dp)
+                PartyMark(dem.color, com.lakesidegames.electioneer.content.NativeArt.usLogo(g, "dem"))
+                Text(dem.name, Modifier.weight(1f), color = Mov.Text2, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                Text(rep.name, Modifier.weight(1f), color = Mov.Text2, style = MaterialTheme.typography.labelMedium, maxLines = 1,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.End)
+                PartyMark(rep.color, com.lakesidegames.electioneer.content.NativeArt.usLogo(g, "rep"))
+                LeaderPortrait(rep.name, rep.color, size = 40.dp)
+            }
             Row(verticalAlignment = Alignment.Bottom) {
                 Metric("$demEv", dem.shortName, color = Mov.DemText)
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {

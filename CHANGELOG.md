@@ -13,6 +13,11 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Added
 
+- The iPhone, iPad and Android apps show leader photos and party logos, as the web game does: on
+  the setup screen, the campaign desk, the standings, the results and election night. Leaders
+  without a freely licensed photo show their initials, and parties without a logo keep their
+  colour. Settings has a Credits section listing every photo and logo with its source, author and
+  licence. The pictures add about 1.5 MB to each app.
 - Parties show their real logos, matched to the election you are playing when a party changed its
   logo over the years: on the setup cards, the standings and map legends, the results screen,
   election night and the electoral vote bar. Parties without a freely available logo keep their

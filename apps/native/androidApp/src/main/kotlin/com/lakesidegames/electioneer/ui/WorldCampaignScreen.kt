@@ -149,7 +149,7 @@ internal fun ChoicePicker(label: String, selected: String, choices: List<Pair<St
 
 /** Standings table with a seat bar: the same block on the desk, results and analysis. */
 @Composable
-internal fun StandingsTable(rows: List<NativeStanding>, unit: String, total: Int, majority: Int?, player: String?) {
+internal fun StandingsTable(rows: List<NativeStanding>, unit: String, total: Int, majority: Int?, player: String?, logoOf: (String) -> String? = { null }) {
     SeatBar(rows.map { partyFill(it.color) to it.units }, total, majority,
         description = rows.joinToString("; ") { "${it.name} ${it.units} $unit" } +
             (majority?.let { ". $it needed for a majority." } ?: ". The most $unit wins."))
@@ -160,7 +160,8 @@ internal fun StandingsTable(rows: List<NativeStanding>, unit: String, total: Int
     }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         rows.forEach { row ->
-            PartyRow(row.color, row.name, listOf("${row.units}", percent(row.voteShare)), highlight = row.partyId == player, tag = if (row.partyId == player) "You" else null)
+            PartyRow(row.color, row.name, listOf("${row.units}", percent(row.voteShare)), highlight = row.partyId == player, tag = if (row.partyId == player) "You" else null,
+                logo = logoOf(row.partyId))
         }
     }
 }
@@ -219,7 +220,18 @@ fun WorldCampaignScreen(session: GameSession) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(MovSpace.s2)) {
                 Eyebrow(if (game.isOver()) "Election result" else "Week ${game.turn() + 1} of ${game.totalTurns()}", color = Mov.Warning)
-                Text("$flag ${game.label()}".trim(), style = MaterialTheme.typography.headlineSmall, color = Mov.Text1)
+                // The desk header: your leader and party for this election.
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s3)) {
+                    LeaderPortrait(game.leaderName(player), mine?.color, size = 44.dp)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text("$flag ${game.label()}".trim(), style = MaterialTheme.typography.headlineSmall, color = Mov.Text1)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(MovSpace.s1_5)) {
+                            PartyMark(mine?.color, game.logo(player))
+                            Text(listOfNotNull(game.leaderName(player), mine?.name).joinToString(" · "), color = Mov.Text2,
+                                style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                }
                 StatRow {
                     Metric(if (game.isPlurality()) "${mine?.units ?: 0}" else "${mine?.units ?: 0}/${game.majority()}", "Your $unit", color = partyInk(mine?.color))
                     Metric(NativeMoney.millions(game.currency(), game.funds()), "Cash")
@@ -240,7 +252,7 @@ fun WorldCampaignScreen(session: GameSession) {
             MovCard {
                 CardHead(if (game.isOver()) "Final standings" else "Projected standings") { Tag(if (game.isPlurality()) "Most $unit wins" else "${game.majority()} to win", TagKind.Outline) }
                 if (game.isOver()) Text(game.outcome(), color = Mov.Text1, style = MaterialTheme.typography.titleSmall)
-                StandingsTable(rows, unit, game.totalUnits(), game.majority().takeUnless { game.isPlurality() }, player)
+                StandingsTable(rows, unit, game.totalUnits(), game.majority().takeUnless { game.isPlurality() }, player, logoOf = { game.logo(it) })
                 Text(game.goalText(), color = Mov.Text3, style = MaterialTheme.typography.bodySmall)
             }
         }
@@ -264,7 +276,7 @@ fun WorldCampaignScreen(session: GameSession) {
                         Text("${selectedRegion.totalUnits} $unit", color = Mov.Text3, style = MaterialTheme.typography.bodyMedium.num)
                     }
                     game.regionStandings(regionId).filter { it.units > 0 || it.voteShare >= 0.01 }.forEach { row ->
-                        PartyRow(row.color, row.name, listOf("${row.units}", percent(row.voteShare)), highlight = row.partyId == player)
+                        PartyRow(row.color, row.name, listOf("${row.units}", percent(row.voteShare)), highlight = row.partyId == player, logo = game.logo(row.partyId))
                     }
                     if (!game.isOver()) Text("Regional moves in your plan target this region.", color = Mov.Text3, style = MaterialTheme.typography.bodySmall)
                 }
