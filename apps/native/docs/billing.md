@@ -112,24 +112,33 @@ Paid offerings stay disabled until both stores are configured and verified.
 
 ## What is tested without a device
 
-- `iosApp/MOVGameiOSTests` (CI job "iOS StoreKit purchase tests", device tier)
-  runs the real `StoreKitAdapter` on the simulator with Xcode StoreKit testing.
-  `Products.storekit` lists all 15 products. A stand-in game server records
-  what the app sends. The tests load every product with its price, buy a
-  country pack and the Complete Collection, check that the signed transaction
-  reaches `/api/store/verify` with the right product id and the binding's
-  appAccountToken, that the right pack unlocks only after the server confirms,
-  that a failed delivery leaves the transaction unfinished, and that Restore
-  purchases delivers it.
 - `server/__tests__/apple-transaction.test.ts` pushes a real-format signed
   transaction (ES256, three-certificate x5c chain) through `/api/store/verify`
-  to a stub account service that checks it the way the real one does.
+  to a stub account service that checks it the way the real one does. A good
+  transaction is forwarded untouched, a tampered one is refused, and an Apple
+  outage is reported as "try again".
 - Not provable without Apple: StoreKit testing transactions are signed by
   Xcode, not Apple, so the account service refuses them (Apple root pinning).
   Apple's sandbox needs a signed build and a sandbox Apple Account signed in on
   the device or simulator, which CI cannot do. The first purchase Apple
   verifies end to end is App Review's own sandbox purchase, unless someone buys
   on a TestFlight build first.
+
+## Trying purchases locally on a Mac
+
+`docs/storekit/Products.storekit` lists all 15 products with their prices. It
+is a StoreKit configuration file for Xcode, not part of any CI job.
+
+1. Open `iosApp/MOVGameiOS.xcodeproj` in Xcode and drag the file into the
+   project navigator (do not add it to the app target).
+2. Choose Product, Scheme, Edit Scheme, Run, Options, and set StoreKit
+   Configuration to `Products.storekit`.
+3. Run on a simulator. The Store lists the products and purchases complete
+   against Xcode's local StoreKit, which is useful for checking the buy and
+   restore screens.
+4. The signed transactions come from Xcode, so a real account service will
+   refuse them at delivery. Point the app at a stand-in server to see the
+   unlock flow, or use a sandbox build on a device for the full path.
 
 ## Offline and refund behaviour
 

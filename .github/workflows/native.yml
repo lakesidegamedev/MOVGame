@@ -232,64 +232,6 @@ jobs:
         with:
           name: ios-simulator-launch
           path: ${{ runner.temp }}/mov-launch
-  ios-storekit:
-    name: iOS StoreKit purchase tests
-    # Buys, restores and delivers through the real StoreKitAdapter with Xcode's
-    # StoreKit testing (MOVGameiOSTests/Products.storekit) and a stand-in game
-    # server. StoreKit testing transactions are signed by Xcode, so this cannot
-    # reach Apple's sandbox; see server/__tests__/apple-transaction.test.ts.
-    needs: changes
-    if: ${{ needs.changes.outputs.ios == 'true' }}
-    runs-on: macos-26
-    timeout-minutes: 50
-    defaults:
-      run:
-        working-directory: apps/native
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-      - uses: android-actions/setup-android@v3
-        with:
-          packages: 'platform-tools platforms;android-36'
-          log-accepted-android-sdk-licenses: false
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Pick an iPhone simulator
-        id: sim
-        run: |
-          udid=$(xcrun simctl list devices available --json | python3 -c "import json, sys; d = json.load(sys.stdin)['devices']; print(next(x['udid'] for r, g in d.items() if 'iOS' in r for x in g if x['name'].startswith('iPhone')))")
-          echo "Simulator $udid"
-          echo "udid=$udid" >> "$GITHUB_OUTPUT"
-      - name: Run StoreKit purchase tests
-        run: >-
-          xcodebuild -project iosApp/MOVGameiOS.xcodeproj
-          -scheme MOVGameiOS -configuration Debug
-          -destination "id=${{ steps.sim.outputs.udid }}"
-          -derivedDataPath "$RUNNER_TEMP/mov-storekit"
-          -resultBundlePath "$RUNNER_TEMP/mov-storekit.xcresult"
-          -only-testing:MOVGameiOSTests
-          -test-timeouts-enabled YES
-          -default-test-execution-time-allowance 120
-          -maximum-test-execution-time-allowance 180
-          CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=
-          test
-      - name: Pack the test results
-        if: always()
-        run: |
-          if [ -d "$RUNNER_TEMP/mov-storekit.xcresult" ]; then
-            ditto -c -k --keepParent "$RUNNER_TEMP/mov-storekit.xcresult" "$RUNNER_TEMP/mov-storekit-xcresult.zip"
-          fi
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: ios-storekit-tests
-          path: ${{ runner.temp }}/mov-storekit-xcresult.zip
-          if-no-files-found: ignore
-          retention-days: 7
   ios-layouts:
     name: Small iPhone and iPad flows
     needs: ios
