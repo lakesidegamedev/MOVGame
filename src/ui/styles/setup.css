@@ -84,6 +84,7 @@
 .party-card.sel { border-color: var(--warning); background: var(--surface-2); box-shadow: var(--ring-select); }
 .party-card-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .party-card-name { font-size: var(--fs-base); font-weight: var(--fw-bold); line-height: var(--lh-snug); }
+.party-card .party-logo { margin-right: var(--space-1-5); vertical-align: -3px; }
 .party-card-sub { font-size: var(--fs-sm); color: var(--text-3); }
 
 /* Legacy candidate card (still used by the custom editor). */

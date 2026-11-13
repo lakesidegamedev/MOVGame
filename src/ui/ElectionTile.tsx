@@ -54,6 +54,7 @@ export function PartyCard({
   color,
   selected,
   onClick,
+  logo,
   children,
 }: {
   name: string;
@@ -62,6 +63,8 @@ export function PartyCard({
   color: string;
   selected: boolean;
   onClick: () => void;
+  /** The party's logo (PartyLogo), shown before the name. */
+  logo?: ReactNode;
   children?: ReactNode;
 }) {
   const fill = partyFill(color);
@@ -75,7 +78,7 @@ export function PartyCard({
     >
       <Avatar name={leader} color={fill} size={40} ring />
       <span className="party-card-text">
-        <span className="party-card-name" style={{ color: partyInk(color) }}>{name}</span>
+        <span className="party-card-name" style={{ color: partyInk(color) }}>{logo}{name}</span>
         <span className="party-card-sub">{sub}</span>
       </span>
       {children}

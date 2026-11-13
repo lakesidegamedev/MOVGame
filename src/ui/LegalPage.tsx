@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BRAND } from "../brand";
 import { ChevronLeft } from "lucide-react";
 import type { LegalTab } from "./view";
+import { PARTY_LOGOS } from "@content/partyLogos";
 
 // Privacy policy and terms for the game. Plain language, and it only claims
 // what the code does: check server/, src/lib/errorReporting.ts, src/main.tsx
@@ -254,6 +255,20 @@ interface PhotoCredit {
   attribution?: string;
 }
 
+interface LogoCredit {
+  party: string;
+  file: string;
+  source: string;
+  title: string;
+  author: string;
+  license: string;
+  licenseUrl?: string;
+  attribution?: string;
+}
+
+// A logo removed from PARTY_LOGOS drops out of the credits too.
+const SHOWN_LOGOS = new Set(PARTY_LOGOS.map((r) => r.file));
+
 interface CoverCredit {
   file: string;
   commons: string;
@@ -283,6 +298,7 @@ function License({ name, url }: { name: string; url?: string }) {
 function Credits() {
   const portraits = useJson<PhotoCredit[]>("images/portraits/credits.json");
   const covers = useJson<CoverCredit[]>("images/covers/ATTRIBUTION.json");
+  const logos = useJson<LogoCredit[]>("images/logos/credits.json");
   return (
     <>
       <h3>Credits</h3>
@@ -300,6 +316,26 @@ function Credits() {
           {portraits.map((c) => (
             <li key={c.name}>
               <strong>{c.name}</strong>: <Ext href={c.source}>{c.title}</Ext>, {c.attribution ?? c.author},{" "}
+              <License name={c.license} url={c.licenseUrl} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h4>Party logos</h4>
+      <p>
+        Party logos are the property of their parties and are shown only to identify each party. They come
+        from Wikimedia Commons, listed here with the source, the author and the status or licence Commons
+        gives each file, and were trimmed and made smaller. Parties without a logo on Commons are shown by
+        their colour.
+      </p>
+      {logos === null && <p className="muted small">Loading credits</p>}
+      {logos === "error" && <p className="muted small">The logo credits could not be loaded. Try again later.</p>}
+      {Array.isArray(logos) && (
+        <ul className="credits-list">
+          {logos.filter((c) => SHOWN_LOGOS.has(c.file)).map((c) => (
+            <li key={c.file}>
+              <strong>{c.party}</strong>: <Ext href={c.source}>{c.title}</Ext>, {c.attribution ?? c.author},{" "}
               <License name={c.license} url={c.licenseUrl} />
             </li>
           ))}

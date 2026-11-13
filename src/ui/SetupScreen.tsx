@@ -5,6 +5,7 @@ import { openStoreForScenario } from "@store/storeNav";
 import { SCENARIOS, SCENARIO_IDS } from "@content/scenarios";
 import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
 import { ElectionTile, PartyCard } from "@ui/ElectionTile";
+import { PartyLogo } from "@ui/PartyLogo";
 import { partyInk } from "@ui/colors";
 import { defaultRunningMate } from "@content/runningMates";
 import { STAFF_POOL, MAX_STAFF, STAFF_BY_ID } from "@content/staff";
@@ -236,7 +237,8 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
                 {(["dem", "rep"] as CandidateId[]).map((id) => {
                   const c = id === "dem" ? scenario.dem : scenario.rep;
                   return (
-                    <PartyCard key={id} name={c.name} sub={c.party} leader={c.name} color={c.color}
+                    <PartyCard key={id} name={c.name} leader={c.name} color={c.color}
+                      sub={<><PartyLogo country="US" party={id} year={scenario.year} size={14} />{c.party}</>}
                       selected={pick === id} onClick={() => choosePick(id)} />
                   );
                 })}

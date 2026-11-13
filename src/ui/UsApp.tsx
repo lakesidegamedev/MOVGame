@@ -207,7 +207,7 @@ function GameScreen({ onHome }: { onHome: () => void }) {
       <DeskHeader
         kicker={SCENARIOS_BY_ID[`us-${game.scenarioId}`]?.label ?? `Campaign ${year}`}
         context={<>{turnLabel(game.turn, game.totalTurns)} · playing <strong style={{ color: partyInk(cand.color) }}>{cand.shortName}–{cand.runningMate.split(" ").slice(-1)[0]}</strong></>}
-        scoreboard={live ? <EvBar projection={live} /> : undefined}
+        scoreboard={live ? <EvBar projection={live} year={year} /> : undefined}
         metrics={[
           { label: "Cash", value: money(res.cash) },
           { label: "Actions left", value: `${remaining}/${res.maxActions}`, warn: remaining <= 0 },

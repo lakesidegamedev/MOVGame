@@ -22,6 +22,7 @@ import { TimelineView } from "../TimelineView";
 import { dailyAssignment, utcDateString } from "@lib/daily";
 import { REGION_PATHS, UK_VIEWBOX } from "@content/uk/regionPaths";
 import { Lock } from "lucide-react";
+import { PartyLogo, electionYear, partyLogoFor, partyLogosFor } from "@ui/PartyLogo";
 
 function govText(g: Government): string {
   switch (g.kind) {
@@ -93,9 +94,11 @@ export function UkResults() {
 
   const reveal = useMemo(() => ukReveal(game), [game]);
   const leaders = useMemo(() => namedLeaders(game.leaders), [game.leaders]);
+  const year = electionYear(game.electionId);
+  const logos = partyLogosFor("UK", reveal.parties.map((p) => p.id), year);
   const [nightDone, setNightDone] = useState(() => !revealSupported() || hasSeenReveal(reveal.storageKey ?? ""));
   if (!nightDone) {
-    return <ElectionNight {...reveal} leaders={leaders} onDone={() => setNightDone(true)} />;
+    return <ElectionNight {...reveal} leaders={leaders} logos={logos} onDone={() => setNightDone(true)} />;
   }
 
   const next = UK_NEXT_SCENARIO[game.electionId];
@@ -149,6 +152,7 @@ export function UkResults() {
         headline={headline}
         headlineColor={headlineParty ? partyColor(headlineParty) : undefined}
         winner={headlineParty && leaders[headlineParty] ? { name: leaders[headlineParty], color: partyColor(headlineParty) } : undefined}
+        winnerLogo={headlineParty ? partyLogoFor("UK", headlineParty, year) : null}
         subhead={
           won
             ? "You won a majority."
@@ -281,7 +285,7 @@ export function UkResults() {
           {order.map((p) => (
             <div className="bloc" key={p}>
               <span className="name" style={{ color: p === game.playerParty ? partyInk(partyColor(p)) : undefined }}>
-                <span className="swatch" style={{ "--party": partyFill(partyColor(p)) } as React.CSSProperties} />
+                <PartyLogo country="UK" party={p} year={electionYear(game.electionId)} color={partyColor(p)} size={14} />
                 {partyShort(p)}
               </span>
               <span className="meta">{r.seats[p]} {r.seats[p] === 1 ? "seat" : "seats"} · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>

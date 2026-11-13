@@ -1,0 +1,2160 @@
+[
+ {
+  "country": "us",
+  "party": "dem",
+  "wiki": "Democratic Party (United States)",
+  "qid": "Q29552",
+  "label": "Democratic Party",
+  "logos": [
+   {
+    "file": "US Democratic Party 2025 logo (positive).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "us",
+  "party": "rep",
+  "wiki": "Republican Party (United States)",
+  "qid": "Q29468",
+  "label": "Republican Party",
+  "logos": [
+   {
+    "file": "GOP logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Republican Disc 2.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Republican Disc.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Republican Party Disc (alternate).svg",
+    "rank": "preferred",
+    "from": null,
+    "to": null
+   }
+  ],
+  "file": "GOP logo.svg",
+  "why": "The elephant logo; the discs are alternates"
+ },
+ {
+  "country": "uk",
+  "party": "con",
+  "wiki": "Conservative Party (UK)",
+  "qid": "Q9626",
+  "label": "Conservative Party",
+  "logos": [],
+  "files": {
+   "1951": "Conservative Party wordmark 1980s.png",
+   "1964": "Conservative Party wordmark 1980s.png",
+   "1966": "Conservative Party wordmark 1980s.png",
+   "1970": "Conservative Party wordmark 1980s.png",
+   "1974": "Conservative Party wordmark 1980s.png",
+   "1979": "Conservative Party wordmark 1980s.png",
+   "1983": "Conservative Party wordmark 1980s.png",
+   "1987": "Conservative Party wordmark 1980s.png",
+   "1992": "Conservative Party wordmark (1989–2000).png",
+   "1997": "Conservative Party wordmark (1989–2000).png",
+   "2001": "Conservative Party wordmark (2000–2006).png",
+   "2005": "Conservative Party wordmark (2000–2006).png",
+   "2010": "Conservative Party wordmark (2006–2010).png",
+   "2015": "Conservative Party wordmark.svg",
+   "2017": "Conservative Party wordmark.svg",
+   "2019": "Conservative Party wordmark.svg",
+   "2024": "Conservative Party wordmark.svg"
+  },
+  "why": "Wikidata names none; Commons has the wordmark of each period, the 1980s one is the oldest"
+ },
+ {
+  "country": "uk",
+  "party": "lab",
+  "wiki": "Labour Party (UK)",
+  "qid": "Q9630",
+  "label": "Labour Party",
+  "logos": [
+   {
+    "file": "Labour Party Wordmark.svg",
+    "rank": "normal",
+    "from": 2020,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "uk",
+  "party": "ld",
+  "to": 1979,
+  "wiki": "Liberal Party (UK)",
+  "qid": "Q622441",
+  "label": "Liberal Party",
+  "logos": [
+   {
+    "file": "Liberal Party logo (pre1988).png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "uk",
+  "party": "ld",
+  "from": 1983,
+  "to": 1987,
+  "wiki": "SDP–Liberal Alliance",
+  "qid": "Q7389478",
+  "label": "SDP–Liberal Alliance",
+  "logos": [
+   {
+    "file": "SDP Liberal Alliance.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "uk",
+  "party": "ld",
+  "from": 1992,
+  "wiki": "Liberal Democrats (UK)",
+  "qid": "Q9624",
+  "label": "Liberal Democrats",
+  "logos": [],
+  "file": "Liberal Democrats logo (wordmark).svg",
+  "why": "Wikidata names none"
+ },
+ {
+  "country": "uk",
+  "party": "ref",
+  "from": 2015,
+  "to": 2015,
+  "wiki": "UK Independence Party",
+  "qid": "Q10647",
+  "label": "UK Independence Party",
+  "logos": [
+   {
+    "file": "UKIP Logo (Original).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ],
+  "skip": "Commons has UKIP's 1994 logo and photos of the 2015 one, not a clean 2015 logo; the slot is named Reform UK"
+ },
+ {
+  "country": "uk",
+  "party": "ref",
+  "from": 2024,
+  "wiki": "Reform UK",
+  "qid": "Q104721252",
+  "label": "Reform UK",
+  "logos": [
+   {
+    "file": "Reform UK Party Ballot Logo.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Logo of the Reform UK.svg",
+    "rank": "preferred",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "uk",
+  "party": "grn",
+  "from": 2019,
+  "wiki": "Green Party of England and Wales",
+  "qid": "Q9669",
+  "label": "Green Party of England and Wales",
+  "logos": [
+   {
+    "file": "GPLogoStackGreenForWeb.jpg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "uk",
+  "party": "snp",
+  "wiki": "Scottish National Party",
+  "qid": "Q10658",
+  "label": "Scottish National Party",
+  "logos": [
+   {
+    "file": "Scottish National Party Logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "uk",
+  "party": "pc",
+  "wiki": "Plaid Cymru",
+  "qid": "Q10691",
+  "label": "Plaid Cymru",
+  "logos": [],
+  "file": "Plaid Cymru wordmark.svg",
+  "why": "Wikidata names none"
+ },
+ {
+  "country": "uk",
+  "party": "dup",
+  "wiki": "Democratic Unionist Party",
+  "qid": "Q215519",
+  "label": "Democratic Unionist Party",
+  "logos": [],
+  "file": "Democratic Unionist Party wordmark.svg",
+  "why": "Wikidata names none"
+ },
+ {
+  "country": "uk",
+  "party": "sf",
+  "wiki": "Sinn Féin",
+  "qid": "Q76382",
+  "label": "Sinn Féin",
+  "logos": [
+   {
+    "file": "Sinn Féin wordmark.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "uk",
+  "party": "uup",
+  "wiki": "Ulster Unionist Party",
+  "qid": "Q841045",
+  "label": "Ulster Unionist Party",
+  "logos": [],
+  "skip": "No Ulster Unionist Party logo on Commons"
+ },
+ {
+  "country": "uk",
+  "party": "sdlp",
+  "wiki": "Social Democratic and Labour Party",
+  "qid": "Q175443",
+  "label": "Social Democratic and Labour Party",
+  "logos": [
+   {
+    "file": "SDLP Logo 2025.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "uk",
+  "party": "apni",
+  "wiki": "Alliance Party of Northern Ireland",
+  "qid": "Q244927",
+  "label": "Alliance Party of Northern Ireland",
+  "logos": [
+   {
+    "file": "Alliance Party of Northern Ireland logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ca",
+  "party": "lpc",
+  "wiki": "Liberal Party of Canada",
+  "qid": "Q138345",
+  "label": "Liberal Party of Canada",
+  "logos": [
+   {
+    "file": "Liberale Partei Kanadas Logo.svg",
+    "rank": "normal",
+    "from": 2009,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ca",
+  "party": "cpc",
+  "to": 2000,
+  "wiki": "Progressive Conservative Party of Canada",
+  "qid": "Q1292617",
+  "label": "Progressive Conservative Party of Canada",
+  "logos": [
+   {
+    "file": "PC 1996 logo.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ca",
+  "party": "cpc",
+  "from": 2004,
+  "wiki": "Conservative Party of Canada",
+  "qid": "Q488523",
+  "label": "Conservative Party of Canada",
+  "logos": [
+   {
+    "file": "Conservative Party of Canada Logo Eng & Fr.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Logo of the Conservative Party of Canada (2023–present).svg",
+    "rank": "preferred",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Logo du Parti conservateur du Canada (2023–présent).svg",
+    "rank": "preferred",
+    "from": null,
+    "to": null
+   }
+  ],
+  "files": {
+   "2004": "Conservative Party of Canada Logo Eng & Fr.svg",
+   "2006": "Conservative Party of Canada Logo Eng & Fr.svg",
+   "2008": "Conservative Party of Canada Logo Eng & Fr.svg",
+   "2011": "Conservative Party of Canada Logo Eng & Fr.svg",
+   "2015": "Conservative Party of Canada Logo Eng & Fr.svg",
+   "2019": "Conservative Party of Canada Logo Eng & Fr.svg",
+   "2021": "Conservative Party of Canada Logo Eng & Fr.svg",
+   "2025": "Logo of the Conservative Party of Canada (2023–present).svg"
+  },
+  "why": "The 2023 logo only from 2025; English version"
+ },
+ {
+  "country": "ca",
+  "party": "ndp",
+  "wiki": "New Democratic Party",
+  "qid": "Q130765",
+  "label": "New Democratic Party",
+  "logos": [
+   {
+    "file": "NDP-NPD Canada.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ca",
+  "party": "bq",
+  "wiki": "Bloc Québécois",
+  "qid": "Q735105",
+  "label": "Bloc Québécois",
+  "logos": [
+   {
+    "file": "Bloc Québécois-logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ca",
+  "party": "gpc",
+  "wiki": "Green Party of Canada",
+  "qid": "Q691730",
+  "label": "Green Party of Canada",
+  "logos": [
+   {
+    "file": "Logo 2025 Green Party of Canada.svg",
+    "rank": "preferred",
+    "from": 2025,
+    "to": null
+   },
+   {
+    "file": "Logo Green Party of Canada bilingue.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Logo 2025 Parti Vert du Canada.svg",
+    "rank": "preferred",
+    "from": 2025,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ca",
+  "party": "ref",
+  "to": 1997,
+  "wiki": "Reform Party of Canada",
+  "qid": "Q1680589",
+  "label": "Reform Party of Canada",
+  "logos": [
+   {
+    "file": "Reform Party.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ca",
+  "party": "ref",
+  "from": 2000,
+  "wiki": "Canadian Alliance",
+  "qid": "Q546881",
+  "label": "Canadian Alliance",
+  "logos": [
+   {
+    "file": "Canadian Alliance.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "au",
+  "party": "alp",
+  "wiki": "Australian Labor Party",
+  "qid": "Q216082",
+  "label": "Australian Labor Party",
+  "logos": [
+   {
+    "file": "Australian Labor Party Logo 2015.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "au",
+  "party": "lnp",
+  "wiki": "Liberal Party of Australia",
+  "note": "The Coalition is led by the Liberal Party",
+  "qid": "Q241149",
+  "label": "Liberal Party of Australia",
+  "logos": [
+   {
+    "file": "Liberal Party of Australia Logo 2015.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "au",
+  "party": "grn",
+  "wiki": "Australian Greens",
+  "qid": "Q781486",
+  "label": "Australian Greens",
+  "logos": [
+   {
+    "file": "AustralianGreensLogo official.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "au",
+  "party": "onp",
+  "wiki": "One Nation (Australia)",
+  "qid": "Q1585274",
+  "label": "Pauline Hanson's One Nation",
+  "logos": [
+   {
+    "file": "One Nation logo.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "nz",
+  "party": "nat",
+  "wiki": "New Zealand National Party",
+  "qid": "Q204716",
+  "label": "New Zealand National Party",
+  "logos": [
+   {
+    "file": "New Zealand National Party logo (2017–present).svg",
+    "rank": "normal",
+    "from": 2017,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "nz",
+  "party": "lab",
+  "wiki": "New Zealand Labour Party",
+  "qid": "Q1048192",
+  "label": "New Zealand Labour Party",
+  "logos": [
+   {
+    "file": "Labour Party NZ logo.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "nz",
+  "party": "grn",
+  "wiki": "Green Party of Aotearoa New Zealand",
+  "qid": "Q1327761",
+  "label": "Green Party of Aotearoa New Zealand",
+  "logos": [
+   {
+    "file": "Green Party of Aotearoa New Zealand logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "nz",
+  "party": "act",
+  "wiki": "ACT New Zealand",
+  "qid": "Q288838",
+  "label": "ACT New Zealand",
+  "logos": [
+   {
+    "file": "ACT New Zealand CMYK.svg",
+    "rank": "preferred",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "ACT New Zealand logo, 2017 variant.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "nz",
+  "party": "nzf",
+  "wiki": "New Zealand First",
+  "qid": "Q180059",
+  "label": "New Zealand First",
+  "logos": [
+   {
+    "file": "NZ First logo 2017.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "nz",
+  "party": "tpm",
+  "wiki": "Te Pāti Māori",
+  "qid": "Q1375170",
+  "label": "Te Pāti Māori",
+  "logos": [],
+  "skip": "No Te Pāti Māori logo on Commons"
+ },
+ {
+  "country": "de",
+  "party": "cdu",
+  "wiki": "Christian Democratic Union of Germany",
+  "qid": "Q49762",
+  "label": "Christian Democratic Union",
+  "logos": [
+   {
+    "file": "Cdu-logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": 2023
+   },
+   {
+    "file": "CDU Logo 2023.svg",
+    "rank": "preferred",
+    "from": 2023,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "de",
+  "party": "afd",
+  "wiki": "Alternative for Germany",
+  "qid": "Q6721203",
+  "label": "Alternative for Germany",
+  "logos": [
+   {
+    "file": "Alternative-fuer-Deutschland-Logo-2013.svg",
+    "rank": "normal",
+    "from": 2013,
+    "to": null
+   },
+   {
+    "file": "AfD-Logo-2017.svg",
+    "rank": "normal",
+    "from": 2017,
+    "to": 2021
+   },
+   {
+    "file": "AfD Logo 2021.svg",
+    "rank": "preferred",
+    "from": 2021,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "de",
+  "party": "spd",
+  "wiki": "Social Democratic Party of Germany",
+  "qid": "Q49768",
+  "label": "Social Democratic Party of Germany",
+  "logos": [
+   {
+    "file": "Sozialdemokratische Partei Deutschlands, Logo um 2000.svg",
+    "rank": "normal",
+    "from": null,
+    "to": 2021
+   },
+   {
+    "file": "SPD-Cube.svg",
+    "rank": "normal",
+    "from": 2009,
+    "to": 2011
+   },
+   {
+    "file": "Sozialdemokratische Partei Deutschlands, Logo 1969-1982.png",
+    "rank": "normal",
+    "from": 1969,
+    "to": 1982
+   },
+   {
+    "file": "SPD-Logo 2022 (rot).svg",
+    "rank": "preferred",
+    "from": 2022,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "de",
+  "party": "grn",
+  "from": 1994,
+  "wiki": "Alliance 90/The Greens",
+  "qid": "Q49766",
+  "label": "Alliance '90/The Greens",
+  "logos": [
+   {
+    "file": "Bündnis 90 - Die Grünen Logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": 2023
+   },
+   {
+    "file": "B90Gruene RGB aufTanne.svg",
+    "rank": "preferred",
+    "from": 2023,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "de",
+  "party": "lnk",
+  "to": 2005,
+  "wiki": "Party of Democratic Socialism (Germany)",
+  "qid": "Q152554",
+  "label": "Party of Democratic Socialism",
+  "logos": [
+   {
+    "file": "PDS-Logo.svg",
+    "rank": "preferred",
+    "from": 1990,
+    "to": 2005
+   },
+   {
+    "file": "Die Linke.PDS logo.svg",
+    "rank": "normal",
+    "from": 2005,
+    "to": 2007
+   }
+  ]
+ },
+ {
+  "country": "de",
+  "party": "lnk",
+  "from": 2009,
+  "wiki": "The Left (Germany)",
+  "qid": "Q49764",
+  "label": "Die Linke",
+  "logos": [
+   {
+    "file": "Logo Die Linke (2023).svg",
+    "rank": "preferred",
+    "from": 2023,
+    "to": null
+   },
+   {
+    "file": "Die Linke logo.svg",
+    "rank": "normal",
+    "from": 2007,
+    "to": 2023
+   }
+  ]
+ },
+ {
+  "country": "de",
+  "party": "fdp",
+  "wiki": "Free Democratic Party (Germany)",
+  "qid": "Q13124",
+  "label": "Free Democratic Party",
+  "logos": [
+   {
+    "file": "Logo der FDP 2026.svg",
+    "rank": "preferred",
+    "from": 2026,
+    "to": null
+   },
+   {
+    "file": "Logo der Freien Demokraten (gelbes).svg",
+    "rank": "normal",
+    "from": 2015,
+    "to": 2026
+   },
+   {
+    "file": "Freie Demokratische Partei (logo, 2013).png",
+    "rank": "normal",
+    "from": 2013,
+    "to": 2015
+   },
+   {
+    "file": "Freie Demokratische Partei (Logo, 2001-2013).svg",
+    "rank": "normal",
+    "from": 2001,
+    "to": 2013
+   },
+   {
+    "file": "Freie Demokratische Partei (Logo, 1968-2001).png",
+    "rank": "normal",
+    "from": 1968,
+    "to": 2001
+   },
+   {
+    "file": "Freie Demokratische Partei (Logo, 1952-1968).svg",
+    "rank": "normal",
+    "from": 1952,
+    "to": 1968
+   }
+  ]
+ },
+ {
+  "country": "fr",
+  "party": "ens",
+  "from": 2017,
+  "wiki": "La République En Marche!",
+  "note": "The centre slot is Macron's party only from 2017",
+  "qid": "Q23731823",
+  "label": "Renaissance",
+  "logos": [
+   {
+    "file": "En marche logo.png",
+    "rank": "normal",
+    "from": 2016,
+    "to": 2017
+   },
+   {
+    "file": "Logo En Marche !.svg",
+    "rank": "normal",
+    "from": 2017,
+    "to": 2017
+   },
+   {
+    "file": "Logo-LREM-noir.svg",
+    "rank": "normal",
+    "from": 2017,
+    "to": 2022
+   },
+   {
+    "file": "Renaissance ALT.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Renaissance-logotype-officiel.svg",
+    "rank": "preferred",
+    "from": 2022,
+    "to": null
+   }
+  ],
+  "files": {
+   "2017": "Logo En Marche !.svg",
+   "2022": "Logo-LREM-noir.svg",
+   "2027": "Renaissance-logotype-officiel.svg"
+  },
+  "why": "En Marche ! in 2017, La République en marche in April 2022, Renaissance from September 2022"
+ },
+ {
+  "country": "fr",
+  "party": "rn",
+  "from": 2002,
+  "to": 2002,
+  "wiki": "National Front (France)",
+  "qid": "Q205150",
+  "label": "National Rally",
+  "logos": [
+   {
+    "file": "Logo Rassemblement National.svg",
+    "rank": "normal",
+    "from": 2018,
+    "to": null
+   }
+  ],
+  "file": "Rassemblement National.svg",
+  "why": "The Front National flame, in use until the 2018 renaming"
+ },
+ {
+  "country": "fr",
+  "party": "rn",
+  "from": 2017,
+  "to": 2017,
+  "wiki": "National Front (France)",
+  "qid": "Q205150",
+  "label": "National Rally",
+  "logos": [
+   {
+    "file": "Logo Rassemblement National.svg",
+    "rank": "normal",
+    "from": 2018,
+    "to": null
+   }
+  ],
+  "file": "Rassemblement National.svg",
+  "why": "The Front National flame, in use until the 2018 renaming"
+ },
+ {
+  "country": "fr",
+  "party": "rn",
+  "from": 2022,
+  "wiki": "National Front (France)",
+  "qid": "Q205150",
+  "label": "National Rally",
+  "logos": [
+   {
+    "file": "Logo Rassemblement National.svg",
+    "rank": "normal",
+    "from": 2018,
+    "to": null
+   }
+  ],
+  "file": "Logo Rassemblement National.svg"
+ },
+ {
+  "country": "br",
+  "party": "pt",
+  "wiki": "Workers' Party (Brazil)",
+  "qid": "Q657089",
+  "label": "Workers' Party",
+  "logos": [
+   {
+    "file": "PT (Brazil) logo 2021.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "br",
+  "party": "dir",
+  "to": 2014,
+  "wiki": "Brazilian Social Democracy Party",
+  "qid": "Q1322897",
+  "label": "Brazilian Social Democracy Party",
+  "logos": [
+   {
+    "file": "Logo of the Brazilian Social Democracy Party (2023).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "br",
+  "party": "dir",
+  "from": 2018,
+  "to": 2018,
+  "wiki": "Social Liberal Party (Brazil)",
+  "qid": "Q2366265",
+  "label": "Social Liberal Party",
+  "logos": [
+   {
+    "file": "Partido Social Liberal logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "br",
+  "party": "dir",
+  "from": 2022,
+  "wiki": "Liberal Party (Brazil, 2006)",
+  "qid": "Q2731720",
+  "label": "Liberal Party",
+  "logos": [
+   {
+    "file": "Partido Liberal (Brazil) logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "mx",
+  "party": "pan",
+  "wiki": "National Action Party (Mexico)",
+  "qid": "Q851087",
+  "label": "National Action Party",
+  "logos": [
+   {
+    "file": "PAN logo (Mexico).svg",
+    "rank": "normal",
+    "from": null,
+    "to": 2025
+   },
+   {
+    "file": "PAN logo (Mexico) 2025.svg",
+    "rank": "preferred",
+    "from": 2025,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "mx",
+  "party": "pri",
+  "wiki": "Institutional Revolutionary Party",
+  "qid": "Q682969",
+  "label": "Institutional Revolutionary Party",
+  "logos": [
+   {
+    "file": "PRI logo (Mexico).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "mx",
+  "party": "izq",
+  "to": 2012,
+  "wiki": "Party of the Democratic Revolution",
+  "qid": "Q767010",
+  "label": "Party of the Democratic Revolution",
+  "logos": [
+   {
+    "file": "PRD logo without border (Mexico).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "mx",
+  "party": "izq",
+  "from": 2018,
+  "wiki": "Morena (political party)",
+  "qid": "Q15717618",
+  "label": "Morena",
+  "logos": [
+   {
+    "file": "Morena logo (Mexico).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "mx",
+  "party": "mc",
+  "wiki": "Citizens' Movement (Mexico)",
+  "qid": "Q10920094",
+  "label": "Citizens' Movement",
+  "logos": [
+   {
+    "file": "Logo Partido Movimiento Ciudadano (México).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "it",
+  "party": "cdx",
+  "to": 2013,
+  "wiki": "The People of Freedom",
+  "qid": "Q47720",
+  "label": "The People of Freedom",
+  "logos": [
+   {
+    "file": "Il Popolo della Libertà.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "it",
+  "party": "cdx",
+  "from": 2018,
+  "to": 2018,
+  "wiki": "Lega Nord",
+  "qid": "Q47750",
+  "label": "Lega Nord",
+  "logos": [],
+  "file": "Simbolo di Lega per Salvini Premier.svg",
+  "why": "The Lega list symbol of 2018"
+ },
+ {
+  "country": "it",
+  "party": "cdx",
+  "from": 2022,
+  "wiki": "Brothers of Italy",
+  "qid": "Q1757843",
+  "label": "Brothers of Italy",
+  "logos": [
+   {
+    "file": "Results of the 2024 European Parliament Election in Italy by Comune (cropped).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ],
+  "skip": "Commons has no Brothers of Italy logo (the Wikidata image is a results map)"
+ },
+ {
+  "country": "it",
+  "party": "csx",
+  "wiki": "Democratic Party (Italy)",
+  "qid": "Q47729",
+  "label": "Democratic Party",
+  "logos": [
+   {
+    "file": "Partito Democratico Italy.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "it",
+  "party": "m5s",
+  "wiki": "Five Star Movement",
+  "qid": "Q47817",
+  "label": "Five Star Movement",
+  "logos": [
+   {
+    "file": "Five Star Movement.svg",
+    "rank": "normal",
+    "from": 2018,
+    "to": 2021
+   },
+   {
+    "file": "Movimento5s.svg",
+    "rank": "normal",
+    "from": 2015,
+    "to": 2018
+   },
+   {
+    "file": "MoVimento 5 Stelle Logo vettoriale.svg",
+    "rank": "normal",
+    "from": 2009,
+    "to": 2015
+   },
+   {
+    "file": "M5S logo 2050.svg",
+    "rank": "preferred",
+    "from": 2021,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "it",
+  "party": "cen",
+  "to": 2008,
+  "wiki": "Union of the Centre (2002)",
+  "qid": "Q47781",
+  "label": "Union of the Centre",
+  "logos": [
+   {
+    "file": "Unione di Centro logo.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "it",
+  "party": "cen",
+  "from": 2013,
+  "to": 2013,
+  "wiki": "Civic Choice",
+  "qid": "Q2792033",
+  "label": "Civic Choice",
+  "logos": [
+   {
+    "file": "Scelta Civica.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "it",
+  "party": "rad",
+  "to": 2008,
+  "wiki": "The Left – The Rainbow",
+  "qid": "Q964642",
+  "label": "The Left – The Rainbow",
+  "logos": [],
+  "skip": "No logo on Commons"
+ },
+ {
+  "country": "it",
+  "party": "rad",
+  "from": 2013,
+  "to": 2013,
+  "wiki": "Civil Revolution",
+  "qid": "Q2152252",
+  "label": "Civil Revolution",
+  "logos": [],
+  "skip": "No logo on Commons"
+ },
+ {
+  "country": "it",
+  "party": "rad",
+  "from": 2018,
+  "to": 2018,
+  "wiki": "Free and Equal",
+  "qid": "Q92800886",
+  "label": "Free and Equal",
+  "logos": [],
+  "file": "Free and Equal (Italy) logo.svg",
+  "why": "Wikidata names none"
+ },
+ {
+  "country": "it",
+  "party": "rad",
+  "from": 2022,
+  "wiki": "People's Union (Italy)",
+  "qid": "Q113297997",
+  "label": "People's Union",
+  "logos": [
+   {
+    "file": "People's Union (Italy) Logo 2022 election.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "pp",
+  "wiki": "People's Party (Spain)",
+  "qid": "Q185088",
+  "label": "People's Party",
+  "logos": [
+   {
+    "file": "Logo del PP (2022).svg",
+    "rank": "preferred",
+    "from": 2022,
+    "to": null
+   },
+   {
+    "file": "People's Party (Spain) Logo (2008-2015).svg",
+    "rank": "normal",
+    "from": 2008,
+    "to": 2015
+   },
+   {
+    "file": "People's Party (Spain) Logo (2000-2007).svg",
+    "rank": "normal",
+    "from": 2004,
+    "to": 2007
+   },
+   {
+    "file": "People's Party (Spain) Logo (2000-2004).svg",
+    "rank": "normal",
+    "from": 2000,
+    "to": 2004
+   },
+   {
+    "file": "People's Party (Spain) Logo (1993-2000).svg",
+    "rank": "normal",
+    "from": 1993,
+    "to": 2000
+   },
+   {
+    "file": "People's Party (Spain) Logo (1989-1993).svg",
+    "rank": "normal",
+    "from": 1989,
+    "to": 1993
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "psoe",
+  "wiki": "Spanish Socialist Workers' Party",
+  "qid": "Q138198",
+  "label": "Spanish Socialist Workers' Party",
+  "logos": [
+   {
+    "file": "Logo PSOE 41 Congreso.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "pod",
+  "to": 2015,
+  "wiki": "Podemos (Spanish political party)",
+  "qid": "Q16059622",
+  "label": "Podemos",
+  "logos": [
+   {
+    "file": "Logotipo Podemos.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Wordmark Podemos 2020.svg",
+    "rank": "normal",
+    "from": 2020,
+    "to": 2022
+   },
+   {
+    "file": "Logo Podem.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Logo de Podemos (2022).svg",
+    "rank": "preferred",
+    "from": 2022,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "pod",
+  "from": 2019,
+  "to": 2019,
+  "wiki": "Unidas Podemos",
+  "qid": "Q24039754",
+  "label": "Unidos Podemos",
+  "logos": [
+   {
+    "file": "Logo Unidos Podemos.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Logo Unidas Podemos.svg",
+    "rank": "preferred",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Unidos Podemos.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "pod",
+  "from": 2023,
+  "wiki": "Sumar (electoral platform)",
+  "qid": "Q112098527",
+  "label": "Sumar",
+  "logos": [
+   {
+    "file": "Sumar logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "iu",
+  "wiki": "United Left (Spain)",
+  "qid": "Q623740",
+  "label": "United Left",
+  "logos": [
+   {
+    "file": "Logo IU completo bocadillo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "cs",
+  "wiki": "Citizens (Spanish political party)",
+  "qid": "Q1393123",
+  "label": "Ciudadanos",
+  "logos": [
+   {
+    "file": "Logo de Ciudadanos (2023).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "vox",
+  "wiki": "Vox (political party)",
+  "qid": "Q15630787",
+  "label": "Vox",
+  "logos": [
+   {
+    "file": "VOX logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "upyd",
+  "wiki": "Union, Progress and Democracy",
+  "qid": "Q1144342",
+  "label": "Union, Progress and Democracy",
+  "logos": [
+   {
+    "file": "Logotipo de UPYD 2018-2020.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "ciu",
+  "to": 2011,
+  "wiki": "Convergence and Union",
+  "qid": "Q150398",
+  "label": "Convergence and Union",
+  "logos": [
+   {
+    "file": "Logo CiU.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "ciu",
+  "from": 2015,
+  "to": 2015,
+  "wiki": "Democràcia i Llibertat",
+  "qid": "Q21401515",
+  "label": "Democracy and Liberty",
+  "logos": [
+   {
+    "file": "Democracia i Llibertat.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "ciu",
+  "from": 2019,
+  "wiki": "Together for Catalonia (2020)",
+  "qid": "Q97155800",
+  "label": "Junts per Catalunya",
+  "logos": [
+   {
+    "file": "Logo partit Junts per Catalunya.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "erc",
+  "wiki": "Republican Left of Catalonia",
+  "qid": "Q150068",
+  "label": "Republican Left of Catalonia",
+  "logos": [
+   {
+    "file": "ERC logo 2025.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "pnv",
+  "wiki": "Basque Nationalist Party",
+  "qid": "Q43093",
+  "label": "Basque Nationalist Party",
+  "logos": [
+   {
+    "file": "Logo PNV 2025.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "bil",
+  "to": 2011,
+  "wiki": "Amaiur",
+  "qid": "Q452571",
+  "label": "Amaiur",
+  "logos": [
+   {
+    "file": "Amaiur logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "bil",
+  "from": 2015,
+  "wiki": "EH Bildu",
+  "qid": "Q1029761",
+  "label": "Euskal Herria Bildu",
+  "logos": [
+   {
+    "file": "EHBilduLogoBerdea.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Logo de EH Bildu (2023).svg",
+    "rank": "preferred",
+    "from": 2023,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "bng",
+  "wiki": "Galician Nationalist Bloc",
+  "qid": "Q885433",
+  "label": "Galician Nationalist Bloc",
+  "logos": [
+   {
+    "file": "Bloque Nacionalista Galego.svg",
+    "rank": "normal",
+    "from": 2017,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "es",
+  "party": "cc",
+  "wiki": "Canarian Coalition",
+  "qid": "Q1104327",
+  "label": "Canarian Coalition",
+  "logos": [
+   {
+    "file": "Coalición Canaria.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ie",
+  "party": "ff",
+  "wiki": "Fianna Fáil",
+  "qid": "Q216517",
+  "label": "Fianna Fáil",
+  "logos": [
+   {
+    "file": "Fianna Fáil logo.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ie",
+  "party": "fg",
+  "wiki": "Fine Gael",
+  "qid": "Q247135",
+  "label": "Fine Gael",
+  "logos": [
+   {
+    "file": "Fine Gael logo 2026.svg",
+    "rank": "normal",
+    "from": 2026,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ie",
+  "party": "sf",
+  "wiki": "Sinn Féin",
+  "qid": "Q76382",
+  "label": "Sinn Féin",
+  "logos": [
+   {
+    "file": "Sinn Féin wordmark.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ie",
+  "party": "lab",
+  "wiki": "Labour Party (Ireland)",
+  "qid": "Q503614",
+  "label": "Labour Party",
+  "logos": [
+   {
+    "file": "The logo of Labour Party in Ireland 2021.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ie",
+  "party": "grn",
+  "wiki": "Green Party (Ireland)",
+  "qid": "Q831015",
+  "label": "Green Party",
+  "logos": [
+   {
+    "file": "Green Party (Ireland) logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ie",
+  "party": "sd",
+  "wiki": "Social Democrats (Ireland)",
+  "qid": "Q20682633",
+  "label": "Social Democrats",
+  "logos": [
+   {
+    "file": "Social Democrats (Ireland) logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "ie",
+  "party": "pbp",
+  "from": 2016,
+  "wiki": "People Before Profit–Solidarity",
+  "qid": "Q21218940",
+  "label": "People Before Profit–Solidarity",
+  "logos": [],
+  "file": "People before Profit logo 2021.png",
+  "why": "Wikidata names none"
+ },
+ {
+  "country": "ie",
+  "party": "aon",
+  "wiki": "Aontú",
+  "qid": "Q61090509",
+  "label": "Aontú",
+  "logos": [],
+  "skip": "No Aontú logo on Commons"
+ },
+ {
+  "country": "ie",
+  "party": "ii",
+  "wiki": "Independent Ireland",
+  "qid": "Q124516371",
+  "label": "Independent Ireland",
+  "logos": [],
+  "file": "Logo of the Independent Ireland.png",
+  "why": "Wikidata names none"
+ },
+ {
+  "country": "in",
+  "party": "nda",
+  "wiki": "Bharatiya Janata Party",
+  "note": "The alliance is led by the BJP",
+  "qid": "Q10230",
+  "label": "Bharatiya Janata Party",
+  "logos": [
+   {
+    "file": "898-8987765 bharatiya-janata-party-bjp-symbol-1.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Logo of the Bharatiya Janata Party.svg",
+    "rank": "preferred",
+    "from": null,
+    "to": null
+   }
+  ],
+  "file": "Logo of the Bharatiya Janata Party.svg",
+  "why": "The preferred logo"
+ },
+ {
+  "country": "in",
+  "party": "upa",
+  "wiki": "Indian National Congress",
+  "note": "The alliance is led by Congress",
+  "qid": "Q10225",
+  "label": "Indian National Congress",
+  "logos": [
+   {
+    "file": "Indian National Congress hand logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "in",
+  "party": "tmc",
+  "wiki": "All India Trinamool Congress",
+  "qid": "Q912899",
+  "label": "All India Trinamool Congress",
+  "logos": [],
+  "file": "All India Trinamool Congress logo.svg",
+  "why": "Wikidata names none"
+ },
+ {
+  "country": "in",
+  "party": "left",
+  "wiki": "Communist Party of India (Marxist)",
+  "note": "The Left Front is led by the CPI(M)",
+  "qid": "Q234277",
+  "label": "Communist Party of India (Marxist)",
+  "logos": [
+   {
+    "file": "Cpm election symbol.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "in",
+  "party": "sp",
+  "wiki": "Samajwadi Party",
+  "qid": "Q1546941",
+  "label": "Samajwadi Party",
+  "logos": [],
+  "file": "Samajwadi Party.png",
+  "why": "Wikidata names none",
+  "author": "Samajwadi Party"
+ },
+ {
+  "country": "in",
+  "party": "bsp",
+  "wiki": "Bahujan Samaj Party",
+  "qid": "Q803681",
+  "label": "Bahujan Samaj Party",
+  "logos": [],
+  "file": "Elephant Bahujan Samaj Party.svg",
+  "why": "Wikidata names none; the party's elephant symbol"
+ },
+ {
+  "country": "in",
+  "party": "bjd",
+  "wiki": "Biju Janata Dal",
+  "qid": "Q859993",
+  "label": "Biju Janata Dal",
+  "logos": [],
+  "file": "Biju Janata Dal logo.svg",
+  "why": "Wikidata names none"
+ },
+ {
+  "country": "in",
+  "party": "ysr",
+  "wiki": "YSR Congress Party",
+  "qid": "Q8046035",
+  "label": "YSR Congress Party",
+  "logos": [],
+  "file": "YSRCPLOGO.jpg",
+  "why": "Wikidata names none"
+ },
+ {
+  "country": "in",
+  "party": "tdp",
+  "wiki": "Telugu Desam Party",
+  "qid": "Q2279320",
+  "label": "Telugu Desam Party",
+  "logos": [
+   {
+    "file": "Telugu Desam Party Flag.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "in",
+  "party": "brs",
+  "wiki": "Bharat Rashtra Samithi",
+  "qid": "Q3518390",
+  "label": "Bharat Rashtra Samithi",
+  "logos": [
+   {
+    "file": "Flag of Bharat Rashtra Samithi (India Nation Council).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "in",
+  "party": "dmk",
+  "wiki": "Dravida Munnetra Kazhagam",
+  "qid": "Q1255973",
+  "label": "Dravida Munnetra Kazhagam",
+  "logos": [
+   {
+    "file": "Flag DMK.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "in",
+  "party": "aiadmk",
+  "wiki": "All India Anna Dravida Munnetra Kazhagam",
+  "qid": "Q651141",
+  "label": "All India Anna Dravida Munnetra Kazhagam",
+  "logos": [
+   {
+    "file": "Indian Election Symbol Two Leaves.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "in",
+  "party": "aap",
+  "wiki": "Aam Aadmi Party",
+  "qid": "Q129844",
+  "label": "Aam Aadmi Party",
+  "logos": [
+   {
+    "file": "Aam Aadmi Party logo (English).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "ldp",
+  "wiki": "Liberal Democratic Party (Japan)",
+  "qid": "Q232595",
+  "label": "Liberal Democratic Party",
+  "logos": [
+   {
+    "file": "自民党Logo.svg",
+    "rank": "preferred",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Liberal Democratic Party of Japan logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Liberal Democratic Party of Japan (Red).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "dpj",
+  "to": 2014,
+  "wiki": "Democratic Party of Japan",
+  "qid": "Q200314",
+  "label": "Democratic Party of Japan",
+  "logos": [
+   {
+    "file": "Democratic Party of Japan Logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "dpj",
+  "from": 2017,
+  "wiki": "Constitutional Democratic Party of Japan (2017)",
+  "qid": "Q99233271",
+  "label": "Constitutional Democratic Party of Japan",
+  "logos": [
+   {
+    "file": "Logo of Constitutional Democratic Party of Japan.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "新・立憲民主党 ロゴ.svg",
+    "rank": "preferred",
+    "from": null,
+    "to": null
+   }
+  ],
+  "files": {
+   "2017": "Logo of Constitutional Democratic Party of Japan.svg",
+   "2021": "Constitutional Democratic Party of Japan (2020).svg",
+   "2024": "新・立憲民主党 ロゴ.svg"
+  },
+  "why": "The 2017 party, the 2020 merged party, then the 2022 logo"
+ },
+ {
+  "country": "jp",
+  "party": "kom",
+  "wiki": "Komeito",
+  "qid": "Q1061354",
+  "label": "Komeito",
+  "logos": [
+   {
+    "file": "Logo of Komeito.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "ishin",
+  "to": 2012,
+  "wiki": "Japan Restoration Party",
+  "qid": "Q1027055",
+  "label": "Japan Restoration Party",
+  "logos": [
+   {
+    "file": "Nippon Ishin no Kai Text Logo.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "ishin",
+  "from": 2014,
+  "to": 2014,
+  "wiki": "Japan Innovation Party (2014–2016)",
+  "qid": "Q18116909",
+  "label": "Japan Innovation Party",
+  "logos": [
+   {
+    "file": "Japan Innovation Party Text Logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "ishin",
+  "from": 2017,
+  "wiki": "Nippon Ishin no Kai",
+  "qid": "Q21499745",
+  "label": "Nippon Ishin no Kai",
+  "logos": [
+   {
+    "file": "Japan Innovation Party.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "jcp",
+  "wiki": "Japanese Communist Party",
+  "qid": "Q641600",
+  "label": "Japanese Communist Party",
+  "logos": [
+   {
+    "file": "Japanese Communist Party logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ],
+  "author": "Japanese Communist Party, vector version by Wikimedia Commons contributors"
+ },
+ {
+  "country": "jp",
+  "party": "kibo",
+  "wiki": "Kibō no Tō",
+  "qid": "Q41040535",
+  "label": "Party of Hope",
+  "logos": [
+   {
+    "file": "Logo of Kibō no Tō.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "dpp",
+  "wiki": "Democratic Party For the People",
+  "qid": "Q99527550",
+  "label": "Democratic Party For the People",
+  "logos": [
+   {
+    "file": "Logo of Democratic Party For the People.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "yp",
+  "wiki": "Your Party (Japan)",
+  "qid": "Q1355093",
+  "label": "Your Party",
+  "logos": [
+   {
+    "file": "Minna no Tō Logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "tpj",
+  "wiki": "Tomorrow Party of Japan",
+  "qid": "Q194683",
+  "label": "Tomorrow Party of Japan",
+  "logos": [
+   {
+    "file": "Nippon mirai logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "sdp",
+  "wiki": "Social Democratic Party (Japan)",
+  "qid": "Q835109",
+  "label": "Social Democratic Party",
+  "logos": [
+   {
+    "file": "Social Democratic Party Logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "pnp",
+  "wiki": "People's New Party",
+  "qid": "Q241325",
+  "label": "People's New Party",
+  "logos": [
+   {
+    "file": "Kokumin Shinto (Logo).svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "reiwa",
+  "wiki": "Reiwa Shinsengumi",
+  "qid": "Q64405573",
+  "label": "Party of Life",
+  "logos": [
+   {
+    "file": "Reiwa Shinsengumi logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "sansei",
+  "wiki": "Sanseitō",
+  "qid": "Q113009668",
+  "label": "Sanseitō",
+  "logos": [
+   {
+    "file": "Sanseito logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   },
+   {
+    "file": "Sanseito Logo (2025).svg",
+    "rank": "preferred",
+    "from": 2025,
+    "to": null
+   }
+  ]
+ },
+ {
+  "country": "jp",
+  "party": "cpj",
+  "wiki": "Conservative Party of Japan",
+  "qid": "Q122639399",
+  "label": "Conservative Party of Japan",
+  "logos": [],
+  "file": "Conservative Party of Japan simple logo.svg",
+  "why": "Wikidata names none"
+ },
+ {
+  "country": "jp",
+  "party": "mirai",
+  "wiki": "Team Mirai",
+  "qid": "Q134414127",
+  "label": "Team for the future",
+  "logos": [
+   {
+    "file": "Team Mirai logo.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ]
+ }
+]

@@ -11,6 +11,7 @@ import { partyColor, partyShort, partyName, sortBySeats, byDisplayOrder } from "
 import { MpPollBlock } from "@ui/MpPollBlock";
 import { MapPin } from "lucide-react";
 import { InertLand, InsetFrames } from "@ui/mapExtras";
+import { PartyLogo } from "@ui/PartyLogo";
 
 function regionWinner(region: StateContest): { winner: string; seats: Record<string, number>; lead: number } {
   const { shareByParty } = tallyRegion(region);
@@ -96,7 +97,7 @@ export function CountryMap() {
       <span className="legend-note">Labels show leader {country.unitNamePlural} / region total.</span>
       {game.parties.filter((p) => country.playable.includes(p)).map((p) => (
         <span key={p} className="legend-item">
-          <span className="swatch" style={{ "--party": partyFill(partyColor(country, p)) } as React.CSSProperties} />
+          <PartyLogo country={country.id} party={p} year={country.elections[game.electionId]?.year} color={partyColor(country, p)} size={14} />
           {partyShort(country, p)}
         </span>
       ))}
@@ -234,7 +235,7 @@ export function CountryStandings() {
       {order.map((p) => (
         <div className="bloc" key={p}>
           <span className="name" style={{ color: p === game.playerParty ? partyInk(partyColor(country, p)) : undefined, fontWeight: p === game.playerParty ? 700 : 500 }}>
-            <span className="swatch" style={{ "--party": partyFill(partyColor(country, p)) } as React.CSSProperties} />
+            <PartyLogo country={country.id} party={p} year={country.elections[game.electionId]?.year} color={partyColor(country, p)} size={14} />
             {partyShort(country, p)}
           </span>
           <span className="meta" title="Units won and national vote share. Votes for parties below a district threshold may yield few or no seats.">{live.seats[p]} {country.unitNamePlural} · {((live.voteShare[p] ?? 0) * 100).toFixed(country.runoff ? 2 : 1)}% votes</span>

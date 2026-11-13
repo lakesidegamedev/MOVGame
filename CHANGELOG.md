@@ -13,6 +13,11 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Added
 
+- Parties show their real logos, matched to the election you are playing when a party changed its
+  logo over the years: on the setup cards, the standings and map legends, the results screen,
+  election night and the electoral vote bar. Parties without a freely available logo keep their
+  colour. The Credits page lists every logo's source; the logos belong to their parties and are
+  shown only to identify them.
 - Opening Margin of Victory from the Lakeside launcher can sign you in with the launcher's
   Lakeside account, so your packs and cloud saves are there without logging in again. The game
   finds your account by your Lakeside account, never by name. If you have never played with that

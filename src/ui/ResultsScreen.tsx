@@ -26,6 +26,7 @@ import { usReveal } from "./electionNight/usReveal";
 import { DailyResultPanel } from "./DailyResultPanel";
 import { dailyAssignment, utcDateString } from "@lib/daily";
 import type { CandidateId } from "@engine/types";
+import { partyLogoFor, partyLogosFor } from "@ui/PartyLogo";
 
 export function ResultsScreen() {
   const game = useGameStore((s) => s.game)!;
@@ -33,6 +34,7 @@ export function ResultsScreen() {
   const difficulty = useGameStore((s) => s.difficulty);
   const result = game.result!;
   const cands = game.candidates;
+  const year = SCENARIOS[game.scenarioId ?? "2020"]?.year;
   const dem = cands.dem.shortName;
   const rep = cands.rep.shortName;
 
@@ -114,7 +116,7 @@ export function ResultsScreen() {
   };
 
   if (!nightDone) {
-    return <ElectionNight {...reveal} leaders={{ dem: cands.dem.name, rep: cands.rep.name }} onDone={() => setNightDone(true)} />;
+    return <ElectionNight {...reveal} leaders={{ dem: cands.dem.name, rep: cands.rep.name }} logos={partyLogosFor("US", ["dem", "rep"], year)} onDone={() => setNightDone(true)} />;
   }
 
   const next = US_NEXT_SCENARIO[game.scenarioId ?? "2020"];
@@ -143,6 +145,7 @@ export function ResultsScreen() {
           headline={!done ? `${demEV}-${repEV}` : winnerName}
           headlineColor={!done ? "var(--text-strong)" : winnerColor}
           winner={done && result.winner !== "tie" ? { name: cands[result.winner].name, color: cands[result.winner].color } : undefined}
+          winnerLogo={done && result.winner !== "tie" ? partyLogoFor("US", result.winner, year) : null}
           subhead={
             !done
               ? `${college.majority} to win · ${tossupEV} EV still out`
@@ -250,7 +253,7 @@ export function ResultsScreen() {
           }
         >
           <div style={{ marginBottom: 4 }}>
-            <EvBar projection={{ ev: { dem: demEV, rep: repEV }, tossupEv: tossupEV, contests: [] } as unknown as Projection} />
+            <EvBar projection={{ ev: { dem: demEV, rep: repEV }, tossupEv: tossupEV, contests: [] } as unknown as Projection} year={year} />
           </div>
 
           {done && (

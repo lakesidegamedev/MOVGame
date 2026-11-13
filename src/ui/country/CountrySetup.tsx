@@ -4,6 +4,7 @@ import { useAuthStore } from "@store/authStore";
 import { openStoreForScenario } from "@store/storeNav";
 import { playablePartiesIn, regionalReach, type CountryBundle } from "@engine/countryGame";
 import { ElectionTile, PartyCard } from "@ui/ElectionTile";
+import { PartyLogo } from "@ui/PartyLogo";
 import { partyInk } from "@ui/colors";
 import { partyColor, partyName, partyShort } from "./helpers";
 import { Vote, Dices, ChevronLeft, Flag, Lock } from "lucide-react";
@@ -120,6 +121,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
                 const name = ld?.name ?? partyName(country, p);
                 return (
                   <PartyCard key={p} name={partyName(country, p)} sub={ld?.name ?? `${partyShort(country, p)} leader`} leader={name}
+                    logo={<PartyLogo country={country.id} party={p} year={data?.year} />}
                     color={partyColor(country, p)} selected={activeParty === p} onClick={() => setParty(p)} />
                 );
               })}
