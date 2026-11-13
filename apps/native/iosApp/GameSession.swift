@@ -180,6 +180,7 @@ final class GameSession: ObservableObject {
     private func beginAutosave(owner: String? = nil) {
         activeAutosaveID = NativeAutosave.companion.slot(owner: owner ?? account.user?.id, nonce: UUID().uuidString)
         UserDefaults.standard.set(activeAutosaveID, forKey: "mov_active_autosave_id")
+        if saveLibrary.pruneGuestAutosaves(active: activeAutosaveID) { persistLibrary() }
     }
     private func mirrorAutosave(_ snapshot: String) {
         let previous = saveLibrary.get(id: activeAutosaveID)
@@ -292,6 +293,9 @@ final class GameSession: ObservableObject {
         _ = store
         if let json = UserDefaults.standard.string(forKey: "mov_named_saves_v1"),
            let restored = NativeSaveLibrary.companion.restore(json: json) { saveLibrary = restored }
+        if saveLibrary.pruneGuestAutosaves(active: activeAutosaveID) {
+            UserDefaults.standard.set(saveLibrary.json(), forKey: "mov_named_saves_v1")
+        }
         namedSaves = saveLibrary.entries()
         cloudQueue = NativeCloudQueue.companion.restore(json: UserDefaults.standard.string(forKey: "mov_cloud_outbox_v1"))
         var lastOwner: String?

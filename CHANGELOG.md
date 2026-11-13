@@ -56,6 +56,10 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- The iPhone and Android apps no longer run out of memory and close when you add an action after
+  starting many campaigns without signing in. Each of those campaigns kept its own autosave forever;
+  the apps now keep the five most recent ones (plus the campaign you are playing). Named saves and
+  signed-in autosaves are not affected.
 - After a loss with a locked next election, the results screen now offers the same country's other
   free election first (United States 2020 after United States 2024) instead of a free election in
   another country, and names it with its year once: "2020 · Biden v. Trump", not "2020 2020".

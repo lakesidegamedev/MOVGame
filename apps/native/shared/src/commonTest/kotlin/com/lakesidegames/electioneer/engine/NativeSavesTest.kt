@@ -98,4 +98,22 @@ class NativeSavesTest {
         assertFalse(library.receiveCloud("bad/path", "Cloud", "{}", "owner", 100, "backup"))
         assertTrue(library.entries().isEmpty())
     }
+
+    @Test
+    fun guestAutosavesStopAtFiveNewestPlusTheActiveOne() {
+        val snapshot = saveGame(createGame(NewGameOptions(seed = 7)), "7", "normal")
+        val library = NativeSaveLibrary.empty()
+        val guests = (0 until 9).map { NativeAutosave.slot(null, "00000000-0000-4000-8000-00000000000$it") }
+        guests.forEachIndexed { i, id -> assertTrue(library.save(id, "Autosave", snapshot, 100L + i)) }
+        val signedIn = NativeAutosave.slot("owner-a", "unused")
+        assertTrue(library.save(signedIn, "Autosave", snapshot, 1))
+        assertTrue(library.save("named-save", "My campaign", snapshot, 2))
+        val owned = NativeAutosave.slot(null, "00000000-0000-4000-8000-0000000000aa")
+        assertTrue(library.save(owned, "Autosave", snapshot, 3)); assertTrue(library.claimCloud(owned, "owner-b"))
+        // The oldest guest slot is the one still being played.
+        assertTrue(library.pruneGuestAutosaves(guests[0]))
+        val left = library.entries().map { it.id }.toSet()
+        assertEquals(guests.takeLast(GUEST_AUTOSAVES_KEPT).toSet() + guests[0] + signedIn + "named-save" + owned, left)
+        assertFalse(library.pruneGuestAutosaves(guests[0]))
+    }
 }

@@ -151,4 +151,21 @@ class NativeSaveLibrary private constructor(private var saves: List<NativeNamedS
         return true
     }
     fun remove(id: String) { saves = saves.filter { it.id != id } }
+    /**
+     * Playing without an account gives every new campaign its own autosave slot
+     * (see NativeAutosave), each holding a full snapshot and replay. Without a
+     * limit the library grew until writing it ran out of memory. Keeps the
+     * newest GUEST_AUTOSAVES_KEPT guest autosaves no account owns, plus [active]; signed-in
+     * slots and named saves are never touched. True when something was removed.
+     */
+    fun pruneGuestAutosaves(active: String): Boolean {
+        val old = saves.filter { it.id != active && it.cloudOwner == null && GUEST_AUTOSAVE.matches(it.id) }
+            .sortedByDescending { it.updatedAt }.drop(GUEST_AUTOSAVES_KEPT).map { it.id }.toSet()
+        if (old.isEmpty()) return false
+        saves = saves.filter { it.id !in old }
+        return true
+    }
 }
+
+const val GUEST_AUTOSAVES_KEPT = 5
+private val GUEST_AUTOSAVE = Regex("autosave-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}")

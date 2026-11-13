@@ -227,6 +227,7 @@ class GameSession : ViewModel() {
     private fun beginAutosave(owner: String? = account.user.value?.id) {
         activeAutosaveId = NativeAutosave.slot(owner, UUID.randomUUID().toString())
         savePrefs?.edit()?.putString("active_autosave_id", activeAutosaveId)?.apply()
+        if (saveLibrary.pruneGuestAutosaves(activeAutosaveId)) persistLibrary()
     }
     private fun mirrorAutosave(snapshot: String) {
         val previous = saveLibrary.get(activeAutosaveId)
@@ -331,6 +332,7 @@ class GameSession : ViewModel() {
         settings = NativePreferences(context.applicationContext)
         cloudQueue = NativeCloudQueue.restore(prefs.getString("cloud_outbox_v1", null))
         saveLibrary = prefs.getString("named_saves_v1", null)?.let(NativeSaveLibrary::restore) ?: NativeSaveLibrary.empty()
+        if (saveLibrary.pruneGuestAutosaves(activeAutosaveId)) prefs.edit().putString("named_saves_v1", saveLibrary.json()).apply()
         _namedSaves.value = saveLibrary.entries()
         account = CampaignAccount(context.applicationContext, scope)
         scope.launch {
