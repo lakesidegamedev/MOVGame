@@ -376,7 +376,9 @@ def account_delete_flows():
     tap_label('Delete account')
     capture('account-delete-confirm', 'It cannot be undone', 'ask')
     tap_label('Cancel', pinned=True)
-    capture('account-delete-cancelled', 'Welcome, campaigner', 'ask')
+    # Cancel leaves the screen scrolled to the Delete account card, so check
+    # that card rather than the welcome line at the top.
+    capture('account-delete-cancelled', 'Delete your account', 'ask')
     if 'IT CANNOT BE UNDONE' in semantic_text('account-delete-cancelled-check'):
         raise RuntimeError('Cancel did not close the Delete account confirmation')
 
