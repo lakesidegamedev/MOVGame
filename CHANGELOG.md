@@ -62,6 +62,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- In the iPhone and Android apps, Ask keeps Lakeside's sign-in and account pages, now at
+  lakesidegames.net/account, inside Ask instead of sending you to your phone's browser.
 - The iPhone and Android apps no longer run out of memory and close when you add an action after
   starting many campaigns without signing in. Each of those campaigns kept its own autosave forever;
   the apps now keep the five most recent ones (plus the campaign you are playing). Named saves and

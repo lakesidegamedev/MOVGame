@@ -51,13 +51,9 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
     private var checkingSignInForSmokeTest = false
     private var openSignInForSmokeTest = ProcessInfo.processInfo.arguments.contains("--mov-capture-ask-login")
     #endif
-    private let allowedHosts: Set<String> = [
-        "ask.lakesidegames.net", "auth.lakesidegames.net", "auth.ahousedividedgame.com",
-        "ahousedividedgame.com", "www.ahousedividedgame.com",
-        "sandbox.ahousedividedgame.com", "accounts.lakesidegames.net",
-        "discord.com", "www.google.com",
-        "appleid.apple.com", "idmsa.apple.com",
-    ]
+    private func allowed(_ url: URL) -> Bool {
+        NativeAskNavigation.shared.allows(scheme: url.scheme, host: url.host, port: Int32(url.port ?? -1), path: url.path)
+    }
 
     override init() {
         let configuration = WKWebViewConfiguration()
@@ -171,7 +167,7 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
             // Google blocks its sign-in inside an app's browser.
             showSignInNotice(NativeLakesideLogin.companion.GOOGLE_UNAVAILABLE)
             decisionHandler(.cancel)
-        } else if url.scheme == "https", let host = url.host?.lowercased(), allowedHosts.contains(host) {
+        } else if allowed(url) {
             decisionHandler(.allow)
         } else {
             UIApplication.shared.open(url)
@@ -184,7 +180,7 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
         guard let url = action.request.url else { return nil }
         if NativeLakesideLogin.companion.isGoogleSignIn(host: url.host, path: url.path) {
             showSignInNotice(NativeLakesideLogin.companion.GOOGLE_UNAVAILABLE)
-        } else if url.scheme == "https", let host = url.host?.lowercased(), allowedHosts.contains(host) {
+        } else if allowed(url) {
             webView.load(URLRequest(url: url))
         } else {
             UIApplication.shared.open(url)
@@ -249,7 +245,7 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
     #if targetEnvironment(simulator)
     private func documentReadyForSmokeTest() {
         guard let url = webView.url else { return }
-        if url.host == "auth.lakesidegames.net" {
+        if NativeAskNavigation.shared.isSignInPage(host: url.host, path: url.path) {
             NSLog("MOV_ASK_SIGNIN_REACHED_EMBEDDED_AUTH")
         } else if url.host == "ask.lakesidegames.net" || url.scheme == "mov-ask-smoke" {
             NSLog("MOV_ASK_DOCUMENT_READY")
@@ -270,7 +266,7 @@ private final class AskBrowser: NSObject, ObservableObject, WKNavigationDelegate
     }
     private func clickSignInWhenReady(attempts: Int) {
         guard openSignInForSmokeTest, webView.url?.host == "ask.lakesidegames.net" else { return }
-        webView.evaluateJavaScript("(() => { const link = document.querySelector('a[href^=\"/auth/lakeside/login\"]'); if (!link) return false; link.click(); return true; })()") { [weak self] result, _ in
+        webView.evaluateJavaScript("(() => { const link = Array.from(document.querySelectorAll('a')).find(a => a.textContent.trim().startsWith('Sign in with Lakeside') || (a.getAttribute('href') || '').startsWith('/auth/lakeside/login')); if (!link) return false; link.click(); return true; })()") { [weak self] result, _ in
             guard let self else { return }
             if result as? Bool == true {
                 self.openSignInForSmokeTest = false
