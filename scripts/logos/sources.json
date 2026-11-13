@@ -1110,7 +1110,8 @@
     "from": null,
     "to": null
    }
-  ]
+  ],
+  "skip": "Commons file is a recreation uploaded as the uploader's own work with a public domain claim that is weak, so the slot shows its colour"
  },
  {
   "country": "it",
@@ -1546,7 +1547,8 @@
     "from": null,
     "to": null
    }
-  ]
+  ],
+  "skip": "Commons file is a party logo uploaded as the uploader's own work with a public domain claim that is weak, so the slot shows its colour"
  },
  {
   "country": "es",

@@ -1,6 +1,6 @@
 {
-  "webHead": "71dabbaeed534d37f621d1b3e6657872ac066de6",
-  "exportedAt": "2026-11-13T15:04:58.186Z",
+  "webHead": "5431b8d5172bf91b5915f6d30b54e53504cb6850",
+  "exportedAt": "2026-11-13T15:06:04.916Z",
   "bundles": {
     "editor-defaults": {
       "bytes": 214407
@@ -21,7 +21,7 @@
       "bytes": 13401
     },
     "art": {
-      "bytes": 164214
+      "bytes": 164033
     },
     "us-blocs": {
       "bytes": 2889
