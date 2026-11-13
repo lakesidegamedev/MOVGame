@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const sentry = vi.hoisted(() => ({ init: vi.fn(), captureException: vi.fn((..._args: unknown[]) => "event-id") }));
 vi.mock("@sentry/browser", () => sentry);
 
-import { initErrorReporting, reportingEnabled, SENTRY_TEST_HASH, sentryEnvironment, sentryRelease } from "../errorReporting";
+import { initErrorReporting, reportingEnabled, SENTRY_TEST_HASH, sentryEnvironment, sentryRelease, withoutSessions } from "../errorReporting";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -21,6 +21,11 @@ describe("error reporting settings", () => {
   it("builds the release from the version and the commit", () => {
     expect(sentryRelease("2.0.0", "e8fe5ee")).toBe("2.0.0+e8fe5ee");
     expect(sentryRelease(undefined, undefined)).toBe("0.0.0+unknown");
+  });
+
+  it("sends no session pings", () => {
+    const kept = withoutSessions([{ name: "BrowserSession" }, { name: "GlobalHandlers" }, { name: "Dedupe" }]);
+    expect(kept.map((i) => i.name)).toEqual(["GlobalHandlers", "Dedupe"]);
   });
 
   it("treats an empty or blank DSN as off", () => {
@@ -74,6 +79,7 @@ describe("initErrorReporting", () => {
       release: "2.0.0+abc1234",
       tracesSampleRate: 0,
       sendDefaultPii: false,
+      integrations: withoutSessions,
     }));
     expect(sentry.captureException).not.toHaveBeenCalled();
   });

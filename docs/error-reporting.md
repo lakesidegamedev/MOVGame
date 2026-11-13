@@ -1,7 +1,8 @@
 # Error reporting
 
 Margin of Victory reports errors to Sentry. Errors only: no performance
-tracing, no session replays, and no personal data (`sendDefaultPii` is off).
+tracing, no session replays, no session pings on launch, and no personal data
+(`sendDefaultPii` is off; Android reports also drop the SDK's install id).
 
 ## One setting
 
