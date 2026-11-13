@@ -110,6 +110,27 @@ Neither native client invents product IDs or derives local rights from a receipt
 before server delivery. Product names and regional prices come from the store.
 Paid offerings stay disabled until both stores are configured and verified.
 
+## What is tested without a device
+
+- `iosApp/MOVGameiOSTests` (CI job "iOS StoreKit purchase tests", device tier)
+  runs the real `StoreKitAdapter` on the simulator with Xcode StoreKit testing.
+  `Products.storekit` lists all 15 products. A stand-in game server records
+  what the app sends. The tests load every product with its price, buy a
+  country pack and the Complete Collection, check that the signed transaction
+  reaches `/api/store/verify` with the right product id and the binding's
+  appAccountToken, that the right pack unlocks only after the server confirms,
+  that a failed delivery leaves the transaction unfinished, and that Restore
+  purchases delivers it.
+- `server/__tests__/apple-transaction.test.ts` pushes a real-format signed
+  transaction (ES256, three-certificate x5c chain) through `/api/store/verify`
+  to a stub account service that checks it the way the real one does.
+- Not provable without Apple: StoreKit testing transactions are signed by
+  Xcode, not Apple, so the account service refuses them (Apple root pinning).
+  Apple's sandbox needs a signed build and a sandbox Apple Account signed in on
+  the device or simulator, which CI cannot do. The first purchase Apple
+  verifies end to end is App Review's own sandbox purchase, unless someone buys
+  on a TestFlight build first.
+
 ## Offline and refund behaviour
 
 The shared NativeStoreWallet policy accepts fresh authenticated ownership
