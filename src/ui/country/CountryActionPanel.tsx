@@ -1,3 +1,4 @@
+import { moneyMillions } from "../format";
 import { useEffect, useState } from "react";
 import { useCountryStore } from "@store/countryStore";
 import { countryGameIssues, type CountryAction, type CountryActionType, type CountryAdMode } from "@engine/countryGame";
@@ -130,7 +131,7 @@ export function CountryActionPanel() {
         <span className="card-sub num">{used}/{pool} actions · max {MAX_PER_DAY}/day</span>
       </div>
       <div className="plan-budget">
-        <div className="metric"><span className="l">Funds</span><span className="v">{cur}{res.funds.toFixed(1)}M</span></div>
+        <div className="metric"><span className="l">Funds</span><span className="v">{moneyMillions(cur, res.funds)}</span></div>
         <div className="metric"><span className="l">Planned / available</span><span className="v">{cur}{committedFunds.toFixed(1)}M / {cur}{availableFunds.toFixed(1)}M</span></div>
         <div className="metric"><span className="l">Actions</span><span className="v">{res.actions}/{res.maxActions}</span></div>
         <div className="metric"><span className="l">Momentum</span><span className="v">{res.momentum >= 0 ? "+" : ""}{res.momentum.toFixed(0)}</span></div>

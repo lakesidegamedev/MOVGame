@@ -6,4 +6,4 @@ Android renders gameplay with Jetpack Compose in `androidApp/`. iOS renders it w
 
 Desktop is separate: `src-tauri/` packages the pinned MOVGame web bundle. `desktop-direct` allows Lakeside checkout; Steam uses DLC only after Steamworks products are configured. Mobile app store products remain disabled until their SKU tables, keys, and store testing are complete.
 
-The stable identifier `com.lakesidegames.electioneer` and the web path `/games/electioneer/` must not change during the repo split.
+The stable identifier `com.lakesidegames.electioneer` must not change. The web game moved to `/games/margin-of-victory/`; the old `/games/electioneer/` path redirects there, and the web build is path independent.

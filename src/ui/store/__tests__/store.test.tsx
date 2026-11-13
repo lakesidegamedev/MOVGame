@@ -136,9 +136,10 @@ describe("the shelf", () => {
       purchases: [{ ...stripe("complete"), provider: "supporter" as const, amountCents: 0 }],
     });
     mount();
-    expect(container.querySelector(".store-hero")!.textContent).toContain("Included with your Supporter membership");
+    expect(container.querySelector(".store-hero")!.textContent).toContain("Included with any Lakeside supporter tier");
+    expect(container.querySelector(".store-hero")!.textContent).not.toMatch(/Supporter\+|Supporter membership/);
     for (const p of countryPacks()) {
-      expect(tile(p.id).textContent).toContain("Included in your Complete Collection");
+      expect(tile(p.id).textContent).toContain("Included with any Lakeside supporter tier");
       expect(tile(p.id).querySelector("button.primary")).toBeNull();
     }
     expect(buttons(/^Buy /)).toHaveLength(0);
@@ -401,5 +402,63 @@ describe("keyboard and screen readers", () => {
     useAuthStore.setState({ modal: "login" });
     mount();
     expect(container.querySelector("[role='dialog']")!.hasAttribute("inert")).toBe(true);
+  });
+});
+
+describe("the Lakeside store", () => {
+  const freeAccessPurchases = () => [...countryPacks(), PACKS_BY_ID.complete].map((p) => ({
+    ...stripe(p.id), provider: "free-access" as const, amountCents: null, currency: null,
+  }));
+
+  it("says who sells it, who takes payment and the refund promise, and links to the Lakeside store", () => {
+    mount();
+    expect(container.querySelector(".store-trust")!.textContent!.replace(/\s+/g, " ").trim())
+      .toBe("Sold by Lakeside Games. Payments by Stripe. Refunds within 14 days, no questions asked.");
+    const link = [...container.querySelectorAll<HTMLAnchorElement>("a")].find((a) => a.textContent?.includes("See everything on the Lakeside store"))!;
+    expect(link.getAttribute("href")).toBe("https://lakesidegames.net/store/margin-of-victory");
+    expect(link.getAttribute("target")).toBe("_blank");
+  });
+
+  it("uses the Lakeside catalog's names and descriptions once it answers", () => {
+    hoisted.catalog.value = catalogFromResponse({
+      source: "platform",
+      products: [...countryPacks(), PACKS_BY_ID.complete].map((p) => ({
+        id: p.id, name: p.id === "canada" ? "Canada Pack" : p.name, description: p.id === "canada" ? "Live text from the Lakeside store." : null,
+        priceCents: p.id === "complete" ? 399 : 99, scenarios: [], listed: true,
+      })),
+    });
+    mount();
+    expect(tile("canada").textContent).toContain("Canada Pack");
+    expect(tile("canada").textContent).toContain("Live text from the Lakeside store.");
+    expect(tile("germany").textContent).toContain(PACKS_BY_ID.germany.description);
+  });
+
+  it("says everything is free and shows no prices or Buy while free access is on", () => {
+    useAuthStore.setState({
+      user: player,
+      unlocked: { scenarioIds: [], packIds: [...countryPacks().map((p) => p.id), "complete"] },
+      purchases: freeAccessPurchases(),
+    });
+    mount();
+    expect(text()).toContain("Everything is free to play while A House Divided is paused");
+    expect(text()).not.toMatch(/\$\d/);
+    expect(buttons(/^Buy /)).toHaveLength(0);
+    expect(container.querySelector(".store-trust")).toBeNull();
+    expect(tile("canada").textContent).toContain("Free to play right now");
+  });
+
+  it("shows no price or Buy under free access even for a pack the switch did not cover", () => {
+    useAuthStore.setState({ user: player, unlocked: { scenarioIds: [], packIds: ["canada"] }, purchases: freeAccessPurchases().filter((p) => p.packId === "canada") });
+    mount();
+    expect(text()).toContain("Everything is free to play while A House Divided is paused");
+    expect(text()).not.toMatch(/\$\d/);
+    expect(buttons(/^Buy /)).toHaveLength(0);
+  });
+
+  it("keeps prices and Buy for a signed-in player without free access", () => {
+    useAuthStore.setState({ user: player, unlocked: { scenarioIds: [], packIds: [] }, purchases: [] });
+    mount();
+    expect(text()).not.toContain("Everything is free to play");
+    expect(buttons(/^Buy /).length).toBeGreaterThan(0);
   });
 });

@@ -24,7 +24,7 @@ const htmlFacts = {
 };
 
 // The store and marketing counts as JSON, next to index.html
-// (/games/electioneer/catalog-facts.json on the web), so the Lakeside store
+// (/games/margin-of-victory/catalog-facts.json on the web), so the Lakeside store
 // reads the same numbers the game shows. Generated from the content data on
 // every build; no prices in it.
 const catalogFactsJson: Plugin = {

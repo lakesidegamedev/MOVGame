@@ -1,8 +1,7 @@
 import { useId } from "react";
 import { Check, Clock, Lock, RefreshCw } from "lucide-react";
-import { PACKS_BY_ID } from "@content/packs";
 import { DISTRIBUTION } from "@lib/distribution";
-import { describeReason, formatPrice, offerFor, unavailableMessage, type Offer } from "@lib/storeModel";
+import { describeReason, formatPrice, offerFor, packName, unavailableMessage, type Offer } from "@lib/storeModel";
 import { useStoreCtx } from "./StoreContext";
 
 export function useOffer(packId: string): Offer {
@@ -37,8 +36,10 @@ export function OfferAction({ packId, label, accessibleName, primary = true, com
   const ctx = useStoreCtx();
   const offer = useOffer(packId);
   const noteId = useId();
-  const name = PACKS_BY_ID[packId]?.name ?? packId;
+  const name = packName(packId, ctx.catalog);
 
+  // Free access: never a price or a Buy, even for a pack the switch somehow left out.
+  if (ctx.freeAccess && offer.kind !== "owned") return null;
   if (offer.kind === "owned") {
     return (
       <span className="store-owned" title={describeReason(offer.reason)}>

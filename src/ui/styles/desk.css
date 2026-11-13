@@ -406,9 +406,10 @@
   .desk-subbar > .ticker, .desk-tools { width: 100%; }
 }
 
-/* Lakeside mark at the end of the tools row, wide screens only, so it never
-   sits among the game controls on phones and tablets. */
-.desk-lakeside { margin-left: calc(-1 * var(--space-2)); }
+/* Lakeside mark, small, at the left of the tools row; wide screens only, so it
+   never sits among the game controls on phones and tablets. */
+.desk-lakeside { flex: 0 0 auto; margin-right: var(--space-1); }
+.desk-lakeside img { width: 16px; height: 16px; }
 @media (max-width: 1100px) {
   .desk-lakeside { display: none; }
 }

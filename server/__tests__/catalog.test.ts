@@ -28,6 +28,18 @@ describe("getCatalogResult", () => {
     expect(items.map((i) => i.id)).toEqual(PACKS.map((p) => p.id)); // the game's membership, in the game's order
   });
 
+  it("carries the platform's name and description, and no description when it gave none", async () => {
+    platformAnswers([
+      { id: "canada", name: "Canada Pack", description: " Twelve federal elections. ", priceCents: 99 },
+      { id: "germany", priceCents: 99, description: "   " },
+    ]);
+    const { items } = await getCatalogResult();
+    const by = Object.fromEntries(items.map((i) => [i.id, i]));
+    expect(by.canada).toMatchObject({ name: "Canada Pack", description: "Twelve federal elections." });
+    expect(by.germany).toMatchObject({ name: PACKS.find((p) => p.id === "germany")!.name, description: null });
+    expect(by.france.description).toBeNull();
+  });
+
   it("keeps pack membership from the game, whatever the platform says", async () => {
     platformAnswers([{ id: "canada", priceCents: 99, scenarios: ["us-2016"] }]);
     const { items } = await getCatalogResult();

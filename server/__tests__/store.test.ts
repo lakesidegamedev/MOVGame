@@ -17,6 +17,8 @@ let api: Server, platform: Server, base: string;
 let platformStatus = 200;
 let platformBody: Record<string, unknown> = {};
 let received: Record<string, unknown> = {}, credential = "";
+// What the platform's entitlements read answers (GET /?ahdUserId=...); null falls back to platformBody.
+let entitlementsBody: Record<string, unknown> | null = null;
 function user(linked: boolean) {
   const id = randomUUID(), username = "u_" + id.slice(0, 8);
   getDb().prepare("INSERT INTO users (id, username, email, password_hash, created_at, ahd_user_id) VALUES (?, ?, ?, 'x', ?, ?)")
@@ -30,7 +32,11 @@ async function call(path: string, token?: string, body: unknown = {}) {
 beforeAll(async () => {
   platform = http.createServer(async (req, res) => {
     const chunks: Buffer[] = []; for await (const chunk of req) chunks.push(chunk);
-    received = JSON.parse(Buffer.concat(chunks).toString() || "{}"); credential = req.headers.authorization || "";
+    if (req.url?.startsWith("/?") && entitlementsBody) {
+      res.writeHead(200, { "Content-Type": "application/json" }); res.end(JSON.stringify(entitlementsBody));
+      return;
+    }
+    if (!req.url?.startsWith("/?")) { received = JSON.parse(Buffer.concat(chunks).toString() || "{}"); credential = req.headers.authorization || ""; }
     res.writeHead(platformStatus, { "Content-Type": "application/json" }); res.end(JSON.stringify(platformBody));
   });
   await new Promise<void>(r => platform.listen(0, "127.0.0.1", () => r()));
@@ -101,6 +107,31 @@ describe("shared store proxy", () => {
     expect(response.status).toBe(200);
     expect([...(response.body.packIds as string[])].sort()).toEqual([...ids].sort());
   });
+  it("adds what entitlements grant (any supporter tier, free access) to app ownership", async () => {
+    const a = user(true);
+    platformBody = { owner: a.owner, packIds: ["canada"], verifiedAt: Date.now() };
+    entitlementsBody = { purchases: [
+      { game: "electioneer", productId: "complete", provider: "supporter", amountCents: null, currency: null, status: "paid", createdAt: 1 },
+      { game: "electioneer", productId: "japan", provider: "free-access", amountCents: null, currency: null, status: "paid", createdAt: 1 },
+      { game: "electioneer", productId: "future-country", provider: "supporter", status: "paid", createdAt: 1 },
+      { game: "corporate-warfare", productId: "corporate-warfare", provider: "supporter", status: "paid", createdAt: 1 },
+    ] };
+    try {
+      const response = await call("/ownership", a.token);
+      expect(response.status).toBe(200);
+      expect([...(response.body.packIds as string[])].sort()).toEqual(["canada", "complete", "japan"]);
+      expect(received).toEqual({ ahdUserId: a.owner });
+    } finally {
+      entitlementsBody = null;
+    }
+  });
+  it("adds nothing when entitlements grant nothing beyond the store", async () => {
+    const a = user(true);
+    platformBody = { owner: a.owner, packIds: ["canada"], verifiedAt: Date.now() };
+    const response = await call("/ownership", a.token);
+    expect(response.status).toBe(200);
+    expect(response.body.packIds).toEqual(["canada"]);
+  });
   it("preserves claim conflicts and keeps upstream auth failures distinct from logout", async () => {
     const a = user(true); platformStatus = 409; platformBody = { error: "This purchase belongs to another Lakeside account." };
     expect((await call("/verify", a.token, { store: "apple", signedTransaction: "signed" })).status).toBe(409);
@@ -123,5 +154,14 @@ describe("shared store proxy", () => {
     expect(history).toHaveLength(2); expect(history[0].provider).toBe("apple"); expect(history[0].amountCents).toBeNull();
     expect((await fetchPlatformPurchases(identity)).map(p => p.provider)).toEqual(["google"]);
     expect(await fetchPlatformPurchases({ ahdUserId: null, email: identity.email })).toEqual([]);
+  });
+  it("keeps the supporter and free-access sources the platform reports", async () => {
+    platformBody = { purchases: [
+      { game: "electioneer", productId: "complete", provider: "supporter", amountCents: null, status: "paid", createdAt: 1 },
+      { game: "electioneer", productId: "canada", provider: "free-access", amountCents: null, status: "paid", createdAt: 2 },
+    ] };
+    clearEntitlementsCache();
+    const purchases = await fetchPlatformPurchases({ ahdUserId: "sources-owner", email: null });
+    expect(purchases.map(p => [p.productId, p.provider])).toEqual([["complete", "supporter"], ["canada", "free-access"]]);
   });
 });

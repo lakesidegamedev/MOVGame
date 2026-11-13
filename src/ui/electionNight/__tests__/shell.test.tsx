@@ -144,14 +144,14 @@ describe("ElectionNightShell", () => {
           lockLabel: "Unlock 1932",
           onPlay: vi.fn(),
           onUnlock,
-          freeAlternative: { label: "🇬🇧 2024 Starmer's landslide", onPlay: onFree },
+          freeAlternative: { label: "🇬🇧 2024 · Starmer's landslide", onPlay: onFree },
         }}
       />,
     );
 
     const free = container.querySelector<HTMLButtonElement>("[data-testid='ens-next-free']")!;
     expect(free.className).toContain("primary");
-    expect(free.textContent).toContain("Play free: 🇬🇧 2024 Starmer's landslide");
+    expect(free.textContent).toContain("Play free: 🇬🇧 2024 · Starmer's landslide");
     act(() => {
       free.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });

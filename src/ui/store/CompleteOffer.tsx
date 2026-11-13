@@ -1,6 +1,5 @@
-import { PACKS_BY_ID } from "@content/packs";
 import { DISTRIBUTION } from "@lib/distribution";
-import { completeCovers, describeReason, formatPrice, priceCents, summarizeComplete, COMPLETE_ID } from "@lib/storeModel";
+import { completeCovers, describeReason, formatPrice, packName, priceCents, summarizeComplete, COMPLETE_ID } from "@lib/storeModel";
 import { useStoreCtx } from "./StoreContext";
 import { OfferAction, useBuyHint, useOffer } from "./OfferAction";
 import { plural } from "./StoreParts";
@@ -21,7 +20,7 @@ export function CompleteOffer({ compact = false }: { compact?: boolean }) {
   const soldElsewhere = DISTRIBUTION.checkout === null;
   const covers = completeCovers();
   const completePrice = priceCents(COMPLETE_ID, ctx.catalog);
-  const buyable = offer.kind === "buy" || offer.kind === "unavailable";
+  const buyable = !ctx.freeAccess && (offer.kind === "buy" || offer.kind === "unavailable");
 
   return (
     <section className={`store-hero${compact ? " compact" : ""}${owned ? " owned" : ""}`} aria-labelledby="store-complete-title">
@@ -35,7 +34,7 @@ export function CompleteOffer({ compact = false }: { compact?: boolean }) {
       <div className="store-hero-body">
         <div className="store-hero-copy">
           <p className="store-eyebrow">{owned ? "Yours" : soldElsewhere ? "Every country" : "Everything in one purchase"}</p>
-          <h2 id="store-complete-title">{PACKS_BY_ID[COMPLETE_ID].name}</h2>
+          <h2 id="store-complete-title">{packName(COMPLETE_ID, ctx.catalog)}</h2>
           <p className="store-hero-lede">
             {owned
               ? offer.kind === "owned" ? describeReason(offer.reason) + "." : ""
@@ -46,7 +45,7 @@ export function CompleteOffer({ compact = false }: { compact?: boolean }) {
           <ul className="store-stats" aria-label="What the Complete Collection contains">
             <li><b>{sum.elections}</b><span>elections</span></li>
             <li><b>{sum.countries}</b><span>countries</span></li>
-            <li><b>1</b><span>price, no subscription</span></li>
+            {!ctx.freeAccess && <li><b>1</b><span>price, no subscription</span></li>}
           </ul>
           <div className="store-flags" aria-hidden="true">{covers.map((c) => <span key={c.country}>{c.flag}</span>)}</div>
           {!owned && sum.havePacks.length > 0 && sum.addsPacks.length > 0 && (
@@ -71,7 +70,7 @@ export function CompleteOffer({ compact = false }: { compact?: boolean }) {
             <OfferAction packId={COMPLETE_ID} />
           ) : (
             <>
-              {offer.kind === "buy" && completePrice !== null && (
+              {buyable && offer.kind === "buy" && completePrice !== null && (
                 <div className="store-bigprice">
                   <span className="store-price big">{formatPrice(completePrice)}</span>
                   <span className="store-price-note">one-time</span>

@@ -76,9 +76,9 @@ export function DeskHeader({
         </div>
       </div>
       <div className="desk-subbar">
+        <LakesideMark className="desk-lakeside" label={false} />
         {ticker ?? <span className="desk-ticker-empty" />}
         <nav className="desk-tools toolbar" aria-label="Campaign tools">{tools}</nav>
-        <LakesideMark className="desk-lakeside" label={false} />
       </div>
       {banner}
     </header>

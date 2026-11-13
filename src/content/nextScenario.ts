@@ -75,15 +75,17 @@ export function countryNextScenario(countryId: string, electionId: string): Next
 }
 
 /**
- * A free election to offer when the next one in a chain is locked: the newest
- * free election of the next country in catalog order (wrapping), never the
- * election just played. Every country has one, so a player without packs is
- * always offered something they can play.
+ * A free election to offer when the next one in a chain is locked: the same
+ * country's newest other free election first (US 2020 after US 2024), then
+ * the newest free election of the next country in catalog order (wrapping),
+ * never the election just played. Every country has one, so a player without
+ * packs is always offered something they can play.
  */
 export function freeAlternative(code: string, playedScenarioId: string): ScenarioMeta | null {
   const order = COUNTRY_MODULES.map((m) => m.code as string);
-  const start = Math.max(0, order.indexOf(code));
-  for (let step = 1; step <= order.length; step++) {
+  const own = order.indexOf(code);
+  const start = Math.max(0, own);
+  for (let step = own < 0 ? 1 : 0; step <= order.length; step++) {
     const country = order[(start + step) % order.length];
     const pick = SCENARIO_REGISTRY.filter((s) => s.country === country && s.free && s.scenarioId !== playedScenarioId)
       .sort((a, b) => b.year - a.year)[0];

@@ -58,10 +58,10 @@ struct NativeSettingsView: View {
                 Button("Replay tutorial") { settings.replayTutorial(); dismiss() }
             }
             Section("Margin of Victory") {
-                Link("Privacy policy", destination: URL(string: "https://lakesidegames.net/games/electioneer/?legal=privacy")!)
-                Link("Terms of service", destination: URL(string: "https://lakesidegames.net/games/electioneer/?legal=terms")!)
+                Link("Privacy policy", destination: URL(string: "https://lakesidegames.net/games/margin-of-victory/?legal=privacy")!)
+                Link("Terms of service", destination: URL(string: "https://lakesidegames.net/games/margin-of-victory/?legal=terms")!)
                 Link("Contact support", destination: URL(string: "mailto:support@lakesidegames.net")!)
-                Link("Web game", destination: URL(string: "https://lakesidegames.net/games/electioneer/")!)
+                Link("Web game", destination: URL(string: "https://lakesidegames.net/games/margin-of-victory/")!)
                 Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""))").font(.caption)
             }
         }.preferredColorScheme(.dark)

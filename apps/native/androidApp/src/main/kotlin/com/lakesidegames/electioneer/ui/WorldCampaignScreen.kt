@@ -222,7 +222,7 @@ fun WorldCampaignScreen(session: GameSession) {
                 Text("$flag ${game.label()}".trim(), style = MaterialTheme.typography.headlineSmall, color = Mov.Text1)
                 StatRow {
                     Metric(if (game.isPlurality()) "${mine?.units ?: 0}" else "${mine?.units ?: 0}/${game.majority()}", "Your $unit", color = partyInk(mine?.color))
-                    Metric("${game.currency()}${number(game.funds())}M", "Cash")
+                    Metric(NativeMoney.millions(game.currency(), game.funds()), "Cash")
                     if (!game.isOver()) Metric("${game.slotsLeft()}", "Moves left")
                     Metric(percent(mine?.voteShare ?: 0.0), "Vote share")
                 }
@@ -298,9 +298,9 @@ fun WorldCampaignScreen(session: GameSession) {
         if (!game.isOver()) {
             item { MovCard {
                 CardHead("Week plan") { Tag("${game.slotsLeft()} moves left", if (game.slotsLeft() > 0) TagKind.Accent else TagKind.Outline) }
-                KeyValue("Cash", "${game.currency()}${number(game.funds())}M")
-                KeyValue("Planned spend", "${game.currency()}${number(game.plannedSpend())}M")
-                KeyValue("Available", "${game.currency()}${number(game.availableFunds())}M")
+                KeyValue("Cash", NativeMoney.millions(game.currency(), game.funds()))
+                KeyValue("Planned spend", NativeMoney.millions(game.currency(), game.plannedSpend()))
+                KeyValue("Available", NativeMoney.millions(game.currency(), game.availableFunds()))
                 Text("Plan estimate: ${game.previewPlayerUnits()} $unit after your queued actions. Rival moves and events can change the result.", style = MaterialTheme.typography.bodySmall, color = Mov.Info)
                 PlanBonusHints(game.planBonuses())
                 Eyebrow("Action")
@@ -312,7 +312,7 @@ fun WorldCampaignScreen(session: GameSession) {
                 if (type == "broadcast") {
                     Eyebrow("Broadcast mode")
                     Segmented(listOf("positive", "contrast", "issue").map { it to actionName(it) }, mode, { mode = it }, label = "Broadcast mode")
-                    KeyValue("Spend", "${game.currency()}${number(spend.toDouble())}M")
+                    KeyValue("Spend", NativeMoney.millions(game.currency(), spend.toDouble()))
                     Slider(spend, { spend = it }, valueRange = 0.5f..10f, modifier = Modifier.semantics { contentDescription = "Campaign spend in millions" },
                         colors = SliderDefaults.colors(thumbColor = Mov.Accent, activeTrackColor = Mov.Accent, inactiveTrackColor = Mov.Sunken))
                     Text(if (regionId.isEmpty()) "National reaches every region where your party stands." else "Regional spending concentrates on this target.", style = MaterialTheme.typography.bodySmall, color = Mov.Text3)

@@ -23,12 +23,34 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 - After you pay in your browser, the Windows desktop app checks for the purchase the moment you
   come back to its window (taskbar, Alt+Tab or a click) and unlocks the pack within about a
   second. "I've paid, check now" and the timed check still work as before.
-- A small Lakeside Games mark in the top bar links to lakesidegames.net, on the web and in the
-  desktop app. In a campaign it appears at the end of the tools row on wide screens only, so it
-  never sits among the game controls on phones.
+- A small Lakeside Games mark at the left of the top bar links to lakesidegames.net, on the web
+  and in the desktop app. In a campaign it sits at the start of the tools row on wide screens
+  only, so it never sits among the game controls on phones.
+- The footer links to the Lakeside store, your Lakeside account, the other Lakeside games and
+  Lakeside support.
+- The Store says who sells the packs: "Sold by Lakeside Games. Payments by Stripe. Refunds within
+  14 days, no questions asked." It links to the full Lakeside store page for Margin of Victory.
+- When Lakeside makes everything free for a while, the Store says "Everything is free to play
+  while A House Divided is paused", shows every pack as open, and shows no prices or Buy buttons.
+
+### Changed
+
+- Margin of Victory has a new web address: lakesidegames.net/games/margin-of-victory. The old
+  /games/electioneer address keeps working and sends you to the new one. Saves, sign-in and
+  purchases carry over.
+- The Store looks like the Lakeside store: the same navy and orange, the same typeface and plain
+  buttons. Pack names, descriptions and prices come live from the Lakeside store.
+- Every Lakeside supporter tier includes every Margin of Victory pack and the Complete Collection.
+  The Store and your account say "Included with any Lakeside supporter tier", the iPhone and
+  Android apps show every pack as owned, and nothing offers a supporter a pack to buy.
 
 ### Fixed
 
+- After a loss with a locked next election, the results screen now offers the same country's other
+  free election first (United States 2020 after United States 2024) instead of a free election in
+  another country, and names it with its year once: "2020 · Biden v. Trump", not "2020 2020".
+- Campaign money below zero reads "-$8.1M" instead of "$-8.1M", on the web, in the desktop app,
+  on iPhone and on Android, in every currency.
 - Prices on the web and in the desktop app now come only from the Lakeside store, live. If the
   store is slow or cannot be reached, the game says "Price unavailable, try again" with a Try again
   button and Buy stays off, instead of showing a price it remembered. The landing page, the Store,

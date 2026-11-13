@@ -23,6 +23,9 @@ export interface CatalogEntry {
   priceCents: number;
   /** The platform sells this product right now. */
   listed: boolean;
+  /** The Lakeside store's name and description for it, when the platform gave them. */
+  name?: string;
+  description?: string;
 }
 
 export interface CatalogState {
@@ -51,7 +54,10 @@ export function catalogFromResponse(res: CatalogResponse | null | undefined): Ca
   for (const p of Array.isArray(res.products) ? res.products : []) {
     if (!p || typeof p.id !== "string") continue;
     if (typeof p.priceCents !== "number" || !Number.isSafeInteger(p.priceCents) || p.priceCents <= 0) continue;
-    entries[p.id] = { priceCents: p.priceCents, listed: p.listed === true };
+    const entry: CatalogEntry = { priceCents: p.priceCents, listed: p.listed === true };
+    if (typeof p.name === "string" && p.name.trim()) entry.name = p.name.trim();
+    if (typeof p.description === "string" && p.description.trim()) entry.description = p.description.trim();
+    entries[p.id] = entry;
   }
   return { status: "ready", entries };
 }
@@ -68,6 +74,18 @@ export function unreachableCatalog(): CatalogState {
 export function priceCents(packId: string, catalog: CatalogState): number | null {
   if (catalog.status !== "ready") return null;
   return catalog.entries[packId]?.priceCents ?? null;
+}
+
+/** The Lakeside store's name for a pack, or the game's own while the live catalog has not answered. */
+export function packName(packId: string, catalog: CatalogState): string {
+  const live = catalog.status === "ready" ? catalog.entries[packId]?.name : undefined;
+  return live ?? PACKS_BY_ID[packId]?.name ?? packId;
+}
+
+/** The Lakeside store's description for a pack, or the game's own while the live catalog has not answered. */
+export function packDescription(packId: string, catalog: CatalogState): string {
+  const live = catalog.status === "ready" ? catalog.entries[packId]?.description : undefined;
+  return live ?? PACKS_BY_ID[packId]?.description ?? "";
 }
 
 export function formatPrice(cents: number): string {
@@ -95,11 +113,27 @@ export function countryPriceLabel(catalog: CatalogState): string | null {
 
 // ── Ownership ────────────────────────────────────────────────────────────
 
+/** Every Lakeside supporter tier includes every pack. The tier itself is never named. */
+export const SUPPORTER_INCLUDED = "Included with any Lakeside supporter tier";
+
+/** Shown instead of prices while the platform's free access switch is on. */
+export const FREE_ACCESS_LINE = "Everything is free to play while A House Divided is paused";
+
+/**
+ * True when the signed-in player's entitlements came back with the platform's
+ * free access source: the Store then shows no prices and no Buy.
+ */
+export function freeAccessOn(purchases: readonly Purchase[]): boolean {
+  return purchases.some((p) => p.provider === "free-access" && p.status === "paid");
+}
+
 export type OwnedReason =
   | { kind: "free" }
   | { kind: "purchase"; provider: "stripe" | "apple" | "google"; at: number | null }
   | { kind: "code"; at: number | null }
   | { kind: "supporter"; at: number | null }
+  /** The platform's free access switch is on: everything plays for free while it lasts. */
+  | { kind: "free-access" }
   /** Unlocked on the account but no receipt is attached (older local activations). */
   | { kind: "account" }
   /** Covered by other packs the player owns (Complete, the legacy Global pack, or a mix). */
@@ -118,6 +152,7 @@ function directReason(packId: string, purchases: readonly Purchase[]): OwnedReas
     case "apple": return { kind: "purchase", provider: "apple", at: p.createdAt };
     case "google": return { kind: "purchase", provider: "google", at: p.createdAt };
     case "supporter": return { kind: "supporter", at: p.createdAt };
+    case "free-access": return { kind: "free-access" };
     case "code": return { kind: "code", at: p.createdAt };
     default: return { kind: "purchase", provider: "stripe", at: p.createdAt };
   }
@@ -164,7 +199,8 @@ export function describeReason(reason: OwnedReason): string {
       const when = formatDate(reason.at);
       return `Unlocked with a code${when ? ` on ${when}` : ""}`;
     }
-    case "supporter": return "Included with your Supporter membership";
+    case "supporter": return SUPPORTER_INCLUDED;
+    case "free-access": return "Free to play right now";
     case "account": return "Unlocked on your account";
     case "included": {
       const names = reason.via.map((v) => v.pack.name);
@@ -172,7 +208,9 @@ export function describeReason(reason: OwnedReason): string {
       const whole = names.length === 1 && /pack|collection/i.test(names[0]);
       const base = `Included in your ${joined}${whole ? "" : names.length === 1 ? " pack" : " packs"}`;
       const sole = reason.via.length === 1 ? reason.via[0].reason : null;
-      return sole?.kind === "supporter" ? `${base} from your Supporter membership` : base;
+      if (sole?.kind === "supporter") return SUPPORTER_INCLUDED;
+      if (sole?.kind === "free-access") return "Free to play right now";
+      return base;
     }
   }
 }

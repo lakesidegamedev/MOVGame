@@ -122,7 +122,7 @@ class StoreGateTest {
     }
 
     @Test fun ownershipThroughEveryRouteOpens() {
-        // Lakeside account, Google Play, App Store and the Supporter perk all
+        // Lakeside account, Google Play, App Store and any supporter tier all
         // arrive as owned pack ids in the shared wallet.
         assertNull(allSellable.lock("US", "2016", packs = setOf("us-historical")))
         assertNull(allSellable.lock("UK", "1997", packs = setOf("uk-elections")))

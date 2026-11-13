@@ -33,7 +33,8 @@ export function freeChoice(unlocked: boolean, country: string, playedScenarioId:
   if (unlocked) return null;
   const meta = freeAlternative(country, playedScenarioId);
   if (!meta) return null;
-  return { label: `${meta.flag} ${meta.year} ${meta.label}`, onPlay: () => usePlayNav.getState().play(meta.scenarioId) };
+  // The registry label already starts with the year ("2020 · Biden v. Trump").
+  return { label: `${meta.flag} ${meta.label}`, onPlay: () => usePlayNav.getState().play(meta.scenarioId) };
 }
 
 export interface ElectionNightShellProps {

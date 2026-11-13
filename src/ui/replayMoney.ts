@@ -1,6 +1,6 @@
 import { loadedCountry } from "@content/countries";
 import type { ReplayLog } from "@lib/replay";
-import { money } from "./format";
+import { money, moneyMillions } from "./format";
 
 /**
  * Cash from a replay log, in the campaign's own currency and units. US cash
@@ -11,7 +11,7 @@ export function replayMoney(log: Pick<ReplayLog, "engine" | "scenarioId"> | null
   if (log?.engine === "uk" || log?.engine === "country") {
     // Country replay logs carry "<CODE>-<election>" as their scenario id.
     const currency = log.engine === "uk" ? "£" : loadedCountry(log.scenarioId.split("-")[0]!.toUpperCase())?.currency ?? "$";
-    return `${n < 0 ? "-" : ""}${currency}${Math.abs(n).toFixed(1)}M`;
+    return moneyMillions(currency, n);
   }
   return money(n);
 }

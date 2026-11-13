@@ -12,3 +12,10 @@ United Kingdom, United States). Rebuild it with `scripts/subset-flag-font.py`.
 - Packaging of the source font: `country-flag-emoji-polyfill` by TalkJS, MIT.
 
 Redistribution is allowed under all three licences provided this attribution travels with the font.
+
+# Fira Sans
+
+`fira-sans-400.woff2` to `fira-sans-700.woff2` are Fira Sans (regular, medium, semibold, bold), the
+typeface of the Lakeside Games store. The Store panel uses them so it matches the Lakeside store pages.
+Copyright The Mozilla Foundation and Telefonica S.A., licensed under the SIL Open Font License 1.1;
+the full licence is in `fira-sans-OFL.txt`, which travels with the fonts.
