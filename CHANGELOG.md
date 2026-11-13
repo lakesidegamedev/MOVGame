@@ -26,6 +26,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- When the next election after your campaign is part of a pack you do not own, the results screen
+  now also offers the next country's free election, so there is always something to play next
+  without buying.
+- The results report and the campaign timeline show United Kingdom and other countries' campaign
+  cash in millions and in the country's currency ("£12.0M", not "£12" or "$12").
+- In Brazil and France the desk's projected outcome says "Too close to call" when no one is past
+  the winning line, instead of "Minority government" or "No majority".
 - The United States setup screen no longer says "Locked years are part of the United States
   pack" when you own every year, and years you buy while the screen is open unlock straight away.
 - The iPhone Store now describes the Complete Collection the way Android and the web do: every

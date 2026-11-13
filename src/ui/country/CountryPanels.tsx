@@ -184,6 +184,16 @@ const GOV_LABEL: Record<string, string> = {
   hung: "No majority",
 };
 
+/**
+ * The desk's "Projected outcome". A presidency (runoff or plurality countries)
+ * has no minority government or coalition: short of the winning line it is
+ * simply too close to call.
+ */
+export function projectedOutcomeLabel(country: Pick<CountryBundle, "runoff" | "plurality">, kind: string): string {
+  if (country.runoff || country.plurality) return kind === "majority" ? "Wins presidency" : "Too close to call";
+  return GOV_LABEL[kind] ?? kind;
+}
+
 export function CountryStandings() {
   const country = useCountryStore((s) => s.country)!;
   const game = useCountryStore((s) => s.game)!;
@@ -201,7 +211,7 @@ export function CountryStandings() {
   return (
     <div className="card scroll">
       <h3>National Standings</h3>
-      <div className="kv"><span className="k">Projected outcome</span><span style={{ color: partyInk(partyColor(country, live.largestParty)) }}>{(country.runoff || country.plurality) && live.government.kind === "majority" ? "Wins presidency" : GOV_LABEL[live.government.kind]}</span></div>
+      <div className="kv"><span className="k">Projected outcome</span><span style={{ color: partyInk(partyColor(country, live.largestParty)) }}>{projectedOutcomeLabel(country, live.government.kind)}</span></div>
       <div className="kv"><span className="k">Leading</span><span style={{ color: partyInk(partyColor(country, live.largestParty)) }}>{partyName(country, live.largestParty)}</span></div>
       <div className="kv"><span className="k">Your momentum</span><span>{game.resources[game.playerParty].momentum.toFixed(0)}</span></div>
       {country.runoff && voteShift !== null && (
