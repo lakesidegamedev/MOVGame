@@ -1,10 +1,10 @@
-// ITALY: four Chamber of Deputies elections (2008, 2013, 2018, 2022), one bundle.
+// ITALY: five Chamber of Deputies elections (2006, 2008, 2013, 2018, 2022), one bundle.
 //
 // Italy changed its electoral law three times in the period this bundle
 // covers, and the chamber itself shrank. The player's job is the same in every
 // election (win the most seats in the Chamber), but the machinery behind the
 // seats is different, and each election's tagline says which law applied.
-//   2008 and 2013 ("Porcellum", law 270 of 2005): closed-list proportional
+//   2006, 2008 and 2013 ("Porcellum", law 270 of 2005): closed-list proportional
 //   representation with a national majority bonus. The coalition with the most
 //   votes, if it fell short of 340 of the 630 seats, was topped up to 340
 //   (54%). One seat went to the Aosta Valley and twelve to Italians abroad.
@@ -98,6 +98,28 @@
 // 2008 (13 and 14 April): 630 seats, 316 for a majority. Centre-right 344
 // (PdL 276, Lega 60, MpA 8), centre-left 246 (PD 217, IdV 29), Union of the
 // Centre 36, others 4. Berlusconi's fourth government.
+//
+// 2006 was added later. It is the first election under the Porcellum: 617
+// seats in 26 constituencies, Aosta Valley's single seat and twelve seats for
+// Italians abroad, voting for the first time. Only two blocs stood: the
+// Union (the Olive Tree list of the Democrats of the Left and the Margherita,
+// Refoundation, the Rose in the Fist, Italy of Values, the Communists, the
+// Greens and the UDEUR, plus the South Tyrol People's Party and the Aosta
+// Valley autonomists) and the House of Freedoms (Forza Italia, National
+// Alliance, UDC, Lega Nord and allies). So `csx` is the Union and `cdx` the
+// House of Freedoms, and there is no `cen`, `rad` or `m5s`. Every number is
+// from the constituency page "Elezioni politiche in Italia del 2006 per
+// circoscrizione (Camera dei deputati)" on Italian Wikipedia, which reproduces
+// the Interior Ministry's results: Union 19,002,598 votes and House of
+// Freedoms 18,977,843 in Italy, a margin of 24,755. Aosta Valley is folded into
+// Piedmont (the autonomist list that won the seat goes to the Union) and the
+// overseas pool EST holds the 12 seats abroad (Union 7 with Italy of Values,
+// House of Freedoms 4 with Tremaglia's list, and the South American
+// associations' list, which sits in Others, 1). The seats are those of each
+// constituency after the bonus was distributed.
+// 2006 (9 and 10 April): 630 seats, 316 for a majority. The Union 348, House of
+// Freedoms 281, others 1. The Union took the bonus and Prodi formed a
+// government that lasted twenty months.
 //
 // Sources. Constituency results: the Italian Wikipedia pages above, which
 // reproduce the Interior Ministry's Eligendo archive. National seat totals and
@@ -393,6 +415,47 @@ export const ITALY: CountryBundle = {
         { id: "security_crime", headline: "A string of violent crimes keeps security on the front pages, and {party} owns the issue", role: "any", party: "cdx", weight: 2, appeal: 0.02, momentum: 5 },
       ],
     },
+
+    "2006": {
+      id: "2006",
+      year: 2006,
+      label: "2006 · Prodi v. Berlusconi",
+      tagline: "April 2006. Silvio Berlusconi has led the longest government in Italian republican history and asks for five more years. Romano Prodi leads a broad centre-left Union that has to hold together long enough to win. It is the first vote under the Porcellum, a new law that guarantees the winning coalition 340 of the 630 seats, and the two sides are within a point or two of each other.",
+      majority: { total: 630, threshold: 316 },
+      goalText: "316 of 630 seats",
+      salience: { tax: 0.85, economy: 0.75, jobs: 0.55, media: 0.5, electoral_law: 0.5, reputation: 0.3 },
+      regions: {
+        PIE: { v: { csx: 0.498, cdx: 0.493, oth: 0.009 }, s: { csx: 26, cdx: 21 } },
+        LOM: { v: { csx: 0.431, cdx: 0.569, oth: 0.001 }, s: { csx: 48, cdx: 50 } },
+        VEN: { v: { csx: 0.402, cdx: 0.568, oth: 0.029 }, s: { csx: 23, cdx: 26 } },
+        NEA: { v: { csx: 0.524, cdx: 0.460, oth: 0.015 }, s: { csx: 14, cdx: 10 } },
+        TOS: { v: { csx: 0.593, cdx: 0.407, oth: 0.001 }, s: { csx: 35, cdx: 20 } },
+        EMR: { v: { csx: 0.599, cdx: 0.401, oth: 0.001 }, s: { csx: 28, cdx: 15 } },
+        UMA: { v: { csx: 0.561, cdx: 0.439, oth: 0.001 }, s: { csx: 16, cdx: 9 } },
+        LAZ: { v: { csx: 0.500, cdx: 0.499, oth: 0.001 }, s: { csx: 30, cdx: 25 } },
+        ABM: { v: { csx: 0.525, cdx: 0.474, oth: 0.001 }, s: { csx: 9, cdx: 7 } },
+        CAM: { v: { csx: 0.509, cdx: 0.488, oth: 0.003 }, s: { csx: 35, cdx: 27 } },
+        PUG: { v: { csx: 0.483, cdx: 0.515, oth: 0.002 }, s: { csx: 23, cdx: 21 } },
+        BAC: { v: { csx: 0.575, cdx: 0.420, oth: 0.004 }, s: { csx: 18, cdx: 10 } },
+        SIC: { v: { csx: 0.419, cdx: 0.579, oth: 0.002 }, s: { csx: 26, cdx: 28 } },
+        SAR: { v: { csx: 0.525, cdx: 0.454, oth: 0.022 }, s: { csx: 10, cdx: 8 } },
+        EST: { v: { csx: 0.472, cdx: 0.381, oth: 0.147 }, s: { csx: 7, cdx: 4, oth: 1 } },
+      },
+      // The real story beats of 2006, in campaign order (a turn is one week; turn 5 is the week before polling day).
+      events: [
+        { id: "debate_rules", headline: "Berlusconi gives way on 3 March and drops his extra closing speech, and Prodi agrees at last to two televised debates, which gives {party} the first win of the campaign", role: "any", party: "csx", weight: 3, appeal: 0.01, momentum: 3, turn: 0 },
+        { id: "first_debate", headline: "More than 16 million watch the first Prodi and Berlusconi debate on 14 March, a record for political television. Berlusconi scribbles nervously, mixes up Iran and Iraq, and {party} is judged to have had the better night", role: "any", party: "csx", weight: 3, appeal: 0.02, momentum: 6, turn: 2 },
+        { id: "ici_surprise", headline: "In his closing three minutes on 3 April Berlusconi announces that he will abolish ICI, the local property tax. Allies are caught off guard, but the promise is the talk of the week for {party}", role: "any", party: "cdx", weight: 3, appeal: 0.025, momentum: 7, turn: 5 },
+        { id: "interests_remark", headline: "Berlusconi tells a business audience on 4 April that he has too much respect for Italians to think many of them would vote against their own interests, and he uses a crude word. {party}'s rivals quote it all week", role: "any", party: "cdx", weight: 2, appeal: -0.02, momentum: -5, turn: 5 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "inheritance_tax", headline: "Berlusconi says a Prodi government would bring back the inheritance tax and tax treasury bills, and Prodi answers that only the very rich would pay. Taxes dominate the last weeks for {party}", role: "any", party: "cdx", weight: 3, appeal: 0.02, momentum: 5 },
+        { id: "tax_wedge", headline: "Prodi promises a 5% cut in the tax wedge on labour, and {party} says the money will come from the rich and from tax evasion", role: "any", party: "csx", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "fini_follini", headline: "Fini moves to the Foreign Ministry and Marco Follini is brought in to replace him, and the centre-right's critics say the coalition's tax cut was paid for in posts for {party}'s allies", role: "any", party: "cdx", weight: 2, appeal: -0.015, momentum: -4 },
+        { id: "par_condicio", headline: "Berlusconi's control over six television channels and his dislike of the equal-time law are the opposition's favourite subject, and {party} makes it a question of fair play", role: "any", party: "csx", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "contract_five", headline: "Voters remember the 2001 Contract with Italians, which promised at least four of five points, and ask whether {party} delivered", role: "any", party: "cdx", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "overseas_vote", headline: "Italians abroad vote for twelve seats of their own for the first time, and {party} courts the emigrant vote in Europe and South America", role: "any", party: "csx", weight: 2, appeal: 0.01, momentum: 3 },
+      ],
+    },
   },
 
   leaders: {
@@ -421,6 +484,10 @@ export const ITALY: CountryBundle = {
       csx: { partyId: "csx", name: "Walter Veltroni", charisma: 68, energy: 74, competence: 62, machine: 60 },
       cen: { partyId: "cen", name: "Pier Ferdinando Casini", charisma: 56, energy: 55, competence: 62, machine: 52 },
       rad: { partyId: "rad", name: "Fausto Bertinotti", charisma: 62, energy: 50, competence: 56, machine: 44 },
+    },
+    "2006": {
+      csx: { partyId: "csx", name: "Romano Prodi", charisma: 44, energy: 66, competence: 80, machine: 62 },
+      cdx: { partyId: "cdx", name: "Silvio Berlusconi", charisma: 84, energy: 76, competence: 56, machine: 92 },
     },
   },
 
