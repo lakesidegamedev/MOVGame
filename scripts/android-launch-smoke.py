@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Capture real native Android flows, semantic markers, keyboard and restart."""
 import importlib.util
+import os
 import pathlib
 import re
+import shutil
+import struct
 import subprocess
 import sys
 import time
@@ -308,6 +311,78 @@ def restart_flows():
     capture('custom-after-restart', 'WEEK 1 OF')
 
 
+PLAY_PHONE = [('home', 'Margin of', 'ask'), ('library', 'Choose your election', 'ask'), ('game-US', 'CAMPAIGN DESK', 'game'),
+              ('map-IN', 'Regional projections', 'game'), ('map-JP', 'Regional projections', 'game'),
+              ('reveal-US', 'Election night', 'game'), ('results-UK', 'ELECTION RESULT', 'game'), ('library-IN', 'Launch campaign', 'ask')]
+PLAY_TABLET = [('home', 'Margin of', 'ask'), ('game-US', 'CAMPAIGN DESK', 'game'), ('map-IN', 'Regional projections', 'game'),
+               ('reveal-US', 'Election night', 'game'), ('results-UK', 'ELECTION RESULT', 'game')]
+
+
+def png_size(path):
+    with open(path, 'rb') as image:
+        header = image.read(24)
+    return struct.unpack('>II', header[16:24])
+
+
+def play_flows():
+    # Google Play listing screenshots: 9:16 phone and 9:16 portrait seven and
+    # ten inch tablets, with a clean demo-mode status bar. Only on
+    # build/android-play. Portrait shows the whole campaign desk; landscape
+    # left it in a short band between the top bar and End Week.
+    adb('shell', 'settings', 'put', 'global', 'sysui_demo_allowed', '1')
+    demo = ['shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command']
+    adb(*demo, 'enter')
+    adb(*demo, 'clock', '-e', 'hhmm', '0941')
+    adb(*demo, 'battery', '-e', 'level', '100', '-e', 'plugged', 'false')
+    adb(*demo, 'network', '-e', 'wifi', 'show', '-e', 'level', '4')
+    adb(*demo, 'network', '-e', 'mobile', 'show', '-e', 'datatype', 'none', '-e', 'level', '4')
+    adb(*demo, 'notifications', '-e', 'visible', 'false')
+    try:
+        for label, size, density, screens, expected in [
+                ('phone', None, None, PLAY_PHONE, None),
+                ('tablet-7', '1080x1920', '280', PLAY_TABLET, (1080, 1920)),
+                ('tablet-10', '1440x2560', '320', PLAY_TABLET, (1440, 2560))]:
+            if size:
+                adb('shell', 'wm', 'size', size)
+                adb('shell', 'wm', 'density', density)
+                time.sleep(3)
+            folder = output / 'play' / label
+            folder.mkdir(parents=True, exist_ok=True)
+            for number, (flow, marker, mode) in enumerate(screens, start=1):
+                name = f'play-{label}-{flow}'
+                before = len(failures)
+                shot(flow, marker, mode, name=name)
+                if len(failures) > before:
+                    continue
+                width, height = png_size(output / f'{name}.png')
+                short, long = sorted((width, height))
+                if short < 1080 or long * 9 != short * 16 or (expected and (width, height) != expected):
+                    failures.append(f'{name}: {width}x{height} is not a Play {label} size')
+                    continue
+                shutil.copy(output / f'{name}.png', folder / f'{number:02d}-{flow}.png')
+                print(f'PASS play {label} {flow} {width}x{height}', flush=True)
+    finally:
+        adb('shell', 'wm', 'size', 'reset')
+        adb('shell', 'wm', 'density', 'reset')
+        adb(*demo, 'exit')
+
+
+def account_delete_flows():
+    # Delete account on the signed-in Account screen: the card, the
+    # confirmation, and Cancel leaving the account in place. Runs last because
+    # the capture account has no session and must not touch other flows.
+    launch('account-signed-in')
+    capture('account-signed-in', 'Welcome, campaigner', 'ask')
+    tap_label('Delete account')
+    capture('account-delete-confirm', 'It cannot be undone', 'ask')
+    tap_label('Cancel', pinned=True)
+    # Cancel leaves the screen scrolled to the Delete account card, so check
+    # that card rather than the welcome line at the top.
+    capture('account-delete-cancelled', 'Delete your account', 'ask')
+    if 'IT CANNOT BE UNDONE' in semantic_text('account-delete-cancelled-check'):
+        raise RuntimeError('Cancel did not close the Delete account confirmation')
+
+
 def section(run):
     # Keep capturing after a failed section so one broken flow does not hide
     # every later screen. The job still fails at the end.
@@ -327,10 +402,15 @@ try:
     adb('shell', 'settings', 'put', 'global', 'window_animation_scale', '0')
     adb('shell', 'settings', 'put', 'global', 'transition_animation_scale', '0')
     adb('shell', 'settings', 'put', 'global', 'animator_duration_scale', '0')
-    for run in (ask_flows, route_flows, accessibility_flows, layout_flows, queue_flows, keyboard_flows, restart_flows):
+    if os.environ.get('MOV_PLAY_CAPTURES') == '1':
+        section(play_flows)
+    for run in (ask_flows, route_flows, accessibility_flows, layout_flows, queue_flows, keyboard_flows, restart_flows, account_delete_flows):
         section(run)
     if failures:
         raise RuntimeError('Failed flows: ' + '; '.join(failures))
 finally:
     (output / 'logcat.txt').write_text(adb('logcat', '-d', '-t', '1200'))
+    # The main buffer rolls over during a full run; the crash buffer keeps
+    # every app crash with its stack trace.
+    (output / 'logcat-crash.txt').write_text(adb('logcat', '-b', 'crash', '-d'))
     adb('shell', 'am', 'force-stop', PACKAGE)

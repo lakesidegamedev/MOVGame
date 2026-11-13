@@ -27,6 +27,8 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   then Delete account, and type your username to confirm. It removes the game account with its
   cloud saves, scores and achievements, and signs you out. Packs you bought stay with your Lakeside
   Games account.
+- Android: Account now has Delete account, like iPhone. It permanently removes your Margin of
+  Victory account with its cloud saves, scores and achievements, after you confirm.
 - Leaders and candidates have photos in every country, on the web and in the desktop app: on the
   setup screen's party and candidate cards, by the title and on every party's row on election
   night, on the projection banner, and above the winner on the results screen, each in a ring of
@@ -49,8 +51,6 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   14 days, no questions asked." It links to the full Lakeside store page for Margin of Victory.
 - When Lakeside makes everything free for a while, the Store says "Everything is free to play
   while A House Divided is paused", shows every pack as open, and shows no prices or Buy buttons.
-
-
 - Margin of Victory has a new web address: lakesidegames.net/games/margin-of-victory. The old
   /games/electioneer address keeps working and sends you to the new one. Saves, sign-in and
   purchases carry over.
@@ -62,6 +62,12 @@ Every pull request that changes the game, the apps, content or tooling adds its 
 
 ### Fixed
 
+- In the iPhone and Android apps, Ask keeps Lakeside's sign-in and account pages, now at
+  lakesidegames.net/account, inside Ask instead of sending you to your phone's browser.
+- The iPhone and Android apps no longer run out of memory and close when you add an action after
+  starting many campaigns without signing in. Each of those campaigns kept its own autosave forever;
+  the apps now keep the five most recent ones (plus the campaign you are playing). Named saves and
+  signed-in autosaves are not affected.
 - After a loss with a locked next election, the results screen now offers the same country's other
   free election first (United States 2020 after United States 2024) instead of a free election in
   another country, and names it with its year once: "2020 · Biden v. Trump", not "2020 2020".

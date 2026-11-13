@@ -22,6 +22,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.lakesidegames.electioneer.BuildConfig
+import com.lakesidegames.electioneer.engine.NativeAskNavigation
 import com.lakesidegames.electioneer.engine.NativeLakesideLogin
 import com.lakesidegames.electioneer.engine.NativeCatalog
 import java.util.concurrent.atomic.AtomicInteger
@@ -40,10 +41,6 @@ private class AskBrowser(private val context: Context, private val smoke: String
     private var activeUrl = ""
     private var mayRetry = true
     private val fixtureRequests = AtomicInteger()
-    private val allowedHosts = setOf("ask.lakesidegames.net", "auth.lakesidegames.net",
-        "auth.ahousedividedgame.com", "ahousedividedgame.com", "www.ahousedividedgame.com",
-        "sandbox.ahousedividedgame.com", "accounts.lakesidegames.net", "discord.com",
-        "www.google.com", "appleid.apple.com", "idmsa.apple.com")
     var view: WebView by mutableStateOf(createView())
         private set
 
@@ -63,7 +60,7 @@ private class AskBrowser(private val context: Context, private val smoke: String
                     showSignInNotice(NativeLakesideLogin.GOOGLE_UNAVAILABLE)
                     return true
                 }
-                val allowed = url.scheme == "https" && (url.port == -1 || url.port == 443) && url.host in allowedHosts
+                val allowed = NativeAskNavigation.allows(url.scheme, url.host, url.port, url.path)
                 if (allowed) {
                     if (request.isForMainFrame) mayRetry = request.method == "GET" && url.host == "ask.lakesidegames.net"
                     return false
@@ -185,7 +182,8 @@ private class AskBrowser(private val context: Context, private val smoke: String
                 phase = AskPhase.READY
                 retries = 0
                 if (BuildConfig.DEBUG) {
-                    android.util.Log.i("MOVAsk", if (Uri.parse(activeUrl).host == "auth.lakesidegames.net")
+                    val page = Uri.parse(view.url ?: activeUrl)
+                    android.util.Log.i("MOVAsk", if (NativeAskNavigation.isSignInPage(page.host, page.path))
                         "MOV_ASK_SIGNIN_REACHED_EMBEDDED_AUTH" else "MOV_ASK_DOCUMENT_READY")
                     if (Uri.parse(activeUrl).host == "ask.lakesidegames.net") view.evaluateJavascript(
                         "(() => { try { const s = JSON.parse(sessionStorage.getItem('ask.movSnapshot')); return s?.version === 1 && s?.game === 'electioneer' && typeof s?.scenario === 'string' ? s.country : null; } catch { return null; } })()"
