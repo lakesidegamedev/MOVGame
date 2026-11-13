@@ -28,4 +28,27 @@ export const NZ_ELECTION_ISSUES: Record<string, CountryIssueDef[]> = {
     { id: "climate", name: "Clean rivers & water", blurb: "Swimmable rivers, dairy pollution and Labour's proposed royalty on water used for irrigation." },
     { id: "immigration", name: "Immigration", blurb: "Record net migration of about 72,000 a year, and Labour and NZ First promises to cut it." },
   ],
+  "2014": [
+    { id: "economy_tax", name: "Capital gains tax", blurb: "Labour's tax on gains from investment property, National's promise of a surplus, and the row over homes held in family trusts." },
+    { id: "integrity", name: "Dirty Politics", blurb: "Nicky Hager's book on the leaked Cameron Slater emails and Judith Collins' resignation as a minister." },
+    { id: "housing", name: "Housing", blurb: "Auckland prices out of reach, and National's plan to let KiwiSaver members spend their tax credits on a first home." },
+    { id: "health", name: "Free doctor visits", blurb: "Labour's promise of free doctor visits and prescriptions for pregnant women, children under 13 and people over 65." },
+    { id: "child_poverty", name: "Child poverty", blurb: "Children in cold, damp homes and the argument over how much help for poor families the government should pay for." },
+    { id: "spying", name: "Surveillance", blurb: "Kim Dotcom's fight with the government and the Moment of Truth event on mass surveillance and the Five Eyes network." },
+  ],
+  "2011": [
+    { id: "assets", name: "Asset sales", blurb: "National's plan to sell minority stakes in state energy companies, and the pledge from Labour and the Greens to stop it." },
+    { id: "economy_tax", name: "Economy & recovery", blurb: "The Christchurch earthquakes, the Rena oil spill and a slow recovery from the recession." },
+    { id: "superannuation", name: "Superannuation age", blurb: "The age at which people can claim New Zealand Superannuation, and the argument over raising it above 65." },
+    { id: "cost_of_living", name: "Jobs & prices", blurb: "Youth unemployment and the cost of food and power for families on ordinary incomes." },
+    { id: "climate", name: "Environment & mining", blurb: "The Emissions Trading Scheme, mining on conservation land and the Rena spill." },
+    { id: "referendums", name: "Voting system referendum", blurb: "The referendum held with the election on whether to keep mixed-member proportional voting." },
+  ],
+  "2008": [
+    { id: "economy_tax", name: "Tax cuts", blurb: "National's promise of about $47 a week more for the average earner, and Labour's warning against borrowing for tax cuts." },
+    { id: "recession", name: "Recession & the banks", blurb: "Treasury's August call that the economy was in recession, and Labour's guarantee of every retail bank deposit." },
+    { id: "integrity", name: "Trust", blurb: "Helen Clark's theme for the campaign, John Key's Tranz Rail shares and the inquiries into New Zealand First's donations." },
+    { id: "cost_of_living", name: "Food & petrol", blurb: "Petrol above two dollars a litre and the highest inflation in eighteen years." },
+    { id: "electoral_finance", name: "Electoral Finance Act", blurb: "The new law on election spending and the complaint that it had a chilling effect on political activity." },
+  ],
 };

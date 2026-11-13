@@ -40,4 +40,12 @@ export const IT_ELECTION_ISSUES: Record<string, CountryIssueDef[]> = {
     { id: "industry", name: "Alitalia", blurb: "Air France-KLM's bid for the state airline and Berlusconi's call for Italian buyers instead." },
     { id: "pensions", name: "Pensions", blurb: "The 2007 deal replacing a sudden jump in the pension age with gradual steps." },
   ],
+  "2006": [
+    { id: "tax", name: "Taxes", blurb: "Berlusconi's promise to abolish the ICI property tax, the inheritance tax, and Prodi's plan for a 5% cut in the tax wedge." },
+    { id: "economy", name: "A stagnant economy", blurb: "Years of weak growth, rising public debt and the argument over who paid for the 2005 tax cut." },
+    { id: "jobs", name: "Jobs & job security", blurb: "The 2003 labour reform that made temporary contracts easy, and whether to undo it." },
+    { id: "media", name: "Television & the par condicio", blurb: "Berlusconi's control over six channels and the equal-time law he wanted repealed." },
+    { id: "electoral_law", name: "The new electoral law", blurb: "The Porcellum, passed by the centre-right months before the vote, with a 340-seat bonus for the winning coalition." },
+    { id: "reputation", name: "Italy's reputation", blurb: "Berlusconi's standing with Europe and the United States and the opposition's charge that Italy has lost influence." },
+  ],
 };

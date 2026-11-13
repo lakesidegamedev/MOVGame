@@ -1099,6 +1099,24 @@
  {
   "country": "it",
   "party": "cdx",
+  "to": 2006,
+  "wiki": "House of Freedoms",
+  "qid": "Q1046657",
+  "label": "House of Freedoms",
+  "logos": [
+   {
+    "file": "Casa delle Libertà.svg",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ],
+  "skip": "Commons file is a recreation uploaded as the uploader's own work with a public domain claim that is weak, so the slot shows its colour"
+ },
+ {
+  "country": "it",
+  "party": "cdx",
+  "from": 2008,
   "to": 2013,
   "wiki": "The People of Freedom",
   "qid": "Q47720",
@@ -1144,6 +1162,17 @@
  {
   "country": "it",
   "party": "csx",
+  "to": 2006,
+  "wiki": "The Union (Italy)",
+  "qid": "Q1138768",
+  "label": "The Union",
+  "logos": [],
+  "skip": "The Wikidata item names no logo"
+ },
+ {
+  "country": "it",
+  "party": "csx",
+  "from": 2008,
   "wiki": "Democratic Party (Italy)",
   "qid": "Q47729",
   "label": "Democratic Party",
@@ -1368,7 +1397,7 @@
  {
   "country": "es",
   "party": "pod",
-  "from": 2019,
+  "from": 2016,
   "to": 2019,
   "wiki": "Unidas Podemos",
   "qid": "Q24039754",
@@ -1502,6 +1531,24 @@
     "to": null
    }
   ]
+ },
+ {
+  "country": "es",
+  "party": "ciu",
+  "from": 2016,
+  "to": 2016,
+  "wiki": "Democratic Convergence of Catalonia",
+  "qid": "Q1129443",
+  "label": "Democratic Convergence of Catalonia",
+  "logos": [
+   {
+    "file": "Logo CDC 2015.png",
+    "rank": "normal",
+    "from": null,
+    "to": null
+   }
+  ],
+  "skip": "Commons file is a party logo uploaded as the uploader's own work with a public domain claim that is weak, so the slot shows its colour"
  },
  {
   "country": "es",

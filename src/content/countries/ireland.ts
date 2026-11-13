@@ -24,16 +24,19 @@ export const IRELAND_MODULE: CountryModule = {
       description: "The recovery election nobody felt. Fine Gael and Labour lose a combined 56 seats and independents multiply." },
     { electionId: "2011", year: 2011, label: "2011 · Kenny v. Gilmore v. Martin", difficulty: "hard",
       description: "The Troika election. Fianna Fáil falls from 78 seats to 20 and Fine Gael and Labour take 113 between them." },
+    { electionId: "2007", year: 2007, label: "2007 · Ahern v. Kenny", difficulty: "hard", addedLater: true,
+      description: "Bertie Ahern seeks a third term while the Mahon Tribunal asks about his finances. Kenny's Fine Gael and Rabbitte's Labour offer an Alliance for Change, and the polls say it could go either way." },
   ],
   systemLabel: "Single transferable vote",
   pack: {
     id: "ireland",
     name: "Ireland",
-    description: "Four Dáil elections from 2011 to 2024 under the single transferable vote: the Troika landslide, the water charge election, Sinn Féin's surge and the coalition that followed.",
+    description: "Five Dáil elections from 2007 to 2024 under the single transferable vote: the last Celtic Tiger election, the Troika landslide, the water charge election, Sinn Féin's surge and the coalition that followed.",
   },
   daily: { pair: ["ff", "fg"], names: { ff: "Fianna Fáil", fg: "Fine Gael" } },
   next: {
     chain: [
+      { id: "2007", blurb: "Continue the timeline: the end of the Celtic Tiger" },
       { id: "2011", blurb: "Continue the timeline: the Troika election" },
       { id: "2016", blurb: "Continue the timeline: the recovery election" },
       { id: "2020", blurb: "Continue the timeline: the three-way split" },

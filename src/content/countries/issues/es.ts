@@ -40,4 +40,21 @@ export const ES_ELECTION_ISSUES: Record<string, CountryIssueDef[]> = {
     { id: "security", name: "The end of ETA", blurb: "ETA's October announcement that its violence is over, and the Basque nationalist left back on the ballot." },
     { id: "corruption", name: "Gürtel", blurb: "The Gürtel case and Camps's resignation as president of Valencia in July." },
   ],
+  "2019nov": [
+    { id: "catalonia", name: "Catalonia & the sentence", blurb: "The Supreme Court's 9 to 13 year sentences for the Catalan leaders, and the violent protests that followed in Barcelona." },
+    { id: "deadlock", name: "A second election", blurb: "April's winner could not form a government, and each party blames the others for a repeat vote." },
+    { id: "alliances", name: "Who could govern", blurb: "The failed talks between Sánchez and Iglesias, and Más País's entry as a new force on the left." },
+    { id: "franco", name: "Franco's exhumation", blurb: "The Supreme Court's ruling and the removal of Franco's remains from the Valley of the Fallen." },
+    { id: "jobs", name: "Jobs & the economy", blurb: "Slowing growth and unemployment near 14 percent, with a minimum wage raised to 900 euros." },
+    { id: "immigration", name: "Immigration & national unity", blurb: "Vox's campaign on borders and the unity of Spain, in its first national debate." },
+  ],
+  "2016": [
+    { id: "jobs", name: "Jobs & unemployment", blurb: "About a fifth of the workforce out of work, a generation on temporary contracts and youth unemployment well above 40%." },
+    { id: "corruption", name: "Corruption", blurb: "The PP's court cases and the question of who should stay in the party, including Rita Barberá." },
+    { id: "deadlock", name: "Another election", blurb: "Six months of failed talks, the dead pact between Sánchez and Rivera and who gets the blame." },
+    { id: "renewal", name: "Political renewal", blurb: "Unidos Podemos and Citizens against the old parties, and the sorpasso: Podemos overtaking the PSOE." },
+    { id: "catalonia", name: "Catalonia", blurb: "The Catalan independence process and what Madrid will offer." },
+    { id: "austerity", name: "Austerity & the deficit", blurb: "Brussels' warnings on the deficit and the budget cuts that follow." },
+    { id: "stability", name: "Stability after Brexit", blurb: "The PP's closing message after the British vote to leave the European Union, and whether it was aimed at Unidos Podemos." },
+  ],
 };

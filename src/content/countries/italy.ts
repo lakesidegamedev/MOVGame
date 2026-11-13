@@ -11,7 +11,7 @@ export const ITALY_MODULE: CountryModule = {
   flag: "🇮🇹",
   engine: "country",
   load: () => import("./italy.bundle").then((m) => m.ITALY),
-  blurb: "Coalitions, a majority bonus, then a mixed system and a chamber cut to 400: four elections from 2008 to 2022.",
+  blurb: "Coalitions, a majority bonus, then a mixed system and a chamber cut to 400: five elections from 2006 to 2022.",
   cover: "images/covers/country-it.jpg",
   art: { a: "#0f3d2e", b: "#c8102e", glow: "rgba(236,240,245,0.2)" },
   freeElections: ["2022"],
@@ -24,16 +24,19 @@ export const ITALY_MODULE: CountryModule = {
       description: "Monti's austerity, Berlusconi's comeback and Grillo's tsunami. The bonus gives the winner 340 seats, and the Senate is a trap." },
     { electionId: "2008", year: 2008, label: "2008 · Berlusconi v. Veltroni", difficulty: "hard",
       description: "Prodi has fallen. Veltroni goes it alone, Berlusconi merges his party with Fini's, and Naples is buried in rubbish." },
+    { electionId: "2006", year: 2006, label: "2006 · Prodi v. Berlusconi", difficulty: "hard", addedLater: true,
+      description: "The first vote under the Porcellum. Berlusconi seeks five more years, Prodi leads a broad centre-left Union, and the winner of the bonus is decided by a margin of about 25,000 votes." },
   ],
   systemLabel: "Coalition bonus, then mixed",
   pack: {
     id: "italy",
     name: "Italy",
-    description: "Four elections to the Chamber of Deputies from 2008 to 2022: the Berlusconi comeback, the Monti and Grillo years, and the Rosatellum.",
+    description: "Five elections to the Chamber of Deputies from 2006 to 2022: the Prodi squeak, the Berlusconi comeback, the Monti and Grillo years, and the Rosatellum.",
   },
   daily: { pair: ["csx", "cdx"], names: { csx: "the Centre-left", cdx: "the Centre-right" } },
   next: {
     chain: [
+      { id: "2006", blurb: "Continue the timeline: the first Porcellum election" },
       { id: "2008", blurb: "Continue the timeline: Veltroni and the Naples rubbish" },
       { id: "2013", blurb: "Continue the timeline: Monti, Grillo and the bonus" },
       { id: "2018", blurb: "Continue the timeline: the first Rosatellum" },
@@ -42,6 +45,6 @@ export const ITALY_MODULE: CountryModule = {
   },
   guide: {
     title: "Italy",
-    body: "Chamber of Deputies only. In 2008 and 2013 the winning coalition got a bonus that lifted it to 340 of 630 seats. In 2018 and 2022 about a third of seats go to single-member districts and the rest to proportional lists, and the chamber shrinks to 400 seats in 2022. Parties are the coalitions voters chose between, so Centre-right means Forza Italia or the People of Freedom, the Lega and Brothers of Italy together. Italians abroad are their own pool. Left and right blocs never govern together here, and a real government also needs the Senate, which is not modelled.",
+    body: "Chamber of Deputies only. In 2006, 2008 and 2013 the winning coalition got a bonus that lifted it to 340 of 630 seats. In 2018 and 2022 about a third of seats go to single-member districts and the rest to proportional lists, and the chamber shrinks to 400 seats in 2022. Parties are the coalitions voters chose between, so Centre-right means Forza Italia or the People of Freedom, the Lega and Brothers of Italy together. Italians abroad are their own pool. Left and right blocs never govern together here, and a real government also needs the Senate, which is not modelled.",
   },
 };

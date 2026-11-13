@@ -1,4 +1,4 @@
-// NEW ZEALAND: three MMP general elections, one bundle.
+// NEW ZEALAND: six MMP general elections, one bundle.
 //
 // Mixed-member proportional representation, modelled the way Germany is:
 // regional pools whose seats move one for one with the party vote (seat
@@ -24,6 +24,34 @@
 // Green 10, ACT 10, Te Pāti Māori 2.
 // 2017 (23 September): 120 seats. National 56, Labour 46, NZ First 9,
 // Green 8, ACT 1. NZ First chose Labour; the Greens gave confidence and supply.
+//
+// 2014, 2011 and 2008 were added later. Method for those three: each region's
+// `v` is the party vote by electorate from the voting-place counts published
+// as open data by the nzelect project (Peter Ellis, built from the Electoral
+// Commission's official results), averaged over the region's electorates
+// (general electorates equal, the Māori electorates at half weight), then
+// raked so the national shares match the Electoral Commission's official final
+// party vote, special votes included (as tabulated on Wikipedia's election
+// articles). `s` splits each real national seat total across the pools in
+// proportion to those votes, with the real electorate winners fixed where they
+// are known to be decisive: the seven Māori electorates, ACT's Epsom seat and
+// the single-seat winners in Ohariu (United Future) and, in 2008, Wigram
+// (Progressive). Pools are the electorate count's share of the chamber, with
+// the Māori pool fixed at its seven electorate winners. The grouping of
+// electorates into the ten regions is the same as for 2017 to 2023.
+//
+// 2014 (20 September): 121 seats, 61 for a majority. National 60, Labour 32,
+// Green 14, NZ First 11, Māori Party 2, ACT 1, United Future 1. Internet Mana
+// lost Hone Harawira's Te Tai Tokerau seat and left Parliament. Conservatives
+// 3.97% (Others).
+// 2011 (26 November): 121 seats. National 59, Labour 34, Green 14, NZ First 8,
+// Māori Party 3, ACT 1, Mana 1, United Future 1. The vote shared the ballot with
+// a referendum, which kept MMP. Mana and United Future sit in Others.
+// 2008 (8 November): 122 seats, 62 for a majority. National 58, Labour 43,
+// Green 9, ACT 5, Māori Party 5, Progressive 1, United Future 1. NZ First won
+// 4.07% and no seats. Progressive and United Future sit in Others.
+// Scheduled story beats fall in the week they happened, counting from six
+// weeks before polling day (turn 0) to the final week (turn 5).
 
 import type { CountryBundle } from "@engine/countryGame";
 import { attachElectionIssues } from "./types";
@@ -239,6 +267,120 @@ export const NEW_ZEALAND: CountryBundle = {
         { id: "morgan_top", headline: "Gareth Morgan's Opportunities Party grabs headlines with a bold tax plan, and {party} peels off restless voters", role: "any", party: "oth", weight: 2, appeal: 0.015, momentum: 4 },
       ],
     },
+
+    "2014": {
+      id: "2014",
+      year: 2014,
+      label: "2014 · Key v. Cunliffe",
+      tagline: "September 2014. John Key is after a third term with a growing economy and a steady hand. Nicky Hager's book has put National's methods on trial, Labour's David Cunliffe wants a capital gains tax and free doctor visits, and Winston Peters and Kim Dotcom are both in the race. Win the third term, or find a left that adds up.",
+      majority: { total: 121, threshold: 61 },
+      goalText: "61 of 121 seats",
+      salience: { economy_tax: 0.8, integrity: 0.75, housing: 0.65, health: 0.5, child_poverty: 0.5, spying: 0.4 },
+      regions: {
+        NTH: { v: { nat: 0.561, lab: 0.161, grn: 0.101, act: 0.010, nzf: 0.087, tpm: 0.005, oth: 0.075 }, s: { nat: 8, lab: 2, grn: 2, nzf: 2 } },
+        AKC: { v: { nat: 0.431, lab: 0.307, grn: 0.132, act: 0.015, nzf: 0.062, tpm: 0.005, oth: 0.049 }, s: { nat: 7, lab: 4, grn: 2, act: 1, nzf: 1, tpm: 1 } },
+        AKS: { v: { nat: 0.457, lab: 0.341, grn: 0.053, act: 0.012, nzf: 0.079, tpm: 0.005, oth: 0.053 }, s: { nat: 7, lab: 5, grn: 1, nzf: 1 } },
+        WBP: { v: { nat: 0.543, lab: 0.181, grn: 0.078, act: 0.004, nzf: 0.116, tpm: 0.008, oth: 0.070 }, s: { nat: 8, lab: 3, grn: 1, nzf: 2 } },
+        CNI: { v: { nat: 0.514, lab: 0.223, grn: 0.084, act: 0.004, nzf: 0.098, tpm: 0.007, oth: 0.071 }, s: { nat: 8, lab: 3, grn: 1, nzf: 2 } },
+        WGN: { v: { nat: 0.437, lab: 0.269, grn: 0.155, act: 0.004, nzf: 0.076, tpm: 0.006, oth: 0.052 }, s: { nat: 6, lab: 3, grn: 3, nzf: 1, oth: 1 } },
+        UPS: { v: { nat: 0.486, lab: 0.214, grn: 0.122, act: 0.003, nzf: 0.088, tpm: 0.004, oth: 0.082 }, s: { nat: 3, lab: 1, grn: 1 } },
+        CAN: { v: { nat: 0.511, lab: 0.225, grn: 0.124, act: 0.005, nzf: 0.076, tpm: 0.004, oth: 0.054 }, s: { nat: 8, lab: 3, grn: 2, nzf: 1 } },
+        OTS: { v: { nat: 0.485, lab: 0.242, grn: 0.124, act: 0.003, nzf: 0.081, tpm: 0.003, oth: 0.061 }, s: { nat: 5, lab: 2, grn: 1, nzf: 1 } },
+        MAO: { v: { nat: 0.078, lab: 0.399, grn: 0.111, act: 0.001, nzf: 0.129, tpm: 0.157, oth: 0.124 }, s: { lab: 6, tpm: 1 } },
+      },
+      // The real story beats of 2014, in campaign order (a turn is one week; turn 5 is the week before polling day).
+      events: [
+        { id: "dirty_politics", headline: "Nicky Hager's Dirty Politics lands on 13 August, drawn from the leaked emails of the blogger Cameron Slater, and {party} answers for its methods for the rest of the campaign", role: "any", party: "nat", weight: 3, appeal: -0.03, momentum: -8, turn: 0 },
+        { id: "free_gp_visits", headline: "Labour opens its campaign on 10 August with free doctor visits and prescriptions for pregnant women, children under 13 and people over 65, and {party} has something to sell", role: "any", party: "lab", weight: 3, appeal: 0.015, momentum: 4, turn: 0 },
+        { id: "kiwisaver_deposit", headline: "National launches in South Auckland on 24 August and lets KiwiSaver members spend their tax credits on a first home, and {party} goes after Labour's housing ground", role: "any", party: "nat", weight: 3, appeal: 0.02, momentum: 5, turn: 2 },
+        { id: "collins_resigns", headline: "Judith Collins resigns from Cabinet on 30 August after an email suggests she undermined the head of the Serious Fraud Office, and {party} loses a senior minister in the middle of the campaign", role: "any", party: "nat", weight: 3, appeal: -0.025, momentum: -6, turn: 3 },
+        { id: "press_debate_cgt", headline: "In the Christchurch debate on 2 September Key lands a hit when Cunliffe cannot say whether family homes held in trusts would escape Labour's capital gains tax, and {party} loses the economic argument", role: "any", party: "lab", weight: 3, appeal: -0.025, momentum: -7, turn: 3 },
+        { id: "act_launch", headline: "ACT launches on 7 September with a promise to repeal the Resource Management Act and scrap the Overseas Investment Office, and {party} gives its base something to cheer", role: "any", party: "act", weight: 2, appeal: 0.01, momentum: 3, turn: 4 },
+        { id: "harawira_email", headline: "Hone Harawira sends party members an expletive-filled email on 8 September about the Internet Party's cannabis push, and {party} looks like a marriage of convenience", role: "any", party: "oth", weight: 3, appeal: -0.02, momentum: -6, turn: 4 },
+        { id: "moment_of_truth", headline: "Kim Dotcom's Moment of Truth event on 15 September brings Glenn Greenwald, Edward Snowden and Julian Assange into one night on surveillance, and the headlines do not turn into votes for {party}", role: "any", party: "oth", weight: 2, appeal: -0.01, momentum: -4, turn: 5 },
+        { id: "steak_not_lamb", headline: "Key tells supporters on 17 September that if they want a National government they should party vote National, not buy 'a lamb chop' when they want steak, and {party} squeezes its partners", role: "any", party: "nat", weight: 3, appeal: 0.02, momentum: 5, turn: 5 },
+        { id: "davis_endorsed", headline: "Key and Winston Peters both back Labour's Kelvin Davis in Te Tai Tokerau on 18 September, and Hone Harawira says they are trying to overturn the voters' choice, which costs {party} its electorate lifeline", role: "any", party: "oth", weight: 2, appeal: -0.02, momentum: -5, turn: 5 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "peters_crowds", headline: "Winston Peters fills provincial halls on the campaign trail, and {party} climbs", role: "any", party: "nzf", weight: 2, appeal: 0.025, momentum: 7 },
+        { id: "craig_billboards", headline: "Colin Craig's Conservatives plaster the country with billboards and polls close to the 5% line, and {party} peels votes from the right", role: "any", party: "oth", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "turia_goes", headline: "Tariana Turia, co-founder of the Māori Party, is standing down at this election, and {party} has to hold its seats without her", role: "any", party: "tpm", weight: 2, appeal: -0.02, momentum: -4 },
+        { id: "green_surplus", headline: "The Greens' Russel Norman and Metiria Turei hold steady near 10% and say they want to be in a Labour-led government, and {party} stays in the frame", role: "any", party: "grn", weight: 2, appeal: 0.015, momentum: 4 },
+      ],
+    },
+
+    "2011": {
+      id: "2011",
+      year: 2011,
+      label: "2011 · Key v. Goff",
+      tagline: "November 2011. Christchurch is still burying and rebuilding after the earthquakes, the Rugby World Cup has just been won at home, and John Key is the most popular prime minister in years. National wants to sell stakes in state power companies and Labour's Phil Goff wants to stop it. The voting system itself is on the ballot too. Win a second term, or make Key work for it.",
+      majority: { total: 121, threshold: 61 },
+      goalText: "61 of 121 seats",
+      salience: { assets: 0.8, economy_tax: 0.75, superannuation: 0.55, cost_of_living: 0.55, climate: 0.45, referendums: 0.4 },
+      regions: {
+        NTH: { v: { nat: 0.581, lab: 0.174, grn: 0.100, act: 0.016, nzf: 0.067, tpm: 0.006, oth: 0.056 }, s: { nat: 9, lab: 2, grn: 2, nzf: 1 } },
+        AKC: { v: { nat: 0.436, lab: 0.334, grn: 0.125, act: 0.012, nzf: 0.051, tpm: 0.007, oth: 0.035 }, s: { nat: 7, lab: 5, grn: 2, act: 1, nzf: 1 } },
+        AKS: { v: { nat: 0.457, lab: 0.370, grn: 0.054, act: 0.012, nzf: 0.062, tpm: 0.005, oth: 0.039 }, s: { nat: 7, lab: 5, grn: 1, nzf: 1 } },
+        WBP: { v: { nat: 0.539, lab: 0.196, grn: 0.092, act: 0.012, nzf: 0.099, tpm: 0.007, oth: 0.056 }, s: { nat: 8, lab: 3, grn: 2, nzf: 1 } },
+        CNI: { v: { nat: 0.514, lab: 0.248, grn: 0.097, act: 0.012, nzf: 0.070, tpm: 0.008, oth: 0.051 }, s: { nat: 8, lab: 4, grn: 1, nzf: 1 } },
+        WGN: { v: { nat: 0.433, lab: 0.304, grn: 0.152, act: 0.008, nzf: 0.056, tpm: 0.007, oth: 0.041 }, s: { nat: 6, lab: 4, grn: 2, nzf: 1, oth: 1 } },
+        UPS: { v: { nat: 0.490, lab: 0.244, grn: 0.139, act: 0.009, nzf: 0.059, tpm: 0.005, oth: 0.054 }, s: { nat: 3, lab: 1, grn: 1 } },
+        CAN: { v: { nat: 0.514, lab: 0.252, grn: 0.129, act: 0.008, nzf: 0.053, tpm: 0.004, oth: 0.039 }, s: { nat: 7, lab: 4, grn: 2, nzf: 1 } },
+        OTS: { v: { nat: 0.483, lab: 0.266, grn: 0.134, act: 0.011, nzf: 0.060, tpm: 0.004, oth: 0.043 }, s: { nat: 4, lab: 3, grn: 1, nzf: 1 } },
+        MAO: { v: { nat: 0.085, lab: 0.400, grn: 0.104, act: 0.002, nzf: 0.094, tpm: 0.167, oth: 0.148 }, s: { lab: 3, tpm: 3, oth: 1 } },
+      },
+      // The real story beats of 2011, in campaign order (a turn is one week; turn 5 is the week before polling day).
+      events: [
+        { id: "world_cup_final", headline: "The All Blacks win the Rugby World Cup final at Eden Park on 23 October, and the country's good mood rubs off on the government of {party}", role: "any", party: "nat", weight: 3, appeal: 0.015, momentum: 4, turn: 1 },
+        { id: "first_debate", headline: "Key and Goff meet in the first TVNZ debate on 31 October, and a text poll gives the night to Key with 61%, which steadies {party}'s lead", role: "any", party: "nat", weight: 3, appeal: 0.02, momentum: 6, turn: 2 },
+        { id: "tea_tape", headline: "Key and ACT's John Banks meet over tea in a Newmarket cafe on 11 November to signal an Epsom deal, and a journalist's recording of the chat makes it a scandal for {party}", role: "any", party: "nat", weight: 3, appeal: -0.015, momentum: -4, turn: 3 },
+        { id: "peters_debate", headline: "Winston Peters wins the minor parties' debate on 16 November in the viewers' text poll, with 36%, and {party} is suddenly a story again", role: "any", party: "nzf", weight: 3, appeal: 0.025, momentum: 7, turn: 4 },
+        { id: "worm_turns", headline: "Goff wins the TV3 debate on 21 November in front of an audience of undecided voters, and {party} gets its best night of the campaign", role: "any", party: "lab", weight: 3, appeal: 0.02, momentum: 6, turn: 5 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "asset_sales", headline: "National's plan to sell minority stakes in state energy companies keeps polling badly, and voters who dislike it look at {party}", role: "any", party: "lab", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "rena_oil", headline: "Oil from the grounded container ship Rena keeps washing onto Bay of Plenty beaches, and {party} makes the case against deep sea drilling", role: "any", party: "grn", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "mana_launch", headline: "Hone Harawira's new Mana party takes aim at the Māori Party in the Māori electorates, and {party} has a fight on its hands", role: "any", party: "tpm", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "brash_act", headline: "Don Brash takes over as ACT leader to rescue a party polling below the 5% line, but its best hope is still the Epsom seat, and {party} has to rely on National's goodwill", role: "any", party: "act", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "super_age", headline: "The age of superannuation eligibility comes up in the minor parties' debates on 30 October and 16 November, and Winston Peters says nobody else will defend the pension at 65, which wins {party} a hearing", role: "any", party: "nzf", weight: 2, appeal: 0.015, momentum: 4 },
+      ],
+    },
+
+    "2008": {
+      id: "2008",
+      year: 2008,
+      label: "2008 · Key v. Clark",
+      tagline: "November 2008. Helen Clark is after a fourth term, and says the campaign is about trust. John Key is promising change and a tax cut as the economy slips into recession and the world's banks wobble. Winston Peters is fighting for his seat and his party's life. Win a fourth term, or end nine years of Labour.",
+      majority: { total: 122, threshold: 62 },
+      goalText: "62 of 122 seats",
+      salience: { economy_tax: 0.8, recession: 0.7, integrity: 0.65, cost_of_living: 0.6, electoral_finance: 0.4 },
+      regions: {
+        NTH: { v: { nat: 0.563, lab: 0.236, grn: 0.059, act: 0.056, nzf: 0.041, tpm: 0.008, oth: 0.037 }, s: { nat: 8, lab: 4, grn: 1, act: 1 } },
+        AKC: { v: { nat: 0.432, lab: 0.375, grn: 0.078, act: 0.040, nzf: 0.030, tpm: 0.008, oth: 0.038 }, s: { nat: 7, lab: 6, grn: 1, act: 2 } },
+        AKS: { v: { nat: 0.455, lab: 0.363, grn: 0.030, act: 0.049, nzf: 0.037, tpm: 0.008, oth: 0.058 }, s: { nat: 7, lab: 6, act: 1 } },
+        WBP: { v: { nat: 0.526, lab: 0.271, grn: 0.054, act: 0.038, nzf: 0.062, tpm: 0.010, oth: 0.039 }, s: { nat: 8, lab: 4, grn: 1, act: 1 } },
+        CNI: { v: { nat: 0.492, lab: 0.319, grn: 0.059, act: 0.036, nzf: 0.045, tpm: 0.010, oth: 0.038 }, s: { nat: 8, lab: 5, grn: 1 } },
+        WGN: { v: { nat: 0.401, lab: 0.383, grn: 0.102, act: 0.030, nzf: 0.035, tpm: 0.009, oth: 0.040 }, s: { nat: 6, lab: 5, grn: 2, oth: 1 } },
+        UPS: { v: { nat: 0.460, lab: 0.331, grn: 0.092, act: 0.026, nzf: 0.038, tpm: 0.006, oth: 0.046 }, s: { nat: 3, lab: 2, grn: 1 } },
+        CAN: { v: { nat: 0.443, lab: 0.354, grn: 0.082, act: 0.028, nzf: 0.033, tpm: 0.006, oth: 0.054 }, s: { nat: 7, lab: 5, grn: 1, oth: 1 } },
+        OTS: { v: { nat: 0.444, lab: 0.363, grn: 0.081, act: 0.029, nzf: 0.036, tpm: 0.006, oth: 0.040 }, s: { nat: 4, lab: 4, grn: 1 } },
+        MAO: { v: { nat: 0.072, lab: 0.483, grn: 0.038, act: 0.005, nzf: 0.059, tpm: 0.314, oth: 0.029 }, s: { lab: 2, tpm: 5 } },
+      },
+      // The real story beats of 2008, in campaign order (a turn is one week; turn 5 is the week before polling day).
+      events: [
+        { id: "fiscal_update", headline: "The government's pre-election update on 6 October shows $3.1 billion less tax next year and more borrowing, and {party} has to defend its books just as it asks for a fourth term", role: "any", party: "lab", weight: 3, appeal: -0.025, momentum: -6, turn: 1 },
+        { id: "national_tax_plan", headline: "National unveils its tax plan on 9 October: around $47 a week more for people on the average wage or above, and {party} claims the economy and the high ground", role: "any", party: "nat", weight: 3, appeal: 0.02, momentum: 5, turn: 1 },
+        { id: "sfo_clears_nzf", headline: "The Serious Fraud Office clears New Zealand First on 11 October, and {party}'s leader says the whole investigation was a waste of time", role: "any", party: "nzf", weight: 3, appeal: 0.02, momentum: 6, turn: 1 },
+        { id: "bank_guarantee", headline: "At Labour's campaign launch on 12 October Helen Clark guarantees every retail bank deposit, a plan worth $150 billion, and National agrees to back it. {party} is seen to act on the crisis", role: "any", party: "lab", weight: 3, appeal: 0.02, momentum: 5, turn: 2 },
+        { id: "greens_labour_only", headline: "The Greens say on 20 October they could only form a government with Labour, and {party} clarifies where its votes will go", role: "any", party: "grn", weight: 2, appeal: 0.01, momentum: 3, turn: 3 },
+        { id: "nzf_cleared_again", headline: "The Electoral Commission clears New Zealand First on 24 October over donations it failed to declare, but {party} still has to climb back from the damage of the summer", role: "any", party: "nzf", weight: 2, appeal: 0.015, momentum: 4, turn: 3 },
+        { id: "dunne_goes_blue", headline: "United Future leader Peter Dunne says in late October his party will side with National after six years of backing Labour, and {party} loses a loyal partner", role: "any", party: "lab", weight: 2, appeal: -0.01, momentum: -3, turn: 4 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "peters_censure", headline: "Parliament censures Winston Peters 62 to 56 over the Owen Glenn donation, and {party} cannot shake the whiff of scandal", role: "any", party: "nzf", weight: 2, appeal: -0.03, momentum: -7 },
+        { id: "tranz_rail", headline: "Labour says John Key did not disclose nearly half his Tranz Rail shares while he was transport spokesman, and {party} has to deal with a question of trust", role: "any", party: "nat", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "petrol_prices", headline: "Petrol has crossed two dollars a litre and inflation is at an eighteen-year high, and voters who feel the squeeze look at {party}", role: "any", party: "nat", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "efa_chill", headline: "Critics say the Electoral Finance Act has a chilling effect on political activity, and {party} makes it a question of free speech", role: "any", party: "act", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "maori_marae_polls", headline: "Polls commissioned by the Marae programme suggest the Māori Party will win most of the Māori electorates, and {party} says it can work with either big party", role: "any", party: "tpm", weight: 2, appeal: 0.02, momentum: 5 },
+      ],
+    },
   },
 
   leaders: {
@@ -265,6 +407,30 @@ export const NEW_ZEALAND: CountryBundle = {
       grn: { partyId: "grn", name: "James Shaw", charisma: 52, energy: 62, competence: 60, machine: 50 },
       act: { partyId: "act", name: "David Seymour", charisma: 56, energy: 70, competence: 58, machine: 40 },
       tpm: { partyId: "tpm", name: "Te Ururoa Flavell & Marama Fox", charisma: 54, energy: 60, competence: 56, machine: 42 },
+    },
+    "2014": {
+      nat: { partyId: "nat", name: "John Key", charisma: 80, energy: 66, competence: 74, machine: 90 },
+      lab: { partyId: "lab", name: "David Cunliffe", charisma: 56, energy: 74, competence: 62, machine: 40 },
+      grn: { partyId: "grn", name: "Russel Norman & Metiria Turei", charisma: 58, energy: 70, competence: 62, machine: 60 },
+      act: { partyId: "act", name: "Jamie Whyte", charisma: 36, energy: 54, competence: 56, machine: 30 },
+      nzf: { partyId: "nzf", name: "Winston Peters", charisma: 78, energy: 68, competence: 62, machine: 54 },
+      tpm: { partyId: "tpm", name: "Te Ururoa Flavell", charisma: 60, energy: 66, competence: 58, machine: 46 },
+    },
+    "2011": {
+      nat: { partyId: "nat", name: "John Key", charisma: 84, energy: 68, competence: 74, machine: 90 },
+      lab: { partyId: "lab", name: "Phil Goff", charisma: 40, energy: 62, competence: 70, machine: 56 },
+      grn: { partyId: "grn", name: "Russel Norman & Metiria Turei", charisma: 56, energy: 68, competence: 60, machine: 56 },
+      act: { partyId: "act", name: "Don Brash", charisma: 42, energy: 58, competence: 62, machine: 36 },
+      nzf: { partyId: "nzf", name: "Winston Peters", charisma: 78, energy: 64, competence: 60, machine: 44 },
+      tpm: { partyId: "tpm", name: "Tariana Turia & Pita Sharples", charisma: 62, energy: 62, competence: 62, machine: 50 },
+    },
+    "2008": {
+      lab: { partyId: "lab", name: "Helen Clark", charisma: 52, energy: 66, competence: 88, machine: 92 },
+      nat: { partyId: "nat", name: "John Key", charisma: 80, energy: 70, competence: 66, machine: 78 },
+      grn: { partyId: "grn", name: "Jeanette Fitzsimons & Russel Norman", charisma: 54, energy: 62, competence: 62, machine: 52 },
+      act: { partyId: "act", name: "Rodney Hide", charisma: 62, energy: 70, competence: 56, machine: 46 },
+      nzf: { partyId: "nzf", name: "Winston Peters", charisma: 76, energy: 66, competence: 56, machine: 52 },
+      tpm: { partyId: "tpm", name: "Tariana Turia & Pita Sharples", charisma: 66, energy: 64, competence: 62, machine: 54 },
     },
   },
 

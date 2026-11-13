@@ -59,6 +59,31 @@
 // the government text describes the investiture threshold. The win condition
 // is the most seats, as everywhere.
 //
+// November 2019 and June 2016 were added later (election ids "2019nov" and
+// "2016"; the April 2019 vote keeps the id "2019"). Same method as above:
+// every `v` and `s` is summed from the official results of each autonomous
+// community, as tabulated on Wikipedia's "Results of the November 2019 Spanish
+// Congress election" and "Results of the 2016 Spanish Congress election"
+// (valid votes including blank ballots; the 2016 and 2019 national totals and
+// seat counts match the official results exactly). Vox and UPyD, which stood
+// in 2016 at 0.2% each and won no seats, are folded into Others that year, and
+// the Catalan Junts and CDC lists are kept in Catalonia only. Podemos is the
+// Unidos Podemos alliance with Compromís, En Comú Podem and En Marea in 2016
+// and Unidas Podemos in November 2019; Más País (3 seats), the CUP (2 seats),
+// Navarra Suma, the Cantabrian Regionalists and Teruel Existe sit in Others in
+// November 2019.
+//
+// November 2019 (10 November): PSOE 120, PP 89, Vox 52, Unidas Podemos 35,
+// ERC 13, Cs 10, JxCat 8, PNV 6, EH Bildu 5, Más País 3, CUP 2, CCa 2, Navarra
+// Suma 2, BNG 1, Teruel Existe 1, PRC 1. Sánchez was invested in January 2020
+// with a PSOE and Unidas Podemos coalition.
+// 2016 (26 June): PP 137, PSOE 85, Unidos Podemos 71, Cs 32, ERC 9, CDC 8,
+// PNV 5, EH Bildu 2, CCa 1. Rajoy was invested at the end of October after the
+// PSOE abstained.
+// Scheduled story beats fall in the week they happened, counting from six
+// weeks before polling day (turn 0) to the final week (turn 5). Sources for the
+// campaigns: Wikipedia's articles on each election (debates, events and issues).
+//
 // Regional parties. ERC, the CiU line, the PNV and Bildu are playable as
 // regional parties (`regional`): they stand only in Catalonia, or in the
 // Basque Country and Navarre, so they cannot reach 176 and their game is the
@@ -243,7 +268,7 @@ export const SPAIN: CountryBundle = {
     "2019": {
       id: "2019",
       year: 2019,
-      label: "2019 · Sánchez v. Casado",
+      label: "2019 (Apr) · Sánchez v. Casado",
       tagline: "April 2019. The Catalan parties have voted down Sánchez's budget and he has called a spring election. The right has split three ways between the PP, Citizens and a Vox fresh from Andalusia, and the Catalan trial runs in the background. Win the most seats and find a majority.",
       majority: { total: 350, threshold: 176 },
       goalText: "176 of 350 seats",
@@ -367,6 +392,91 @@ export const SPAIN: CountryBundle = {
         { id: "bng_galicia", headline: "Galician voters weigh the BNG against the two big parties in a region hit by shipyard and fishing job losses, and {party} claims the local issues", role: "any", party: "bng", weight: 2, appeal: 0.02, momentum: 5 },
       ],
     },
+
+    "2016": {
+      id: "2016",
+      year: 2016,
+      label: "2016 · Rajoy v. Sánchez",
+      tagline: "June 2016. Six months of failed talks after December have sent Spain back to the polls. Podemos has joined forces with United Left and wants to overtake the PSOE, Rajoy asks for stability, and Rivera wants to be the party nobody can govern without. Win the most seats, then try to find 176.",
+      majority: { total: 350, threshold: 176 },
+      goalText: "176 of 350 seats",
+      salience: { jobs: 0.8, corruption: 0.75, deadlock: 0.7, renewal: 0.65, catalonia: 0.5, austerity: 0.5, stability: 0.35 },
+      regions: {
+        AND: { v: { pp: 0.338, psoe: 0.311, pod: 0.185, cs: 0.136, oth: 0.030 }, s: { pp: 25, psoe: 20, pod: 11, cs: 7 } },
+        CAT: { v: { pod: 0.245, erc: 0.182, psoe: 0.161, ciu: 0.139, pp: 0.134, cs: 0.109, oth: 0.030 }, s: { pod: 12, erc: 9, ciu: 8, psoe: 7, pp: 6, cs: 5 } },
+        MAD: { v: { pp: 0.382, pod: 0.213, psoe: 0.196, cs: 0.178, oth: 0.031 }, s: { pp: 15, pod: 8, psoe: 7, cs: 6 } },
+        VAL: { v: { pp: 0.354, pod: 0.254, psoe: 0.208, cs: 0.150, oth: 0.033 }, s: { pp: 13, pod: 9, psoe: 6, cs: 5 } },
+        GAL: { v: { pp: 0.415, psoe: 0.222, pod: 0.222, cs: 0.086, bng: 0.029, oth: 0.027 }, s: { pp: 12, psoe: 6, pod: 5 } },
+        PV: { v: { pod: 0.291, pnv: 0.249, psoe: 0.142, bil: 0.133, pp: 0.129, cs: 0.035, oth: 0.021 }, s: { pod: 6, pnv: 5, psoe: 3, bil: 2, pp: 2 } },
+        CYL: { v: { pp: 0.443, psoe: 0.231, pod: 0.156, cs: 0.142, oth: 0.028 }, s: { pp: 18, psoe: 9, pod: 3, cs: 1 } },
+        CLE: { v: { pp: 0.417, psoe: 0.299, pod: 0.142, cs: 0.122, oth: 0.021 }, s: { pp: 17, psoe: 11, pod: 3 } },
+        ARA: { v: { pp: 0.358, psoe: 0.248, pod: 0.197, cs: 0.162, oth: 0.034 }, s: { pp: 6, psoe: 4, pod: 2, cs: 1 } },
+        NAV: { v: { pp: 0.355, pod: 0.243, psoe: 0.197, cs: 0.088, bil: 0.062, oth: 0.055 }, s: { pp: 4, pod: 3, psoe: 2 } },
+        MUR: { v: { pp: 0.467, psoe: 0.203, cs: 0.157, pod: 0.145, oth: 0.029 }, s: { pp: 5, psoe: 2, cs: 2, pod: 1 } },
+        AST: { v: { pp: 0.375, psoe: 0.244, pod: 0.216, cs: 0.133, oth: 0.032 }, s: { pp: 5, psoe: 3, pod: 3, cs: 2 } },
+        BAL: { v: { pp: 0.351, pod: 0.254, psoe: 0.201, cs: 0.146, oth: 0.049 }, s: { pp: 3, pod: 2, psoe: 2, cs: 1 } },
+        CAN: { v: { pp: 0.341, psoe: 0.225, pod: 0.203, cs: 0.120, cc: 0.080, oth: 0.032 }, s: { pp: 6, psoe: 3, pod: 3, cs: 2, cc: 1 } },
+      },
+      // The real story beats of the June 2016 campaign, in order (a turn is one week; turn 5 is the week before polling day).
+      events: [
+        { id: "puerta_del_sol", headline: "Podemos and United Left, who sealed their alliance in Puerta del Sol on 9 May, fill the square again on 15 May for the anniversary of the 15-M movement, and {party} has its launch", role: "any", party: "pod", weight: 3, appeal: 0.025, momentum: 7, turn: 0 },
+        { id: "salvados_duel", headline: "Iglesias and Rivera clash two on two in the Salvados programme, broadcast on 5 June to more than three million viewers, and {party} gets a rare prime-time audience", role: "any", party: "pod", weight: 2, appeal: 0.01, momentum: 4, turn: 3 },
+        { id: "four_way_debate", headline: "Rajoy, Sánchez, Iglesias and Rivera share one stage on 13 June, the first debate with all four leaders, and {party}'s leader, who skipped the one in December, goes on the attack", role: "any", party: "pp", weight: 3, appeal: 0.01, momentum: 4, turn: 4 },
+        { id: "brexit_stability", headline: "After Britain votes on 23 June to leave the European Union the PP calls for stability against radicalism and populism, and {party} says it is the only safe choice", role: "any", party: "pp", weight: 3, appeal: 0.025, momentum: 7, turn: 5 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "sorpasso_claim", headline: "Iglesias says he takes for granted that his party has already overtaken the PSOE and offers Sánchez a place as his deputy, and {party} sells the sorpasso", role: "any", party: "pod", weight: 2, appeal: 0.02, momentum: 6 },
+        { id: "chacon_lozano", headline: "Carme Chacón and Irene Lozano withdraw from the PSOE lists, and {party} starts the campaign with another round of bad headlines about its own camp", role: "any", party: "psoe", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "robles_borrell", headline: "Sánchez signs up the judge Margarita Robles and the former minister Josep Borrell, and {party} says a vote for it is a vote for change", role: "any", party: "psoe", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "no_deal_while_rajoy", headline: "Rivera says Citizens will not negotiate with the PP while Rajoy leads it, and {party} offers itself as the party without sickles, hammers or corruption", role: "any", party: "cs", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "barbera_row", headline: "The case of Rita Barberá reopens the argument over how the PP deals with its own corruption cases, and {party} spends another week on it", role: "any", party: "pp", weight: 2, appeal: -0.02, momentum: -5 },
+        { id: "erc_decide", headline: "ERC campaigns as the voice of the Catalan right to decide with Gabriel Rufián at the head of its list, and {party} tries to repeat December's nine seats", role: "any", party: "erc", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "cdc_pujol", headline: "Democratic Convergence runs under its own name with Francesc Homs while the Pujol family case still hangs over it, and {party} fights to keep its Catalan seats", role: "any", party: "ciu", weight: 2, appeal: -0.015, momentum: -4 },
+        { id: "pnv_stability", headline: "Aitor Esteban presents the PNV as the steady partner Congress needs after six months of deadlock, and {party} holds its place in the Basque Country", role: "any", party: "pnv", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "bildu_two_seats", headline: "EH Bildu runs again with Marian Beitialarrangoitia and has to hold off Unidos Podemos for its Basque seats, and {party} says only it speaks for the abertzale left", role: "any", party: "bil", weight: 2, appeal: 0.015, momentum: 4 },
+      ],
+    },
+
+    "2019nov": {
+      id: "2019nov",
+      year: 2019,
+      label: "2019 (Nov) · Sánchez v. Casado",
+      tagline: "November 2019. The April winner could not build a majority, so Spain votes again six months later. The Supreme Court sentences the Catalan leaders in the middle of the campaign, Franco's remains leave the Valley of the Fallen, and Íñigo Errejón's Más País splits the left. Win the most seats and, this time, find a majority.",
+      majority: { total: 350, threshold: 176 },
+      goalText: "176 of 350 seats",
+      salience: { catalonia: 0.95, deadlock: 0.7, alliances: 0.6, franco: 0.5, jobs: 0.5, immigration: 0.4 },
+      regions: {
+        AND: { v: { psoe: 0.332, pp: 0.206, vox: 0.205, pod: 0.130, cs: 0.080, oth: 0.047 }, s: { psoe: 25, pp: 16, vox: 13, pod: 6, cs: 3 } },
+        CAT: { v: { erc: 0.226, psoe: 0.205, pod: 0.142, ciu: 0.137, oth: 0.098, pp: 0.074, vox: 0.063, cs: 0.056 }, s: { erc: 13, psoe: 12, ciu: 8, pod: 7, pp: 2, vox: 2, cs: 2, oth: 2 } },
+        MAD: { v: { psoe: 0.269, pp: 0.249, vox: 0.183, pod: 0.130, cs: 0.091, oth: 0.078 }, s: { psoe: 10, pp: 10, vox: 7, pod: 5, cs: 3, oth: 2 } },
+        VAL: { v: { psoe: 0.276, pp: 0.230, vox: 0.185, pod: 0.134, oth: 0.098, cs: 0.077 }, s: { psoe: 10, pp: 8, vox: 7, pod: 4, cs: 2, oth: 1 } },
+        GAL: { v: { pp: 0.320, psoe: 0.313, pod: 0.126, bng: 0.081, vox: 0.078, cs: 0.043, oth: 0.039 }, s: { pp: 10, psoe: 10, pod: 2, bng: 1 } },
+        PV: { v: { pnv: 0.320, psoe: 0.192, bil: 0.187, pod: 0.154, pp: 0.088, vox: 0.024, oth: 0.023, cs: 0.011 }, s: { pnv: 6, psoe: 4, bil: 4, pod: 3, pp: 1 } },
+        CYL: { v: { pp: 0.317, psoe: 0.313, vox: 0.166, pod: 0.093, cs: 0.076, oth: 0.035 }, s: { pp: 13, psoe: 12, vox: 6 } },
+        CLE: { v: { psoe: 0.349, pp: 0.266, vox: 0.201, pod: 0.092, cs: 0.071, oth: 0.021 }, s: { psoe: 14, pp: 10, vox: 7 } },
+        ARA: { v: { psoe: 0.307, pp: 0.239, vox: 0.170, pod: 0.108, oth: 0.091, cs: 0.086 }, s: { psoe: 6, pp: 4, vox: 1, pod: 1, oth: 1 } },
+        NAV: { v: { psoe: 0.282, oth: 0.248, pod: 0.144, bil: 0.113, pp: 0.113, vox: 0.077, cs: 0.023 }, s: { psoe: 3, pp: 2, oth: 2, pod: 1, bil: 1 } },
+        MUR: { v: { vox: 0.280, pp: 0.265, psoe: 0.248, pod: 0.089, cs: 0.074, oth: 0.044 }, s: { vox: 3, pp: 3, psoe: 3, pod: 1 } },
+        AST: { v: { psoe: 0.296, pp: 0.242, vox: 0.155, pod: 0.133, oth: 0.115, cs: 0.060 }, s: { psoe: 4, pp: 4, vox: 2, pod: 1, oth: 1 } },
+        BAL: { v: { psoe: 0.254, pp: 0.228, pod: 0.181, vox: 0.171, oth: 0.092, cs: 0.074 }, s: { psoe: 2, pp: 2, pod: 2, vox: 2 } },
+        CAN: { v: { psoe: 0.289, pp: 0.208, pod: 0.147, cc: 0.131, vox: 0.125, cs: 0.054, oth: 0.047 }, s: { psoe: 5, pp: 4, pod: 2, cc: 2, vox: 2 } },
+      },
+      // The real story beats of the November 2019 campaign, in order (a turn is one week; turn 5 is the week before polling day).
+      events: [
+                { id: "valle_closed", headline: "The government closes the Valley of the Fallen to visitors on 11 October to prepare Franco's exhumation, and {party} says it is keeping a promise to the victims", role: "any", party: "psoe", weight: 2, appeal: 0.01, momentum: 3, turn: 1 },
+        { id: "catalan_sentence", headline: "The Supreme Court sentences the Catalan independence leaders to between 9 and 13 years in prison, and days of violent protests in Barcelona put {party}'s law-and-order line at the centre of the campaign", role: "any", party: "vox", weight: 3, appeal: 0.025, momentum: 7, turn: 2 },
+        { id: "franco_exhumed", headline: "Franco's remains are taken out of the Valley of the Fallen on 24 October, and {party} has done what it promised when it took office", role: "any", party: "psoe", weight: 3, appeal: 0.01, momentum: 3, turn: 3 },
+        { id: "five_way_debate", headline: "Sánchez, Casado, Rivera, Iglesias and Abascal meet on 4 November in the first debate with Vox, watched by 8.6 million, and {party} has a national audience for the first time", role: "any", party: "vox", weight: 3, appeal: 0.02, momentum: 7, turn: 5 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "no_coalition_deal", headline: "The PSOE and Unidas Podemos each blame the other for the failure to agree a coalition after April, and {party} has to explain why Spain is voting again", role: "any", party: "pod", weight: 2, appeal: -0.015, momentum: -4 },
+        { id: "mas_pais_launch", headline: "Íñigo Errejón launches Más País on 25 September with Compromís, Chunta Aragonesista and Equo, and {party} has a rival for the left's votes", role: "any", party: "pod", weight: 3, appeal: -0.02, momentum: -6 },
+        { id: "supreme_court_valle", headline: "The Supreme Court rules on 24 September that the government may move Franco out of the Valley of the Fallen, and {party} calls it the end of an era", role: "any", party: "psoe", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "errejon_poll", headline: "Más País polls at 6% as soon as it is formed, and {party} sees Errejón take young voters it counted on", role: "any", party: "pod", weight: 2, appeal: -0.015, momentum: -4 },
+        { id: "borras_list", headline: "Laura Borràs heads Junts per Catalunya's list while Carles Puigdemont stays in Belgium, and {party} runs on defiance after the sentence", role: "any", party: "ciu", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "erc_junqueras", headline: "Oriol Junqueras is serving 13 years, and ERC asks voters to answer the sentence by giving {party} the Catalan vote", role: "any", party: "erc", weight: 2, appeal: 0.02, momentum: 5 },
+        { id: "pnv_kingmaker", headline: "The PNV, whose votes helped bring down Rajoy in 2018, says it will once more lend its six seats to a stable government, and {party} runs on delivery", role: "any", party: "pnv", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "bildu_aizpurua", headline: "Mertxe Aizpurua leads EH Bildu into a repeat election, and {party} aims to hold and add to its four Basque seats", role: "any", party: "bil", weight: 2, appeal: 0.015, momentum: 4 },
+      ],
+    },
   },
 
   leaders: {
@@ -414,6 +524,27 @@ export const SPAIN: CountryBundle = {
       ciu: { partyId: "ciu", name: "Josep Antoni Duran i Lleida", charisma: 58, energy: 60, competence: 72, machine: 74 },
       pnv: { partyId: "pnv", name: "Josu Erkoreka", charisma: 50, energy: 58, competence: 70, machine: 78 },
       bil: { partyId: "bil", name: "Iñaki Antigüedad", charisma: 48, energy: 62, competence: 56, machine: 64 },
+    },
+    "2016": {
+      pp: { partyId: "pp", name: "Mariano Rajoy", charisma: 40, energy: 52, competence: 66, machine: 86 },
+      psoe: { partyId: "psoe", name: "Pedro Sánchez", charisma: 62, energy: 74, competence: 52, machine: 58 },
+      pod: { partyId: "pod", name: "Pablo Iglesias", charisma: 72, energy: 82, competence: 58, machine: 62 },
+      cs: { partyId: "cs", name: "Albert Rivera", charisma: 72, energy: 80, competence: 56, machine: 54 },
+      erc: { partyId: "erc", name: "Gabriel Rufián", charisma: 70, energy: 82, competence: 54, machine: 58 },
+      ciu: { partyId: "ciu", name: "Francesc Homs", charisma: 50, energy: 62, competence: 60, machine: 56 },
+      pnv: { partyId: "pnv", name: "Aitor Esteban", charisma: 62, energy: 64, competence: 74, machine: 78 },
+      bil: { partyId: "bil", name: "Marian Beitialarrangoitia", charisma: 46, energy: 60, competence: 52, machine: 56 },
+    },
+    "2019nov": {
+      psoe: { partyId: "psoe", name: "Pedro Sánchez", charisma: 66, energy: 78, competence: 62, machine: 78 },
+      pp: { partyId: "pp", name: "Pablo Casado", charisma: 54, energy: 74, competence: 52, machine: 62 },
+      cs: { partyId: "cs", name: "Albert Rivera", charisma: 62, energy: 78, competence: 50, machine: 56 },
+      pod: { partyId: "pod", name: "Pablo Iglesias", charisma: 66, energy: 72, competence: 60, machine: 62 },
+      vox: { partyId: "vox", name: "Santiago Abascal", charisma: 62, energy: 78, competence: 48, machine: 54 },
+      erc: { partyId: "erc", name: "Gabriel Rufián", charisma: 72, energy: 78, competence: 56, machine: 64 },
+      ciu: { partyId: "ciu", name: "Laura Borràs", charisma: 58, energy: 66, competence: 60, machine: 60 },
+      pnv: { partyId: "pnv", name: "Aitor Esteban", charisma: 64, energy: 64, competence: 76, machine: 80 },
+      bil: { partyId: "bil", name: "Mertxe Aizpurua", charisma: 52, energy: 62, competence: 58, machine: 62 },
     },
   },
 

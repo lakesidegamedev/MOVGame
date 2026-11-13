@@ -123,6 +123,14 @@
     "us-1940": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "us-1936": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
     "us-1932": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
-    "jp-2026": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
+    "jp-2026": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "nz-2014": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "nz-2011": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "nz-2008": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "es-2019nov": { "suggested": "easy", "authored": "easy", "underdogWinRate": 0.7 },
+    "es-2016": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0.1 },
+    "jp-2005": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "it-2006": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 },
+    "ie-2007": { "suggested": "hard", "authored": "hard", "underdogWinRate": 0 }
   }
 }

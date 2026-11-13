@@ -457,6 +457,11 @@
     "file": "Josu Erkoreka 2009 (cropped).jpg"
   },
   {
+    "name": "Laura Borràs",
+    "country": "ES",
+    "qid": "Q16179626"
+  },
+  {
     "name": "Marian Beitialarrangoitia",
     "country": "ES",
     "qid": "Q5997371"
@@ -576,6 +581,11 @@
     "qid": "Q2124"
   },
   {
+    "name": "Bertie Ahern",
+    "country": "IE",
+    "qid": "Q154550"
+  },
+  {
     "name": "Brendan Howlin",
     "country": "IE",
     "qid": "Q466028"
@@ -636,6 +646,11 @@
     "qid": "Q920403"
   },
   {
+    "name": "Pat Rabbitte",
+    "country": "IE",
+    "qid": "Q560453"
+  },
+  {
     "name": "Peadar Tóibín",
     "country": "IE",
     "qid": "Q7157787"
@@ -656,6 +671,11 @@
     "country": "IE",
     "qid": "Q7518922",
     "file": "Simon Harris (official portrait) 2020.jpg"
+  },
+  {
+    "name": "Trevor Sargent",
+    "country": "IE",
+    "qid": "Q12849"
   },
   {
     "name": "Akhilesh Yadav",
@@ -805,6 +825,11 @@
     "qid": "Q2503364"
   },
   {
+    "name": "Romano Prodi",
+    "country": "IT",
+    "qid": "Q38484"
+  },
+  {
     "name": "Silvio Berlusconi",
     "country": "IT",
     "qid": "Q11860"
@@ -839,6 +864,16 @@
     "country": "JP",
     "qid": "Q128573",
     "file": "Ichiro Matsui 2022-6-12(cropped).jpg"
+  },
+  {
+    "name": "Junichiro Koizumi",
+    "country": "JP",
+    "qid": "Q130852"
+  },
+  {
+    "name": "Katsuya Okada",
+    "country": "JP",
+    "qid": "Q513317"
   },
   {
     "name": "Kazuo Shii",
@@ -889,6 +924,11 @@
     "name": "Takahiro Anno",
     "country": "JP",
     "qid": "Q126992672"
+  },
+  {
+    "name": "Takenori Kanzaki",
+    "country": "JP",
+    "qid": "Q337379"
   },
   {
     "name": "Taro Aso",
@@ -1022,9 +1062,24 @@
     "qid": "Q74370310"
   },
   {
+    "name": "David Cunliffe",
+    "country": "NZ",
+    "qid": "Q5232720"
+  },
+  {
     "name": "David Seymour",
     "country": "NZ",
     "qid": "Q17055796"
+  },
+  {
+    "name": "Don Brash",
+    "country": "NZ",
+    "qid": "Q1238979"
+  },
+  {
+    "name": "Helen Clark",
+    "country": "NZ",
+    "qid": "Q180383"
   },
   {
     "name": "Jacinda Ardern",
@@ -1037,9 +1092,34 @@
     "qid": "Q18167139"
   },
   {
+    "name": "Jamie Whyte",
+    "country": "NZ",
+    "qid": "Q15070150"
+  },
+  {
+    "name": "John Key",
+    "country": "NZ",
+    "qid": "Q57783"
+  },
+  {
     "name": "Judith Collins",
     "country": "NZ",
     "qid": "Q6303349"
+  },
+  {
+    "name": "Phil Goff",
+    "country": "NZ",
+    "qid": "Q597909"
+  },
+  {
+    "name": "Rodney Hide",
+    "country": "NZ",
+    "qid": "Q7356954"
+  },
+  {
+    "name": "Te Ururoa Flavell",
+    "country": "NZ",
+    "qid": "Q4451134"
   },
   {
     "name": "Winston Peters",
