@@ -21,6 +21,8 @@ import { DailyResultPanel } from "../DailyResultPanel";
 import { WhyReport } from "../WhyReport";
 import { TimelineView } from "../TimelineView";
 import { dailyAssignment, utcDateString } from "@lib/daily";
+import { PartyLogo } from "@ui/PartyLogo";
+import { partyLogoFor, partyLogosFor } from "@ui/PartyLogo";
 
 function defaultGovText(g: Government, name: (p: string) => string, plurality = false, unit = "seats"): string {
   switch (g.kind) {
@@ -95,9 +97,11 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
 
   const reveal = useMemo(() => countryReveal(country, game), [country, game]);
   const leaders = useMemo(() => namedLeaders(game.leaders), [game.leaders]);
+  const year = country.elections[game.electionId]?.year;
+  const logos = partyLogosFor(country.id, reveal.parties.map((p) => p.id), year);
   const [nightDone, setNightDone] = useState(() => !revealSupported() || hasSeenReveal(reveal.storageKey ?? ""));
   if (!nightDone) {
-    return <ElectionNight {...reveal} leaders={leaders} onDone={() => setNightDone(true)} />;
+    return <ElectionNight {...reveal} leaders={leaders} logos={logos} onDone={() => setNightDone(true)} />;
   }
 
   const next = countryNextScenario(country.id, game.electionId);
@@ -170,6 +174,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
         headline={headline}
         headlineColor={headlineParty ? partyColor(country, headlineParty) : undefined}
         winner={headlineParty && leaders[headlineParty] ? { name: leaders[headlineParty], color: partyColor(country, headlineParty) } : undefined}
+        winnerLogo={headlineParty ? partyLogoFor(country.id, headlineParty, year) : null}
         subhead={
           won
             ? `You won ${country.label}.`
@@ -310,7 +315,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
           {order.map((p) => (
             <div className="bloc" key={p}>
               <span className="name" style={{ color: p === game.playerParty ? partyInk(partyColor(country, p)) : undefined }}>
-                <span className="swatch" style={{ "--party": partyFill(partyColor(country, p)) } as React.CSSProperties} />
+                <PartyLogo country={country.id} party={p} year={country.elections[game.electionId]?.year} color={partyColor(country, p)} size={14} />
                 {partyShort(country, p)}
               </span>
               <span className="meta">{r.seats[p]} {r.seats[p] === 1 ? country.unitName : country.unitNamePlural} · {((r.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>

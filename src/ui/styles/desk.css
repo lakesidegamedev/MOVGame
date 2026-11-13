@@ -120,6 +120,7 @@
 }
 .evbar .endlabel.dem { color: var(--dem-text); }
 .evbar .endlabel.gop { color: var(--gop-text); }
+.evbar .endlabel .party-logo { margin: 0 5px; vertical-align: 1px; }
 .evbar .endlabel.goal { color: var(--text-3); font-size: var(--fs-sm); font-weight: var(--fw-bold); min-width: 0; display: flex; flex-direction: column; align-items: center; line-height: 1.05; }
 .evbar .endlabel.goal small { font-size: 9px; letter-spacing: var(--tracking-label); text-transform: uppercase; font-weight: var(--fw-semibold); }
 .win270 { font-size: var(--fs-xs); color: var(--text-3); }

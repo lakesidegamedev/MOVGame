@@ -137,6 +137,15 @@ a.ghost {
   background: var(--party, var(--gray-400)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
 }
 
+/* Party logo: the party's real logo on a small white tile, next to its
+   name. Set --logo-h inline (PartyLogo's size). Wide wordmarks are capped. */
+.party-logo {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  height: var(--logo-h, 16px); max-width: calc(var(--logo-h, 16px) * 4); padding: 1px 3px; box-sizing: border-box;
+  background: #fff; border-radius: 3px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35); vertical-align: middle;
+}
+.party-logo img { display: block; height: 100%; width: auto; max-width: 100%; object-fit: contain; }
+
 /* ── Segmented control and tabs ───────────────────────────────────────────
    .segmented: buttons inside a sunken track; the active one is filled.
    Mark the active button with aria-pressed="true", aria-selected="true"

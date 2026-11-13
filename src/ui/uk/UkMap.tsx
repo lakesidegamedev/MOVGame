@@ -7,6 +7,7 @@ import { tallyRegion, allocateRegionSeats } from "@engine/multiparty";
 import { REGION_PATHS, UK_VIEWBOX } from "@content/uk/regionPaths";
 import { partyColor, partyShort } from "./parties";
 import type { StateContest } from "@engine/types";
+import { PartyLogo, electionYear } from "@ui/PartyLogo";
 
 // Rough geographic tile layout for the square cartogram fallback (north at top).
 const TILES: Record<string, { row: number; col: number }> = {
@@ -52,7 +53,7 @@ export function UkMap() {
       <span className="legend-note">Labels show leader seats / region total.</span>
       {["lab", "con", "ld", "ref", "snp", "grn", "pc"].map((p) => (
         <span key={p} className="legend-item">
-          <span className="swatch" style={{ "--party": partyFill(partyColor(p)) } as React.CSSProperties} />
+          <PartyLogo country="UK" party={p} year={electionYear(game.electionId)} color={partyColor(p)} size={14} />
           {partyShort(p)}
         </span>
       ))}

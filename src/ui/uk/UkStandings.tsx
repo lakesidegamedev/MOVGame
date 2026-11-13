@@ -1,9 +1,10 @@
 import { useUkStore } from "@store/ukStore";
-import { partyInk, partyFill } from "@ui/colors";
+import { partyInk } from "@ui/colors";
 import { majorityForUk, ukGameIssues } from "@engine/ukGame";
 import { partyColor, partyShort, sortBySeats } from "./parties";
 import { partyName } from "./parties";
 import { MpPollBlock } from "@ui/MpPollBlock";
+import { PartyLogo, electionYear } from "@ui/PartyLogo";
 
 const GOV_LABEL: Record<string, string> = {
   majority: "Majority government",
@@ -46,7 +47,7 @@ export function UkStandings() {
       {order.map((p) => (
         <div className="bloc" key={p}>
           <span className="name" style={{ color: p === game.playerParty ? partyInk(partyColor(p)) : undefined, fontWeight: p === game.playerParty ? 700 : 500 }}>
-            <span className="swatch" style={{ "--party": partyFill(partyColor(p)) } as React.CSSProperties} />
+            <PartyLogo country="UK" party={p} year={electionYear(game.electionId)} color={partyColor(p)} size={14} />
             {partyShort(p)}
           </span>
           <span className="meta">{live.seats[p]} seats · {((live.voteShare[p] ?? 0) * 100).toFixed(1)}%</span>

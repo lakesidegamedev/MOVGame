@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, SkipForward, Zap } from "lucide-react";
 import { partyFill, partyInk } from "@ui/colors";
 import { Avatar } from "@ui/Avatar";
+import { LogoTile } from "@ui/PartyLogo";
 import "./electionNight.css";
 import { buildSchedule, unitAllocation, OTHERS_ID, type RevealUnit } from "@lib/electionReveal";
 export { buildSchedule, OTHERS_ID } from "@lib/electionReveal";
@@ -49,6 +50,8 @@ export interface RevealProps {
   // projection banner and the header. Set by the results screens, not the
   // adapters, so the shared reveal data stays the same on every platform.
   leaders?: Record<string, string>;
+  // Party id to logo image, for the parties that have one at this election.
+  logos?: Record<string, string>;
   onDone: () => void;
 }
 
@@ -92,6 +95,7 @@ type Speed = "1x" | "2x" | "instant";
 export function ElectionNight(props: RevealProps) {
   const { title, totalUnits, threshold, parties, units, playerPartyId, storageKey, map, onDone } = props;
   const leaders = props.leaders ?? {};
+  const logos = props.logos ?? {};
   const faces = parties.filter((p) => leaders[p.id]).slice(0, 2);
   const unitLabel = props.unitLabel ?? "seats";
   const noMajorityLabel = props.noMajorityLabel ?? "NO OVERALL MAJORITY: HUNG PARLIAMENT";
@@ -272,12 +276,13 @@ export function ElectionNight(props: RevealProps) {
             {leaders[projected.id] && (
               <Avatar name={leaders[projected.id]} color={partyFill(projected.color)} size={40} ring ringColor="#fff" />
             )}
+            {logos[projected.id] && <LogoTile src={logos[projected.id]} size={22} />}
             <span>PROJECTION: {projected.short} WINS</span>
           </div>
         )}
         {finished && !projected && <div className="en-banner hung">{noMajorityLabel}</div>}
 
-        <div className={`en-board${faces.length > 0 ? " with-faces" : ""}`}>
+        <div className={`en-board${faces.length > 0 ? " with-faces" : ""}${Object.keys(logos).length > 0 ? " with-logos" : ""}`}>
           {parties.map((p) => {
             const val = p.id === OTHERS_ID ? othersTotal : (tallies[p.id] ?? 0);
             return (
@@ -286,6 +291,7 @@ export function ElectionNight(props: RevealProps) {
                   {faces.length > 0 && (leaders[p.id]
                     ? <Avatar name={leaders[p.id]} color={partyFill(p.color)} size={24} ring />
                     : <span className="en-face-blank" aria-hidden="true" />)}
+                  {logos[p.id] && <LogoTile src={logos[p.id]} size={14} />}
                   <span className="en-party-short">{p.short}</span>
                 </span>
                 <div className="en-track">

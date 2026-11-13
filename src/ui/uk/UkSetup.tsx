@@ -10,6 +10,7 @@ import { UK_PLAYABLE, playablePartiesIn } from "@engine/ukGame";
 import { leaderFor } from "@content/uk/leaders";
 import { partyName, partyColor, partyShort } from "./parties";
 import { Avatar } from "@ui/Avatar";
+import { PartyLogo, electionYear } from "@ui/PartyLogo";
 import { Vote, Dices, ChevronLeft, ChevronRight, Check, Flag, Lock } from "lucide-react";
 import type { PartyId } from "@engine/system";
 import { BRAND } from "../../brand";
@@ -152,6 +153,7 @@ export function UkSetup({ onBack, initialElection, initialSeed, initialParty }: 
                   const ld = leaderFor(election, p, partyName(p));
                   return (
                     <PartyCard key={p} name={partyName(p)} sub={ld.name} leader={ld.name} color={partyColor(p)}
+                      logo={<PartyLogo country="UK" party={p} year={electionYear(election)} />}
                       selected={activeParty === p} onClick={() => setParty(p)} />
                   );
                 })}
