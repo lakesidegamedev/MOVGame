@@ -365,6 +365,10 @@ try {
       window.addEventListener("mov-shell-focus", note("mov-shell-focus"));
       document.addEventListener("visibilitychange", note("visibilitychange"));
     });
+    const listenAt = Date.now();
+    const activationsBefore = await page.evaluate(() => window.__movActivations ?? 0);
+    const hookInstalled = await page.evaluate(() => Promise.resolve(window.__TAURI_INTERNALS__?.invoke("activation_hook")).catch((e) => `error: ${e?.message ?? e}`));
+    log("activation hook installed:", JSON.stringify(hookInstalled));
     if (blurCmd) runCmd(blurCmd);
     const seen = state.refreshAt.length;
     const until = Date.now() + 20_000;
@@ -384,13 +388,22 @@ try {
     await shot("unlocked");
     const checks = state.refreshAt.map((t) => t - focusAt);
     const early = state.refreshAt.some((t, i) => t >= focusAt && i > 0 && t - state.refreshAt[i - 1] < 3_500);
-    const events = (await page.evaluate(() => window.__smokeEvents ?? [])).filter((e) => e.at >= focusAt);
+    const allEvents = await page.evaluate(() => window.__smokeEvents ?? []);
+    const events = allEvents.filter((e) => e.at >= focusAt);
+    // Shell activation reports (the Win32 WM_ACTIVATE hook on Windows) during the whole away-and-back.
+    const activations = (await page.evaluate(() => window.__movActivations ?? 0)) - activationsBefore;
     // The moment the page learned the window was back: the first focus report after the restore began.
     const backAt = events.find((e) => e.type === "mov-shell-focus" || e.type === "focus")?.at ?? null;
     check("purchase picked up", unlockedAt !== null, unlockedAt ? `${unlockedAt - restoredAt} ms after the window came back` : "no unlock within 30 s");
-    // Recorded, not asserted: on Windows no focus report reaches the page when the window is restored
-    // (Tauri focus events and window focus polling both produced none in CI), so pickup there comes
-    // from the timed check. The timing stays in the log and in result.notes.
+    // Coming back to the window must check at once, not wait for the next timed check (4 s or more).
+    // The focus command performs a real activation (the window becomes the foreground window), the
+    // way a taskbar click or Alt+Tab does, so this measures what players get.
+    if (focusCmd) {
+      check("a focus report reached the page when the window came back", backAt !== null,
+        `events since leaving: ${JSON.stringify(allEvents.map((e) => ({ ...e, at: e.at - focusAt })))}, activation reports: ${activations}`);
+      check("picked up within 2 s of the window coming back", backAt !== null && unlockedAt !== null && unlockedAt - backAt <= 2_000,
+        backAt !== null && unlockedAt !== null ? `${unlockedAt - backAt} ms after the first focus report` : "no focus report or no unlock");
+    }
     const pickupNote = backAt === null
       ? `no focus report reached the page (events ${JSON.stringify(events)}); unlocked ${unlockedAt === null ? "never" : `${unlockedAt - restoredAt} ms`} after the restore, check outside the timer: ${early}`
       : `${unlockedAt === null ? "never" : `${unlockedAt - backAt} ms`} after the first focus report; check outside the timer: ${early}`;
@@ -401,6 +414,11 @@ try {
       restoreTookMs: restoredAt - focusAt,
       checksRelativeToRestoreStartMs: checks,
       eventsRelativeToRestoreStartMs: events.map((e) => ({ ...e, at: e.at - focusAt })),
+      // Including the minimise: shows whether WebView2 told the page it was hidden at all.
+      eventsSinceLeavingMs: allEvents.map((e) => ({ ...e, at: e.at - focusAt })),
+      leftAtMs: listenAt - focusAt,
+      shellActivationReports: activations,
+      activationHookInstalled: hookInstalled,
       unlockedAfterRestoreMs: unlockedAt ? unlockedAt - restoredAt : null,
       unlockedAfterFocusReportMs: unlockedAt && backAt ? unlockedAt - backAt : null,
       pickedUpByWindowReturn: early,

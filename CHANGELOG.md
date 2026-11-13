@@ -20,9 +20,9 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   already logged in to a game account that is not linked yet, the launcher sign in links that one
   instead.
 - The desktop app signs you in the same way when the Lakeside launcher starts it.
-- After you pay in your browser, the Windows desktop app unlocks the pack about 3 to 12 seconds
-  later, or straight away with "I've paid, check now". It does not yet check the moment you come
-  back to its window.
+- After you pay in your browser, the Windows desktop app checks for the purchase the moment you
+  come back to its window (taskbar, Alt+Tab or a click) and unlocks the pack within about a
+  second. "I've paid, check now" and the timed check still work as before.
 
 ### Fixed
 
@@ -30,6 +30,13 @@ Every pull request that changes the game, the apps, content or tooling adds its 
   sign-in instead of saying the page cannot be opened.
 - After a test purchase on iPhone or Android, the Store says the pack is unlocked in the app
   instead of "Production ownership is unchanged".
+- When the next election after your campaign is part of a pack you do not own, the results screen
+  now also offers the next country's free election, so there is always something to play next
+  without buying.
+- The results report and the campaign timeline show United Kingdom and other countries' campaign
+  cash in millions and in the country's currency ("£12.0M", not "£12" or "$12").
+- In Brazil and France the desk's projected outcome says "Too close to call" when no one is past
+  the winning line, instead of "Minority government" or "No majority".
 - The United States setup screen no longer says "Locked years are part of the United States
   pack" when you own every year, and years you buy while the screen is open unlock straight away.
 - The iPhone Store now describes the Complete Collection the way Android and the web do: every

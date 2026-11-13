@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 // Build the Tauri desktop shell for one distribution channel.
 //
-//   node scripts/desktop-build.mjs <channel> [--app-version X.Y.Z] [--ci-debug-port N] [tauri build args]
+//   node scripts/desktop-build.mjs <channel> [--app-version X.Y.Z] [--ci-debug-port N] [--ci-autoplay N] [tauri build args]
 //
 // --app-version overrides the version in tauri.conf.json. CI uses it to build
 // an "older release" from the same commit for the upgrade test.
 // --ci-debug-port opens WebView2's remote debugging port so the CI smoke test
 // can drive the game (scripts/desktop-smoke.mjs). Builds made with it say
 // "CI test build" in the window title and must never be handed out.
+// --ci-autoplay adds scripts/ci-autoplay.mjs's page script, which plays to week
+// two by itself and reports to 127.0.0.1:N, for shells with no debugging port
+// (macOS). Same "CI test build" title and the same rule.
 // desktop-direct uses tauri.conf.json as is. steam adds tauri.steam.conf.json.
 // desktop-preview writes a config overlay with its own identifier (so its saves
 // live apart from a real install) and a window title that names the commit.
@@ -33,6 +36,7 @@ function takeFlag(name, pattern, example) {
 }
 const appVersion = takeFlag("--app-version", /^\d+\.\d+\.\d+$/, "1.9.0");
 const debugPort = takeFlag("--ci-debug-port", /^\d{4,5}$/, "9222");
+const autoplayPort = takeFlag("--ci-autoplay", /^\d{4,5}$/, "47990");
 
 const CHANNELS = ["desktop-direct", "steam", "desktop-preview"];
 if (!CHANNELS.includes(channel)) {
@@ -68,6 +72,15 @@ if (debugPort) {
     title: `${w.title} (CI test build)`,
     additionalBrowserArgs: `--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --remote-debugging-port=${debugPort}`,
   }));
+}
+if (autoplayPort) {
+  if (channel === "steam") {
+    console.error("--ci-autoplay is for desktop-direct and desktop-preview builds");
+    process.exit(2);
+  }
+  editWindows((w) => ({ title: w.title.includes("(CI test build)") ? w.title : `${w.title} (CI test build)` }));
+  const fetchWeb = overlay.build?.beforeBuildCommand ?? base.build.beforeBuildCommand;
+  overlay.build = { ...overlay.build, beforeBuildCommand: `${fetchWeb} && node scripts/ci-autoplay.mjs inject ${autoplayPort}` };
 }
 if (windows) overlay.app = { ...overlay.app, windows };
 if (Object.keys(overlay).length > 0) {
