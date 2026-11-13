@@ -188,3 +188,16 @@
     transition: none !important;
   }
 }
+
+/* Leader portraits: the two main faces by the title, one per board row, and
+   the projected winner's on the banner. */
+.en-title-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.en-title-row .en-title { margin: 0; }
+.en-faces { display: inline-flex; flex-shrink: 0; }
+.en-faces > * + * { margin-left: -8px; }
+.en-board.with-faces .en-row { grid-template-columns: 104px 1fr 58px; }
+.en-board.with-faces .en-party { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.en-party-short { overflow: hidden; text-overflow: ellipsis; }
+.en-face-blank { width: 24px; height: 24px; flex-shrink: 0; }
+.en-banner:has(img, [role="img"]) { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.en-banner > * { position: relative; }

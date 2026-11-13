@@ -24,6 +24,7 @@ import {
   LineChart, Mic2, Globe2, RefreshCw,
 } from "lucide-react";
 import { BRAND, LAKESIDE_LINKS } from "../brand";
+import type { LegalTab } from "./view";
 import { useSavesStore } from "@store/savesStore";
 import { sessionGame } from "@store/sessions";
 import type { GameState } from "@engine/types";
@@ -73,7 +74,7 @@ export type LandingDestination =
   | { kind: "country"; countryId: string; electionId?: string }
   | { kind: "leaderboard" }
   | { kind: "daily" }                    // App resolves via dailyAssignment()
-  | { kind: "legal"; tab?: "privacy" | "terms" };
+  | { kind: "legal"; tab?: LegalTab };
 
 function CoverImg({ src, alt, tall }: { src?: string; alt: string; tall?: boolean }) {
   if (!src) return null;
@@ -473,6 +474,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
         <div className="landing-foot">
           <button className="ghost small" onClick={() => onGo({ kind: "legal", tab: "privacy" })}>Privacy</button>
           <button className="ghost small" onClick={() => onGo({ kind: "legal", tab: "terms" })}>Terms</button>
+          <button className="ghost small" onClick={() => onGo({ kind: "legal", tab: "credits" })}>Credits</button>
           <a className="ghost small" href={`mailto:${BRAND.supportEmail}`}>Contact</a>
           <a className="ghost small" href="https://ask.lakesidegames.net/?game=electioneer" target="_blank" rel="noopener noreferrer">Ask about the game</a>
           <button className="ghost small" onClick={() => openStore()}>Store</button>

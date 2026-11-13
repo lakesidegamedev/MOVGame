@@ -25,7 +25,7 @@ function historyView(): View {
   const view = (window.history.state as { movView?: View } | null)?.movView;
   if (view && ["landing", "us", "uk", "country", "leaderboard", "legal"].includes(view.kind)) return view;
   const legal = new URLSearchParams(window.location.search).get("legal");
-  if (legal === "privacy" || legal === "terms") return { kind: "legal", tab: legal };
+  if (legal === "privacy" || legal === "terms" || legal === "credits") return { kind: "legal", tab: legal };
   return { kind: "landing" };
 }
 

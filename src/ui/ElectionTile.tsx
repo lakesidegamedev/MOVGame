@@ -73,7 +73,7 @@ export function PartyCard({
       onClick={onClick}
       style={{ "--party": fill } as React.CSSProperties}
     >
-      <Avatar name={leader} color={fill} size={40} />
+      <Avatar name={leader} color={fill} size={40} ring />
       <span className="party-card-text">
         <span className="party-card-name" style={{ color: partyInk(color) }}>{name}</span>
         <span className="party-card-sub">{sub}</span>

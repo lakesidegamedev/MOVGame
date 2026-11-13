@@ -114,7 +114,7 @@ export function ResultsScreen() {
   };
 
   if (!nightDone) {
-    return <ElectionNight {...reveal} onDone={() => setNightDone(true)} />;
+    return <ElectionNight {...reveal} leaders={{ dem: cands.dem.name, rep: cands.rep.name }} onDone={() => setNightDone(true)} />;
   }
 
   const next = US_NEXT_SCENARIO[game.scenarioId ?? "2020"];
@@ -142,6 +142,7 @@ export function ResultsScreen() {
           }
           headline={!done ? `${demEV}-${repEV}` : winnerName}
           headlineColor={!done ? "var(--text-strong)" : winnerColor}
+          winner={done && result.winner !== "tie" ? { name: cands[result.winner].name, color: cands[result.winner].color } : undefined}
           subhead={
             !done
               ? `${college.majority} to win · ${tossupEV} EV still out`

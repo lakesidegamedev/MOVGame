@@ -1,0 +1,1958 @@
+[
+  {
+    "name": "Adam Bandt",
+    "country": "AU",
+    "qid": "Q4678672"
+  },
+  {
+    "name": "Anthony Albanese",
+    "country": "AU",
+    "qid": "Q335697"
+  },
+  {
+    "name": "Bill Shorten",
+    "country": "AU",
+    "qid": "Q4910865"
+  },
+  {
+    "name": "Bob Brown",
+    "country": "AU",
+    "qid": "Q24598"
+  },
+  {
+    "name": "Christine Milne",
+    "country": "AU",
+    "qid": "Q542278",
+    "file": "Christine Milne profile.jpg"
+  },
+  {
+    "name": "John Howard",
+    "country": "AU",
+    "qid": "Q51330"
+  },
+  {
+    "name": "Julia Gillard",
+    "country": "AU",
+    "qid": "Q41563"
+  },
+  {
+    "name": "Kevin Rudd",
+    "country": "AU",
+    "qid": "Q43135"
+  },
+  {
+    "name": "Kim Beazley",
+    "country": "AU",
+    "qid": "Q304561"
+  },
+  {
+    "name": "Malcolm Turnbull",
+    "country": "AU",
+    "qid": "Q927550"
+  },
+  {
+    "name": "Mark Latham",
+    "country": "AU",
+    "qid": "Q982227"
+  },
+  {
+    "name": "Paul Keating",
+    "country": "AU",
+    "qid": "Q242654"
+  },
+  {
+    "name": "Peter Dutton",
+    "country": "AU",
+    "qid": "Q7173778"
+  },
+  {
+    "name": "Richard Di Natale",
+    "country": "AU",
+    "qid": "Q186010"
+  },
+  {
+    "name": "Scott Morrison",
+    "country": "AU",
+    "qid": "Q7436908"
+  },
+  {
+    "name": "Tony Abbott",
+    "country": "AU",
+    "qid": "Q348577"
+  },
+  {
+    "name": "Aécio Neves",
+    "country": "BR",
+    "qid": "Q2875339"
+  },
+  {
+    "name": "Dilma Rousseff",
+    "country": "BR",
+    "qid": "Q40722",
+    "file": "Dilma Rousseff 2011 cropped (2).jpg"
+  },
+  {
+    "name": "Fernando Haddad",
+    "country": "BR",
+    "qid": "Q3069485"
+  },
+  {
+    "name": "Geraldo Alckmin",
+    "country": "BR",
+    "qid": "Q964493"
+  },
+  {
+    "name": "Jair Bolsonaro",
+    "country": "BR",
+    "qid": "Q10304982"
+  },
+  {
+    "name": "José Serra",
+    "country": "BR",
+    "qid": "Q379563"
+  },
+  {
+    "name": "Luiz Inácio Lula da Silva",
+    "country": "BR",
+    "qid": "Q37181"
+  },
+  {
+    "name": "Alexa McDonough",
+    "country": "CA",
+    "qid": "Q2604970"
+  },
+  {
+    "name": "Andrew Scheer",
+    "country": "CA",
+    "qid": "Q2846724"
+  },
+  {
+    "name": "Annamie Paul",
+    "country": "CA",
+    "qid": "Q96743904"
+  },
+  {
+    "name": "Audrey McLaughlin",
+    "country": "CA",
+    "qid": "Q2870860"
+  },
+  {
+    "name": "Brian Mulroney",
+    "country": "CA",
+    "qid": "Q128563"
+  },
+  {
+    "name": "Ed Broadbent",
+    "country": "CA",
+    "qid": "Q717744"
+  },
+  {
+    "name": "Elizabeth May",
+    "country": "CA",
+    "qid": "Q445620"
+  },
+  {
+    "name": "Erin O'Toole",
+    "country": "CA",
+    "qid": "Q1840895"
+  },
+  {
+    "name": "Gilles Duceppe",
+    "country": "CA",
+    "qid": "Q205319"
+  },
+  {
+    "name": "Jack Layton",
+    "country": "CA",
+    "qid": "Q317842"
+  },
+  {
+    "name": "Jagmeet Singh",
+    "country": "CA",
+    "qid": "Q6122681"
+  },
+  {
+    "name": "Jean Chrétien",
+    "country": "CA",
+    "qid": "Q128543"
+  },
+  {
+    "name": "Jim Harris",
+    "country": "CA",
+    "qid": "Q2409849"
+  },
+  {
+    "name": "Joe Clark",
+    "country": "CA",
+    "qid": "Q128574"
+  },
+  {
+    "name": "John Turner",
+    "country": "CA",
+    "qid": "Q128568"
+  },
+  {
+    "name": "Justin Trudeau",
+    "country": "CA",
+    "qid": "Q3099714",
+    "file": "Justin Trudeau (2023).jpg"
+  },
+  {
+    "name": "Kim Campbell",
+    "country": "CA",
+    "qid": "Q128553"
+  },
+  {
+    "name": "Lucien Bouchard",
+    "country": "CA",
+    "qid": "Q1873388"
+  },
+  {
+    "name": "Mark Carney",
+    "country": "CA",
+    "qid": "Q192533"
+  },
+  {
+    "name": "Michael Ignatieff",
+    "country": "CA",
+    "qid": "Q311684"
+  },
+  {
+    "name": "Paul Martin",
+    "country": "CA",
+    "qid": "Q128529"
+  },
+  {
+    "name": "Pierre Poilievre",
+    "country": "CA",
+    "qid": "Q3386636"
+  },
+  {
+    "name": "Preston Manning",
+    "country": "CA",
+    "qid": "Q959778"
+  },
+  {
+    "name": "Stéphane Dion",
+    "country": "CA",
+    "qid": "Q366456"
+  },
+  {
+    "name": "Stephen Harper",
+    "country": "CA",
+    "qid": "Q206"
+  },
+  {
+    "name": "Stockwell Day",
+    "country": "CA",
+    "qid": "Q1556889"
+  },
+  {
+    "name": "Thomas Mulcair",
+    "country": "CA",
+    "qid": "Q1892814"
+  },
+  {
+    "name": "Yves-François Blanchet",
+    "country": "CA",
+    "qid": "Q3573412"
+  },
+  {
+    "name": "Alice Weidel",
+    "country": "DE",
+    "qid": "Q27975838"
+  },
+  {
+    "name": "Angela Merkel",
+    "country": "DE",
+    "qid": "Q567",
+    "file": "Angela Merkel. Tallinn Digital Summit.jpg"
+  },
+  {
+    "name": "Annalena Baerbock",
+    "country": "DE",
+    "qid": "Q564328"
+  },
+  {
+    "name": "Armin Laschet",
+    "country": "DE",
+    "qid": "Q78205"
+  },
+  {
+    "name": "Bernd Lucke",
+    "country": "DE",
+    "qid": "Q823840"
+  },
+  {
+    "name": "Christian Lindner",
+    "country": "DE",
+    "qid": "Q85806"
+  },
+  {
+    "name": "Edmund Stoiber",
+    "country": "DE",
+    "qid": "Q44507",
+    "file": "Edmund Stoiber, Europapolitischer Dialog Berlin, 2003-2 (cropped).jpg"
+  },
+  {
+    "name": "Frank-Walter Steinmeier",
+    "country": "DE",
+    "qid": "Q76658"
+  },
+  {
+    "name": "Friedrich Merz",
+    "country": "DE",
+    "qid": "Q566257"
+  },
+  {
+    "name": "Gabi Zimmer",
+    "country": "DE",
+    "qid": "Q77771"
+  },
+  {
+    "name": "Gerhard Schröder",
+    "country": "DE",
+    "qid": "Q2530"
+  },
+  {
+    "name": "Gregor Gysi",
+    "country": "DE",
+    "qid": "Q65126"
+  },
+  {
+    "name": "Guido Westerwelle",
+    "country": "DE",
+    "qid": "Q58284"
+  },
+  {
+    "name": "Heidi Reichinnek",
+    "country": "DE",
+    "qid": "Q61965546"
+  },
+  {
+    "name": "Helmut Kohl",
+    "country": "DE",
+    "qid": "Q2518"
+  },
+  {
+    "name": "Joschka Fischer",
+    "country": "DE",
+    "qid": "Q57344"
+  },
+  {
+    "name": "Klaus Kinkel",
+    "country": "DE",
+    "qid": "Q159913",
+    "file": "Klaus Kinkel (cropped).jpg"
+  },
+  {
+    "name": "Martin Schulz",
+    "country": "DE",
+    "qid": "Q17905"
+  },
+  {
+    "name": "Olaf Scholz",
+    "country": "DE",
+    "qid": "Q61053"
+  },
+  {
+    "name": "Oskar Lafontaine",
+    "country": "DE",
+    "qid": "Q110719"
+  },
+  {
+    "name": "Peer Steinbrück",
+    "country": "DE",
+    "qid": "Q49328",
+    "file": "Peer Steinbrück in Münster (2012) - 2.jpg"
+  },
+  {
+    "name": "Robert Habeck",
+    "country": "DE",
+    "qid": "Q109943"
+  },
+  {
+    "name": "Rudolf Scharping",
+    "country": "DE",
+    "qid": "Q61321"
+  },
+  {
+    "name": "Wolfgang Gerhardt",
+    "country": "DE",
+    "qid": "Q69029"
+  },
+  {
+    "name": "Aitor Esteban",
+    "country": "ES",
+    "qid": "Q5661421"
+  },
+  {
+    "name": "Albert Rivera",
+    "country": "ES",
+    "qid": "Q2424274",
+    "file": "Albert Rivera in 2019 (cropped).jpg"
+  },
+  {
+    "name": "Alberto Garzón",
+    "country": "ES",
+    "qid": "Q3327963",
+    "file": "Alberto Garzón03.jpg"
+  },
+  {
+    "name": "Alberto Núñez Feijóo",
+    "country": "ES",
+    "qid": "Q2457783"
+  },
+  {
+    "name": "Alfred Bosch",
+    "country": "ES",
+    "qid": "Q3325328"
+  },
+  {
+    "name": "Alfredo Pérez Rubalcaba",
+    "country": "ES",
+    "qid": "Q333638"
+  },
+  {
+    "name": "Andrés Herzog",
+    "country": "ES",
+    "qid": "Q19930140"
+  },
+  {
+    "name": "Cayo Lara",
+    "country": "ES",
+    "qid": "Q981471"
+  },
+  {
+    "name": "Francesc Homs",
+    "country": "ES",
+    "qid": "Q11922769",
+    "file": "Francesc Homs davant la Conselleria d'Economia.jpg"
+  },
+  {
+    "name": "Gabriel Rufián",
+    "country": "ES",
+    "qid": "Q20876620"
+  },
+  {
+    "name": "Iñaki Antigüedad",
+    "country": "ES",
+    "qid": "Q2917455"
+  },
+  {
+    "name": "Jordi Sànchez",
+    "country": "ES",
+    "qid": "Q19928416",
+    "file": "Jordi Sànchez cropped.jpg"
+  },
+  {
+    "name": "Josep Antoni Duran i Lleida",
+    "country": "ES",
+    "qid": "Q276884"
+  },
+  {
+    "name": "Josu Erkoreka",
+    "country": "ES",
+    "qid": "Q3321681",
+    "file": "Josu Erkoreka 2009 (cropped).jpg"
+  },
+  {
+    "name": "Marian Beitialarrangoitia",
+    "country": "ES",
+    "qid": "Q5997371"
+  },
+  {
+    "name": "Mariano Rajoy",
+    "country": "ES",
+    "qid": "Q10819",
+    "file": "Mariano Rajoy 2015 (cropped).jpg"
+  },
+  {
+    "name": "Mertxe Aizpurua",
+    "country": "ES",
+    "qid": "Q12263472"
+  },
+  {
+    "name": "Míriam Nogueras",
+    "country": "ES",
+    "qid": "Q22337925"
+  },
+  {
+    "name": "Oriol Junqueras",
+    "country": "ES",
+    "qid": "Q116812"
+  },
+  {
+    "name": "Pablo Casado",
+    "country": "ES",
+    "qid": "Q6055866"
+  },
+  {
+    "name": "Pablo Iglesias",
+    "country": "ES",
+    "qid": "Q13989269"
+  },
+  {
+    "name": "Pedro Sánchez",
+    "country": "ES",
+    "qid": "Q6070218"
+  },
+  {
+    "name": "Rosa Díez",
+    "country": "ES",
+    "qid": "Q255666"
+  },
+  {
+    "name": "Santiago Abascal",
+    "country": "ES",
+    "qid": "Q11703587"
+  },
+  {
+    "name": "Yolanda Díaz",
+    "country": "ES",
+    "qid": "Q3393973"
+  },
+  {
+    "name": "Édouard Philippe",
+    "country": "FR",
+    "qid": "Q3579995"
+  },
+  {
+    "name": "Emmanuel Macron",
+    "country": "FR",
+    "qid": "Q3052772"
+  },
+  {
+    "name": "François Hollande",
+    "country": "FR",
+    "qid": "Q157"
+  },
+  {
+    "name": "François Mitterrand",
+    "country": "FR",
+    "qid": "Q2038"
+  },
+  {
+    "name": "Jacques Chirac",
+    "country": "FR",
+    "qid": "Q2105"
+  },
+  {
+    "name": "Jean-Marie Le Pen",
+    "country": "FR",
+    "qid": "Q7177",
+    "file": "Jean-Marie Le Pen 2005 (cropped).jpg"
+  },
+  {
+    "name": "Jordan Bardella",
+    "country": "FR",
+    "qid": "Q40655898"
+  },
+  {
+    "name": "Lionel Jospin",
+    "country": "FR",
+    "qid": "Q187099",
+    "file": "Lionel Jospin (4553758629).jpg"
+  },
+  {
+    "name": "Marine Le Pen",
+    "country": "FR",
+    "qid": "Q12927"
+  },
+  {
+    "name": "Nicolas Sarkozy",
+    "country": "FR",
+    "qid": "Q329"
+  },
+  {
+    "name": "Ségolène Royal",
+    "country": "FR",
+    "qid": "Q81923",
+    "file": "Ségolène Royal - Janvier 2012.jpg"
+  },
+  {
+    "name": "Valéry Giscard d'Estaing",
+    "country": "FR",
+    "qid": "Q2124"
+  },
+  {
+    "name": "Brendan Howlin",
+    "country": "IE",
+    "qid": "Q466028"
+  },
+  {
+    "name": "Eamon Gilmore",
+    "country": "IE",
+    "qid": "Q982225"
+  },
+  {
+    "name": "Eamon Ryan",
+    "country": "IE",
+    "qid": "Q920195"
+  },
+  {
+    "name": "Enda Kenny",
+    "country": "IE",
+    "qid": "Q57815"
+  },
+  {
+    "name": "Gerry Adams",
+    "country": "IE",
+    "qid": "Q76139"
+  },
+  {
+    "name": "Holly Cairns",
+    "country": "IE",
+    "qid": "Q83752372"
+  },
+  {
+    "name": "Ivana Bacik",
+    "country": "IE",
+    "qid": "Q6097927"
+  },
+  {
+    "name": "Joan Burton",
+    "country": "IE",
+    "qid": "Q444685"
+  },
+  {
+    "name": "John Gormley",
+    "country": "IE",
+    "qid": "Q1700253"
+  },
+  {
+    "name": "Leo Varadkar",
+    "country": "IE",
+    "qid": "Q1728820"
+  },
+  {
+    "name": "Mary Lou McDonald",
+    "country": "IE",
+    "qid": "Q467414"
+  },
+  {
+    "name": "Micheál Martin",
+    "country": "IE",
+    "qid": "Q920403"
+  },
+  {
+    "name": "Peadar Tóibín",
+    "country": "IE",
+    "qid": "Q7157787"
+  },
+  {
+    "name": "Richard Boyd Barrett",
+    "country": "IE",
+    "qid": "Q2149121"
+  },
+  {
+    "name": "Roderic O'Gorman",
+    "country": "IE",
+    "qid": "Q16980123",
+    "file": "Roderic O'Gorman 2024 (cropped).jpg"
+  },
+  {
+    "name": "Simon Harris",
+    "country": "IE",
+    "qid": "Q7518922",
+    "file": "Simon Harris (official portrait) 2020.jpg"
+  },
+  {
+    "name": "Akhilesh Yadav",
+    "country": "IN",
+    "qid": "Q417657"
+  },
+  {
+    "name": "Arvind Kejriwal",
+    "country": "IN",
+    "qid": "Q59155",
+    "skip": "no photo of this person alone under a public domain or CC BY / CC BY-SA licence on Wikimedia Commons"
+  },
+  {
+    "name": "Edappadi K. Palaniswami",
+    "country": "IN",
+    "qid": "Q6323772"
+  },
+  {
+    "name": "J. Jayalalithaa",
+    "country": "IN",
+    "qid": "Q465018",
+    "file": "Cpim-jayalaitha meet (cropped).jpg"
+  },
+  {
+    "name": "Jagan Mohan Reddy",
+    "country": "IN",
+    "qid": "Q3531971",
+    "skip": "no photo of this person alone under a public domain or CC BY / CC BY-SA licence on Wikimedia Commons"
+  },
+  {
+    "name": "L. K. Advani",
+    "country": "IN",
+    "qid": "Q468324"
+  },
+  {
+    "name": "Mamata Banerjee",
+    "country": "IN",
+    "qid": "Q465041"
+  },
+  {
+    "name": "Mayawati",
+    "country": "IN",
+    "qid": "Q264896",
+    "file": "Mayawati in 2016 (cropped).jpg"
+  },
+  {
+    "name": "Mulayam Singh Yadav",
+    "country": "IN",
+    "qid": "Q2736550",
+    "skip": "no photo of this person alone under a public domain or CC BY / CC BY-SA licence on Wikimedia Commons"
+  },
+  {
+    "name": "Narendra Modi",
+    "country": "IN",
+    "qid": "Q1058",
+    "file": "PM Modi 2015.jpg"
+  },
+  {
+    "name": "Naveen Patnaik",
+    "country": "IN",
+    "qid": "Q1190856",
+    "skip": "no photo of this person alone under a public domain or CC BY / CC BY-SA licence on Wikimedia Commons"
+  },
+  {
+    "name": "Prakash Karat",
+    "country": "IN",
+    "qid": "Q278075",
+    "file": "PrakashKarat cropped.jpg"
+  },
+  {
+    "name": "Rahul Gandhi",
+    "country": "IN",
+    "qid": "Q10218"
+  },
+  {
+    "name": "Sitaram Yechury",
+    "country": "IN",
+    "qid": "Q7531710",
+    "file": "Sitaram Yechury at 2019 Hyderabad Book fair1 (cropped).jpg"
+  },
+  {
+    "name": "Antonio Ingroia",
+    "country": "IT",
+    "qid": "Q1591887"
+  },
+  {
+    "name": "Beppe Grillo",
+    "country": "IT",
+    "qid": "Q47683",
+    "file": "Beppe Grillo crop.jpg"
+  },
+  {
+    "name": "Enrico Letta",
+    "country": "IT",
+    "qid": "Q674957"
+  },
+  {
+    "name": "Fausto Bertinotti",
+    "country": "IT",
+    "qid": "Q559577",
+    "file": "Fausto Bertinotti 2008.jpg"
+  },
+  {
+    "name": "Giorgia Meloni",
+    "country": "IT",
+    "qid": "Q451791"
+  },
+  {
+    "name": "Giuseppe Conte",
+    "country": "IT",
+    "qid": "Q53844829",
+    "file": "Giuseppe Conte (cropped).jpg"
+  },
+  {
+    "name": "Luigi de Magistris",
+    "country": "IT",
+    "qid": "Q1148719"
+  },
+  {
+    "name": "Luigi Di Maio",
+    "country": "IT",
+    "qid": "Q13581225"
+  },
+  {
+    "name": "Mario Monti",
+    "country": "IT",
+    "qid": "Q47904"
+  },
+  {
+    "name": "Matteo Renzi",
+    "country": "IT",
+    "qid": "Q47563"
+  },
+  {
+    "name": "Pier Ferdinando Casini",
+    "country": "IT",
+    "qid": "Q552229"
+  },
+  {
+    "name": "Pier Luigi Bersani",
+    "country": "IT",
+    "qid": "Q47556"
+  },
+  {
+    "name": "Pietro Grasso",
+    "country": "IT",
+    "qid": "Q2503364"
+  },
+  {
+    "name": "Silvio Berlusconi",
+    "country": "IT",
+    "qid": "Q11860"
+  },
+  {
+    "name": "Walter Veltroni",
+    "country": "IT",
+    "qid": "Q319547"
+  },
+  {
+    "name": "Akihiro Ota",
+    "country": "JP",
+    "qid": "Q337406"
+  },
+  {
+    "name": "Banri Kaieda",
+    "country": "JP",
+    "qid": "Q806947"
+  },
+  {
+    "name": "Fumio Kishida",
+    "country": "JP",
+    "qid": "Q359480"
+  },
+  {
+    "name": "Hirofumi Yoshimura",
+    "country": "JP",
+    "qid": "Q21529384"
+  },
+  {
+    "name": "Ichiro Matsui",
+    "country": "JP",
+    "qid": "Q128573",
+    "file": "Ichiro Matsui 2022-6-12(cropped).jpg"
+  },
+  {
+    "name": "Kazuo Shii",
+    "country": "JP",
+    "qid": "Q337507"
+  },
+  {
+    "name": "Keiichi Ishii",
+    "country": "JP",
+    "qid": "Q1737905"
+  },
+  {
+    "name": "Naoki Hyakuta",
+    "country": "JP",
+    "qid": "Q11580823"
+  },
+  {
+    "name": "Natsuo Yamaguchi",
+    "country": "JP",
+    "qid": "Q977641"
+  },
+  {
+    "name": "Nobuyuki Baba",
+    "country": "JP",
+    "qid": "Q11667848"
+  },
+  {
+    "name": "Sanae Takaichi",
+    "country": "JP",
+    "qid": "Q1705028"
+  },
+  {
+    "name": "Shigeru Ishiba",
+    "country": "JP",
+    "qid": "Q1335527"
+  },
+  {
+    "name": "Shinzo Abe",
+    "country": "JP",
+    "qid": "Q132345"
+  },
+  {
+    "name": "Sohei Kamiya",
+    "country": "JP",
+    "qid": "Q11590855"
+  },
+  {
+    "name": "Takahiro Anno",
+    "country": "JP",
+    "qid": "Q126992672"
+  },
+  {
+    "name": "Taro Aso",
+    "country": "JP",
+    "qid": "Q132596"
+  },
+  {
+    "name": "Taro Yamamoto",
+    "country": "JP",
+    "qid": "Q1093223"
+  },
+  {
+    "name": "Tomoko Tamura",
+    "country": "JP",
+    "qid": "Q11576938"
+  },
+  {
+    "name": "Yoshihiko Noda",
+    "country": "JP",
+    "qid": "Q57647"
+  },
+  {
+    "name": "Yoshimi Watanabe",
+    "country": "JP",
+    "qid": "Q361715"
+  },
+  {
+    "name": "Yuichiro Tamaki",
+    "country": "JP",
+    "qid": "Q11572647"
+  },
+  {
+    "name": "Yukiko Kada",
+    "country": "JP",
+    "qid": "Q152728"
+  },
+  {
+    "name": "Yukio Edano",
+    "country": "JP",
+    "qid": "Q732087"
+  },
+  {
+    "name": "Yukio Hatoyama",
+    "country": "JP",
+    "qid": "Q131077"
+  },
+  {
+    "name": "Yuriko Koike",
+    "country": "JP",
+    "qid": "Q261703"
+  },
+  {
+    "name": "Andrés Manuel López Obrador",
+    "country": "MX",
+    "qid": "Q318508"
+  },
+  {
+    "name": "Claudia Sheinbaum",
+    "country": "MX",
+    "qid": "Q5771800"
+  },
+  {
+    "name": "Cuauhtémoc Cárdenas",
+    "country": "MX",
+    "qid": "Q922837"
+  },
+  {
+    "name": "Enrique Peña Nieto",
+    "country": "MX",
+    "qid": "Q296741"
+  },
+  {
+    "name": "Felipe Calderón",
+    "country": "MX",
+    "qid": "Q57269"
+  },
+  {
+    "name": "Francisco Labastida",
+    "country": "MX",
+    "qid": "Q966913",
+    "file": "FranciscoLabastidaOchoa.jpg"
+  },
+  {
+    "name": "Jorge Álvarez Máynez",
+    "country": "MX",
+    "qid": "Q16582362"
+  },
+  {
+    "name": "José Antonio Meade",
+    "country": "MX",
+    "qid": "Q3186168"
+  },
+  {
+    "name": "Josefina Vázquez Mota",
+    "country": "MX",
+    "qid": "Q466819"
+  },
+  {
+    "name": "Ricardo Anaya",
+    "country": "MX",
+    "qid": "Q2894271"
+  },
+  {
+    "name": "Roberto Madrazo",
+    "country": "MX",
+    "qid": "Q713557"
+  },
+  {
+    "name": "Vicente Fox",
+    "country": "MX",
+    "qid": "Q190572"
+  },
+  {
+    "name": "Xóchitl Gálvez",
+    "country": "MX",
+    "qid": "Q65430971"
+  },
+  {
+    "name": "Bill English",
+    "country": "NZ",
+    "qid": "Q4384608"
+  },
+  {
+    "name": "Chris Hipkins",
+    "country": "NZ",
+    "qid": "Q5106890"
+  },
+  {
+    "name": "Christopher Luxon",
+    "country": "NZ",
+    "qid": "Q74370310"
+  },
+  {
+    "name": "David Seymour",
+    "country": "NZ",
+    "qid": "Q17055796"
+  },
+  {
+    "name": "Jacinda Ardern",
+    "country": "NZ",
+    "qid": "Q3606816"
+  },
+  {
+    "name": "James Shaw",
+    "country": "NZ",
+    "qid": "Q18167139"
+  },
+  {
+    "name": "Judith Collins",
+    "country": "NZ",
+    "qid": "Q6303349"
+  },
+  {
+    "name": "Winston Peters",
+    "country": "NZ",
+    "qid": "Q1396178"
+  },
+  {
+    "name": "Adam Price",
+    "country": "UK",
+    "qid": "Q3405033"
+  },
+  {
+    "name": "Alec Douglas-Home",
+    "country": "UK",
+    "qid": "Q128976"
+  },
+  {
+    "name": "Alex Salmond",
+    "country": "UK",
+    "qid": "Q10652",
+    "file": "Alex Salmond (crop).JPG"
+  },
+  {
+    "name": "Boris Johnson",
+    "country": "UK",
+    "qid": "Q180589",
+    "file": "Boris Johnson in 2018.jpg"
+  },
+  {
+    "name": "Caroline Lucas",
+    "country": "UK",
+    "qid": "Q9670"
+  },
+  {
+    "name": "Clement Attlee",
+    "country": "UK",
+    "qid": "Q129006"
+  },
+  {
+    "name": "Clement Davies",
+    "country": "UK",
+    "qid": "Q5131308"
+  },
+  {
+    "name": "Dafydd Wigley",
+    "country": "UK",
+    "qid": "Q333600"
+  },
+  {
+    "name": "David Cameron",
+    "country": "UK",
+    "qid": "Q192",
+    "file": "David Cameron portrait (cropped).jpg"
+  },
+  {
+    "name": "Ed Davey",
+    "country": "UK",
+    "qid": "Q296689"
+  },
+  {
+    "name": "Ed Miliband",
+    "country": "UK",
+    "qid": "Q216594",
+    "file": "Official portrait of Rt Hon Edward Miliband MP crop 2.jpg"
+  },
+  {
+    "name": "Edward Heath",
+    "country": "UK",
+    "qid": "Q128967"
+  },
+  {
+    "name": "Gordon Brown",
+    "country": "UK",
+    "qid": "Q10648",
+    "file": "GordonBrown1234 cropped.jpg"
+  },
+  {
+    "name": "Harold Wilson",
+    "country": "UK",
+    "qid": "Q128956"
+  },
+  {
+    "name": "Ieuan Wyn Jones",
+    "country": "UK",
+    "qid": "Q3396810"
+  },
+  {
+    "name": "James Goldsmith",
+    "country": "UK",
+    "qid": "Q3090082",
+    "skip": "no photo of this person alone under a public domain or CC BY / CC BY-SA licence on Wikimedia Commons"
+  },
+  {
+    "name": "Jeremy Corbyn",
+    "country": "UK",
+    "qid": "Q291169"
+  },
+  {
+    "name": "Jeremy Thorpe",
+    "country": "UK",
+    "qid": "Q334102",
+    "skip": "no photo with a usable licence on Wikimedia Commons"
+  },
+  {
+    "name": "Jo Grimond",
+    "country": "UK",
+    "qid": "Q335812"
+  },
+  {
+    "name": "Jo Swinson",
+    "country": "UK",
+    "qid": "Q327790"
+  },
+  {
+    "name": "John Major",
+    "country": "UK",
+    "qid": "Q9559"
+  },
+  {
+    "name": "John Swinney",
+    "country": "UK",
+    "qid": "Q333811"
+  },
+  {
+    "name": "Keir Starmer",
+    "country": "UK",
+    "qid": "Q6383803",
+    "file": "Keir Starmer, 2020 Labour Party leadership election hustings, Bristol 3 (cropped).jpg"
+  },
+  {
+    "name": "Leanne Wood",
+    "country": "UK",
+    "qid": "Q10694"
+  },
+  {
+    "name": "Natalie Bennett",
+    "country": "UK",
+    "qid": "Q6968126"
+  },
+  {
+    "name": "Nick Clegg",
+    "country": "UK",
+    "qid": "Q189947"
+  },
+  {
+    "name": "Nicola Sturgeon",
+    "country": "UK",
+    "qid": "Q467112"
+  },
+  {
+    "name": "Nigel Farage",
+    "country": "UK",
+    "qid": "Q318471"
+  },
+  {
+    "name": "Paddy Ashdown",
+    "country": "UK",
+    "qid": "Q333066"
+  },
+  {
+    "name": "Paul Nuttall",
+    "country": "UK",
+    "qid": "Q546131"
+  },
+  {
+    "name": "Rhun ap Iorwerth",
+    "country": "UK",
+    "qid": "Q14420732"
+  },
+  {
+    "name": "Rishi Sunak",
+    "country": "UK",
+    "qid": "Q20055561",
+    "file": "Prime Minister Rishi Sunak 2023 (cropped).jpg"
+  },
+  {
+    "name": "Theresa May",
+    "country": "UK",
+    "qid": "Q264766"
+  },
+  {
+    "name": "Tim Farron",
+    "country": "UK",
+    "qid": "Q304251"
+  },
+  {
+    "name": "Tony Blair",
+    "country": "UK",
+    "qid": "Q9545"
+  },
+  {
+    "name": "Winston Churchill",
+    "country": "UK",
+    "qid": "Q8016"
+  },
+  {
+    "name": "Adlai Stevenson",
+    "country": "US",
+    "qid": "Q311719"
+  },
+  {
+    "name": "Al Gore",
+    "country": "US",
+    "qid": "Q19673"
+  },
+  {
+    "name": "Al Smith",
+    "country": "US",
+    "qid": "Q430714"
+  },
+  {
+    "name": "Alben Barkley",
+    "country": "US",
+    "qid": "Q273549"
+  },
+  {
+    "name": "Albert Gore Sr.",
+    "country": "US",
+    "qid": "Q577160"
+  },
+  {
+    "name": "Albert Ritchie",
+    "country": "US",
+    "qid": "Q887807"
+  },
+  {
+    "name": "Alf Landon",
+    "country": "US",
+    "qid": "Q665416"
+  },
+  {
+    "name": "Amy Klobuchar",
+    "country": "US",
+    "qid": "Q22237"
+  },
+  {
+    "name": "Andy Beshear",
+    "country": "US",
+    "qid": "Q21572825"
+  },
+  {
+    "name": "Arthur Vandenberg",
+    "country": "US",
+    "qid": "Q4388292"
+  },
+  {
+    "name": "Barack Obama",
+    "country": "US",
+    "qid": "Q76"
+  },
+  {
+    "name": "Barry Goldwater",
+    "country": "US",
+    "qid": "Q319129"
+  },
+  {
+    "name": "Bill Bradley",
+    "country": "US",
+    "qid": "Q504025"
+  },
+  {
+    "name": "Bill Clinton",
+    "country": "US",
+    "qid": "Q1124"
+  },
+  {
+    "name": "Bill Frist",
+    "country": "US",
+    "qid": "Q31112"
+  },
+  {
+    "name": "Bob Dole",
+    "country": "US",
+    "qid": "Q319079"
+  },
+  {
+    "name": "Bob Graham",
+    "country": "US",
+    "qid": "Q578102"
+  },
+  {
+    "name": "Bob Kerrey",
+    "country": "US",
+    "qid": "Q39718"
+  },
+  {
+    "name": "Charles Curtis",
+    "country": "US",
+    "qid": "Q271023"
+  },
+  {
+    "name": "Charles Dawes",
+    "country": "US",
+    "qid": "Q184565"
+  },
+  {
+    "name": "Charles Halleck",
+    "country": "US",
+    "qid": "Q525619"
+  },
+  {
+    "name": "Charles McNary",
+    "country": "US",
+    "qid": "Q2959799",
+    "file": "Charles Linza McNary cph.3b18950 (cropped 3x4).jpg"
+  },
+  {
+    "name": "Chris Christie",
+    "country": "US",
+    "qid": "Q63879"
+  },
+  {
+    "name": "Christian Herter",
+    "country": "US",
+    "qid": "Q240274"
+  },
+  {
+    "name": "Colin Powell",
+    "country": "US",
+    "qid": "Q150851"
+  },
+  {
+    "name": "Connie Mack",
+    "country": "US",
+    "qid": "Q436535"
+  },
+  {
+    "name": "Cory Booker",
+    "country": "US",
+    "qid": "Q1135767"
+  },
+  {
+    "name": "Dan Quayle",
+    "country": "US",
+    "qid": "Q49214"
+  },
+  {
+    "name": "Dianne Feinstein",
+    "country": "US",
+    "qid": "Q230733"
+  },
+  {
+    "name": "Dick Cheney",
+    "country": "US",
+    "qid": "Q48259"
+  },
+  {
+    "name": "Dick Gephardt",
+    "country": "US",
+    "qid": "Q1209677"
+  },
+  {
+    "name": "Donald Trump",
+    "country": "US",
+    "qid": "Q22686"
+  },
+  {
+    "name": "Doug Burgum",
+    "country": "US",
+    "qid": "Q22095395"
+  },
+  {
+    "name": "Dwight D. Eisenhower",
+    "country": "US",
+    "qid": "Q9916"
+  },
+  {
+    "name": "Earl Warren",
+    "country": "US",
+    "qid": "Q311197"
+  },
+  {
+    "name": "Ed Muskie",
+    "country": "US",
+    "qid": "Q319867"
+  },
+  {
+    "name": "Edmund Muskie",
+    "country": "US",
+    "qid": "Q319867"
+  },
+  {
+    "name": "Elizabeth Dole",
+    "country": "US",
+    "qid": "Q239571"
+  },
+  {
+    "name": "Elizabeth Warren",
+    "country": "US",
+    "qid": "Q434706"
+  },
+  {
+    "name": "Estes Kefauver",
+    "country": "US",
+    "qid": "Q1108617"
+  },
+  {
+    "name": "Eugene McCarthy",
+    "country": "US",
+    "qid": "Q380550"
+  },
+  {
+    "name": "Evan Bayh",
+    "country": "US",
+    "qid": "Q344930"
+  },
+  {
+    "name": "Frank Church",
+    "country": "US",
+    "qid": "Q477169"
+  },
+  {
+    "name": "Frank Knox",
+    "country": "US",
+    "qid": "Q526220"
+  },
+  {
+    "name": "Franklin D. Roosevelt",
+    "country": "US",
+    "qid": "Q8007"
+  },
+  {
+    "name": "Fred Harris",
+    "country": "US",
+    "qid": "Q533214"
+  },
+  {
+    "name": "Gary Hart",
+    "country": "US",
+    "qid": "Q919448"
+  },
+  {
+    "name": "George Bush",
+    "country": "US",
+    "qid": "Q23505"
+  },
+  {
+    "name": "George McGovern",
+    "country": "US",
+    "qid": "Q331742"
+  },
+  {
+    "name": "George Romney",
+    "country": "US",
+    "qid": "Q520275"
+  },
+  {
+    "name": "George W. Bush",
+    "country": "US",
+    "qid": "Q207"
+  },
+  {
+    "name": "Gerald Ford",
+    "country": "US",
+    "qid": "Q9582"
+  },
+  {
+    "name": "Geraldine Ferraro",
+    "country": "US",
+    "qid": "Q229141"
+  },
+  {
+    "name": "Gretchen Whitmer",
+    "country": "US",
+    "qid": "Q5607720"
+  },
+  {
+    "name": "Hanford MacNider",
+    "country": "US",
+    "qid": "Q5647800"
+  },
+  {
+    "name": "Harold Stassen",
+    "country": "US",
+    "qid": "Q887520"
+  },
+  {
+    "name": "Harris Wofford",
+    "country": "US",
+    "qid": "Q323511"
+  },
+  {
+    "name": "Harry S. Truman",
+    "country": "US",
+    "qid": "Q11613"
+  },
+  {
+    "name": "Henry 'Scoop' Jackson",
+    "country": "US",
+    "qid": "Q1345201"
+  },
+  {
+    "name": "Henry Cabot Lodge",
+    "country": "US",
+    "qid": "Q450984"
+  },
+  {
+    "name": "Henry Wallace",
+    "country": "US",
+    "qid": "Q251666"
+  },
+  {
+    "name": "Herbert Hoover",
+    "country": "US",
+    "qid": "Q35236"
+  },
+  {
+    "name": "Herbert Lehman",
+    "country": "US",
+    "qid": "Q879261"
+  },
+  {
+    "name": "Hillary Clinton",
+    "country": "US",
+    "qid": "Q6294"
+  },
+  {
+    "name": "Howard Baker",
+    "country": "US",
+    "qid": "Q1337643"
+  },
+  {
+    "name": "Hubert Humphrey",
+    "country": "US",
+    "qid": "Q209989"
+  },
+  {
+    "name": "Jack Kemp",
+    "country": "US",
+    "qid": "Q357676"
+  },
+  {
+    "name": "James Byrnes",
+    "country": "US",
+    "qid": "Q432726"
+  },
+  {
+    "name": "JD Vance",
+    "country": "US",
+    "qid": "Q28935729"
+  },
+  {
+    "name": "Jeane Kirkpatrick",
+    "country": "US",
+    "qid": "Q240534"
+  },
+  {
+    "name": "Jeff Sessions",
+    "country": "US",
+    "qid": "Q358443"
+  },
+  {
+    "name": "Jesse Jackson",
+    "country": "US",
+    "qid": "Q310586"
+  },
+  {
+    "name": "Jimmy Carter",
+    "country": "US",
+    "qid": "Q23685"
+  },
+  {
+    "name": "Joe Biden",
+    "country": "US",
+    "qid": "Q6279"
+  },
+  {
+    "name": "Joe Lieberman",
+    "country": "US",
+    "qid": "Q160157"
+  },
+  {
+    "name": "John Bricker",
+    "country": "US",
+    "qid": "Q885374"
+  },
+  {
+    "name": "John Connally",
+    "country": "US",
+    "qid": "Q311293"
+  },
+  {
+    "name": "John Edwards",
+    "country": "US",
+    "qid": "Q217314"
+  },
+  {
+    "name": "John F. Kennedy",
+    "country": "US",
+    "qid": "Q9696"
+  },
+  {
+    "name": "John Glenn",
+    "country": "US",
+    "qid": "Q182642"
+  },
+  {
+    "name": "John Kerry",
+    "country": "US",
+    "qid": "Q22316"
+  },
+  {
+    "name": "John McCain",
+    "country": "US",
+    "qid": "Q10390"
+  },
+  {
+    "name": "John Nance Garner",
+    "country": "US",
+    "qid": "Q298991"
+  },
+  {
+    "name": "John Sparkman",
+    "country": "US",
+    "qid": "Q388215"
+  },
+  {
+    "name": "Joseph Robinson",
+    "country": "US",
+    "qid": "Q888196"
+  },
+  {
+    "name": "Josh Shapiro",
+    "country": "US",
+    "qid": "Q6289368"
+  },
+  {
+    "name": "Julián Castro",
+    "country": "US",
+    "qid": "Q970720"
+  },
+  {
+    "name": "Kamala Harris",
+    "country": "US",
+    "qid": "Q10853588"
+  },
+  {
+    "name": "Kristi Noem",
+    "country": "US",
+    "qid": "Q465749"
+  },
+  {
+    "name": "Lee Hamilton",
+    "country": "US",
+    "qid": "Q984174"
+  },
+  {
+    "name": "Leverett Saltonstall",
+    "country": "US",
+    "qid": "Q880369"
+  },
+  {
+    "name": "Lloyd Bentsen",
+    "country": "US",
+    "qid": "Q455401"
+  },
+  {
+    "name": "Lyndon Johnson",
+    "country": "US",
+    "qid": "Q9640"
+  },
+  {
+    "name": "Marco Rubio",
+    "country": "US",
+    "qid": "Q324546"
+  },
+  {
+    "name": "Mark Kelly",
+    "country": "US",
+    "qid": "Q357510",
+    "file": "Mark Kelly, Official Portrait 117th (cropped).jpg"
+  },
+  {
+    "name": "Mark Warner",
+    "country": "US",
+    "qid": "Q453893"
+  },
+  {
+    "name": "Michael Dukakis",
+    "country": "US",
+    "qid": "Q319099"
+  },
+  {
+    "name": "Mike Monroney",
+    "country": "US",
+    "qid": "Q279157"
+  },
+  {
+    "name": "Mike Pence",
+    "country": "US",
+    "qid": "Q24313"
+  },
+  {
+    "name": "Mitt Romney",
+    "country": "US",
+    "qid": "Q4496"
+  },
+  {
+    "name": "Nelson Rockefeller",
+    "country": "US",
+    "qid": "Q11237"
+  },
+  {
+    "name": "Newt Gingrich",
+    "country": "US",
+    "qid": "Q182788"
+  },
+  {
+    "name": "Newton Baker",
+    "country": "US",
+    "qid": "Q926206"
+  },
+  {
+    "name": "Nikki Haley",
+    "country": "US",
+    "qid": "Q11668"
+  },
+  {
+    "name": "Ogden Mills",
+    "country": "US",
+    "qid": "Q1370873"
+  },
+  {
+    "name": "Paul Laxalt",
+    "country": "US",
+    "qid": "Q661008"
+  },
+  {
+    "name": "Paul McNutt",
+    "country": "US",
+    "qid": "Q887892"
+  },
+  {
+    "name": "Paul Ryan",
+    "country": "US",
+    "qid": "Q203966"
+  },
+  {
+    "name": "Richard Nixon",
+    "country": "US",
+    "qid": "Q9588"
+  },
+  {
+    "name": "Richard Russell",
+    "country": "US",
+    "qid": "Q718415"
+  },
+  {
+    "name": "Rob Portman",
+    "country": "US",
+    "qid": "Q926069"
+  },
+  {
+    "name": "Robert Kennedy",
+    "country": "US",
+    "qid": "Q25310"
+  },
+  {
+    "name": "Robert Taft",
+    "country": "US",
+    "qid": "Q519730"
+  },
+  {
+    "name": "Ronald Reagan",
+    "country": "US",
+    "qid": "Q9960"
+  },
+  {
+    "name": "Rudy Giuliani",
+    "country": "US",
+    "qid": "Q212648"
+  },
+  {
+    "name": "Sam Rayburn",
+    "country": "US",
+    "qid": "Q1378052"
+  },
+  {
+    "name": "Sarah Palin",
+    "country": "US",
+    "qid": "Q43144"
+  },
+  {
+    "name": "Sargent Shriver",
+    "country": "US",
+    "qid": "Q317248"
+  },
+  {
+    "name": "Spiro Agnew",
+    "country": "US",
+    "qid": "Q203433"
+  },
+  {
+    "name": "Stuart Symington",
+    "country": "US",
+    "qid": "Q962660"
+  },
+  {
+    "name": "Styles Bridges",
+    "country": "US",
+    "qid": "Q434228"
+  },
+  {
+    "name": "Ted Kennedy",
+    "country": "US",
+    "qid": "Q134549"
+  },
+  {
+    "name": "Thomas E. Dewey",
+    "country": "US",
+    "qid": "Q320061"
+  },
+  {
+    "name": "Thomas Eagleton",
+    "country": "US",
+    "qid": "Q3176929"
+  },
+  {
+    "name": "Thruston Morton",
+    "country": "US",
+    "qid": "Q2429723"
+  },
+  {
+    "name": "Tim Kaine",
+    "country": "US",
+    "qid": "Q359888"
+  },
+  {
+    "name": "Tim Pawlenty",
+    "country": "US",
+    "qid": "Q160181"
+  },
+  {
+    "name": "Tim Scott",
+    "country": "US",
+    "qid": "Q561315"
+  },
+  {
+    "name": "Tim Walz",
+    "country": "US",
+    "qid": "Q2434360",
+    "file": "Tim Walz official photo.jpg"
+  },
+  {
+    "name": "Tom Bradley",
+    "country": "US",
+    "qid": "Q1133864"
+  },
+  {
+    "name": "Tom Cotton",
+    "country": "US",
+    "qid": "Q3090307"
+  },
+  {
+    "name": "Tom Ridge",
+    "country": "US",
+    "qid": "Q559822"
+  },
+  {
+    "name": "Tom Vilsack",
+    "country": "US",
+    "qid": "Q353826"
+  },
+  {
+    "name": "Val Demings",
+    "country": "US",
+    "qid": "Q7909083"
+  },
+  {
+    "name": "Walter Judd",
+    "country": "US",
+    "qid": "Q762215"
+  },
+  {
+    "name": "Walter Mondale",
+    "country": "US",
+    "qid": "Q49216"
+  },
+  {
+    "name": "Wendell Willkie",
+    "country": "US",
+    "qid": "Q698714"
+  },
+  {
+    "name": "Wesley Clark",
+    "country": "US",
+    "qid": "Q159478",
+    "file": "General Wesley Clark official photograph.jpg",
+    "depictsNote": "official US Army portrait of Clark; its depicts data lists only the flag behind him"
+  },
+  {
+    "name": "William Bankhead",
+    "country": "US",
+    "qid": "Q960737"
+  },
+  {
+    "name": "William Borah",
+    "country": "US",
+    "qid": "Q895819"
+  },
+  {
+    "name": "William Knowland",
+    "country": "US",
+    "qid": "Q5915564"
+  },
+  {
+    "name": "William Miller",
+    "country": "US",
+    "qid": "Q1383137"
+  },
+  {
+    "name": "William O. Douglas",
+    "country": "US",
+    "qid": "Q1391996"
+  }
+]

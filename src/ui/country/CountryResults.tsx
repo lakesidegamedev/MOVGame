@@ -13,6 +13,7 @@ import { countryNextScenario } from "@content/nextScenario";
 import { partyColor, partyName, partyShort, sortBySeats } from "./helpers";
 import { Trophy, Lock } from "lucide-react";
 import { ElectionNight, hasSeenReveal, revealSupported } from "../electionNight/ElectionNight";
+import { namedLeaders } from "@ui/Avatar";
 import { ElectionNightShell, freeChoice } from "../electionNight/ElectionNightShell";
 import { MultipartySeatPanel } from "../electionNight/MultipartySeatPanel";
 import { countryReveal } from "../electionNight/countryReveal";
@@ -93,9 +94,10 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
     defaultGovText(r.government, name, plurality, country.unitNamePlural);
 
   const reveal = useMemo(() => countryReveal(country, game), [country, game]);
+  const leaders = useMemo(() => namedLeaders(game.leaders), [game.leaders]);
   const [nightDone, setNightDone] = useState(() => !revealSupported() || hasSeenReveal(reveal.storageKey ?? ""));
   if (!nightDone) {
-    return <ElectionNight {...reveal} onDone={() => setNightDone(true)} />;
+    return <ElectionNight {...reveal} leaders={leaders} onDone={() => setNightDone(true)} />;
   }
 
   const next = countryNextScenario(country.id, game.electionId);
@@ -167,6 +169,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
         eyebrow={eyebrow}
         headline={headline}
         headlineColor={headlineParty ? partyColor(country, headlineParty) : undefined}
+        winner={headlineParty && leaders[headlineParty] ? { name: leaders[headlineParty], color: partyColor(country, headlineParty) } : undefined}
         subhead={
           won
             ? `You won ${country.label}.`

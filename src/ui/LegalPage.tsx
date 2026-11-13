@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BRAND } from "../brand";
 import { ChevronLeft } from "lucide-react";
+import type { LegalTab } from "./view";
 
 // Privacy policy and terms for the game. Plain language, and it only claims
 // what the code does: check server/, src/lib/errorReporting.ts, src/main.tsx
@@ -243,8 +244,100 @@ function Terms() {
   );
 }
 
-export function LegalPage({ initialTab, onBack }: { initialTab?: "privacy" | "terms"; onBack: () => void }) {
-  const [tab, setTab] = useState<"privacy" | "terms">(initialTab ?? "privacy");
+interface PhotoCredit {
+  name: string;
+  source: string;
+  title: string;
+  author: string;
+  license: string;
+  licenseUrl?: string;
+  attribution?: string;
+}
+
+interface CoverCredit {
+  file: string;
+  commons: string;
+  license: string;
+  artist: string;
+}
+
+// Photo credits load only when this tab opens: the lists are long and most
+// players never look.
+function useJson<T>(path: string): T | null | "error" {
+  const [data, setData] = useState<T | null | "error">(null);
+  useEffect(() => {
+    let live = true;
+    fetch(path)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((json: T) => { if (live) setData(json); })
+      .catch(() => { if (live) setData("error"); });
+    return () => { live = false; };
+  }, [path]);
+  return data;
+}
+
+function License({ name, url }: { name: string; url?: string }) {
+  return url ? <Ext href={url}>{name}</Ext> : <>{name}</>;
+}
+
+function Credits() {
+  const portraits = useJson<PhotoCredit[]>("images/portraits/credits.json");
+  const covers = useJson<CoverCredit[]>("images/covers/ATTRIBUTION.json");
+  return (
+    <>
+      <h3>Credits</h3>
+
+      <h4>Leader photos</h4>
+      <p>
+        Photos of leaders and candidates come from Wikimedia Commons. Each is public domain or used under
+        the Creative Commons licence named next to it, and was cropped to a square and made smaller.
+        Leaders with no freely licensed photo are shown with their initials.
+      </p>
+      {portraits === null && <p className="muted small">Loading credits</p>}
+      {portraits === "error" && <p className="muted small">The photo credits could not be loaded. Try again later.</p>}
+      {Array.isArray(portraits) && (
+        <ul className="credits-list">
+          {portraits.map((c) => (
+            <li key={c.name}>
+              <strong>{c.name}</strong>: <Ext href={c.source}>{c.title}</Ext>, {c.attribution ?? c.author},{" "}
+              <License name={c.license} url={c.licenseUrl} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h4>Country and election photos</h4>
+      {Array.isArray(covers) ? (
+        <ul className="credits-list">
+          {covers.map((c) => (
+            <li key={c.file}>
+              <Ext href={`https://commons.wikimedia.org/wiki/${encodeURIComponent(c.commons.replace(/ /g, "_"))}`}>{c.commons.replace(/^File:/, "")}</Ext>
+              , {c.artist.trim()}, {c.license}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="muted small">{covers === "error" ? "The photo credits could not be loaded. Try again later." : "Loading credits"}</p>
+      )}
+
+      <h4>Fonts</h4>
+      <ul className="credits-list">
+        <li>
+          Flags: Twemoji, copyright Twitter, Inc and other contributors,{" "}
+          <Ext href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</Ext>. Cropped and converted to a
+          font with only the game's flags.
+        </li>
+        <li>
+          Fira Sans, copyright The Mozilla Foundation and Telefonica S.A.,{" "}
+          <Ext href="https://openfontlicense.org/">SIL Open Font License 1.1</Ext>.
+        </li>
+      </ul>
+    </>
+  );
+}
+
+export function LegalPage({ initialTab, onBack }: { initialTab?: LegalTab; onBack: () => void }) {
+  const [tab, setTab] = useState<LegalTab>(initialTab ?? "privacy");
   return (
     <div className="center" style={{ alignItems: "flex-start", paddingTop: 18 }}>
       <div className="setup" style={{ maxWidth: 760, textAlign: "left" }}>
@@ -255,10 +348,11 @@ export function LegalPage({ initialTab, onBack }: { initialTab?: "privacy" | "te
           <div className="row" style={{ gap: 4 }}>
             <button className={`ghost small${tab === "privacy" ? " active" : ""}`} onClick={() => setTab("privacy")}>Privacy</button>
             <button className={`ghost small${tab === "terms" ? " active" : ""}`} onClick={() => setTab("terms")}>Terms</button>
+            <button className={`ghost small${tab === "credits" ? " active" : ""}`} onClick={() => setTab("credits")}>Credits</button>
           </div>
         </div>
         <div className="card" style={{ lineHeight: 1.55 }}>
-          {tab === "privacy" ? <Privacy /> : <Terms />}
+          {tab === "privacy" ? <Privacy /> : tab === "terms" ? <Terms /> : <Credits />}
         </div>
       </div>
     </div>
