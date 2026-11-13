@@ -1,0 +1,242 @@
+{
+  "identifier": "9C2E5B1A-4D7F-4A63-8E21-5B0C3F7A1D44",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "3.99",
+      "familyShareable": false,
+      "internalID": "6817095000",
+      "localizations": [
+        {
+          "description": "Every country and election, now and later",
+          "displayName": "Complete Collection",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.complete",
+      "referenceName": "MOV Complete Collection",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095001",
+      "localizations": [
+        {
+          "description": "24 elections, 1932 to 2024",
+          "displayName": "United States",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.us_historical",
+      "referenceName": "MOV Pack: United States",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095002",
+      "localizations": [
+        {
+          "description": "18 general elections, 1951 to 2024",
+          "displayName": "United Kingdom",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.uk_elections",
+      "referenceName": "MOV Pack: United Kingdom",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095003",
+      "localizations": [
+        {
+          "description": "12 federal elections, 1984 to 2025",
+          "displayName": "Canada",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.canada",
+      "referenceName": "MOV Pack: Canada",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095004",
+      "localizations": [
+        {
+          "description": "10 Bundestag elections, 1990 to 2025",
+          "displayName": "Germany",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.germany",
+      "referenceName": "MOV Pack: Germany",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095005",
+      "localizations": [
+        {
+          "description": "9 presidential elections, 1981 to 2027",
+          "displayName": "France",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.france",
+      "referenceName": "MOV Pack: France",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095006",
+      "localizations": [
+        {
+          "description": "11 federal elections, 1996 to 2025",
+          "displayName": "Australia",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.australia",
+      "referenceName": "MOV Pack: Australia",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095007",
+      "localizations": [
+        {
+          "description": "Three MMP elections, 2017 to 2023",
+          "displayName": "New Zealand",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.new_zealand",
+      "referenceName": "MOV Pack: New Zealand",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095008",
+      "localizations": [
+        {
+          "description": "Four Lok Sabha elections, 2009 to 2024",
+          "displayName": "India",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.india",
+      "referenceName": "MOV Pack: India",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095009",
+      "localizations": [
+        {
+          "description": "Seven lower house elections, 2009 to 2026",
+          "displayName": "Japan",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.japan",
+      "referenceName": "MOV Pack: Japan",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095010",
+      "localizations": [
+        {
+          "description": "Six presidential runoffs, 2002 to 2022",
+          "displayName": "Brazil",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.brazil",
+      "referenceName": "MOV Pack: Brazil",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095011",
+      "localizations": [
+        {
+          "description": "Four Dáil elections, 2011 to 2024",
+          "displayName": "Ireland",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.ireland",
+      "referenceName": "MOV Pack: Ireland",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095012",
+      "localizations": [
+        {
+          "description": "Four Congress elections, 2011 to 2023",
+          "displayName": "Spain",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.spain",
+      "referenceName": "MOV Pack: Spain",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095013",
+      "localizations": [
+        {
+          "description": "Four Chamber elections, 2008 to 2022",
+          "displayName": "Italy",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.italy",
+      "referenceName": "MOV Pack: Italy",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "6817095014",
+      "localizations": [
+        {
+          "description": "Five presidential elections, 2000 to 2024",
+          "displayName": "Mexico",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.lakesidegames.electioneer.mexico",
+      "referenceName": "MOV Pack: Mexico",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
+}
