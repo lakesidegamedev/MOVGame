@@ -1,4 +1,4 @@
-// JAPAN: seven House of Representatives elections, one bundle.
+// JAPAN: eight House of Representatives elections, one bundle.
 //
 // Parallel voting: about 290 members are elected in single-member districts
 // and 176 from party lists in eleven regional blocks, and the two tiers are
@@ -32,6 +32,21 @@
 // summed back to the official chamber totals. Seats are election night
 // results by party label: the LDP in 2021 and 2024 gained a few members later
 // when independents were given the party endorsement, which is not counted.
+//
+//
+// 2005 was added later (11 September 2005, 480 seats: 300 single-member
+// districts and 180 list seats in the same eleven blocks). Same method as the
+// other years: the district winners of each block from the English Wikipedia
+// page "Results of the 2005 Japanese general election", the list votes and list
+// seats of each block from the 2005 table of the block's own Wikipedia page
+// (which reproduce the Ministry of Internal Affairs and Communications
+// counts), and every party label as on the day: LDP 296, Democratic 113,
+// Komeito 31, JCP 9, SDP 7, People's New 4, New Party Daichi 1, New Party
+// Nippon 1 and 18 independents (the last three groups are Others, as is the
+// New Party Daichi list vote in Hokkaido). Where Others or the People's New
+// Party won a district in a block with no list vote for it, a 0.4 percent floor
+// stands in for the missing vote. The LDP in 2005 won 38.2 percent of the list
+// vote and 296 seats, and with Komeito the ruling bloc won 327 seats.
 //
 // Party lines. The Democratic Party of Japan and the Constitutional
 // Democratic Party are one line here (`dpj`): the CDP is the DPJ's main heir
@@ -488,6 +503,45 @@ export const JAPAN: CountryBundle = {
         { id: "futenma_pledge", headline: "Hatoyama tells voters in Okinawa the Futenma base should move out of the prefecture, a promise that will be hard to keep, and {party} wins friends on the islands", role: "any", party: "dpj", weight: 2, appeal: 0.01, momentum: 3 },
       ],
     },
+
+    "2005": {
+      id: "2005",
+      year: 2005,
+      label: "2005 · Koizumi v. Okada",
+      tagline: "September 2005. The House of Councillors has killed Koizumi's postal privatisation bills, and he has answered by dissolving the lower house and calling the election a referendum on them. He has refused the party label to 37 LDP rebels and is sending celebrity candidates against them. Okada's Democrats came close in 2003 and say they would reform better. Win a majority, or stop Koizumi winning one.",
+      majority: { total: 480, threshold: 241 },
+      goalText: "241 of 480 seats",
+      salience: { postal: 0.95, reform: 0.7, economy: 0.6, consumption_tax: 0.5, foreign_policy: 0.3 },
+      regions: {
+        HKD: { v: { dpj: 0.338, ldp: 0.291, oth: 0.134, kom: 0.114, jcp: 0.075, sdp: 0.047 }, s: { dpj: 11, ldp: 7, oth: 1, kom: 1 } },
+        TOH: { v: { ldp: 0.364, dpj: 0.335, kom: 0.119, sdp: 0.069, jcp: 0.062, pnp: 0.047, oth: 0.004 }, s: { ldp: 23, dpj: 12, oth: 1, kom: 1, sdp: 1, jcp: 1 } },
+        NKT: { v: { ldp: 0.402, dpj: 0.315, kom: 0.130, jcp: 0.066, sdp: 0.045, oth: 0.041 }, s: { ldp: 36, dpj: 11, kom: 2, oth: 1, jcp: 1, sdp: 1 } },
+        SKT: { v: { ldp: 0.424, dpj: 0.295, kom: 0.122, jcp: 0.068, sdp: 0.054, oth: 0.037 }, s: { ldp: 38, dpj: 9, kom: 4, oth: 3, jcp: 1, sdp: 1 } },
+        TKY: { v: { ldp: 0.402, dpj: 0.296, kom: 0.124, jcp: 0.088, sdp: 0.045, oth: 0.044 }, s: { ldp: 30, dpj: 7, kom: 3, jcp: 1, sdp: 1 } },
+        HSN: { v: { ldp: 0.381, dpj: 0.324, kom: 0.092, pnp: 0.069, jcp: 0.067, sdp: 0.062, oth: 0.004 }, s: { ldp: 18, dpj: 9, pnp: 2, oth: 1, kom: 1 } },
+        TKI: { v: { ldp: 0.386, dpj: 0.348, kom: 0.124, jcp: 0.063, oth: 0.041, sdp: 0.038 }, s: { ldp: 30, dpj: 18, kom: 3, oth: 2, jcp: 1 } },
+        KNK: { v: { ldp: 0.368, dpj: 0.290, kom: 0.150, jcp: 0.097, sdp: 0.057, oth: 0.039 }, s: { ldp: 45, dpj: 17, kom: 10, jcp: 3, sdp: 1, oth: 1 } },
+        CHG: { v: { ldp: 0.366, dpj: 0.285, kom: 0.157, pnp: 0.079, jcp: 0.059, sdp: 0.051, oth: 0.004 }, s: { ldp: 21, dpj: 5, pnp: 2, kom: 2, oth: 1 } },
+        SHK: { v: { ldp: 0.381, dpj: 0.330, kom: 0.147, jcp: 0.082, sdp: 0.055, oth: 0.004 }, s: { ldp: 14, dpj: 3, oth: 1, kom: 1 } },
+        KYU: { v: { ldp: 0.369, dpj: 0.293, kom: 0.159, sdp: 0.078, jcp: 0.058, pnp: 0.039, oth: 0.004 }, s: { ldp: 34, dpj: 11, oth: 8, kom: 3, sdp: 2, jcp: 1 } },
+      },
+      // The real story beats of 2005, in campaign order (a turn is one week; turn 5 is the week before polling day).
+      events: [
+        { id: "postal_defeat", headline: "The House of Councillors kills the Japan Post bills on 8 August with 30 LDP members voting no or abstaining, and Koizumi dissolves the lower house the same day. Approval of his cabinet jumps, and {party} has its referendum", role: "any", party: "ldp", weight: 3, appeal: 0.03, momentum: 9, turn: 1 },
+        { id: "okada_resign", headline: "Katsuya Okada says on 10 August that he will resign if the Democrats fail to take over the government, matching Koizumi's own pledge, and {party} sets a clear test for itself", role: "any", party: "dpj", weight: 2, appeal: 0.01, momentum: 3, turn: 1 },
+        { id: "rebels_new_party", headline: "Shizuka Kamei and three other LDP rebels form the People's New Party on 17 August so that those denied the LDP label can fight with a party behind them, and {party} has a rival for the old guard's votes", role: "any", party: "pnp", weight: 2, appeal: 0.02, momentum: 4, turn: 2 },
+        { id: "campaign_opens", headline: "The 12-day official campaign opens on 30 August, and Koizumi turns every stump speech into the same question on postal privatisation. {party} has the simplest message in the race", role: "any", party: "ldp", weight: 3, appeal: 0.02, momentum: 6, turn: 4 },
+        // Unscheduled flavour: joins the weekly draw, fires at most once.
+        { id: "assassins", headline: "Celebrities, bureaucrats and local politicians are recruited to run against the 37 rebels, and Livedoor's Takafumi Horie takes on Kamei in Hiroshima's 6th district. The 'assassins' make {party} the story of every news bulletin", role: "any", party: "ldp", weight: 3, appeal: 0.025, momentum: 7 },
+        { id: "shimamura_fired", headline: "Koizumi fires Agriculture Minister Yoshinobu Shimamura for refusing to sign the dissolution order, and the old guard of {party} sees how far the prime minister will go", role: "any", party: "ldp", weight: 2, appeal: -0.01, momentum: -3 },
+        { id: "dpj_postal_plan", headline: "The Democrats, who had no clear position on Japan Post, offer a plan to shrink its public savings over several years, and {party} is accused of copying Koizumi", role: "any", party: "dpj", weight: 3, appeal: -0.02, momentum: -5 },
+        { id: "iraq_pullout", headline: "Okada promises to bring the troops home from Iraq by December and not to visit Yasukuni Shrine, and {party} offers a different foreign policy, though voters hardly notice", role: "any", party: "dpj", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "tax_honesty", headline: "Both big parties admit that the consumption tax will have to rise in time and that temporary tax cuts will go, and {party} is trusted to say so", role: "any", party: "dpj", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "komeito_machine", headline: "New Komeito's Soka Gakkai machine gets out the vote for the ruling bloc in every district, and {party} holds its lists", role: "any", party: "kom", weight: 2, appeal: 0.015, momentum: 4 },
+        { id: "jcp_stands_apart", headline: "The Communists run against the postal reform and against the Democrats' version of it, and {party} sells itself as the one party that is not copying Koizumi", role: "any", party: "jcp", weight: 2, appeal: 0.01, momentum: 3 },
+        { id: "unpopular_reforms", headline: "Farmers, shopkeepers and builders who lost out under Koizumi's reforms are drifting away from the LDP's rural base, and {party} wins them in the districts", role: "any", party: "dpj", weight: 2, appeal: 0.02, momentum: 5 },
+      ],
+    },
   },
 
   leaders: {
@@ -553,6 +607,12 @@ export const JAPAN: CountryBundle = {
       kom: { partyId: "kom", name: "Akihiro Ota", charisma: 40, energy: 54, competence: 62, machine: 82 },
       jcp: { partyId: "jcp", name: "Kazuo Shii", charisma: 52, energy: 60, competence: 60, machine: 66 },
       yp: { partyId: "yp", name: "Yoshimi Watanabe", charisma: 64, energy: 70, competence: 60, machine: 34 },
+    },
+    "2005": {
+      ldp: { partyId: "ldp", name: "Junichiro Koizumi", charisma: 94, energy: 82, competence: 70, machine: 82 },
+      dpj: { partyId: "dpj", name: "Katsuya Okada", charisma: 44, energy: 66, competence: 72, machine: 62 },
+      kom: { partyId: "kom", name: "Takenori Kanzaki", charisma: 38, energy: 54, competence: 62, machine: 86 },
+      jcp: { partyId: "jcp", name: "Kazuo Shii", charisma: 50, energy: 60, competence: 60, machine: 68 },
     },
   },
 

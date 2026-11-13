@@ -65,4 +65,11 @@ export const JP_ELECTION_ISSUES: Record<string, CountryIssueDef[]> = {
     { id: "security", name: "North Korea and bases", blurb: "North Korea's May nuclear test and Hatoyama's call to move Futenma out of Okinawa." },
     { id: "trade", name: "Farm trade", blurb: "The Democrats' US free trade pledge, softened after farm protests, and income support for farmers." },
   ],
+  "2005": [
+    { id: "postal", name: "Postal privatisation", blurb: "Koizumi's bills to split Japan Post into four companies, and the Councillors' vote that killed them." },
+    { id: "reform", name: "Koizumi's reforms", blurb: "Smaller government, fewer public works and fewer civil servants, which both big parties promise and the LDP's rural base resents." },
+    { id: "economy", name: "A sluggish recovery", blurb: "A recovery that has not reached farmers, shopkeepers and builders, and the worst public finances of any rich country." },
+    { id: "consumption_tax", name: "The consumption tax", blurb: "The common understanding that the tax will have to rise and temporary tax cuts will end." },
+    { id: "foreign_policy", name: "Iraq, China & Yasukuni", blurb: "Troops in Iraq, Koizumi's visits to Yasukuni Shrine and Okada's pledge to bring the troops home." },
+  ],
 };

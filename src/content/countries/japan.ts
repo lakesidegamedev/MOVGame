@@ -30,17 +30,20 @@ export const JAPAN_MODULE: CountryModule = {
       description: "The Democrats' three years end. Abe returns, Hashimoto and Ishihara build a third pole, and a split vote hands the LDP a landslide." },
     { electionId: "2009", year: 2009, label: "2009 · Hatoyama v. Aso", difficulty: "hard",
       description: "The change of government. The Democrats take on 54 years of LDP rule with Hatoyama's child allowance and Aso's collapsing caucus." },
+    { electionId: "2005", year: 2005, label: "2005 · Koizumi v. Okada", difficulty: "hard", addedLater: true,
+      description: "Koizumi dissolves the House after the Councillors kill his postal bills, and makes the election a referendum. Thirty-seven LDP rebels are shut out and the Democrats say they would reform better." },
   ],
   systemLabel: "Parallel voting (districts and lists)",
   pack: {
     id: "japan",
     name: "Japan",
-    description: "Seven House of Representatives elections from 2009 to 2026: the Democratic landslide, Abe's return, the Hope split, the slush fund election that cost the coalition its majority, and Takaichi's two-thirds landslide.",
+    description: "Eight House of Representatives elections from 2005 to 2026: the Koizumi postal landslide, the Democratic landslide, Abe's return, the Hope split, the slush fund election that cost the coalition its majority, and Takaichi's two-thirds landslide.",
   },
   // 2026 pairs the LDP with the CRA, which replaced the CDP (row dailyPair).
   daily: { pair: ["ldp", "dpj"], names: { ldp: "the LDP", dpj: "the DPJ/CDP", cra: "the CRA" } },
   next: {
     chain: [
+      { id: "2005", blurb: "Continue the timeline: the postal privatisation election" },
       { id: "2009", blurb: "Continue the timeline: the change of government" },
       { id: "2012", blurb: "Continue the timeline: Abe returns" },
       { id: "2014", blurb: "Continue the timeline: the Abenomics election" },
