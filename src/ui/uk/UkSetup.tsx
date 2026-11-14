@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useUkStore } from "@store/ukStore";
 import { useAuthStore } from "@store/authStore";
-import { openStoreForScenario } from "@store/storeNav";
+import { SIGN_IN_TO_PLAY_FREE, openLockedScenario, useFreeAccess } from "@lib/freeAccess";
 import { DifficultyPicker, type Difficulty } from "@ui/DifficultyPicker";
 import { UK_ELECTIONS, UK_ELECTION_IDS } from "@content/uk/elections";
 import { ElectionTile, PartyCard } from "@ui/ElectionTile";
@@ -28,13 +28,17 @@ function UkBeginButton({ election, party, seed, year, onBegin }: {
   void seed;
   const canPlay = useAuthStore((s) => s.canPlay);
   const unlocked = canPlay(`uk-${election}`);
+  const fa = useFreeAccess();
   return (
+    <>
     <button
       className="primary su-next"
-      onClick={() => (unlocked ? onBegin() : openStoreForScenario(`uk-${election}`))}
+      onClick={() => (unlocked ? onBegin() : openLockedScenario(`uk-${election}`))}
     >
-      <Flag size={15} /> {unlocked ? `Begin ${year} as ${partyShort(party)}` : <><Lock size={14} aria-hidden="true" /> Unlock to play</>}
+      <Flag size={15} /> {unlocked ? `Begin ${year} as ${partyShort(party)}` : <><Lock size={14} aria-hidden="true" /> {fa.on ? SIGN_IN_TO_PLAY_FREE : "Unlock to play"}</>}
     </button>
+    {!unlocked && fa.on && !fa.signedIn && <span className="muted small">{fa.untilLine}</span>}
+    </>
   );
 }
 

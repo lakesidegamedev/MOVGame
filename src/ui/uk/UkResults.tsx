@@ -3,7 +3,7 @@ import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "@lib/distribution";
 import { partyFill, partyInk } from "@ui/colors";
 import { useUkStore } from "@store/ukStore";
 import { useAuthStore } from "@store/authStore";
-import { openStoreForScenario } from "@store/storeNav";
+import { openLockedScenario } from "@lib/freeAccess";
 import { api } from "@lib/api";
 import { computeScoreFromFacts, multipartyScoreFacts } from "@engine/scoring";
 import { majorityForUk, playablePartiesIn } from "@engine/ukGame";
@@ -190,7 +190,7 @@ export function UkResults() {
                 ctaLabel: `Play ${nextData.year} →`,
                 lockLabel: `Unlock ${nextData.year}`,
                 onPlay: () => newGame(next.id, nextParty, String(Date.now()), difficulty),
-                onUnlock: () => openStoreForScenario(`uk-${next.id}`),
+                onUnlock: () => openLockedScenario(`uk-${next.id}`),
                 mapPreview: <UkMiniMap seats={r.seats} />,
                 freeAlternative: freeChoice(unlocked, "UK", scenarioId),
               }

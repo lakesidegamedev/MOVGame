@@ -8,7 +8,8 @@ import { useCatalog } from "@lib/useCatalog";
 import { DISTRIBUTION } from "@lib/distribution";
 import { SHELL_FOCUS_EVENT } from "@lib/desktopShell";
 import { BRAND } from "../../brand";
-import { FREE_ACCESS_LINE, countryPacks, freeAccessOn, freeElectionsByCountry, offerFor } from "@lib/storeModel";
+import { SIGN_IN_TO_PLAY_FREE, startFreeSignIn, useFreeAccess } from "@lib/freeAccess";
+import { FREE_ACCESS_LINE, countryPacks, freeElectionsByCountry, offerFor } from "@lib/storeModel";
 import { FREE_ELECTIONS_LINE } from "@content/facts";
 import { ExternalLink } from "../ExternalLink";
 import { StoreContext, type StoreCtx } from "./StoreContext";
@@ -111,7 +112,8 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
 
   const ownedPackIds = unlocked.packIds;
   // The platform's free access switch: everything plays, so the Store shows no prices and no Buy.
-  const freeAccess = !!user && freeAccessOn(purchases);
+  const fa = useFreeAccess();
+  const freeAccess = fa.on;
   // Lakeside sells it here (web and desktop checkout): say who sells it and how refunds work.
   const lakesideSale = DISTRIBUTION.checkout !== null && !DISTRIBUTION.preview && !freeAccess;
   // While a purchase is in flight every Buy waits, including after a checkout return whose payment
@@ -197,8 +199,11 @@ export default function StoreScreen({ onClose, onPlay }: { onClose: () => void; 
                   <Gift size={18} aria-hidden="true" />
                   <div>
                     <strong>{FREE_ACCESS_LINE}.</strong>
-                    <p>Every country and every election is open on your Lakeside account. Nothing to buy.</p>
+                    {user
+                      ? <p>Every country and every election is open on your Lakeside account. Nothing to buy.</p>
+                      : <p>{fa.untilLine}. Sign in with your Lakeside account and every country and every election is open. Nothing to buy.</p>}
                   </div>
+                  {!user && <button type="button" className="primary small" onClick={startFreeSignIn}>{SIGN_IN_TO_PLAY_FREE}</button>}
                 </div>
               </div>
             )}

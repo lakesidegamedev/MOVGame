@@ -4,7 +4,7 @@ import { InertLand, InsetFrames } from "@ui/mapExtras";
 import { partyFill, partyInk } from "@ui/colors";
 import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
-import { openStoreForScenario } from "@store/storeNav";
+import { openLockedScenario } from "@lib/freeAccess";
 import { api } from "@lib/api";
 import { computeScoreFromFacts, multipartyScoreFacts, multipartyUnitMargin } from "@engine/scoring";
 import { countryGovernmentText, majorityFor, playablePartiesIn, regionalReach } from "@engine/countryGame";
@@ -216,7 +216,7 @@ export function CountryResults({ onExit }: { onExit: () => void }) {
                 ctaLabel: `Play ${nextData.year} →`,
                 lockLabel: `Unlock ${nextData.year}`,
                 onPlay: () => newGame(country.id, next.id, nextParty, String(Date.now()), difficulty),
-                onUnlock: () => openStoreForScenario(packId),
+                onUnlock: () => openLockedScenario(packId),
                 mapPreview,
                 freeAlternative: freeChoice(unlocked, country.id, scenarioId),
               }

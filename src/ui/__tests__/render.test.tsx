@@ -3,7 +3,7 @@
 // the same path the browser uses) to catch JSX/component crashes the data-layer
 // tests can't. No testing-library — just react-dom/client + act.
 import "fake-indexeddb/auto";
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "../../App";
@@ -60,6 +60,9 @@ function typeInto(input: HTMLInputElement, value: string) {
 }
 
 describe("App renders without crashing", () => {
+  // The live free access switch must not leak into these paid-copy assertions.
+  beforeEach(() => { vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("offline"); })); });
+  afterEach(() => { vi.unstubAllGlobals(); });
   beforeEach(reset);
 
   it("shows the landing scenario browser on first load, then the U.S. setup wizard", async () => {

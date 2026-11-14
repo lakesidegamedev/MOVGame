@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCountryStore } from "@store/countryStore";
 import { useAuthStore } from "@store/authStore";
-import { openStoreForScenario } from "@store/storeNav";
+import { SIGN_IN_TO_PLAY_FREE, openLockedScenario, useFreeAccess } from "@lib/freeAccess";
 import { playablePartiesIn, regionalReach, type CountryBundle } from "@engine/countryGame";
 import { ElectionTile, PartyCard } from "@ui/ElectionTile";
 import { PartyLogo } from "@ui/PartyLogo";
@@ -43,6 +43,7 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
 }) {
   const newGame = useCountryStore((s) => s.newGame);
   const canPlay = useAuthStore((s) => s.canPlay);
+  const fa = useFreeAccess();
   const ids = Object.keys(country.elections).sort((a, b) => Number(b) - Number(a));
   const [election, setElection] = useState(initialElection && country.elections[initialElection] ? initialElection : ids[0]);
   const [party, setParty] = useState<PartyId>(initialParty && country.playable.includes(initialParty) ? initialParty : country.playable[0]);
@@ -178,14 +179,15 @@ export function CountrySetup({ country, onBack, initialElection, initialSeed, in
             className="primary su-next"
             onClick={() => {
               const sid = `${country.id.toLowerCase()}-${election}`;
-              if (!canPlay(sid)) { openStoreForScenario(sid); return; }
+              if (!canPlay(sid)) { openLockedScenario(sid); return; }
               newGame(country.id, election, activeParty, seed, difficulty);
             }}
           >
             <Flag size={15} /> {canPlay(`${country.id.toLowerCase()}-${election}`)
               ? <>Begin {data.year} as {partyShort(country, activeParty)}</>
-              : <><Lock size={14} aria-hidden="true" /> Unlock to play</>}
+              : <><Lock size={14} aria-hidden="true" /> {fa.on ? SIGN_IN_TO_PLAY_FREE : "Unlock to play"}</>}
           </button>
+          {!canPlay(`${country.id.toLowerCase()}-${election}`) && fa.on && !fa.signedIn && <span className="muted small">{fa.untilLine}</span>}
         </div>
       </div>
     </div>

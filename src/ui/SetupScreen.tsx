@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { useGameStore, type Difficulty } from "@store/gameStore";
 import { useAuthStore } from "@store/authStore";
-import { openStoreForScenario } from "@store/storeNav";
+import { SIGN_IN_TO_PLAY_FREE, openLockedScenario, useFreeAccess } from "@lib/freeAccess";
 import { SCENARIOS, SCENARIO_IDS } from "@content/scenarios";
 import { PAYWALL_ENABLED } from "@content/scenarioRegistry";
 import { ElectionTile, PartyCard } from "@ui/ElectionTile";
@@ -119,10 +119,11 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
   const globalId = (id: string) => `us-${id}`;
   const lockedIds = SCENARIO_IDS.filter((id) => !canPlay(globalId(id)));
   const unlocked = canPlay(globalId(scenarioId));
+  const fa = useFreeAccess();
 
   const chooseScenario = (id: string) => {
     if (!canPlay(globalId(id))) {
-      openStoreForScenario(globalId(id));
+      openLockedScenario(globalId(id));
       return;
     }
     setScenarioId(id);
@@ -154,7 +155,7 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
 
   const begin = () => {
     if (!unlocked) {
-      openStoreForScenario(globalId(scenarioId));
+      openLockedScenario(globalId(scenarioId));
       return;
     }
     newGame({
@@ -219,9 +220,16 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
               </div>
               {PAYWALL_ENABLED && lockedIds.length > 0 && (
                 <p className="setup-note">
-                  <Lock size={12} aria-hidden="true" /> Locked years are part of the <strong>United States</strong> pack. Pick one to see it in the{" "}
-                  <button type="button" className="su-link" onClick={() => openStoreForScenario(globalId(lockedIds[0]))}>store</button>,
-                  where you can buy it or redeem a code.
+                  <Lock size={12} aria-hidden="true" />{" "}
+                  {fa.on ? (
+                    fa.signedIn ? "Locked years open with your account while free access lasts." : <>{fa.untilLine}. <button type="button" className="su-link" onClick={() => openLockedScenario(globalId(lockedIds[0]))}>Sign in to play free</button>.</>
+                  ) : (
+                    <>
+                      Locked years are part of the <strong>United States</strong> pack. Pick one to see it in the{" "}
+                      <button type="button" className="su-link" onClick={() => openLockedScenario(globalId(lockedIds[0]))}>store</button>,
+                      where you can buy it or redeem a code.
+                    </>
+                  )}
                 </p>
               )}
             </div>
@@ -457,9 +465,12 @@ export function SetupScreen({ initialScenarioId, initialSeed, initialParty, onEx
               Next <ChevronRight size={16} />
             </button>
           ) : (
+            <>
             <button className="primary su-next" onClick={begin}>
-              {unlocked ? <>Begin {scenario.year} as {ticket.shortName} <ChevronRight size={16} aria-hidden="true" /></> : <><Lock size={14} aria-hidden="true" /> Unlock to play</>}
+              {unlocked ? <>Begin {scenario.year} as {ticket.shortName} <ChevronRight size={16} aria-hidden="true" /></> : <><Lock size={14} aria-hidden="true" /> {fa.on ? SIGN_IN_TO_PLAY_FREE : "Unlock to play"}</>}
             </button>
+            {!unlocked && fa.on && !fa.signedIn && <span className="muted small">{fa.untilLine}</span>}
+            </>
           )}
         </div>
 

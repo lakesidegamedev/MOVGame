@@ -32,7 +32,7 @@ import {
 } from "@content/customScenario";
 import { packForScenario } from "@content/packs";
 import { useAuthStore } from "@store/authStore";
-import { openStoreForScenario } from "@store/storeNav";
+import { openLockedScenario } from "@lib/freeAccess";
 import type { EditorLaunchTarget } from "@ui/SetupScreen";
 import { customScenarioStore } from "@persistence/local";
 import { X, Dices, Trash2, Play, Download, Upload, Save, Lock } from "lucide-react";
@@ -395,7 +395,7 @@ function EditorBody({ onClose, onLaunch }: { onClose: () => void; onLaunch?: (t:
     return pack ? { scenarioId: id, packName: pack.name } : null;
   };
 
-  const unlock = (scenarioId: string) => openStoreForScenario(scenarioId);
+  const unlock = (scenarioId: string) => openLockedScenario(scenarioId);
 
   const play = (cs: CustomScenario) => {
     // Free path stays open (US customs, free bases). A paid base needs its pack.
