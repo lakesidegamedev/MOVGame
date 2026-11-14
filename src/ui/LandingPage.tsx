@@ -9,6 +9,7 @@ import {
 } from "@content/facts";
 import { useAuthStore } from "@store/authStore";
 import { useStoreNav } from "@store/storeNav";
+import { SIGN_IN_TO_PLAY_FREE, startFreeSignIn, useFreeAccess, type FreeAccess } from "@lib/freeAccess";
 import { usePackPrices, type PackPrices } from "@lib/usePackPrices";
 import { packFacts, COMPLETE_ID, PRICE_UNAVAILABLE } from "@lib/storeModel";
 import { BUILD_COMMIT, DISTRIBUTION } from "@lib/distribution";
@@ -178,8 +179,12 @@ function faqItems(prices: PackPrices): { q: string; a: string }[] {
   ];
 }
 
-function FaqSection({ prices }: { prices: PackPrices }) {
+function FaqSection({ prices, fa }: { prices: PackPrices; fa: FreeAccess }) {
   const items = faqItems(prices).map((item) => {
+    if (fa.on) {
+      if (item.q === "What do I get if I pay?") return { q: "What do I get with free access?", a: `Every country bundle and the Complete Collection are ${fa.untilLine.replace(/^Free/, "free")}, with a free Lakeside account. Sign in and every election opens.` };
+      if (item.q === BUY_QUESTION) return { q: "Do I need an account?", a: "Sign in with your Lakeside account to open the paid elections while free access lasts. The free elections and the daily challenge need no account." };
+    }
     if (DISTRIBUTION.externalStore) return item;
     if (item.q === "What do I get if I pay?") {
       return { q: item.q, a: `Scenario packs unlock more elections. They are one time purchases managed by ${DISTRIBUTION.nativeStoreName}, not subscriptions.` };
@@ -262,6 +267,8 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
   const unlocked = useAuthStore((s) => s.unlocked);
   const openStore = useStoreNav((s) => s.openStore);
   const packPrices = usePackPrices();
+  const fa = useFreeAccess();
+  const freeLine = fa.untilLine.replace(/^Free/, "free");
 
   const free = SCENARIO_REGISTRY.filter((s) => s.free);
 
@@ -272,6 +279,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
   };
 
   const locked = (s: ScenarioMeta) => {
+    if (fa.on && !fa.signedIn) { startFreeSignIn(); return; }
     openStore({ scenarioId: s.scenarioId });
   };
 
@@ -306,12 +314,17 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             <p className="sub">
               Run a real campaign turn by turn: allocate a budget, target battlegrounds, survive debates,
               and watch the map move. {ELECTION_COUNT} elections across {COUNTRY_COUNT} countries.
-              {PAYWALL_ENABLED
+              {PAYWALL_ENABLED && fa.on
+                ? ` ${HERO_FREE_LINE}, and the daily challenge are free forever. Every other election is ${freeLine}${fa.signedIn ? "" : ", with a free Lakeside account"}.`
+                : PAYWALL_ENABLED
                 ? ` ${HERO_FREE_LINE}, and the daily challenge are free forever.${packPrices.country && packPrices.complete ? ` The rest of each country is ${packPrices.country}, or ${packPrices.complete} for everything.` : " The rest of each country is a one-time bundle, or get everything in one purchase."}`
                 : " All of them are free to play right now."}
             </p>
             <div className="landing-hero-actions">
               <button className="primary" onClick={() => play(free[0])}><Play size={15} /> Play free</button>
+              {fa.on && !fa.signedIn && (
+                <button className="ghost" onClick={startFreeSignIn}>{SIGN_IN_TO_PLAY_FREE}</button>
+              )}
               {resumable[0] && (
                 <button className="ghost" onClick={() => onResume(resumable[0].target)}>
                   Resume {resumable[0].label} · Week {resumable[0].turn + 1}
@@ -402,12 +415,14 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
             <div className="pricing-card">
               <h3>Country bundles</h3>
               <p className="pricing-price">
-                {!PAYWALL_ENABLED ? "Free for now" : packPrices.country ? `${packPrices.country} per country` : <PriceUnavailable prices={packPrices} />}
+                {!PAYWALL_ENABLED ? "Free for now" : fa.on ? fa.untilLine : packPrices.country ? `${packPrices.country} per country` : <PriceUnavailable prices={packPrices} />}
               </p>
               <ul className="pricing-list">
                 <li><Check size={13} /> {PAID_ELECTION_COUNT} more elections across {COUNTRY_COUNT} country bundles</li>
-                <li><Check size={13} /> Complete Collection: every country {everythingText(packPrices)}</li>
-                {PAYWALL_ENABLED ? (
+                <li><Check size={13} /> {fa.on ? "Complete Collection: every country, included" : <>Complete Collection: every country {everythingText(packPrices)}</>}</li>
+                {PAYWALL_ENABLED && fa.on ? (
+                  fa.signedIn ? null : <li><Check size={13} /> Sign in with a free Lakeside account to play them</li>
+                ) : PAYWALL_ENABLED ? (
                   <>
                     <li><Check size={13} /> One time purchase, yours to keep, no subscription</li>
                     <li><Check size={13} /> {DISTRIBUTION.externalStore ? "Bought and delivered through the Lakeside store" : `Purchased and restored through ${DISTRIBUTION.nativeStoreName}`}</li>
@@ -416,7 +431,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
                   <li><Check size={13} /> Play every election free while paid tiers are being prepared</li>
                 )}
               </ul>
-              {PAYWALL_ENABLED && !DISTRIBUTION.externalStore && (
+              {PAYWALL_ENABLED && !fa.on && !DISTRIBUTION.externalStore && (
                 <p className="muted small" style={{ marginTop: 8 }}>
                   Purchases and restoration will be handled by {DISTRIBUTION.nativeStoreName}.
                 </p>
@@ -441,7 +456,12 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
                   <span className="muted small pack-desc" title={p.description}>{p.description}</span>
                   <span className="pack-foot">
                     <span className="pack-price">
-                      {PAYWALL_ENABLED ? (
+                      {PAYWALL_ENABLED && fa.on ? (
+                        <>
+                          {packPrices.label(p.id) && <s style={{ opacity: 0.5, fontWeight: 500 }}>{packPrices.label(p.id)}</s>}
+                          <span style={{ color: "var(--green)", fontWeight: 800, marginLeft: 6 }}>Free</span>
+                        </>
+                      ) : PAYWALL_ENABLED ? (
                         packPrices.label(p.id) ?? <PriceUnavailable prices={packPrices} compact />
                       ) : (
                         <>
@@ -452,6 +472,10 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
                     </span>
                     {owned ? (
                       <span className="muted small">Owned</span>
+                    ) : PAYWALL_ENABLED && fa.on ? (
+                      fa.signedIn
+                        ? null
+                        : <button className="primary small" onClick={startFreeSignIn}>{SIGN_IN_TO_PLAY_FREE}</button>
                     ) : PAYWALL_ENABLED && DISTRIBUTION.externalStore ? (
                       <button className="primary small" onClick={() => openStore({ packId: p.id })}>
                         View
@@ -468,7 +492,7 @@ export function LandingPage({ onGo, onResume }: { onGo: (dest: LandingDestinatio
           </div>
         </div>
 
-        <FaqSection prices={packPrices} />
+        <FaqSection prices={packPrices} fa={fa} />
 
         {/* Footer: legal + studio credit + contact + attribution */}
         <div className="landing-foot">

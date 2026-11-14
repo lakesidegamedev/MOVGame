@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DISTRIBUTION, PREVIEW_SCORE_NOTE } from "@lib/distribution";
 import { useGameStore } from "@store/gameStore";
 import { useAuthStore } from "@store/authStore";
-import { openStoreForScenario } from "@store/storeNav";
+import { openLockedScenario } from "@lib/freeAccess";
 import { GRID, SPLIT_UNITS, GRID_COLS, GRID_ROWS } from "@content/mapLayout";
 import { STATE_PATHS } from "@content/statePaths";
 import { isCustomScenarioId } from "@content/customIds";
@@ -195,7 +195,7 @@ export function ResultsScreen() {
                       eventMode: game.eventMode,
                       difficulty,
                     }),
-                  onUnlock: () => openStoreForScenario(`us-${next.id}`),
+                  onUnlock: () => openLockedScenario(`us-${next.id}`),
                   mapPreview: <UsMiniMapPreview byState={byState} cands={cands} />,
                   freeAlternative: freeChoice(unlocked, "US", `us-${game.scenarioId ?? "2020"}`),
                 }

@@ -13,6 +13,7 @@ import {
   type DifficultyFilter,
   type LibraryFilters,
 } from "./filter";
+import { SIGN_IN_TO_PLAY_FREE, startFreeSignIn, useFreeAccess } from "@lib/freeAccess";
 
 // How many elections a country shows before "Show all" when no filter is set.
 const COLLAPSED_ROWS = 8;
@@ -51,11 +52,13 @@ export function LibraryCard({ s, unlocked, showFree, onPlay, onLocked }: {
 }) {
   const [, matchup] = s.label.split("·").map((part) => part.trim());
   const tags = scenarioTags(s);
+  const fa = useFreeAccess();
+  const signInFree = !unlocked && fa.on && !fa.signedIn;
   return (
     <button
       type="button"
       className={`library-card${unlocked ? "" : " locked"}`}
-      onClick={unlocked ? onPlay : onLocked}
+      onClick={unlocked ? onPlay : signInFree ? startFreeSignIn : onLocked}
       aria-label={`${s.label}${unlocked ? "" : ", locked"}`}
     >
       <span className="library-card-top">
@@ -75,7 +78,9 @@ export function LibraryCard({ s, unlocked, showFree, onPlay, onLocked }: {
           {tags.includes("tide") ? "Historical tide" : tags.includes("coin-flip") ? "Coin-flip election" : "Challenge path"}
         </span>
       )}
-      {!unlocked && <span className="library-card-unlock">Unlock to play</span>}
+      {!unlocked && (signInFree
+        ? <span className="library-card-unlock">{fa.untilLine}. {SIGN_IN_TO_PLAY_FREE}</span>
+        : !fa.on && <span className="library-card-unlock">Unlock to play</span>)}
     </button>
   );
 }
