@@ -30,7 +30,7 @@ describe("loadFreeAccess", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it("reads the public endpoint once per session", async () => {
-    const fetchMock = vi.fn(async () => ({ ok: true, json: async () => ({ on: true, endsAt: "2999-01-01T00:00:00Z" }) }));
+    const fetchMock = vi.fn(async (_url: string) => ({ ok: true, json: async () => ({ on: true, endsAt: "2999-01-01T00:00:00Z" }) }));
     vi.stubGlobal("fetch", fetchMock);
     expect((await loadFreeAccess()).on).toBe(true);
     await loadFreeAccess();
