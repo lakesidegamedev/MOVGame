@@ -10,6 +10,7 @@ import zlib
 probe = runpy.run_path(str(pathlib.Path(__file__).with_name('ios-screen-ready.py')))
 coverage = probe['screen_coverage']
 check_screen = probe['check_screen']
+capture_mode = probe['capture_mode']
 
 
 def png(background, marker=None):
@@ -64,6 +65,14 @@ class ScreenReadyTest(unittest.TestCase):
         fixtures = pathlib.Path(__file__).parent / 'test-fixtures'
         self.assertFalse(check_screen(fixtures / 'ios-guide-narrow.png')[0])
         self.assertTrue(check_screen(fixtures / 'ios-guide.png')[0])
+
+    def test_neutral_menu_needs_presentation_signal_and_visible_text(self):
+        fixture = pathlib.Path(__file__).parent / 'test-fixtures' / 'ios-menu.png'
+        self.assertIsNone(capture_mode('menu', ''))
+        self.assertFalse(check_screen(fixture)[0])
+        mode = capture_mode('menu', 'MOV_MENU_PRESENTED')
+        self.assertTrue(check_screen(fixture, mode)[0])
+        self.assertFalse(self.ready(png([10, 15, 20]), mode))
 
     def test_blank_dark_screen_has_no_accent(self):
         self.assertFalse(self.ready(png([10, 15, 20])))

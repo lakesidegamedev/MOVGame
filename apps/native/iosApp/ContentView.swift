@@ -510,6 +510,13 @@ struct ContentView: View {
         }
         .listStyle(.insetGrouped)
         .tint(.primary)
+        .onAppear {
+            #if targetEnvironment(simulator)
+            if ProcessInfo.processInfo.arguments.contains("--mov-capture-menu") {
+                NSLog("MOV_MENU_PRESENTED")
+            }
+            #endif
+        }
     }
 
     private func menuRow(_ destination: MenuDestination, icon: String) -> some View {

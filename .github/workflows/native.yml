@@ -188,8 +188,8 @@ jobs:
           name: android-emulator-flows
           path: android-captures
           retention-days: 7
-  ios:
-    name: iOS simulator launch
+  ios-build:
+    name: Build iOS simulator app
     needs: changes
     if: ${{ needs.changes.outputs.ios == 'true' }}
     runs-on: macos-26
@@ -225,11 +225,26 @@ jobs:
           name: unsigned-ios-simulator-app
           path: ${{ runner.temp }}/mov-simulator.tar.gz
           retention-days: 3
+  ios:
+    name: iOS simulator launch
+    needs: ios-build
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: unsigned-ios-simulator-app
+          path: ${{ runner.temp }}/mov-iphone
       - name: Launch app on iPhone simulator
         env:
           MOV_CAPTURE_SCREENS: '1'
           MOV_FRESH_SIMULATOR: '1'
-        run: python3 ../../scripts/ios-launch-smoke.py "$RUNNER_TEMP/mov-derived/Build/Products/Release-iphonesimulator/MOVGameiOS.app" "$RUNNER_TEMP/mov-launch"
+        run: |
+          tar -xzf "$RUNNER_TEMP/mov-iphone/mov-simulator.tar.gz" -C "$RUNNER_TEMP/mov-iphone"
+          python3 scripts/ios-launch-smoke.py "$RUNNER_TEMP/mov-iphone/MOVGameiOS.app" "$RUNNER_TEMP/mov-launch"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -237,7 +252,7 @@ jobs:
           path: ${{ runner.temp }}/mov-launch
   ios-layouts:
     name: Small iPhone and iPad flows
-    needs: ios
+    needs: ios-build
     runs-on: macos-26
     timeout-minutes: 35
     env:
@@ -260,7 +275,7 @@ jobs:
   ios-store-screenshots:
     name: App Store screenshots
     # Only on purpose: a build/ios-review* push or a manual run that asks for it.
-    needs: ios
+    needs: ios-build
     if: ${{ startsWith(github.ref_name, 'build/ios-review') || inputs.store_screenshots }}
     runs-on: macos-26
     timeout-minutes: 45
@@ -272,7 +287,7 @@ jobs:
         with:
           name: unsigned-ios-simulator-app
           path: ${{ runner.temp }}/mov-store
-      - name: Capture iPhone 6.9 inch and iPad 13 inch screens
+      - name: Capture iPhone Dynamic Island and iPad 13-inch screens
         run: |
           tar -xzf "$RUNNER_TEMP/mov-store/mov-simulator.tar.gz" -C "$RUNNER_TEMP/mov-store"
           python3 scripts/ios-store-captures.py "$RUNNER_TEMP/mov-store/MOVGameiOS.app" "$RUNNER_TEMP/mov-store-captures"
@@ -284,8 +299,7 @@ jobs:
           retention-days: 14
   ios27:
     name: iOS 27 iPhone 17 Pro Max launch
-    needs: ios
-    if: ${{ always() && (needs.ios.result == 'success' || needs.ios.result == 'failure') }}
+    needs: ios-build
     runs-on: xcode-27
     timeout-minutes: 50
     env:
