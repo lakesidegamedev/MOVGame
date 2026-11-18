@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """App Store screenshots at the sizes App Store Connect requires.
 
-Reuses the reviewed simulator binary on the largest iPhone (6.9 inch) and the
-largest iPad (13 inch), with a clean status bar, and copies the chosen screens
+Reuses the reviewed simulator binary on an iPhone with Dynamic Island (medium display)
+and a 13-inch iPad, with a clean status bar, and copies the chosen screens
 into one folder per device, numbered in listing order.
 """
 import json
@@ -16,11 +16,11 @@ import sys
 app = pathlib.Path(sys.argv[1]).resolve()
 output = pathlib.Path(sys.argv[2]).resolve()
 output.mkdir(parents=True, exist_ok=True)
-SCREENS = ['launch', 'library', 'campaign', 'world-in', 'world-de', 'world-jp', 'reveal',
-           'world-reveal-mx', 'results', 'world-results-jp', 'briefing-in', 'setup', 'store-priced']
+SCREENS = ['library', 'campaign', 'reveal', 'reveal-counties', 'plan', 'world-in',
+           'world-de', 'world-jp', 'results', 'briefing-in']
 # (label, simulator names to try in order, accepted portrait pixel sizes)
 DEVICES = [
-    ('iphone-6.9', ['iPhone 17 Pro Max', 'iPhone 16 Pro Max'], {(1320, 2868), (1290, 2796)}),
+    ('iphone-dynamic-island', ['iPhone 17 Pro', 'iPhone 17', 'iPhone 16 Pro', 'iPhone 16'], {(1206, 2622), (1179, 2556)}),
     ('ipad-13', ['iPad Pro 13-inch (M5)', 'iPad Pro 13-inch (M4)'], {(2064, 2752), (2048, 2732)}),
 ]
 
@@ -71,7 +71,11 @@ for label, names, sizes in DEVICES:
             if (width, height) not in sizes:
                 failures.append(f'{label}: {name} is {width}x{height}, expected one of {sorted(sizes)}')
                 continue
-            shutil.copy(source, final / f'{number:02d}-{name}.png')
+            target = final / f'{number:02d}-{name}'
+            if 'hasAlpha: yes' in run('sips', '-g', 'hasAlpha', str(source)):
+                run('sips', '-s', 'format', 'jpeg', '-s', 'formatOptions', 'best', str(source), '--out', str(target.with_suffix('.jpg')))
+            else:
+                shutil.copy(source, target.with_suffix('.png'))
             print(f'PASS: {label} {name} {width}x{height}', flush=True)
     finally:
         subprocess.run(['xcrun', 'simctl', 'shutdown', device], timeout=60, check=False)

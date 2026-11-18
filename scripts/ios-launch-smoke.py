@@ -152,7 +152,9 @@ try:
             ('campaign', '--mov-capture-game', 20),
             ('plan', '--mov-capture-plan', 20),
             ('results', '--mov-capture-results', 20),
-            ('reveal', '--mov-capture-reveal', 20),
+            ('reveal', '--mov-capture-reveal', 15),
+            ('reveal-counties', '--mov-capture-reveal-counties', 15),
+            ('menu', '--mov-capture-menu', 5),
             ('ask', '--mov-capture-ask', 20),
             ('ask-de', '--mov-capture-ask-de', 20),
             ('ask-login', '--mov-capture-ask-login', 20),
@@ -201,6 +203,8 @@ try:
                         screenshot(device, output / f'{name}.png')
                         print(f'PASS: {name} reached auth inside the app webview', flush=True)
                     else:
+                        if name == 'reveal-counties' and 'MOV_COUNTY_RETURNS_READY' not in (output / f'{name}-console.log').read_text():
+                            raise SystemExit('FAIL: county returns did not load')
                         capture_ready(name, preview)
                 finally:
                     stop(preview)

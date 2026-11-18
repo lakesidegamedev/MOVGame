@@ -5,6 +5,12 @@
 	};
 	objectVersion = 56;
 	objects = {
+		7A0000010000000000000057 = { isa = PBXFileReference; lastKnownFileType = text.json; path = usCounties.json; sourceTree = "<group>"; };
+		7A0000010000000000000058 = { isa = PBXBuildFile; fileRef = 7A0000010000000000000057; };
+		7A0000010000000000000055 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElectionCountyView.swift; sourceTree = "<group>"; };
+		7A0000010000000000000056 = { isa = PBXBuildFile; fileRef = 7A0000010000000000000055; };
+		7A0000010000000000000053 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElectionNightTimeline.swift; sourceTree = "<group>"; };
+		7A0000010000000000000054 = { isa = PBXBuildFile; fileRef = 7A0000010000000000000053; };
         7A000001000000000000004F = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeEditorView.swift; sourceTree = "<group>"; };
         7A0000010000000000000050 = { isa = PBXBuildFile; fileRef = 7A000001000000000000004F; };
         7A000001000000000000004D = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeSettingsViews.swift; sourceTree = "<group>"; };
@@ -46,6 +52,9 @@
 				7A000001000000000000004B,
 				7A0000010000000000000049,
 				7A0000010000000000000047,
+				7A0000010000000000000057,
+				7A0000010000000000000055,
+				7A0000010000000000000053,
 				7A0000010000000000000045,
 				7A0000010000000000000043,
 				7A0000010000000000000041,
@@ -103,6 +112,8 @@
 				7A000001000000000000004C,
 				7A000001000000000000004A,
 				7A0000010000000000000048,
+				7A0000010000000000000056,
+				7A0000010000000000000054,
 				7A0000010000000000000046,
 				7A0000010000000000000044,
 				7A0000010000000000000042,
@@ -148,6 +159,7 @@
 				7A000001000000000000002D,
 				7A000001000000000000003C,
 				7A0000010000000000000052,
+				7A0000010000000000000058,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

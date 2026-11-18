@@ -32,7 +32,12 @@ final class PlannerDraft: ObservableObject {
             spendMillions: type == "advertise" ? spend : nil,
             issueSerial: (type == "issue_pivot" || (type == "advertise" && adMode == "issue")) ? issue : nil,
             newPosition: type == "issue_pivot" ? position : nil)
-        notice = added ? "Added to day \(day)." : "Check the day, available action slots, and cash."
+        let usedDay = day
+        notice = added ? "Added to day \(usedDay)." : "Check the target, day, and cash."
+        if added, session.plannedActions().filter({ Int($0.day) == usedDay }).count >= 3,
+           let next = (1...7).first(where: { candidate in session.plannedActions().filter { Int($0.day) == candidate }.count < 3 }) {
+            day = next
+        }
     }
 }
 
@@ -260,16 +265,9 @@ struct GameView: View {
                 .padding()
               }
               if deskSection == .plan {
-                  Button { draft.add(to: session) } label: {
-                      Text("Add to day \(draft.day)  →")
-                          .font(.headline).frame(maxWidth: .infinity).padding(14)
-                  }
-                  .buttonStyle(.plain).foregroundStyle(CampaignStyle.background)
-                  .background(addDisabled ? CampaignStyle.muted : CampaignStyle.coral,
-                              in: RoundedRectangle(cornerRadius: 14))
-                  .disabled(addDisabled)
-                  .padding(.horizontal, 16).padding(.vertical, 8)
-                  .background(CampaignStyle.card)
+                  PlannerFooter(addTitle: "Add to day \(draft.day)", notice: draft.notice,
+                                addDisabled: addDisabled, endDisabled: session.eventId != nil,
+                                add: { draft.add(to: session) }, endWeek: { session.requestEndTurn() })
               }
             }
             .background(Color(red: 10/255, green: 15/255, blue: 20/255))
@@ -287,6 +285,10 @@ struct GameView: View {
                     deskSection = .plan
                 }
                 #endif
+            }
+            .onChange(of: g.turn()) { _ in
+                draft.day = 1
+                draft.notice = nil
             }
             .onChange(of: draft.target) { next in
                 if let state = states.first(where: { $0.id == next }) {
@@ -395,7 +397,6 @@ struct ActionPlannerView: View {
     @ObservedObject var draft: PlannerDraft
     let selectedStateId: String?
     let battlegrounds: [Battleground]
-    @State private var showingMoves = false
 
     private let actions = [
         PlannerAction(id: "advertise", label: "Advertising", icon: "megaphone.fill", hint: "$1-30M · move voters"),
@@ -418,39 +419,19 @@ struct ActionPlannerView: View {
         let dayCount = plan.filter { Int($0.day) == draft.day }.count
 
         return VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("BUILD THE WEEK").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
-                Spacer()
-                Text("\(plan.count) planned").font(.subheadline.bold())
-            }
-            PlanBonusHints(active: session.currentGame()?.planBonuses() ?? [])
-            if !plan.isEmpty, let game = session.currentGame() {
-                Text("Plan estimate: \(game.previewPlayerEv()) EV. Rival moves and events can change the result.")
-                    .font(.caption).foregroundStyle(CampaignStyle.gold)
-            }
-            VStack(alignment: .leading, spacing: 6) {
-                Label("DAY \(draft.day) · \(dayCount)/3 MOVES", systemImage: "calendar")
-                    .font(.subheadline.bold()).foregroundStyle(CampaignStyle.gold)
-                // Seven always-visible day buttons, so a phone player can plan any day
-                // of the week (the web game has a "+" on every day, Android has chips).
-                HStack(spacing: 6) {
-                    ForEach(1...7, id: \.self) { n in
-                        let count = plan.filter { Int($0.day) == n }.count
-                        Button { draft.day = n; draft.notice = nil } label: {
-                            VStack(spacing: 1) {
-                                Text("\(n)").font(.headline)
-                                Text("\(count)/3").font(.caption2)
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                            .foregroundStyle(draft.day == n ? CampaignStyle.background : (count >= 3 ? CampaignStyle.muted : .white))
-                            .background(draft.day == n ? CampaignStyle.gold : CampaignStyle.background, in: RoundedRectangle(cornerRadius: 10))
-                            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(CampaignStyle.muted.opacity(0.5)))
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Day \(n), \(count) of 3 planned")
-                        .accessibilityAddTraits(draft.day == n ? .isSelected : [])
+            WeekDayPicker(day: $draft.day, days: plan.map { Int($0.day) })
+            if let selected = actions.first(where: { $0.id == draft.type }) {
+                Picker("Campaign move", selection: $draft.type) {
+                    ForEach(actions) { action in
+                        Label(action.label, systemImage: action.icon).tag(action.id)
                     }
                 }
+                .pickerStyle(.menu)
+                .onChange(of: draft.type) { next in
+                    if next == "issue_pivot" { draft.position = session.playerIssuePosition(draft.issue) }
+                    draft.notice = nil
+                }
+                Text(selected.hint).font(.caption).foregroundStyle(CampaignStyle.muted)
             }
             HStack {
                 Spacer()
@@ -488,38 +469,6 @@ struct ActionPlannerView: View {
                 }
             }
 
-            HStack {
-                Text("CAMPAIGN MOVE").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
-                Spacer()
-                Text("10 moves available").font(.caption).foregroundStyle(CampaignStyle.muted)
-            }
-            if let selected = actions.first(where: { $0.id == draft.type }) {
-                Button { showingMoves.toggle() } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: selected.icon).font(.title3).frame(width: 27)
-                            .foregroundStyle(CampaignStyle.gold)
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(selected.label).font(.subheadline.bold())
-                            Text(selected.hint).font(.caption).foregroundStyle(CampaignStyle.muted)
-                        }
-                        Spacer()
-                        Text(showingMoves ? "Close" : "Change")
-                            .font(.subheadline.bold()).foregroundStyle(CampaignStyle.gold)
-                        Image(systemName: showingMoves ? "chevron.up" : "chevron.down")
-                            .font(.caption.bold()).foregroundStyle(CampaignStyle.gold)
-                    }
-                    .padding(12)
-                    .background(CampaignStyle.background, in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(CampaignStyle.gold.opacity(0.65)))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Campaign move: \(selected.label). \(showingMoves ? "Close choices" : "Change move")")
-            }
-            if showingMoves {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 7) {
-                    ForEach(actions) { action in actionButton(action) }
-                }
-            }
             if draft.type == "advertise" {
                 Text("ADVERTISING SETTINGS").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
                 HStack(spacing: 6) {
@@ -585,44 +534,32 @@ struct ActionPlannerView: View {
             } else if (session.currentGame()?.slotsLeft() ?? 0) == 0 {
                 Text("No action slots remain this week.").font(.subheadline).foregroundStyle(CampaignStyle.gold)
             }
-            if let notice = draft.notice {
-                Text(notice).font(.subheadline).foregroundStyle(CampaignStyle.gold)
-            }
 
-            HStack {
-                Text("WEEK SCHEDULE").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
-                Spacer()
-                Button("Clear all") { session.clearQueue() }.disabled(plan.isEmpty)
-                    .font(.subheadline)
-            }
-            ForEach(1...7, id: \.self) { n in
-                HStack(alignment: .top) {
-                    Text("DAY \(n)").font(.caption.bold()).foregroundStyle(CampaignStyle.gold)
-                        .frame(width: 48, alignment: .leading)
-                    let items = plan.filter { Int($0.day) == n }
-                    if items.isEmpty {
-                        Text("Open").font(.subheadline).foregroundStyle(CampaignStyle.muted)
-                    } else {
-                        VStack(alignment: .leading) {
-                            ForEach(items, id: \.index) { item in
-                                Button("\(item.label)  ×") { session.removeAction(Int(item.index)) }
-                                    .font(.subheadline).buttonStyle(.plain)
+            DisclosureGroup("Week schedule · \(plan.count) planned") {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(plan, id: \.index) { item in
+                        HStack {
+                            Text("Day \(item.day) · \(item.label)").font(.subheadline)
+                            Spacer()
+                            Button(role: .destructive) { session.removeAction(Int(item.index)) } label: {
+                                Image(systemName: "xmark").frame(minWidth: 44, minHeight: 44)
                             }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Remove \(item.label) from day \(item.day)")
                         }
                     }
-                    Spacer()
+                    if !plan.isEmpty { Button("Clear week", role: .destructive) { session.clearQueue() } }
                 }
+                .padding(.top, 8)
             }
-            Button { session.requestEndTurn() } label: {
-                Text("End week · \(plan.count) planned  →")
-                    .font(.subheadline.bold()).frame(maxWidth: .infinity).padding(12)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(plan.isEmpty ? CampaignStyle.muted : .white)
-            .background(CampaignStyle.background, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(CampaignStyle.muted.opacity(0.5)))
-            if plan.isEmpty {
-                Text("An empty week spends no moves. You will be asked to confirm.").font(.subheadline).foregroundStyle(CampaignStyle.muted)
+            .disabled(plan.isEmpty)
+
+            DisclosureGroup("Plan estimate") {
+                PlanBonusHints(active: session.currentGame()?.planBonuses() ?? [])
+                if !plan.isEmpty, let game = session.currentGame() {
+                    Text("\(game.previewPlayerEv()) projected electoral votes. Rival moves and events can change the result.")
+                        .font(.caption).foregroundStyle(CampaignStyle.muted)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading).padding(14)
@@ -637,26 +574,76 @@ struct ActionPlannerView: View {
         }
     }
 
-    private func actionButton(_ action: PlannerAction) -> some View {
-        let selected = draft.type == action.id
-        return Button {
-            draft.type = action.id
-            if action.id == "issue_pivot" { draft.position = session.playerIssuePosition(draft.issue) }
-            draft.notice = nil
-            showingMoves = false
-        } label: {
-            VStack(alignment: .leading, spacing: 6) {
-                Image(systemName: action.icon).font(.subheadline)
-                Text(action.label).font(.caption.bold()).lineLimit(1).minimumScaleFactor(0.8)
-                Text(action.hint).font(.caption2).lineLimit(2)
-                    .foregroundStyle(selected ? CampaignStyle.background.opacity(0.8) : CampaignStyle.muted)
+}
+
+struct WeekDayPicker: View {
+    @Binding var day: Int
+    let days: [Int]
+    @Environment(\.sizeCategory) private var sizeCategory
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Day \(day)").font(.subheadline.weight(.semibold))
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5),
+                                     count: sizeCategory.isAccessibilityCategory ? 4 : 7), spacing: 5) {
+                ForEach(1...7, id: \.self) { number in
+                    let count = days.filter { $0 == number }.count
+                    Button { day = number } label: {
+                        VStack(spacing: 2) {
+                            Text(String(number)).font(.subheadline.weight(.semibold))
+                            Text("\(count)/3").font(.caption2.monospacedDigit())
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .foregroundStyle(day == number ? CampaignStyle.background : CampaignStyle.muted)
+                        .background(day == number ? CampaignStyle.gold : CampaignStyle.background,
+                                    in: RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Day \(number), \(count) of 3 planned")
+                    .accessibilityAddTraits(day == number ? .isSelected : [])
+                }
             }
-            .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
-            .padding(8)
-            .foregroundStyle(selected ? CampaignStyle.background : .white)
-            .background(selected ? CampaignStyle.gold : CampaignStyle.background,
-                        in: RoundedRectangle(cornerRadius: 12))
         }
-        .buttonStyle(.plain)
+    }
+}
+
+struct PlannerFooter: View {
+    let addTitle: String
+    let notice: String?
+    let addDisabled: Bool
+    let endDisabled: Bool
+    let add: () -> Void
+    let endWeek: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if let notice {
+                Text(notice).font(.caption).foregroundStyle(CampaignStyle.muted)
+            }
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) { controls }
+                VStack(spacing: 4) { controls }
+            }
+            .buttonStyle(.bordered)
+            .tint(.primary)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
+        .background(CampaignStyle.card)
+    }
+
+    @ViewBuilder private var controls: some View {
+        Button(action: add) {
+            Text(addTitle).fontWeight(.semibold)
+                .frame(maxWidth: .infinity, minHeight: 32)
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(CampaignStyle.coral)
+        .foregroundStyle(CampaignStyle.background)
+        .disabled(addDisabled)
+        Button(action: endWeek) {
+            Text("End week").frame(minHeight: 32)
+        }
+        .disabled(endDisabled)
     }
 }

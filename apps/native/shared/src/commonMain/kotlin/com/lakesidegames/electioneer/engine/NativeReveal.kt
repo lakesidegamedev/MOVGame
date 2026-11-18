@@ -145,14 +145,14 @@ object NativeReveal {
 }
 
 class NativeElectionNight private constructor(private val data: NativeRevealData, private val sequence: NativeRevealSchedule,
-    private val geography: NativeMap, private val logos: Map<String, String> = emptyMap()) {
+    private val geography: NativeMap, private val logos: Map<String, String>, private val country: String) {
     companion object {
         fun create(snapshot: String): NativeElectionNight? {
             val data = NativeReveal.data(snapshot) ?: return null
             val world = MobileCampaign.restore(snapshot)
             val map = world?.map() ?: nativeMaps.getValue("US")
             val logos = if (world != null) data.parties.mapNotNull { p -> world.logo(p.id)?.let { p.id to it } }.toMap() else usLogos(snapshot)
-            return NativeElectionNight(data, NativeReveal.schedule(data), map, logos)
+            return NativeElectionNight(data, NativeReveal.schedule(data), map, logos, world?.countryId() ?: "US")
         }
 
         // The two U.S. parties' logos at this scenario's election; none for custom races.
@@ -163,6 +163,7 @@ class NativeElectionNight private constructor(private val data: NativeRevealData
     }
     /** The party's logo file (NativeArt.DIRECTORY) at this election, or null. */
     fun logo(partyId: String): String? = logos[partyId]
+    fun countryCode(): String = country
     fun data(): NativeRevealData = data
     fun map(): NativeMap = geography
     fun count(): Int = sequence.entries.size
@@ -174,21 +175,46 @@ class NativeElectionNight private constructor(private val data: NativeRevealData
     fun board(index: Int): NativeRevealBoard {
         val executed = sequence.entries.take(index.coerceIn(0, count()))
         val calls = executed.mapNotNull { it.unit }
-        val tally = mutableMapOf<String, Int>()
-        for (unit in calls) for ((party, seats) in unit.allocation ?: mapOf(unit.winnerId to unit.units))
-            tally[party] = (tally[party] ?: 0) + seats
-        val called = calls.sumOf { it.units }
-        val known = data.parties.filter { it.id != "__others" }.sumOf { tally[it.id] ?: 0 }
-        val rows = data.parties.map { p -> NativeRevealTally(p.id, p.short, p.color,
-            if (p.id == "__others") maxOf(0, called - known) else tally[p.id] ?: 0) }
         val finished = index >= count()
-        val projection = executed.firstOrNull { it.projectedId != null }?.projectedId?.let { party ->
-            "PROJECTED: ${data.parties.firstOrNull { it.id == party }?.short ?: party.uppercase()}"
-        } ?: if (finished) data.noMajorityLabel else null
-        val last = calls.lastOrNull()
         val wave = executed.lastOrNull { it.wave != null }?.wave ?: 0
         val status = if (finished) "ALL RESULTS IN" else if (executed.any { it.kind == "cliff" }) "TOO CLOSE TO CALL"
             else if (calls.isEmpty()) "POLLS ARE CLOSING" else "CALLS COMING IN · WAVE $wave OF ${sequence.waveCount}"
+        return tallyBoard(calls, finished, status, executed.firstOrNull { it.projectedId != null }?.projectedId)
+    }
+
+    /** Tally a chronological list of calls on the iOS results desk. */
+    fun reportingBoard(calledIds: List<String>, finished: Boolean): NativeRevealBoard {
+        val units = data.units.associateBy { it.id }
+        return tallyBoard(calledIds.distinct().mapNotNull(units::get), finished, "")
+    }
+
+    private fun tallyBoard(calls: List<NativeRevealUnit>, finished: Boolean, status: String, knownProjection: String? = null): NativeRevealBoard {
+        val tally = mutableMapOf<String, Int>()
+        var called = 0
+        var projected = knownProjection
+        val total = data.units.sumOf { it.units }
+        for ((index, unit) in calls.withIndex()) {
+            called += unit.units
+            val allocation = unit.allocation ?: mapOf(unit.winnerId to unit.units)
+            for ((party, seats) in allocation) {
+                tally[party] = (tally[party] ?: 0) + seats
+                if (data.pluralityWinner == null && projected == null && tally.getValue(party) >= data.threshold)
+                    projected = party
+            }
+            val winner = data.pluralityWinner
+            if (winner != null && projected == null) {
+                val rival = tally.filterKeys { it != winner }.values.maxOrNull() ?: 0
+                if ((tally[winner] ?: 0) > rival + total - called || index + 1 == data.units.size)
+                    projected = winner
+            }
+        }
+        val known = data.parties.filter { it.id != "__others" }.sumOf { tally[it.id] ?: 0 }
+        val rows = data.parties.map { p -> NativeRevealTally(p.id, p.short, p.color,
+            if (p.id == "__others") maxOf(0, called - known) else tally[p.id] ?: 0) }
+        val projection = projected?.let { party ->
+            "PROJECTED: ${data.parties.firstOrNull { it.id == party }?.short ?: party.uppercase()}"
+        } ?: if (finished) data.noMajorityLabel else null
+        val last = calls.lastOrNull()
         return NativeRevealBoard(status, rows, called, maxOf(0, data.totalUnits - called), projection,
             last?.let { "${it.name} · ${it.winnerShort} leads" }, calls, finished)
     }

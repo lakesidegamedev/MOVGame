@@ -20,10 +20,11 @@ for content in source_files:
         errors.append(f'Content differs: {shipped}')
 if errors:
     raise SystemExit('\n'.join(errors))
-map_source = pathlib.Path(__file__).resolve().parents[1] / 'apps/native/iosApp/statePaths.json'
-map_shipped = app / 'statePaths.json'
-if not map_shipped.is_file():
-    raise SystemExit(f'Missing geographic map: {map_shipped}')
-if hashlib.sha256(map_source.read_bytes()).digest() != hashlib.sha256(map_shipped.read_bytes()).digest():
-    raise SystemExit(f'Geographic map differs: {map_shipped}')
-print(f'PASS: {len(source_files)} content bundles present and byte-identical in {app}')
+for name in ('statePaths.json', 'usCounties.json'):
+    map_source = pathlib.Path(__file__).resolve().parents[1] / 'apps/native/iosApp' / name
+    map_shipped = app / name
+    if not map_shipped.is_file():
+        raise SystemExit(f'Missing geographic map: {map_shipped}')
+    if hashlib.sha256(map_source.read_bytes()).digest() != hashlib.sha256(map_shipped.read_bytes()).digest():
+        raise SystemExit(f'Geographic map differs: {map_shipped}')
+print(f'PASS: {len(source_files)} content bundles and two geographic maps present and byte-identical in {app}')

@@ -635,6 +635,10 @@ struct NativeWorldCampaign: View {
     @State private var issueId = ""
     @State private var rival = ""
     @State private var day = 1
+    @State private var showingPlanner = false
+    @State private var confirmPlannerEmptyWeek = false
+    @State private var advanceAfterPlanner = false
+    @State private var plannerNotice: String?
     @State private var confirmEmptyWeek = false
     @State private var showRecap = false
     @State private var notice: String?
@@ -726,26 +730,6 @@ struct NativeWorldCampaign: View {
                         Text("WHAT DECIDED IT").font(.caption.bold()).foregroundStyle(CampaignStyle.gold)
                         ForEach(Array(game.resultCauses().enumerated()), id: \.offset) { _, cause in Text(cause).font(.subheadline) }
                         Button("Choose another campaign") { session.playScreen = .library }.buttonStyle(.borderedProminent)
-                    } else {
-                        planner(game)
-                        ForEach(game.plan(), id: \.index) { action in
-                            HStack(alignment: .top) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Day \(action.day) · \(action.title)").font(.subheadline.bold())
-                                    Text("\(action.detail) · \(game.currency())\(String(format: "%.1f", action.cost))M")
-                                        .font(.caption).foregroundStyle(CampaignStyle.muted)
-                                }
-                                Spacer(minLength: 4)
-                                Button("Remove") { game.removeAction(index: action.index); session.touch() }.font(.caption)
-                            }.nativeCampaignCard()
-                        }
-                        Button {
-                            if game.plan().isEmpty { confirmEmptyWeek = true }
-                            else if session.endWorldWeek() { showRecap = !game.recap().isEmpty }
-                        } label: { Text("End week").font(.headline).frame(maxWidth: .infinity).padding(16) }
-                            .buttonStyle(.plain).foregroundStyle(CampaignStyle.background)
-                            .background(CampaignStyle.coral, in: RoundedRectangle(cornerRadius: 14))
-                            .disabled(game.hasPendingEvent())
                     }
                     Text("CAMPAIGN NEWS").font(.caption.bold()).foregroundStyle(CampaignStyle.gold)
                     ForEach(Array(game.news().enumerated()), id: \.offset) { _, item in
@@ -753,6 +737,40 @@ struct NativeWorldCampaign: View {
                     }
                 }
                 .padding(20)
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if !game.isOver() {
+                    Button {
+                        showingPlanner = true
+                    } label: {
+                        Label("Plan week · \(game.plan().count) queued", systemImage: "calendar")
+                            .font(.headline).frame(maxWidth: .infinity, minHeight: 36)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(CampaignStyle.coral)
+                    .foregroundStyle(CampaignStyle.background)
+                    .disabled(game.hasPendingEvent())
+                    .padding(.horizontal, 18).padding(.vertical, 6)
+                    .background(CampaignStyle.background)
+                }
+            }
+            .sheet(isPresented: $showingPlanner, onDismiss: { finishPlanner(game) }) {
+                NavigationStack {
+                    ScrollView { planner(game).padding(16) }
+                        .background(CampaignStyle.background)
+                        .navigationTitle("Plan week")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showingPlanner = false } } }
+                        .safeAreaInset(edge: .bottom, spacing: 0) {
+                            PlannerFooter(addTitle: "Add to day \(day)", notice: plannerNotice,
+                                          addDisabled: !canQueue(game), endDisabled: game.hasPendingEvent(),
+                                          add: { queue(game) }, endWeek: { endWeek(game) })
+                        }
+                        .alert("End week without moves?", isPresented: $confirmPlannerEmptyWeek) {
+                            Button("End week", role: .destructive) { closePlannerAndAdvance() }
+                            Button("Keep planning", role: .cancel) { }
+                        } message: { Text("You have no actions queued this week.") }
+                }
             }
             .background(CampaignStyle.background).preferredColorScheme(.dark)
             .onChange(of: session.shortcutSequence) { _ in
@@ -805,20 +823,16 @@ struct NativeWorldCampaign: View {
     private func planner(_ game: MobileCampaign) -> some View {
         let regional = ["rally", "surrogate", "ground_game", "gotv", "canvass"].contains(type)
         return VStack(alignment: .leading, spacing: 12) {
-            Text("Plan your week").font(.title2.bold())
+            WeekDayPicker(day: $day, days: game.plan().map { Int($0.day) })
             Text("\(nativeMoneyMillions(game.currency(), game.funds())) cash · \(game.slotsLeft()) moves left").font(.subheadline)
             Text("Planned \(nativeMoneyMillions(game.currency(), game.plannedSpend())) · Available \(nativeMoneyMillions(game.currency(), game.availableFunds()))")
                 .font(.caption).foregroundStyle(CampaignStyle.muted)
-            Text("Plan estimate: \(game.previewPlayerUnits()) \(game.unitName()) after your queued actions. Rival moves and events can change the result.")
-                .font(.caption).foregroundStyle(CampaignStyle.gold)
-            PlanBonusHints(active: game.planBonuses())
             Picker("Action", selection: $type) { ForEach(game.actionTypes(), id: \.self) { Text(nativeActionName($0)).tag($0) } }
             Picker("Target", selection: $regionId) {
                 Text("National").tag("")
                 ForEach(game.regions(), id: \.id) { Text($0.name).tag($0.id) }
             }
             if regional && regionId.isEmpty { Text("Choose a region for this action.").font(.caption).foregroundStyle(CampaignStyle.gold) }
-            Picker("Day", selection: $day) { ForEach(1...7, id: \.self) { Text("Day \($0)").tag($0) } }
             if type == "broadcast" {
                 Picker("Broadcast mode", selection: $mode) { ForEach(["positive", "contrast", "issue"], id: \.self) { Text($0.capitalized).tag($0) } }
                 Text("Spend \(game.currency())\(String(format: "%.1f", spend))M").font(.subheadline)
@@ -840,20 +854,74 @@ struct NativeWorldCampaign: View {
                     ForEach(game.rivals(), id: \.partyId) { Text($0.name).tag($0.partyId) }
                 }
             }
-            Button {
-                let added = game.queue(type: type, regionId: regionId.isEmpty ? nil : regionId, day: Int32(day),
-                    mode: type == "broadcast" ? mode : nil,
-                    spend: type == "broadcast" ? KotlinDouble(double: spend) : nil,
-                    issueId: type == "issue_pivot" || (type == "broadcast" && mode == "issue") ? issueId : nil,
-                    targetParty: type == "oppo_research" || (type == "broadcast" && mode == "contrast") ? (rival.isEmpty ? nil : rival) : nil)
-                if added { notice = nil; session.touch() }
-                else { notice = "Check your target, cash, remaining moves, and the three-move daily limit." }
-            } label: { Text("Add to plan").frame(maxWidth: .infinity) }
-                .buttonStyle(.borderedProminent)
-                .disabled(game.slotsLeft() == 0 || game.hasPendingEvent() || (regional && regionId.isEmpty))
+            DisclosureGroup("Week schedule · \(game.plan().count) planned") {
+                ForEach(game.plan(), id: \.index) { action in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Day \(action.day) · \(action.title)").font(.subheadline.bold())
+                            Text(action.detail).font(.caption).foregroundStyle(CampaignStyle.muted)
+                        }
+                        Spacer()
+                        Button(role: .destructive) { game.removeAction(index: action.index); session.touch() } label: {
+                            Image(systemName: "xmark").frame(minWidth: 44, minHeight: 44)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Remove \(action.title) from day \(action.day)")
+                    }
+                }
+            }
+            .disabled(game.plan().isEmpty)
+            DisclosureGroup("Plan estimate") {
+                PlanBonusHints(active: game.planBonuses())
+                Text("\(game.previewPlayerUnits()) projected \(game.unitName()). Rival moves and events can change the result.")
+                    .font(.caption).foregroundStyle(CampaignStyle.muted)
+            }
         }
         .pickerStyle(.menu)
         .nativeCampaignCard()
+    }
+
+    private func canQueue(_ game: MobileCampaign) -> Bool {
+        let requiresRegion = ["rally", "surrogate", "ground_game", "gotv", "canvass"].contains(type)
+        return !game.hasPendingEvent() && game.slotsLeft() > 0 && (!requiresRegion || !regionId.isEmpty) &&
+            game.plan().filter { Int($0.day) == day }.count < 3
+    }
+
+    private func queue(_ game: MobileCampaign) {
+        let added = game.queue(type: type, regionId: regionId.isEmpty ? nil : regionId, day: Int32(day),
+            mode: type == "broadcast" ? mode : nil,
+            spend: type == "broadcast" ? KotlinDouble(double: spend) : nil,
+            issueId: type == "issue_pivot" || (type == "broadcast" && mode == "issue") ? issueId : nil,
+            targetParty: type == "oppo_research" || (type == "broadcast" && mode == "contrast") ? (rival.isEmpty ? nil : rival) : nil)
+        guard added else { plannerNotice = "Check the target, day, and available cash."; return }
+        let usedDay = day
+        plannerNotice = "Added to day \(usedDay)."
+        let plan = game.plan()
+        if plan.filter({ Int($0.day) == usedDay }).count >= 3,
+           let next = (1...7).first(where: { candidate in plan.filter { Int($0.day) == candidate }.count < 3 }) {
+            day = next
+        }
+        session.touch()
+    }
+
+    private func endWeek(_ game: MobileCampaign) {
+        if game.plan().isEmpty { confirmPlannerEmptyWeek = true }
+        else { closePlannerAndAdvance() }
+    }
+
+    private func closePlannerAndAdvance() {
+        advanceAfterPlanner = true
+        showingPlanner = false
+    }
+
+    private func finishPlanner(_ game: MobileCampaign) {
+        guard advanceAfterPlanner else { return }
+        advanceAfterPlanner = false
+        if session.endWorldWeek() {
+            plannerNotice = nil
+            day = 1
+            showRecap = !game.recap().isEmpty && !game.isOver()
+        }
     }
 }
 

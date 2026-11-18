@@ -1,3 +1,4 @@
+import { PlanQueueControls } from "./PlanQueueControls";
 import { useEffect, useState } from "react";
 import { useGameStore } from "@store/gameStore";
 import type { ActionType, AdMode, CampaignAction, IssueId } from "@engine/index";
@@ -142,7 +143,7 @@ export function ActionPanel() {
   const evDelta = evPreview - evLive;
   const myDelta = player === "dem" ? evDelta : -evDelta;
 
-  const TypeIcon = ICON[type];
+  const selectedAction = ACTIONS.find((action) => action.type === type);
 
   return (
     <div className="card desk-plan">
@@ -159,6 +160,15 @@ export function ActionPanel() {
       </div>
 
       {/* Action builder — configure one action, then drop it on a day below. */}
+      <label className="plan-mobile-action">
+        Campaign move
+        <select value={type} onChange={(event) => {
+            const next = event.target.value as ActionType;
+            setType(next);
+        }}>
+          {ACTIONS.map((action) => <option key={action.type} value={action.type}>{action.label}</option>)}
+        </select>
+      </label>
       <div className="actiongrid">
         {ACTIONS.map((a) => {
           const Ico = ICON[a.type];
@@ -225,56 +235,61 @@ export function ActionPanel() {
         )}
       </div>
 
-      <PlanBonusStrip plan={plan} />
       {configuredCost > res.cash - committedCash && (
         <p className="plan-warning" role="status">
           This action costs {money(configuredCost)}. You have {money(res.cash - committedCash)} uncommitted.
         </p>
       )}
 
+      <PlanQueueControls
+        days={DAYS.map((day) => ({ day, count: dayItems(day).length, available: canQueueAction(game, { ...buildAction(), day }) }))}
+        limit={MAX_PER_DAY}
+        action={selectedAction?.label ?? type}
+        addToDay={addToDay}
+      />
+
+      <details className="plan-schedule">
+        <summary>Week schedule · {used} planned</summary>
       {/* 7-day week. Each day holds up to 3 actions; "+" drops the configured
           action above onto that day. The pool runs out before all 21 slots. */}
-      <div className="weekplan">
-        {DAYS.map((d) => {
-          const items = dayItems(d);
-          const full = items.length >= MAX_PER_DAY;
-          const canAdd = canQueueAction(game, { ...buildAction(), day: d });
-          return (
-            <div className={`day${full ? " full" : ""}`} key={d}>
-              <div className="day-head">
-                <span className="day-name">Day {d}</span>
-                <span className="day-slots">
-                  {Array.from({ length: MAX_PER_DAY }).map((_, k) => (
-                    <span key={k} className={k < items.length ? "dot on" : "dot"} />
-                  ))}
-                </span>
-                <button className="day-add" disabled={!canAdd} onClick={() => addToDay(d)} aria-label={`Add ${type.replace("_", " ")} to Day ${d}`} title={canAdd ? `Add ${type} to Day ${d}` : full ? "Day is full" : used >= pool ? "Action pool is full" : "Not enough available cash"}>
-                  <Plus size={13} />
-                </button>
+        <div className="weekplan">
+          {DAYS.map((d) => {
+            const items = dayItems(d);
+            const full = items.length >= MAX_PER_DAY;
+            const canAdd = canQueueAction(game, { ...buildAction(), day: d });
+            return (
+              <div className={`day${full ? " full" : ""}`} key={d}>
+                <div className="day-head">
+                  <span className="day-name">Day {d}</span>
+                  <span className="day-slots">
+                    {Array.from({ length: MAX_PER_DAY }).map((_, k) => (
+                      <span key={k} className={k < items.length ? "dot on" : "dot"} />
+                    ))}
+                  </span>
+                  <button className="day-add" disabled={!canAdd} onClick={() => addToDay(d)} aria-label={`Add ${type.replace("_", " ")} to Day ${d}`} title={canAdd ? `Add ${type} to Day ${d}` : full ? "Day is full" : used >= pool ? "Action pool is full" : "Not enough available cash"}>
+                    <Plus size={13} />
+                  </button>
+                </div>
+                <div className="day-actions">
+                  {items.length === 0 && <span className="day-empty">no events</span>}
+                  {items.map(({ a, i }) => {
+                    const Ico = ICON[a.type];
+                    return (
+                      <span className="plan-chip" key={i} title={a.type === "advertise" ? `${a.adMode} ads · ${money(a.spend ?? 0)}` : a.type}>
+                        <Ico size={12} />
+                        {shortDesc(a, issueName)}
+                        <button type="button" className="x" onClick={() => removeQueued(i)} aria-label={`Remove ${shortDesc(a, issueName)}`}><X size={11} /></button>
+                      </span>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="day-actions">
-                {items.length === 0 && <span className="day-empty">no events</span>}
-                {items.map(({ a, i }) => {
-                  const Ico = ICON[a.type];
-                  return (
-                    <span className="plan-chip" key={i} title={a.type === "advertise" ? `${a.adMode} ads · ${money(a.spend ?? 0)}` : a.type}>
-                      <Ico size={12} />
-                      {shortDesc(a, issueName)}
-                      <button type="button" className="x" onClick={() => removeQueued(i)} aria-label={`Remove ${shortDesc(a, issueName)}`}><X size={11} /></button>
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
-      <button className="block plan-add"
-        disabled={!DAYS.some((d) => canQueueAction(game, { ...buildAction(), day: d }))}
-        onClick={() => { for (const d of DAYS) { if (dayItems(d).length < MAX_PER_DAY) { addToDay(d); break; } } }}>
-        <TypeIcon size={14} /> Add to next open day
-      </button>
+        <PlanBonusStrip plan={plan} />
+      </details>
 
       {preview && (
         <div className={`preview num${myDelta < 0 ? " down" : ""}`}>
