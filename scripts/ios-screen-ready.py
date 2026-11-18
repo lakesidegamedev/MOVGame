@@ -87,12 +87,18 @@ def check_screen(path, mode='game'):
     if mode == 'boot':
         # The black Apple boot splash is about 96% dark. Wait for SpringBoard.
         ready = fraction < 0.90
-    elif mode == 'ask':
-        # Ask uses dense white text on dark panels, without MOV's colored accents.
+    elif mode in ('ask', 'text'):
+        # Neutral screens have white text on dark panels without colored accents.
         ready = fraction >= 0.35 and white_samples >= 80
     else:
         ready = fraction >= 0.35 and (amber >= 3 or coral >= 3 or blue_samples >= 8)
     return ready, summary
+
+
+def capture_mode(name, launch_log):
+    if name == 'menu':
+        return 'text' if 'MOV_MENU_PRESENTED' in launch_log else None
+    return 'ask' if name.startswith('ask') else 'game'
 
 
 if __name__ == '__main__':

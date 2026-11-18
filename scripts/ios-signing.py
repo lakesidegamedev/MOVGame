@@ -31,6 +31,9 @@ def main():
     missing = [name for name in names if not os.environ.get(name)]
     if missing:
         raise SystemExit("Missing signing inputs: " + ", ".join(missing))
+    distribution = os.environ.get("IOS_DISTRIBUTION", "internal")
+    if distribution not in ("internal", "app-store"):
+        raise SystemExit("Choose internal or app-store distribution")
     team = os.environ["APPLE_TEAM_ID"]
     bundle = os.environ["IOS_BUNDLE_ID"]
     if not re.fullmatch(r"[A-Z0-9]{10}", team):
@@ -100,11 +103,11 @@ project.save
     run("ruby", "-e", ruby)
     options = {"method": "app-store-connect", "teamID": team,
                "signingStyle": "manual", "signingCertificate": fingerprint,
-               "provisioningProfiles": {bundle: uuid}, "testFlightInternalTestingOnly": True}
+               "provisioningProfiles": {bundle: uuid}, "testFlightInternalTestingOnly": distribution == "internal"}
     (temp / "ExportOptions.plist").write_bytes(plistlib.dumps(options))
     cert.unlink()
     profile_file.unlink()
-    print("App Store profile and matching private key installed")
+    print(f"App Store profile and matching private key installed for {distribution} distribution")
 
 
 if __name__ == "__main__":

@@ -239,7 +239,18 @@
 .plan-budget .stat { align-items: flex-start; }
 .plan-config { margin-top: var(--space-3); }
 .plan-warning { font-size: var(--fs-sm); color: var(--warning); margin: var(--space-2) 0; }
-.plan-add { margin-top: var(--space-2); }
+.plan-queue-controls {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: end;
+  gap: var(--space-1) var(--space-2); margin-top: var(--space-3);
+}
+.plan-queue-controls label, .plan-mobile-action { font-size: var(--fs-sm); color: var(--text-2); }
+.plan-queue-controls select, .plan-mobile-action select { display: block; width: 100%; margin-top: 4px; }
+.plan-queue-controls button, .plan-queue-controls select, .plan-mobile-action select { min-height: 44px; }
+.plan-queue-notice { grid-column: 1 / -1; font-size: var(--fs-xs); color: var(--text-3); }
+.plan-queue-notice:empty { display: none; }
+.plan-schedule { margin: var(--space-3) 0; }
+.plan-schedule summary { cursor: pointer; color: var(--text-2); font-size: var(--fs-sm); padding: var(--space-2) 0; }
+.plan-mobile-action { display: none; }
 
 .actiongrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-1-5); }
 .actionbtn {
@@ -391,7 +402,9 @@
   .splitstrip { gap: var(--space-2); }
   .splitgroup .tile { width: 30px; }
   .geo-map { max-height: 46vh; min-height: 160px; }
-  .actiongrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .desk-plan .actiongrid { display: none; }
+  .plan-mobile-action { display: block; }
+  .plan-queue-controls select, .plan-mobile-action select { font-size: 16px; }
   .actionbtn { min-height: 56px; flex-direction: row; justify-content: flex-start; text-align: left; padding: var(--space-2); gap: var(--space-2); }
   .actionbtn .t { font-size: var(--fs-sm); }
   .actionbtn > span { display: block; }

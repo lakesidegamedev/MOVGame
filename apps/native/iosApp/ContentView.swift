@@ -341,9 +341,25 @@ struct ContentView: View {
     @State private var menuDestination: MenuDestination? = nil
 
     private enum MenuDestination: String, Identifiable {
-        case store, account, credits, guide, saves, analysis, replay, boards, settings, editor
+        case store = "Store"
+        case account = "Lakeside account"
+        case credits = "Image credits"
+        case guide = "How to play"
+        case saves = "Saved campaigns"
+        case analysis = "Campaign analysis"
+        case replay = "Campaign replay"
+        case boards = "Leaderboards"
+        case settings = "Settings"
+        case editor = "Scenario editor"
         var id: String { rawValue }
     }
+
+    private enum MenuSelection {
+        case destination(MenuDestination)
+        case ask
+    }
+
+    @State private var menuSelection: MenuSelection?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -353,24 +369,18 @@ struct ContentView: View {
         }
         .background(CampaignStyle.background)
         .preferredColorScheme(.dark)
-        .confirmationDialog("Campaign menu", isPresented: $showingMenu) {
-            if session.hasGame {
-                Button("Continue campaign") { session.resumeGame() }
-                Button("Campaign analysis") { menuDestination = .analysis }
-                if session.canViewReplay() { Button("Campaign replay and report") { menuDestination = .replay } }
+        .sheet(isPresented: $showingMenu, onDismiss: openMenuSelection) {
+            NavigationStack {
+                campaignMenu
+                    .navigationTitle("Menu")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { showingMenu = false }
+                        }
+                    }
             }
-            Button("Start a new campaign") { session.playScreen = .library }
-            Button("Campaign library") { session.playScreen = .library }
-            Button("Store") { menuDestination = .store }
-            Button("Scenario editor") { menuDestination = .editor }
-            Button("Settings") { menuDestination = .settings }
-            Button("How to play") { menuDestination = .guide }
-            Button(session.hasGame ? "Ask about this campaign" : "Ask about Margin of Victory") {
-                openAsk()
-            }
-            Button("Leaderboards and daily champions") { menuDestination = .boards }
-            Button("Account and saves") { menuDestination = .account }
-            Button("Image credits") { menuDestination = .credits }
+            .environment(\.sizeCategory, captureSizeCategory)
         }
         .task { _ = session.store }
         .alert("Unlock this election", isPresented: Binding(get: { session.paywallPack != nil },
@@ -396,7 +406,7 @@ struct ContentView: View {
                     case .settings: NativeSettingsView(settings: session.settings)
                     }
                 }
-                .navigationTitle(destination == .editor ? "Scenario editor" : destination == .settings ? "Settings" : destination == .store ? "Store" : destination == .account ? "Account and saves" : destination == .saves ? "Saved campaigns" : destination == .analysis ? "Campaign analysis" : destination == .replay ? "Campaign replay" : destination == .boards ? "Leaderboards" : destination == .guide ? "How to play" : "Image credits")
+                .navigationTitle(destination.rawValue)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Done") { menuDestination = nil }
@@ -435,11 +445,17 @@ struct ContentView: View {
         }
         .onChange(of: session.shortcutSequence) { _ in
             if session.shortcut == "?" { menuDestination = .settings }
-            if session.shortcut == UIKeyCommand.inputEscape { menuDestination = nil; showingMenu = false; showingAsk = false }
+            if session.shortcut == UIKeyCommand.inputEscape {
+                menuSelection = nil
+                menuDestination = nil
+                showingMenu = false
+                showingAsk = false
+            }
         }
         .onAppear {
             #if targetEnvironment(simulator)
             if ProcessInfo.processInfo.arguments.contains("--mov-capture-account") || ProcessInfo.processInfo.arguments.contains("--mov-capture-lakeside-login") { menuDestination = .account }
+            if ProcessInfo.processInfo.arguments.contains("--mov-capture-menu") { showingMenu = true }
             if ProcessInfo.processInfo.arguments.contains("--mov-capture-editor") { menuDestination = .editor }
             if ProcessInfo.processInfo.arguments.contains(where: { $0.hasPrefix("--mov-capture-store") }) { menuDestination = .store }
             if ProcessInfo.processInfo.arguments.contains("--mov-capture-settings") { menuDestination = .settings }
@@ -461,6 +477,74 @@ struct ContentView: View {
             #endif
         }
         .environment(\.sizeCategory, captureSizeCategory)
+    }
+
+    private var campaignMenu: some View {
+        List {
+            Section("Campaigns") {
+                menuRow(.saves, icon: "folder")
+                if session.hasGame {
+                    menuRow(.analysis, icon: "chart.bar")
+                    if session.canViewReplay() { menuRow(.replay, icon: "clock.arrow.circlepath") }
+                }
+                menuRow(.editor, icon: "slider.horizontal.3")
+                menuRow(.boards, icon: "trophy")
+            }
+            Section("Lakeside") {
+                menuRow(.account, icon: "person.crop.circle")
+                menuRow(.store, icon: "bag")
+            }
+            Section("Help and settings") {
+                menuRow(.guide, icon: "book")
+                Button {
+                    menuSelection = .ask
+                    showingMenu = false
+                } label: {
+                    Label(session.hasGame ? "Ask about this campaign" : "Ask about the game",
+                          systemImage: "bubble.left.and.text.bubble.right")
+                        .frame(minHeight: 44)
+                }
+                menuRow(.settings, icon: "gearshape")
+                menuRow(.credits, icon: "photo.on.rectangle")
+            }
+        }
+        .listStyle(.insetGrouped)
+        .tint(.primary)
+        .onAppear {
+            #if targetEnvironment(simulator)
+            if ProcessInfo.processInfo.arguments.contains("--mov-capture-menu") {
+                NSLog("MOV_MENU_PRESENTED")
+            }
+            #endif
+        }
+    }
+
+    private func menuRow(_ destination: MenuDestination, icon: String) -> some View {
+        Button {
+            menuSelection = .destination(destination)
+            showingMenu = false
+        } label: {
+            HStack {
+                Label(destination.rawValue, systemImage: icon)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+            }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+    }
+
+    private func openMenuSelection() {
+        let selection = menuSelection
+        menuSelection = nil
+        switch selection {
+        case .destination(let destination): menuDestination = destination
+        case .ask: openAsk()
+        case nil: break
+        }
     }
 
     private func openAsk() {
@@ -496,9 +580,13 @@ struct ContentView: View {
             navigationButton("Home", icon: "house.fill", selected: session.playScreen == .home) {
                 session.playScreen = .home
             }
-            navigationButton("Campaign", icon: "flag.fill", selected: session.playScreen == .game || session.playScreen == .results || session.playScreen == .worldGame,
-                             enabled: session.hasGame) {
-                session.resumeGame()
+            navigationButton("Elections", icon: "list.bullet.rectangle", selected: session.playScreen == .library || session.playScreen == .setup) {
+                session.playScreen = .library
+            }
+            if session.hasGame {
+                navigationButton("Campaign", icon: "flag.fill", selected: session.playScreen == .game || session.playScreen == .results || session.playScreen == .worldGame) {
+                    session.resumeGame()
+                }
             }
             navigationButton("Menu", icon: "line.3.horizontal", selected: false) {
                 showingMenu = true
@@ -510,21 +598,21 @@ struct ContentView: View {
     }
 
     private func navigationButton(_ title: String, icon: String, selected: Bool,
-                                  enabled: Bool = true, action: @escaping () -> Void) -> some View {
+                                  action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 3) {
                 Image(systemName: icon).font(.title3).frame(height: 24)
                 Text(title).font(.caption.bold())
-                    .lineLimit(1).minimumScaleFactor(0.75)
+                    .lineLimit(2).multilineTextAlignment(.center)
             }
             .foregroundStyle(selected ? CampaignStyle.gold : CampaignStyle.muted)
             .frame(maxWidth: .infinity)
-            .frame(height: usesAccessibilityLayout ? 64 : 48)
+            .frame(minHeight: usesAccessibilityLayout ? 64 : 48)
+            .contentShape(Rectangle())
             .background(selected ? CampaignStyle.background : .clear, in: RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
-        .disabled(!enabled)
-        .opacity(enabled ? 1 : 0.45)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 

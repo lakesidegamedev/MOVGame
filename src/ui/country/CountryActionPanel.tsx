@@ -1,3 +1,4 @@
+import { PlanQueueControls } from "../PlanQueueControls";
 import { moneyMillions } from "../format";
 import { useEffect, useState } from "react";
 import { useCountryStore } from "@store/countryStore";
@@ -122,7 +123,7 @@ export function CountryActionPanel() {
 
   const playerSeats = (r: typeof live) => r?.seats[player] ?? 0;
   const seatDelta = playerSeats(preview) - playerSeats(live);
-  const TypeIcon = ICON[type];
+  const selectedAction = ACTIONS.find((action) => action.type === type);
 
   return (
     <div className="card desk-plan">
@@ -137,11 +138,21 @@ export function CountryActionPanel() {
         <div className="metric"><span className="l">Momentum</span><span className="v">{res.momentum >= 0 ? "+" : ""}{res.momentum.toFixed(0)}</span></div>
       </div>
 
+      <label className="plan-mobile-action">
+        Campaign move
+        <select value={type} onChange={(event) => {
+            const next = event.target.value as CountryActionType;
+            if (NEEDS_REGION.includes(next) && regionId === "__national") setRegionId(regions[0]?.id ?? "");
+            setType(next);
+        }}>
+          {ACTIONS.map((action) => <option key={action.type} value={action.type}>{action.label}</option>)}
+        </select>
+      </label>
       <div className="actiongrid">
         {ACTIONS.map((a) => {
           const Ico = ICON[a.type];
           return (
-            <button key={a.type} className={`actionbtn${type === a.type ? " sel" : ""}`} onClick={() => {
+            <button key={a.type} className={`actionbtn${type === a.type ? " sel" : ""}`} aria-pressed={type === a.type} onClick={() => {
               if (NEEDS_REGION.includes(a.type) && regionId === "__national") setRegionId(regions[0]?.id ?? "");
               setType(a.type);
             }}>
@@ -207,52 +218,56 @@ export function CountryActionPanel() {
         )}
       </div>
 
-      <PlanBonusStrip plan={plan} />
 
-      <div className="weekplan">
-        {DAYS.map((d) => {
-          const items = dayItems(d);
-          const full = items.length >= MAX_PER_DAY;
-          const canAdd = used < pool && !full && !(regionRequired && (!regionId || regionId === "__national")) && mpActionCost(buildAction()) <= availableFunds;
-          return (
-            <div className={`day${full ? " full" : ""}`} key={d}>
-              <div className="day-head">
-                <span className="day-name">Day {d}</span>
-                <span className="day-slots">
-                  {Array.from({ length: MAX_PER_DAY }).map((_, k) => (
-                    <span key={k} className={k < items.length ? "dot on" : "dot"} />
-                  ))}
-                </span>
-                <button className="day-add" disabled={!canAdd} onClick={() => addToDay(d)} title={canAdd ? `Add ${type} to Day ${d}` : "No room"}>
-                  <Plus size={13} />
-                </button>
-              </div>
-              <div className="day-actions">
-                {items.length === 0 && <span className="day-empty">no events</span>}
-                {items.map(({ a, i }) => {
-                  const Ico = ICON[a.type];
-                  return (
-                    <span className="plan-chip" key={i} title={a.type}>
-                      <Ico size={12} />
-                      {shortDesc(a)}
-                      <button type="button" className="x" onClick={() => removeAction(i)} aria-label="Remove action"><X size={11} /></button>
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <PlanQueueControls
+        days={DAYS.map((day) => ({ day, count: dayItems(day).length, available: used < pool && dayItems(day).length < MAX_PER_DAY &&
+          !(regionRequired && (!regionId || regionId === "__national")) && mpActionCost(buildAction()) <= availableFunds }))}
+        limit={MAX_PER_DAY}
+        action={selectedAction?.label ?? type}
+        addToDay={addToDay}
+      />
 
-      <div className="row" style={{ gap: 8, marginTop: 6 }}>
-        <button className="block plan-add"
-          disabled={used >= pool || (regionRequired && !regionId) || mpActionCost(buildAction()) > availableFunds}
-          onClick={() => { for (const d of DAYS) { if (dayItems(d).length < MAX_PER_DAY) { addToDay(d); break; } } }}>
-          <TypeIcon size={14} /> Add to next open day
-        </button>
-        {used > 0 && <button className="ghost small" onClick={clearActions}>Clear</button>}
-      </div>
+      <details className="plan-schedule">
+        <summary>Week schedule · {used} planned</summary>
+        <div className="weekplan">
+          {DAYS.map((d) => {
+            const items = dayItems(d);
+            const full = items.length >= MAX_PER_DAY;
+            const canAdd = used < pool && !full && !(regionRequired && (!regionId || regionId === "__national")) && mpActionCost(buildAction()) <= availableFunds;
+            return (
+              <div className={`day${full ? " full" : ""}`} key={d}>
+                <div className="day-head">
+                  <span className="day-name">Day {d}</span>
+                  <span className="day-slots">
+                    {Array.from({ length: MAX_PER_DAY }).map((_, k) => (
+                      <span key={k} className={k < items.length ? "dot on" : "dot"} />
+                    ))}
+                  </span>
+                  <button className="day-add" disabled={!canAdd} onClick={() => addToDay(d)} title={canAdd ? `Add ${type} to Day ${d}` : "No room"}>
+                    <Plus size={13} />
+                  </button>
+                </div>
+                <div className="day-actions">
+                  {items.length === 0 && <span className="day-empty">no events</span>}
+                  {items.map(({ a, i }) => {
+                    const Ico = ICON[a.type];
+                    return (
+                      <span className="plan-chip" key={i} title={a.type}>
+                        <Ico size={12} />
+                        {shortDesc(a)}
+                        <button type="button" className="x" onClick={() => removeAction(i)} aria-label="Remove action"><X size={11} /></button>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {used > 0 && <button className="ghost small" onClick={clearActions}>Clear week</button>}
+        <PlanBonusStrip plan={plan} />
+      </details>
 
       {preview && used > 0 && (
         <div className="preview">

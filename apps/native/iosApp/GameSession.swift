@@ -378,7 +378,7 @@ final class GameSession: ObservableObject {
         } else if arguments.contains("--mov-capture-setup") || arguments.contains("--mov-capture-setup-2016") {
             playScreen = .setup
         } else if arguments.contains("--mov-capture-game") || arguments.contains("--mov-capture-plan") ||
-                    arguments.contains("--mov-capture-ask") || arguments.contains("--mov-capture-ask-login") || arguments.contains("--mov-capture-results") || arguments.contains("--mov-capture-reveal") || arguments.contains("--mov-capture-saves") || arguments.contains("--mov-capture-analysis") || arguments.contains("--mov-capture-replay") {
+                    arguments.contains("--mov-capture-ask") || arguments.contains("--mov-capture-ask-login") || arguments.contains("--mov-capture-results") || (arguments.contains("--mov-capture-reveal") || arguments.contains("--mov-capture-reveal-counties")) || arguments.contains("--mov-capture-saves") || arguments.contains("--mov-capture-analysis") || arguments.contains("--mov-capture-replay") {
             let mate = mates(scenarioId: "2024", playerSerial: "dem").first(where: { $0.historical })
                 ?? mates(scenarioId: "2024", playerSerial: "dem").first
             guard let mate else { return }
@@ -513,7 +513,7 @@ final class GameSession: ObservableObject {
                 totalTurns: Int32(totalTurns), seed: seed, whatIfState: whatIfState,
                 mirrorMatch: mirrorMatch, pandemic: pandemic)
             #if targetEnvironment(simulator)
-            if ["--mov-capture-results", "--mov-capture-reveal", "--mov-capture-us1948-results", "--mov-capture-us1948-reveal"].contains(where: { ProcessInfo.processInfo.arguments.contains($0) }) {
+            if ["--mov-capture-results", "--mov-capture-reveal", "--mov-capture-reveal-counties", "--mov-capture-us1948-results", "--mov-capture-us1948-reveal"].contains(where: { ProcessInfo.processInfo.arguments.contains($0) }) {
                 for _ in 0..<Int(started.totalTurns()) { _ = started.endTurn() }
             }
             #endif
@@ -537,7 +537,10 @@ final class GameSession: ObservableObject {
                 #endif
                 self.touch()
                 #if targetEnvironment(simulator)
-                if ProcessInfo.processInfo.arguments.contains("--mov-capture-reveal") || ProcessInfo.processInfo.arguments.contains("--mov-capture-us1948-reveal") { self.presentReveal(force: true) }
+                let revealCaptures = ["--mov-capture-reveal", "--mov-capture-reveal-counties", "--mov-capture-us1948-reveal"]
+                if revealCaptures.contains(where: ProcessInfo.processInfo.arguments.contains) {
+                    self.presentReveal(force: true)
+                }
                 if ProcessInfo.processInfo.arguments.contains("--mov-capture-saves") { self.saveNamed(name: "Campaign checkpoint") }
                 #endif
             }

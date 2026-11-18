@@ -14,7 +14,9 @@ output = pathlib.Path(sys.argv[2]).resolve()
 output.mkdir(parents=True, exist_ok=True)
 bundle = 'com.lakesidegames.electioneer'
 extra_arguments = ['--mov-capture-large-text'] if os.environ.get('MOV_CAPTURE_LARGE_TEXT') == '1' else []
-check_screen = runpy.run_path(str(pathlib.Path(__file__).with_name('ios-screen-ready.py')))['check_screen']
+screen_probe = runpy.run_path(str(pathlib.Path(__file__).with_name('ios-screen-ready.py')))
+check_screen = screen_probe['check_screen']
+capture_mode = screen_probe['capture_mode']
 
 
 def run(*args, timeout=120):
@@ -36,7 +38,9 @@ def capture_ready(name, process, attempts=3):
         try:
             subprocess.run(['sips', '--resampleWidth', '320', str(capture), '--out', str(probe)],
                            check=True, capture_output=True, timeout=30)
-            ready, summary = check_screen(probe, 'ask' if name.startswith('ask') else 'game')
+            menu_log = (output / 'menu-console.log').read_text() if name == 'menu' else ''
+            mode = capture_mode(name, menu_log)
+            ready, summary = check_screen(probe, mode) if mode else (False, 'menu presentation not observed')
         finally:
             probe.unlink(missing_ok=True)
         print(f'{name} capture {attempt + 1}: {summary}', flush=True)
@@ -152,7 +156,9 @@ try:
             ('campaign', '--mov-capture-game', 20),
             ('plan', '--mov-capture-plan', 20),
             ('results', '--mov-capture-results', 20),
-            ('reveal', '--mov-capture-reveal', 20),
+            ('reveal', '--mov-capture-reveal', 15),
+            ('reveal-counties', '--mov-capture-reveal-counties', 15),
+            ('menu', '--mov-capture-menu', 5),
             ('ask', '--mov-capture-ask', 20),
             ('ask-de', '--mov-capture-ask-de', 20),
             ('ask-login', '--mov-capture-ask-login', 20),
@@ -201,6 +207,8 @@ try:
                         screenshot(device, output / f'{name}.png')
                         print(f'PASS: {name} reached auth inside the app webview', flush=True)
                     else:
+                        if name == 'reveal-counties' and 'MOV_COUNTY_RETURNS_READY' not in (output / f'{name}-console.log').read_text():
+                            raise SystemExit('FAIL: county returns did not load')
                         capture_ready(name, preview)
                 finally:
                     stop(preview)

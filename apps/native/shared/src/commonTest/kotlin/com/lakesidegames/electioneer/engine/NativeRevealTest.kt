@@ -31,6 +31,14 @@ class NativeRevealTest {
             for (row in final.rows.filter { it.id != "__others" }) assertEquals(allocation[row.id], row.units)
             // Plurality countries project the engine's winner; everyone else the first party over the line.
             assertEquals(data.pluralityWinner ?: allocation.entries.firstOrNull { it.value >= data.threshold }?.key, actual.projectedId)
+            val chronological = data.units.reversed().map { it.id }
+            val opening = night.reportingBoard(emptyList(), false)
+            assertEquals(0, opening.calledUnits)
+            assertNull(opening.projection)
+            val chronologicalFinal = night.reportingBoard(chronological, true)
+            assertEquals(final.rows, chronologicalFinal.rows)
+            assertEquals(final.projection, chronologicalFinal.projection)
+            assertEquals(chronological, chronologicalFinal.called.map { it.id })
             assertEquals(0, night.board(0).calledUnits)
             assertTrue((0 until night.count()).all { night.delay(it, 1) >= 30 && night.delay(it, 2) >= 30 })
         }

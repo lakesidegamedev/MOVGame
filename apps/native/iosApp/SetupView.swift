@@ -26,45 +26,25 @@ struct HomeView: View {
                 HStack(spacing: 12) {
                     Image("MOVMark")
                         .resizable()
-                        .frame(width: 56, height: 56)
+                        .frame(width: 48, height: 48)
                         .accessibilityHidden(true)
-                    Text("MARGIN OF VICTORY")
-                        .font(.caption.bold()).tracking(2)
-                        .foregroundStyle(CampaignStyle.gold)
+                    Text("Margin of Victory")
+                        .font(.largeTitle.bold())
+                        .accessibilityAddTraits(.isHeader)
                 }
-                GeometryReader { geometry in
-                    Image("cover-country-us")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: geometry.size.width, height: 132)
-                        .clipped()
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .accessibilityLabel("United States Capitol")
-                }
-                .frame(height: 132)
-                HStack(spacing: 0) {
-                    CampaignStyle.democrat
-                    CampaignStyle.republican
-                }
-                .frame(height: 4)
-                .clipShape(Capsule())
-                Text("\(catalog.countries) COUNTRIES · \(catalog.elections) ELECTIONS").font(.caption.bold()).tracking(2).foregroundStyle(CampaignStyle.gold)
-                Text("Margin of\nVictory").font(.system(size: 46, weight: .black)).fixedSize(horizontal: false, vertical: true)
-                Text("Every state has a story. Every decision moves the map.")
-                    .font(.subheadline).foregroundStyle(CampaignStyle.muted)
                 if session.hasGame {
                     Button { session.resumeGame() } label: {
                         VStack(alignment: .leading, spacing: 7) {
-                            Text("CONTINUE CAMPAIGN").font(.caption.bold()).tracking(1).foregroundStyle(CampaignStyle.gold)
+                            Text("Continue campaign").font(.subheadline.bold()).foregroundStyle(CampaignStyle.gold)
                             Text(session.savedCampaignLabel).font(.title2.bold()).foregroundStyle(.white)
-                            Text("Return to the campaign trail  →").foregroundStyle(CampaignStyle.muted)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading).padding(20)
                         .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 18))
                     }
                 }
                 Button { session.playScreen = .library } label: {
-                    Text("Start a new campaign  →").font(.headline).frame(maxWidth: .infinity).padding(16)
+                    Label("Browse elections", systemImage: "list.bullet.rectangle")
+                        .font(.headline).frame(maxWidth: .infinity).padding(16)
                 }
                 .buttonStyle(.plain).foregroundStyle(CampaignStyle.background)
                 .background(CampaignStyle.coral, in: RoundedRectangle(cornerRadius: 14))
@@ -99,9 +79,17 @@ struct HomeView: View {
                     .background(CampaignStyle.card, in: RoundedRectangle(cornerRadius: 16))
                 }
                 .buttonStyle(.plain)
-                Text("\(catalog.countries) countries and \(catalog.elections) elections from \(String(catalog.firstYear)) to today. At least one election in every country is free.").font(.caption).foregroundStyle(CampaignStyle.muted)
+                Text("\(catalog.elections) elections across \(catalog.countries) countries, from \(String(catalog.firstYear)) to today.")
+                    .font(.caption).foregroundStyle(CampaignStyle.muted)
+                Image("cover-country-us")
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .accessibilityHidden(true)
             }
+            .frame(maxWidth: 620)
             .padding(18)
+            .frame(maxWidth: .infinity)
         }
         .background(CampaignStyle.background).preferredColorScheme(.dark)
     }
