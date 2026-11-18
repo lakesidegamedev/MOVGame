@@ -67,8 +67,8 @@ struct NativeElectionNightView: View {
         .onAppear(perform: prepare)
         .sheet(item: $counties) { selection in
             ElectionCountyView(name: selection.name, returns: selection.returns,
-                               demName: data.parties.first { $0.id == "dem" }?.short ?? "Democrat",
-                               repName: data.parties.first { $0.id == "rep" }?.short ?? "Republican",
+                               demName: board.rows.first { $0.id == "dem" }?.name ?? "Democrat",
+                               repName: board.rows.first { $0.id == "rep" }?.name ?? "Republican",
                                demColor: partyColor("dem"), repColor: partyColor("rep"),
                                minute: $minute, closes: selection.closes)
                 .environment(\.sizeCategory, sizeCategory)

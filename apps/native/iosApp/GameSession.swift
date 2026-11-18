@@ -537,7 +537,10 @@ final class GameSession: ObservableObject {
                 #endif
                 self.touch()
                 #if targetEnvironment(simulator)
-                if ProcessInfo.processInfo.(arguments.contains("--mov-capture-reveal") || arguments.contains("--mov-capture-reveal-counties")) || ProcessInfo.processInfo.arguments.contains("--mov-capture-us1948-reveal") { self.presentReveal(force: true) }
+                let revealCaptures = ["--mov-capture-reveal", "--mov-capture-reveal-counties", "--mov-capture-us1948-reveal"]
+                if revealCaptures.contains(where: ProcessInfo.processInfo.arguments.contains) {
+                    self.presentReveal(force: true)
+                }
                 if ProcessInfo.processInfo.arguments.contains("--mov-capture-saves") { self.saveNamed(name: "Campaign checkpoint") }
                 #endif
             }
