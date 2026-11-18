@@ -1,4 +1,4 @@
-name: iOS TestFlight
+name: iOS TestFlight and App Store
 
 on:
   workflow_dispatch:
@@ -7,6 +7,14 @@ on:
         description: Full reviewed default-branch commit SHA
         required: true
         type: string
+      distribution:
+        description: Select internal TestFlight or an App Store eligible build
+        required: true
+        type: choice
+        default: internal
+        options:
+          - internal
+          - app-store
 
 permissions:
   contents: read
@@ -61,6 +69,7 @@ jobs:
           IOS_CERTIFICATE: ${{ secrets.IOS_CERTIFICATE }}
           IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
           IOS_MOBILE_PROVISION: ${{ secrets.IOS_MOBILE_PROVISION }}
+          IOS_DISTRIBUTION: ${{ inputs.distribution }}
         run: python3 ../../scripts/ios-signing.py
       - name: Archive signed app
         working-directory: apps/native
@@ -68,7 +77,7 @@ jobs:
           xcodebuild -project iosApp/MOVGameiOS.xcodeproj -scheme MOVGameiOS -configuration Release             -destination 'generic/platform=iOS'             -archivePath "$RUNNER_TEMP/App.xcarchive"             CURRENT_PROJECT_VERSION="$((1000 + GITHUB_RUN_NUMBER))" archive
       - name: Verify archived campaign content
         run: python3 scripts/verify-ios-bundles.py "$RUNNER_TEMP/App.xcarchive/Products/Applications/MOVGameiOS.app"
-      - name: Export internal TestFlight IPA
+      - name: Export IPA for the selected distribution
         run: |
           xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive"             -exportPath "$RUNNER_TEMP/ipa"             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
       - name: Upload to App Store Connect

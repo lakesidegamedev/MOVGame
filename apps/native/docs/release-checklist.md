@@ -44,10 +44,10 @@ Actions is the release runner.
   the upload path.
 - [x] App Store Connect: create the `Margin of Victory` app record for the
   bundle ID. The record's Apple ID is `6817094138`.
-- [ ] Run the manual GitHub `iOS TestFlight` workflow with
-  `reviewed_sha` set to the exact main commit. Confirm a signed IPA uploads and
-  reaches Apple's `VALID` processing state. The workflow does not submit
-  to App Review; assign the build to internal testers after processing.
+- [ ] Run the manual GitHub `iOS TestFlight and App Store` workflow with
+  `reviewed_sha` set to the exact main commit and `distribution` set to
+  `app-store`. Confirm a signed build uploads, finishes processing and can be
+  selected for the public version. Attach it to the internal test group.
 - [ ] On a device: repeat the campaign and action plan close/reopen test and
   verify the shared save restores through the SwiftUI session.
 - [x] macOS verify: Codemagic `ios-verify` fully passed for the native
@@ -61,9 +61,8 @@ Actions is the release runner.
 - [ ] Optional: sentry-cocoa via SPM, reading the same `MOV_SENTRY_DSN`
   secret (Android hook `MovApp` is the pattern to mirror; not added blind
   from Linux). Until then the iOS app sends no crash reports of its own.
-- [ ] Listing: screenshots, privacy manifest and nutrition label reflecting
-  the actual account, cloud, score, Ask and telemetry behavior; TestFlight
-  beta notes and crash-free gate.
+- [ ] Prepare the [App Store listing and review notes](ios-app-store.md).
+  Verify privacy disclosures, the screenshot sets and the candidate device pass.
 - [ ] Attach gate evidence per platform to the Hub work item.
 
 ## Launch-safe posture (from #23)

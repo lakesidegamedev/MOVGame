@@ -1,17 +1,21 @@
-# iOS internal TestFlight
+# iOS TestFlight and App Store
 
 Web and native clients are maintained in the same repository. Build native iOS
 from `apps/native` on `main`. Bundle ID: `com.lakesidegames.electioneer`.
 
 1. Merge the reviewed change after the web and unsigned native checks pass.
-2. Select the manual **iOS TestFlight** workflow on `main` and supply its
-   full commit as `reviewed_sha`. The workflow rejects any other revision.
-3. The workflow archives with Xcode 26.6, exports an internal-only App Store
-   IPA, and uploads it directly to App Store Connect. It does not publish
-   signing files, IPAs, or archives as GitHub artifacts or releases.
-4. Wait for Apple processing to finish, attach the build to an internal test
-   group, then install and test on a physical device. A successful upload is
-   not proof of app launch, save recovery, or gameplay readiness.
+2. Select the manual **iOS TestFlight and App Store** workflow on `main`
+   and supply its full commit as `reviewed_sha`. Choose `internal` for routine
+   internal builds or `app-store` for a public release candidate.
+3. Both options archive with Xcode 26.6 and upload the signed build to App Store
+   Connect. The `app-store` build can be installed through TestFlight and
+   selected for App Review. The `internal` build is eligible for internal
+   TestFlight groups. [Apple distribution options](https://developer.apple.com/documentation/Xcode/distributing-your-app-for-beta-testing-and-releases)
+4. Once Apple finishes processing the candidate, attach that build to a
+   TestFlight group and complete the physical-device pass.
+5. Use the [App Store release checklist](../apps/native/docs/ios-app-store.md)
+   to prepare the version for review in App Store Connect. Submission and
+   public release happen separately in App Store Connect.
 
 Repository Actions secrets: `APPLE_TEAM_ID`, `IOS_CERTIFICATE` (base64 p12),
 `IOS_CERTIFICATE_PASSWORD`, `IOS_MOBILE_PROVISION` (base64 App Store profile),
