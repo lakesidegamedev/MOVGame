@@ -2,6 +2,18 @@ name: iOS TestFlight feedback
 
 on:
   workflow_dispatch:
+    inputs:
+      report:
+        description: Read TestFlight feedback or check the App Store listing draft
+        type: choice
+        default: beta-feedback
+        options:
+          - beta-feedback
+          - app-store-listing
+      version:
+        description: Marketing version to audit for an App Store listing report
+        type: string
+        default: '2.0'
 
 permissions:
   contents: read
@@ -17,9 +29,19 @@ jobs:
         with:
           node-version: '22'
       - name: Read beta feedback
+        if: inputs.report == 'beta-feedback'
         env:
           APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
           APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           IOS_BUNDLE_ID: com.lakesidegames.electioneer
         run: node scripts/testflight-feedback.mjs
+      - name: Audit App Store listing
+        if: inputs.report == 'app-store-listing'
+        env:
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          IOS_BUNDLE_ID: com.lakesidegames.electioneer
+          IOS_MARKETING_VERSION: ${{ inputs.version }}
+        run: node scripts/audit-app-store-listing.mjs
