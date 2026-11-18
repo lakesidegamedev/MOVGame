@@ -22,19 +22,23 @@ function authorization() {
   return cachedToken.value;
 }
 
+export async function read(path) {
+  const url = new URL(path, root);
+  if (url.origin !== root) throw new Error('Unexpected App Store Connect API origin');
+  const headers = { Authorization: authorization() };
+  const response = await fetch(url, { headers, redirect: 'error', signal: AbortSignal.timeout(25_000) });
+  if (!response.ok) {
+    const error = new Error(`App Store Connect request failed: ${response.status} ${url.pathname}`);
+    error.status = response.status;
+    throw error;
+  }
+  return response.json();
+}
+
 export async function list(path) {
   const records = [];
   while (path) {
-    const url = new URL(path, root);
-    if (url.origin !== root) throw new Error('Unexpected App Store Connect API origin');
-    const headers = { Authorization: authorization() };
-    const response = await fetch(url, { headers, redirect: 'error', signal: AbortSignal.timeout(25_000) });
-    if (!response.ok) {
-      const error = new Error(`App Store Connect request failed: ${response.status} ${url.pathname}`);
-      error.status = response.status;
-      throw error;
-    }
-    const page = await response.json();
+    const page = await read(path);
     records.push(...page.data);
     path = page.links?.next;
   }
