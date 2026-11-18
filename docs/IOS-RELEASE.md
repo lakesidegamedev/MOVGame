@@ -11,8 +11,10 @@ from `apps/native` on `main`. Bundle ID: `com.lakesidegames.electioneer`.
    Connect. The `app-store` build can be installed through TestFlight and
    selected for App Review. The `internal` build is eligible for internal
    TestFlight groups. [Apple distribution options](https://developer.apple.com/documentation/Xcode/distributing-your-app-for-beta-testing-and-releases)
-4. Once Apple finishes processing the candidate, attach that build to a
-   TestFlight group and complete the physical-device pass.
+4. The verification job reads the exported build number and checks App Store
+   Connect for `VALID` and the chosen audience. If processing takes longer
+   than 35 minutes, rerun the failed verification job to check the same build.
+   Attach the candidate to a TestFlight group and complete the device pass.
 5. Use the [App Store release checklist](../apps/native/docs/ios-app-store.md)
    to prepare the version for review in App Store Connect. Submission and
    public release happen separately in App Store Connect.

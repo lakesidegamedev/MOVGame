@@ -28,6 +28,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: macos-26
     timeout-minutes: 60
+    outputs:
+      build_number: ${{ steps.metadata.outputs.build_number }}
     env:
       CI: '1'
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
@@ -80,6 +82,26 @@ jobs:
       - name: Export IPA for the selected distribution
         run: |
           xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive"             -exportPath "$RUNNER_TEMP/ipa"             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
+      - name: Read build number from the exported IPA
+        id: metadata
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, plistlib, re, zipfile
+          ipas = list((pathlib.Path(os.environ['RUNNER_TEMP']) / 'ipa').glob('*.ipa'))
+          if len(ipas) != 1:
+              raise SystemExit('Expected exactly one signed IPA')
+          with zipfile.ZipFile(ipas[0]) as ipa:
+              app_info = [name for name in ipa.namelist() if re.fullmatch(r'Payload/[^/]+\.app/Info\.plist', name)]
+              if len(app_info) != 1:
+                  raise SystemExit('Expected one top-level app Info.plist')
+              metadata = plistlib.loads(ipa.read(app_info[0]))
+          build = str(metadata['CFBundleVersion'])
+          if metadata['CFBundleIdentifier'] != os.environ['IOS_BUNDLE_ID'] or not build.isdecimal():
+              raise SystemExit('Unexpected bundle identifier or build number')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              print(f'build_number={build}', file=output)
+          print(f'Exported iOS build {build}')
+          PY
       - name: Upload to App Store Connect
         env:
           APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
@@ -109,3 +131,23 @@ jobs:
       - name: Remove signing material
         if: always()
         run: python3 scripts/ios-signing.py --cleanup
+
+  verify-apple-processing:
+    name: Verify App Store Connect build
+    needs: upload
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check processing and distribution
+        env:
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          IOS_BUNDLE_ID: com.lakesidegames.electioneer
+          IOS_BUILD_NUMBER: ${{ needs.upload.outputs.build_number }}
+          IOS_DISTRIBUTION: ${{ inputs.distribution }}
+        run: node scripts/verify-app-store-build.mjs
