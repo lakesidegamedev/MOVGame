@@ -112,7 +112,7 @@ console.log(JSON.stringify({
     contactComplete: ['contactFirstName', 'contactLastName', 'contactEmail', 'contactPhone']
       .every((key) => Boolean(reviewInfo?.[key]?.trim())),
     notesPresent: Boolean(reviewInfo?.notes?.trim()),
-    notesMentionFreeAccess: /free access|free.to.play|all elections are open/i.test(reviewInfo?.notes ?? ''),
+    notesMentionFreeAccess: /free[\s\p{Dash_Punctuation}]+access|free.to.play|all elections are open/iu.test(reviewInfo?.notes ?? ''),
     notesCoverStoreKit: /storekit|restore purchases|in-app purchases/i.test(reviewInfo?.notes ?? ''),
     notesCoverSignIn: /lakeside|sign.in|login/i.test(reviewInfo?.notes ?? ''),
   },
